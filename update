@@ -1,0 +1,5 @@
+#!/usr/bin/env sh
+rm pkg/*.gem
+rake gem
+sudo gem uninstall testability-driver -a -x -I
+sudo gem install pkg/testability-driver*.gem --local --no-ri --no-rdoc

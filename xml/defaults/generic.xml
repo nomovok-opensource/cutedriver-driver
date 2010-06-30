@@ -1,0 +1,84 @@
+
+
+<parameters>
+
+        <!-- orbit test application path -->
+        <parameter name="app_path" value="" />
+
+        <!-- default behaviours file -->
+        <parameter name="behaviours" value="behaviours.xml" />
+
+        <!--default timeout for verify if called without timeout or with nil -->
+        <parameter name="synchronization_timeout" value="10" />
+
+    	<!-- default parameters for mysql localisation server settings -->
+        <!--parameter name="localisation_db_type" value="sqlite" /-->
+        <parameter name="localisation_db_type" value="mysql" />
+        <parameter name="localisation_server_ip" value="127.0.0.1" /> <!--valid only for mysql! -->
+        <parameter name="localisation_server_username" value="root" /> <!--valid only for mysql! -->
+        <parameter name="localisation_server_password" value="" /> <!--valid only for mysql! -->
+        <parameter name="localisation_server_database_name" value="default_tdriver_db" /> <!--path to the file for sqlite -->
+
+
+        <!-- Logging levels:
+                        0 = DISABLED	No logging done (default)
+                        1 = DEBUG	Debug level logging
+                        2 = BEHAVIOUR   Behaviour logging enabled (including all levels below)
+                        2 = INFO	All levels below (suitable for most cases)
+                        3 = WARNING	Warnings and all errors (not implemented)
+                        4 = ERROR	All errors (not implemented)
+                        5 = FATAL	Only fatal errors (not implemented)
+                -->
+
+        <parameter name="logging_level" value="0" />
+
+        <parameter name="logging_outputter_enabled" value="false" />
+        <parameter name="logging_outputter_path" value="logfiles/" />
+        <parameter name="logging_outputter_unique_filename" value="false" />
+        <parameter name="logging_outputter_append" value="false" />
+
+        <!-- pattern macros: %d date, %c log name, %l log level, %M text -->
+        <parameter name="logging_outputter_pattern" value="%d [%c] [%l] %M" />
+
+        <!-- Parameters for report crash file monitoring -->
+        <parameter name="report_crash_file_monitor" value="false" />
+        <parameter name="report_crash_file_monitored_sut_ids" value="s60,qt_sut" />
+        <parameter name="report_crash_file_locations" value="C:,c:\data,E:,F:" />
+        <parameter name="report_crash_file_names" value="MobileCrash" />
+        <parameter name="report_disconnect_connected_devices" value="false" />
+
+        <!-- Parameters for report details -->
+        <parameter name="report_outputter_path" value="tdriver_reports/" />
+        <parameter name="behaviour_logging" value="true" />
+        <parameter name="realtime_status_page_update" value="false" />
+        <parameter name="report_passed_statuses" value="passed" /> <!-- Different statuses can be separated with | -->
+        <parameter name="report_failed_statuses" value="failed" /> <!-- Different statuses can be separated with | -->
+        <parameter name="report_not_run_statuses" value="not run" /> <!-- Different statuses can be separated with | -->
+        <parameter name="report_editable" value="false" /> <!-- Set to true to make report editable -->
+        <parameter name="report_trace_capture" value="false" /> <!-- capture traces to test case -->
+        <parameter name="report_trace_folder" value="C:/my_trace_folder/" /> <!-- Folder that contains the trace files that are attached to test case -->
+        <parameter name="report_trace_capture_only_in_failed_case" value="true" /> <!-- capture trace files only when test case fails -->
+
+        <!-- Parameters for generic file capturing -->
+        <parameter name="report_file_monitor" value="false" />
+        <parameter name="report_file_monitored_sut_ids" value="sut_s60_qt,qt_sut" />
+        <parameter name="report_file_locations" value="C:\logs,E:\logs" />
+        <parameter name="report_file_names" value="*.log" />
+        <parameter name="report_clean_files_from_sut_after_capture" value="true" />
+        <parameter name="report_fail_test_if_files_found" value="true" />        
+
+        
+        <!-- Parameters for error recovery situations -->
+        <parameter name="error_recovery_enabled" value="false" />
+        <parameter name="ats4_error_recovery_enabled" value="false" />
+        <parameter name="wait_time_for_ats4_error_recovery" value="60" />
+        <parameter name="error_recovery_monitored_sut_ids" value="s60" />
+
+        <!-- Parameters for pinging the connection -->
+        <parameter name="ping_connection" value="true" />        
+
+        <!-- Parameters for reconnect attempts -->
+        <parameter name="reconnect_device" value="true" />
+        <parameter name="reconnect_attempts" value="1" />
+
+</parameters>

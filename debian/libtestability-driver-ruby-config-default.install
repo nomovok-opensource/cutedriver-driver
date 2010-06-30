@@ -1,0 +1,6 @@
+xml/parameters/*xml /etc/tdriver/
+xml/behaviours/*xml /etc/tdriver/behaviours/
+xml/defaults/*xml /etc/tdriver/defaults/
+xml/templates/*xml /etc/tdriver/templates/
+debian/tdriver.sh /etc/profile.d/
+config/* /etc/tdriver/

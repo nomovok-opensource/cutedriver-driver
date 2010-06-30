@@ -1,0 +1,490 @@
+<behaviours>
+
+	<behaviour name="GenericTestObject" object_type="*" sut_type="*" input_type="*" version="*">
+
+		<module name="MobyBehaviour::TestObject" />
+
+		<methods>
+			<method name="id">
+				<description>Returns id of the test object</description>
+				<example>id</example>
+			</method>
+
+			<method name="eql?">
+				<description>Checks if two values are equal and of the same type</description>
+				<example>eql?</example>
+			</method>
+
+			<method name="name">
+				<description>Return name of the test object</description>
+				<example>name</example>
+			</method>
+
+			<method name="type">
+				<description>Returns type of the test object</description>
+				<example>type</example>
+			</method>
+
+			<method name="xml_data">
+				<description>Returns objects xml data</description>
+				<example>xml_data</example>
+			</method>
+
+			<method name="attribute">
+				<description>Returns a attribute of test object</description>
+				<example>attribute("type")</example>
+			</method>
+
+			<method name="application?">
+				<description>Returns a boolean representing that is test object type of application</description>
+				<example>application?</example>
+			</method>
+
+			<method name="attributes">
+				<description>Returns a attributes of test object</description>
+				<example>attributes</example>
+			</method>
+
+			<method name="parent_object">
+				<description>Returns the test object tha was used as the parent when the test object was created</description>
+				<example>parent_object</example>
+			</method>
+
+			<method name="parent">
+				<description>Returns the test object tha was used as the parent when the test object was created</description>
+				<example>parent_object</example>
+			</method>
+
+			<method name="get_parent">
+				<description>Returns parent of the current object according to the UI object hierarchy</description>
+				<example>get_parent</example>
+			</method>
+
+			<method name="child">
+				<description>Creates a child object of receiver test object.</description>
+				<example>child( :text=>'1' )</example>
+			</method>
+
+			<method name="children">
+				<description>Creates an array of child object of receiver test object.</description>
+				<example>children( :text=>'1' )</example>
+			</method>
+
+			<method name="refresh">
+				<description>Refreshes test objects to correspond with the current state of the device</description>
+				<example>refresh</example>
+			</method>
+
+			<method name="force_refresh">
+				<description>Refreshes test objects to correspond with the current state of the device, forcing</description>
+				<example>force_refresh</example>
+			</method>
+
+			<method name="state">
+				<description>Returns a StateObject containing the current state of this test object as XML</description>
+				<example>state</example>
+			</method>
+
+			<method name="activate">
+				<description>Activate the test object</description>
+				<example>activate</example>
+			</method>
+
+			<method name="deactivate">
+				<description>Deactivate the test object</description>
+				<example>deactivate</example>
+			</method>
+
+			<method name="get_application_id">
+				<description>Test object get_application_id</description>
+				<example>get_application_id</example>
+			</method>
+
+			<method name="set_application_id">
+				<description>Test object set_application_id</description>
+				<example>set_application_id</example>
+			</method>
+
+			<method name="update">
+				<description>Test object update</description>
+				<example>update</example>
+			</method>
+
+			<method name="wait_child">
+				<description>Test object wait_child</description>
+				<example>wait_child</example>
+			</method>
+
+			<method name="creation_attributes">
+				<description>Test object creation attributes</description>
+				<example>creation_attributes</example>
+			</method>
+
+			<method name="method_missing">
+				<description>Invoked by Ruby when object is sent a message it cannot handle</description>
+				<example>method_missing</example>
+			</method>
+
+			<method name="translate!">
+				<description>desc</description>
+				<example>example</example>
+			</method>
+
+			<method name="inspect">
+				<description>Returns a string containing a human-readable representation of object</description>
+				<example>inspect</example>
+			</method>
+
+		</methods>
+
+	</behaviour>
+
+   <behaviour name="Flaxi" object_type="sut" sut_type="*" input_type="*" version="*">
+
+        <module name="MobyBehaviour::FlaxiBehaviour" />
+
+        <methods>
+            <method name="flash">
+                <description>Flashes the device using flaxi</description>
+                <example>flash</example>
+            </method>
+            <method name="flash_files">
+                <description>Instructs the flaxi to flash defined files</description>
+                <example>flash_files('\tmp\image.bin \tmp\variant.bin')</example>
+            </method>
+        </methods>
+
+    </behaviour>
+
+    <behaviour name="Switchbox" object_type="sut" sut_type="*" input_type="*" version="*">
+
+        <module name="MobyBehaviour::SwitchboxBehaviour" />
+
+        <methods>
+            <method name="reset">
+                <description>Reboots the device using switchbox</description>
+                <example>reset</example>
+            </method>
+            <method name="power_down">
+                <description>Instructs the switchbox to power up the sut</description>
+                <example>power_down</example>
+            </method>
+            <method name="power_up">
+                <description>Instructs the switchbox to power up the sut</description>
+                <example>power_up</example>
+            </method>
+            <method name="power_status">
+                <description>Gets the current power status of the switchbox</description>
+                <example>power_status</example>
+            </method>
+        </methods>
+
+    </behaviour>
+
+    <behaviour name="GenericObjectComposition" object_type="*;sut" sut_type="*" input_type="*" version="*">
+
+        <module name="MobyBehaviour::ObjectComposition" />
+
+        <methods>
+
+            <method name="add_parent">
+                <description>Adds a object as a parent of this object</description>
+                <example>add_parent( parent_object )</example>
+            </method>
+            <method name="remove_parent">
+                <description>removes association to parent object from self</description>
+                <example>remove_parent</example>
+            </method>
+            <method name="add_child">
+                <description>Adds a test object as a child of this object</description>
+                <example>add_child( child_object )</example>
+            </method>
+            <method name="remove_child">
+                <description>Removes target_child_object from the Set of child objects</description>
+                <example>remove_child( child_object )</example>
+            </method>
+
+        </methods>
+
+    </behaviour>
+
+
+    <behaviour name="GenericObjectDescription" object_type="*;sut" sut_type="*" input_type="*" version="*">
+
+        <module name="MobyBehaviour::ObjectBehaviourDescription" />
+
+        <methods>
+            <method name="describe">
+                <description>Describes receiver object; Shows associated SUT, object type, included behaviours and methods</description>
+                <example>describe</example>
+            </method>
+            <method name="describe_method">
+                <description>Describes desired method; Description and example will be shown</description>
+                <example>describe_method</example>
+            </method>
+            <method name="behaviours">
+                <description>Returns array of behaviours that receiver contains.</description>
+                <example>behaviours</example>
+            </method>
+            <method name="object_methods">
+                <description>Returns array of methods that receiver contains.</description>
+                <example>object_methods</example>
+            </method>
+
+        </methods>
+
+    </behaviour>
+
+    <behaviour name="GenericSut" object_type="sut" sut_type="*" input_type="*" version="*">
+
+        <module name="MobyBehaviour::SUT" />
+
+        <methods>
+            <method name="application">
+                <description>Returns the current foreground application</description>
+                <example>application</example>
+            </method>
+
+            <method name="child">
+                <description>Returns child object of this object</description>
+                <example>child</example>
+            </method>
+
+            <method name="current_application_id">
+                <description>Returns current_application_id</description>
+                <example>current_application_id</example>
+            </method>
+
+            <method name="fetch_references">
+                <description>Returns object references</description>
+                <example>fetch_references</example>
+            </method>
+
+            <method name="dump_count">
+                <description>Returns dump_count</description>
+                <example>dump_count</example>
+            </method>
+
+            <method name="frozen">
+                <description>Returns frozen status</description>
+                <example>frozen</example>
+            </method>
+
+            <method name="input">
+                <description>Sut input</description>
+                <example>input</example>
+            </method>
+
+            <method name="refresh">
+                <description>Sut refresh</description>
+                <example>refresh</example>
+            </method>
+
+            <method name="refresh_timeout">
+                <description>Sut refresh_timeout</description>
+                <example>refresh_timeout</example>
+            </method>
+
+            <method name="refresh_tries">
+                <description>Sut refresh_tries</description>
+                <example>refresh_tries</example>
+            </method>
+
+            <method name="refresh_ui_dump">
+                <description>Sut refresh_ui_dump</description>
+                <example>refresh_ui_dump</example>
+            </method>
+
+            <method name="ui_type">
+                <description>Sut ui_type</description>
+                <example>ui_type</example>
+            </method>
+
+            <method name="ui_version">
+                <description>Sut ui_version</description>
+                <example>ui_version</example>
+            </method>
+
+            <method name="update">
+                <description>Sut update</description>
+                <example>update</example>
+            </method>
+
+            <method name="x_path">
+                <description>Sut x_path</description>
+                <example>x_path</example>
+            </method>
+
+            <method name="xml_data">
+                <description>Sut xml_data</description>
+                <example>xml_data</example>
+            </method>
+
+            <method name="xml_data_crc">
+                <description>Sut xml_data_crc</description>
+                <example>xml_data_crc</example>
+            </method>
+
+            <method name="translate">
+                <description>Sut translate</description>
+                <example>translate</example>
+            </method>
+
+            <method name="connect">
+                <description>Connect to target</description>
+                <example>connect</example>
+            </method>
+
+            <method name="disconnect">
+                <description>Disconnects connection to sut (e.g. closes open socket)</description>
+                <example>disconnect</example>
+            </method>
+
+            <method name="capture_screen">
+                <description>Screen capture function to take snapshot of SUTs current display view</description>
+                <example>capture_screen( :Filename => 'c:/screen.png' )</example>
+            </method>
+
+            <method name="parameter">
+                <description>Function to return parameters for this SUT. Uses the Parameter singleton to read the values from xml under group identified as this SUT.</description>
+                <example>parameter("type")</example>
+            </method>
+
+            <method name="press_key">
+                <description>Press_key function to pass symbol or sequence to the assosiacted SUT controllers</description>
+                <example>press_key(:kDown)</example>
+            </method>
+
+            <method name="run">
+                <description>Instructs the SUT to start the specified application if it is not currenly being executed. The application will also be brought to the foregound.</description>
+                <example>run(:name => 'application_executable.exe')</example>
+            </method>
+
+            <method name="get_ui_dump">
+                <description>Return UI state as XML dump</description>
+                <example>get_ui_dump</example>
+            </method>
+
+            <method name="state">
+                <description>Returns a StateObject containing the current state of this sut object as XML. The state object is static and thus is not refreshed or synchronized etc.</description>
+                <example>state</example>
+            </method>
+
+            <method name="freeze">
+                <description>Function to disable taking UI dumps from target for a moment. User must remember to enable UI dumps again using unfreeze.</description>
+                <example>freeze</example>
+            </method>
+            <method name="unfreeze">
+                <description>Function to enable taking UI dumps from target</description>
+                <example>unfreeze</example>
+            </method>
+
+
+            <method name="get_object">
+                <description>Retrieve object with given identification hash. Id, Name or Type must be given in hash.</description>
+                <example>get_object( :type => 'Button', :text => '1') </example>
+            </method>
+            
+            <method name="get_application_id">
+                <description>Retrieve current application id.</description>
+                <example>get_application_id</example>
+            </method>
+            <method name="clear_verify_blocks">
+                <description>Clear existing verify blocks</description>
+                <example>clear_verify_blocks</example>
+            </method>
+            <method name="verify_always">
+                <description>Verify always</description>
+                <example>verify_always( expected, message = nil, block )</example>
+            </method>
+            <method name="verify_blocks">
+                <description>Verify blocks</description>
+                <example>verify_blocks</example>
+            </method>
+
+
+        </methods>
+
+    </behaviour>
+
+    <behaviour name="GenericApplication" object_type="application" sut_type="*" input_type="*" version="*">
+
+        <module name="MobyBehaviour::Application" />
+
+        <methods>
+            <method name="close">
+                <description>Close the application.</description>
+                <example>close</example>
+            </method>
+
+            <method name="executable_name">
+                <description>Get the name of the executable file of the application.</description>
+                <example>executable_name</example>
+            </method>
+
+            <method name="uid">
+                <description>Get the uid of the application</description>
+                <example>uid</example>
+            </method>
+
+            <method name="closable?">
+                <description>Get a boolean indicating whether the application can be closed.</description>
+                <example>closable?</example>
+            </method>
+        </methods>
+
+    </behaviour>
+
+    <behaviour name="GenericTestObjectSyncronization" object_type="*;sut" sut_type="*" input_type="*" version="*">
+
+        <module name="MobyBehaviour::TestObjectSynchronization" />
+
+        <methods>
+            <method name="wait_child">
+                <description>Wait until this test object has a child test object of the specified type and matching the given attributes. The child being waited for must be identifiable by the provided constraints. The call terminates only when exactly a single child matches the criteria.</description>
+                <example>wait_child("Button", { :text => '1' }, 10)</example>
+            </method>
+        </methods>
+
+    </behaviour>
+
+    <behaviour name="GenericVerification" object_type="*;sut" sut_type="*" input_type="*" version="*">
+
+        <module name="MobyBehaviour::Verification" />
+
+        <methods>
+            <method name="test_object_exists?">
+                <description>Verifies that the defined test object exists as a child of the sut or receiving test object.</description>
+                <example>test_object_exists?("menu_item", {:id => '1'})</example>
+            </method>
+        </methods>
+
+    </behaviour>
+
+    <behaviour name="GenericFind" object_type="*;sut" sut_type="*" input_type="*" version="*">
+
+        <module name="MobyBehaviour::Find" />
+
+        <methods>
+            <method name="find">
+                <description>temp description</description>
+                <template>find({:id => '1'})</template>
+            </method>
+        </methods>
+
+    </behaviour>
+
+    <behaviour name="GenericSutController" object_type="sut" sut_type="*" input_type="*" version="*">
+
+        <module name="MobyBehaviour::SutController" />
+
+        <methods>
+            <method name="execution_order">
+                <description>Change SUT controller execution order, can be used when multiple controllers for one SUT</description>
+                <template>execution_order</template>
+            </method>
+        </methods>
+
+    </behaviour>
+
+</behaviours>

@@ -1,0 +1,23 @@
+
+
+<parameters>
+
+	<!-- see templates and defaults folders for default values -->
+
+	<sut id="sut_qt" template="qt">
+		<!-- use default values -->
+	</sut>
+
+ 	<sut id="sut_qt_maemo" template="qt">
+		<!-- use default values -->
+		<parameter name="application_synchronization_timeout" value="60" />
+		<parameter name="application_synchronization_retry_interval" value="0.25" />
+		<parameter name="synchronization_timeout" value="30" />
+		<parameter name="default_timeout" value="30" />
+	</sut>
+
+	<!-- overload default behaviours parameter (see generic.xml in defaults folder) -->
+	<!-- parameter name="tmp_folder" value="C:\tdriver\temp_folder"/ -->
+	<parameter name="behaviours" value="behaviours.xml"/>
+
+</parameters>

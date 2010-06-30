@@ -1,0 +1,8 @@
+#!/usr/bin/make -f
+DEB_VERBOSE_ALL=yes
+export DH_VERBOSE=1
+
+# include /usr/share/cdbs/1/rules/patchsys-quilt.mk
+include /usr/share/cdbs/1/rules/debhelper.mk
+# Ruby package with setup.rb
+include /usr/share/ruby-pkg-tools/1/class/ruby-setup-rb.mk

@@ -1,0 +1,199 @@
+#! /usr/bin/ruby1.8
+# Add '.rb' to work around a bug in IronRuby's File#dirname
+$:.unshift(File.dirname(__FILE__ + '.rb') + '/../lib') unless $:.include?(File.dirname(__FILE__ + '.rb') + '/../lib')
+
+
+require 'tdriver'  # contains the reporter!
+require 'nokogiri'
+require 'date'
+require 'optparse'
+
+include TDriverReportDataPresentation
+
+##################################
+## PARSE COMMAND LINE OPTIONS
+@settings = {}
+@settings[:iterations] = nil
+@settings[:signals] = ["applicationReady()"]
+@settings[:events] = ["Paint"]
+@settings[:output_filename] = "startperf_report.html"
+@settings[:app_name] = ""
+@settings[:objects] = ""
+@settings[:sut_type] = "sut_qt"
+@data = {}
+
+begin
+	options = OptionParser.new do |opts|
+		opts.banner = "Usage: start_app_perf [OPTIONS] <application>\nNote: 'applicationStart()' signal and 'Paint' events will be collected by default.\nOptions:\n"
+		opts.on("-n ITERATIONS", "--iterations", "Required. Number of iterations of the start test.") do |s| @settings[:iterations] = s.to_i; end
+		opts.on("-s SYGNALS", "--signals", "Comma separated list of signals to collect, don't use spaces.") do |s| @settings[:signals] << s.split(',').collect{|a| a.strip}; end
+		opts.on("-e EVENTS", "--events", "Comma separated list of events to collect, don't use spaces.") do |s| @settings[:events] << s.split(',').collect{|a| a.strip}; end
+		opts.on("-o FILENAME", "--output", "Filename for the output html report. Defaults to 'startperf_report.html'") do |s|  @settings[:output_filename] = s; end
+		opts.on("-t SUTTYPE", "--suttype", "Sut type to be used. 'sut_qt' will be used as default type.") do |s|  @settings[:sut_type] = s; end
+		@settings[:opts] = opts
+	end.parse!
+	raise OptionParser::MissingArgument.new("number of iterations not provided. use the -n option to provide it.") if @settings[:iterations] == nil
+	raise OptionParser::MissingArgument.new("application to run not provided.") if ARGV.length < 1 
+	raise OptionParser::InvalidArgument.new("too many arguments provided." + ARGV.to_s) if ARGV.length > 1
+	@settings[:app_name] = ARGV[0].sub(/\.exe/, '')	
+rescue OptionParser::MissingArgument, OptionParser::InvalidArgument, Exception => e
+	puts e.message 
+	puts
+	puts @settings[:opts]
+	exit
+end
+
+
+# HARDCODED => Sut type, 
+# signals to listen: 'applicationReady()'
+# events to listen: 'Paint'
+
+##################################
+## METHODS
+
+# convert string argument into integer
+def toi(arg)
+  while(arg.length > 0 && arg[0] == '0')
+		arg = arg[1..-1]
+  end
+  arg.to_i
+end
+
+# Run Application
+def run(iteration)
+	# start application and set events & signals to listen. SLEEP prevents other communications to affect the performance of the application while starting
+	app = @sut.run(:name => @settings[:app_name], :events_to_listen => @settings[:events].join(','), :signals_to_listen => @settings[:signals].join(','), :sleep_after_launch => 5)
+	strOut = ""
+
+	# process Events
+	if !@settings[:events].empty?
+		events = app.get_events
+		app.disable_events
+		#puts events
+		doc = Nokogiri::XML.parse(events)
+		first_time_stamp = nil
+		node_set = doc.xpath('//object[@name = "QtApplicationEvents"]/objects/object')
+		timer_counter = 0
+		index = 0
+		target_object = nil
+		while(index < node_set.size)
+				node = node_set.at(index)
+				time_str = node.xpath("#{node.path}/attributes/attribute[@name = \"timeStamp\"]/value").first.text
+				time_stamp = Time.local(toi(time_str[0..3]), toi(time_str[4..5]), toi(time_str[6..7]), toi(time_str[8..9]), toi(time_str[10..11]), toi(time_str[12..13]), toi(time_str[14..16])*1000)
+				if (first_time_stamp == nil)
+						first_time_stamp = time_stamp
+						strOut << "application started at " << first_time_stamp.to_s << "\n"
+						strOut << "events:\n"
+				else
+						event_name = node.attribute("name").text
+						delta_time_seconds = time_stamp.to_i-first_time_stamp.to_i
+						delta_time_milliseconds = (time_stamp.usec/1000) - (first_time_stamp.usec/1000)
+						delta_time = delta_time_seconds*1000
+						delta_time = delta_time + delta_time_milliseconds
+
+						strOut << (delta_time).to_s << "\t" << event_name
+						target_object = node.xpath("#{node.path}/objects/object").first
+						if(target_object)
+								target_object_name = target_object.attribute("name").text
+								target_object_type = target_object.attribute("type").text
+								strOut << "\t" << target_object_type << "(" << target_object_name << ")"
+						end
+						strOut << "\n"
+						
+						#DATACOLLECTION!
+						event_method_name = target_object.nil? ? event_name : "#{event_name}:#{target_object_type}(#{target_object_name})"
+						@data[event_method_name] = Array.new if @data[event_method_name] == nil
+						@data[event_method_name][iteration] = delta_time
+				end
+				index = index + 1
+		end
+	end
+	
+	
+	# process signals
+	if !@settings[:signals].empty?
+		signals = app.fixture('signal', 'get_signal')
+		app.fixture('signal', 'remove_signals')
+		#puts signals 
+		doc = Nokogiri::XML.parse(signals)
+		first_time_stamp = nil
+		node_set = doc.xpath('//tasInfo[@name = "QtSignals"]/object')
+		timer_counter = 0
+		index = 0
+		target_object = nil
+		while(index < node_set.size)
+				node = node_set.at(index)
+				time_str = node.xpath("#{node.path}/attributes/attribute[@name = \"timeStamp\"]/value").first.text
+				time_stamp = Time.local(toi(time_str[0..3]), toi(time_str[4..5]), toi(time_str[6..7]), toi(time_str[8..9]), toi(time_str[10..11]), toi(time_str[12..13]), toi(time_str[14..16])*1000)
+				if (first_time_stamp == nil)
+						first_time_stamp = time_stamp
+						strOut << "application started at " << first_time_stamp.to_s << "\n" if (strOut == "")
+						strOut << "signals:\n"
+				else
+						signal_name = node.attribute("name").text
+						delta_time_seconds = time_stamp.to_i-first_time_stamp.to_i
+						delta_time_milliseconds = (time_stamp.usec/1000) - (first_time_stamp.usec/1000)
+						delta_time = delta_time_seconds*1000
+						delta_time = delta_time + delta_time_milliseconds
+						
+						#DATACOLLECTION!
+						@data[signal_name] = Array.new if @data[signal_name] == nil
+						@data[signal_name][iteration] = delta_time
+						
+						strOut << (delta_time).to_s << "\t" << signal_name << "\n"
+				end
+				index = index + 1
+		end
+	end
+	
+	# print out the list of events and signals
+	puts strOut
+	app.close
+end
+
+# Create HTML Graph Report
+def gen_html_report
+	include TDriverReportWriter
+	write_style_sheet("tdriver_report_style.css")
+	html_file = File.new(@settings[:output_filename], "w+")
+	html_file << '<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+		<html xmlns="http://www.w3.org/1999/xhtml">
+		<head><meta http-equiv="Content-Type" content="text/html; charset=utf-8"><meta http-eqiv="cache-control" content="no-cache">
+		<link rel="stylesheet" title="TDriverReportStyle" href="tdriver_report_style.css"/>
+		<title>'+ "Application Start Performance" +'</title>
+		</head><body>'
+	html_file << insert_graph_css
+	html_file << insert_html_graph( @data, nil, nil, "500")
+	html_file << insert_html_table( @data , 500)
+	html_file << '</body></html>'
+end
+
+##################################
+## MAIN
+# Print options summary
+puts ">> Application: " + @settings[:app_name]
+puts ">> Iterations: " + @settings[:iterations].to_s
+puts ">> Signals: " + @settings[:signals].to_s
+puts ">> Events: " + @settings[:events].to_s
+
+# Connect to TDriver
+@sut = TDriver.sut( :Id => @settings[:sut_type] )
+
+# Run iterations
+@settings[:iterations].times do |iteration|
+	puts "\nITERATION " + (iteration + 1).to_s + " OF " +  @settings[:iterations].to_s
+	run(iteration)
+end
+
+# Print Summary
+puts "\nDATA Collected"
+@data.each_key do |key|
+	puts "Signal/Event: " + key.to_s + " Values: " + @data[key].join(',') 
+end
+
+# Generate HTML report
+gen_html_report
+puts "\nHTML Report created at " + @settings[:output_filename]
+
+# Disconnect from Tdriver
+@sut.disconnect

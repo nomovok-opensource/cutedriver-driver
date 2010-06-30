@@ -1,0 +1,16 @@
+
+			<method name="$METHOD_NAME">
+
+				<description>$METHOD_DESCRIPTION</description>
+
+				<arguments>
+				$METHOD_ARGUMENTS
+				</arguments>
+
+				<exceptions>
+				$METHOD_EXCEPTIONS
+				</exceptions>
+
+				<example>$METHOD_EXAMPLE</example>
+
+			</method>
