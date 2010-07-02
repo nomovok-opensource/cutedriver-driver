@@ -102,6 +102,8 @@
         <parameter name="logging_outputter_unique_filename" value="false" />
         <parameter name="logging_outputter_append" value="false" />
 
+        <parameter name="logging_include_behaviour_info" value="false" />
+
         <!-- pattern macros: %d date, %c log name, %l log level, %M text -->
         <parameter name="logging_outputter_pattern" value="%d [%c] [%l] %M" />
 

@@ -109,7 +109,11 @@ module MobyUtil
 
 				# log text to given level if logging enabled
 				text_array.each{ | text |          
-					logger_instance.send( level, "#{text.to_s} in #{log_caller}" )
+					if Parameter[ :logging_include_behaviour_info, 'false' ] == 'true'
+					  logger_instance.send( level, "#{text.to_s} in #{log_caller}" ) 
+					else
+					  logger_instance.send( level, "#{text.to_s}" ) 
+					end
 				} 
 
 			end if @enabled
