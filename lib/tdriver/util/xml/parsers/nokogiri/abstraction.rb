@@ -17,7 +17,6 @@
 ## 
 ############################################################################
 
-
 module MobyUtil
 
 	module XML
@@ -26,30 +25,35 @@ module MobyUtil
 
 			module Abstraction
 
+				# TODO: Documentation
 				def empty?
 
 					@xml.empty?
 
 				end
 
+				# TODO: Documentation
 				def name
 
 					@xml.name
 
 				end
 
+				# TODO: Documentation
 				def nil?
 
 					@xml.nil?
 
 				end
 
+				# TODO: Documentation
 				def size
 
 					@xml.size
 
 				end
 
+				# TODO: Documentation
 				def to_s
 
 					@xml.to_s
@@ -61,27 +65,56 @@ module MobyUtil
 				# method to create MobyUtil::XML::Attribute object
 				def attribute_object( xml_data )
 
-					MobyUtil::XML::Attribute.new().extend( Attribute ).tap { | attr | attr.xml = xml_data; attr.parser = @parser; }
+					MobyUtil::XML::Attribute.new().extend( Attribute ).tap{ | attr | 
+						
+						attr.xml = xml_data 
+						attr.parser = @parser 
+
+					}
 
 				end
 
-				# method to create MobyUtil::XML::Element object
+				# method to create MobyUtil::XML::Element or MobyUtil::XML::NilElement object 
 				def element_object( xml_data )
 
-					MobyUtil::XML::Element.new().extend( Element ).tap { | element | element.xml = xml_data; element.parser = @parser; }
+					unless xml_data.nil?
+
+						MobyUtil::XML::Element.new.extend( Element ).tap{ | element | 
+
+							element.xml = xml_data 
+							element.parser = @parser
+
+						}
+
+
+					else
+
+						MobyUtil::XML::NilElement.new.tap { | element | 
+
+							element.parser = @parser
+
+						}
+
+					end
 
 				end
 
+				# TODO: Documentation
 				def method_missing( method, *args, &block )
 
-					Kernel::raise RuntimeError.new("Method '#{ method.to_s }' is not supported by #{ self.class.to_s } (#{ @parser.to_s })" )
+					raise RuntimeError.new( "Method '%s' is not supported by %s (%s)" % [ method, self.class, @parser ] )
 
 				end
 
 				# method to create MobyUtil::XML::Nodeset object
 				def nodeset_object( xml_data )
 
-					MobyUtil::XML::Nodeset.new().extend( Nodeset ).tap { | node | node.xml = xml_data; node.parser = @parser; }
+					MobyUtil::XML::Nodeset.new().extend( Nodeset ).tap{ | node | 
+
+						node.xml = xml_data
+						node.parser = @parser
+
+					}
 
 				end
 

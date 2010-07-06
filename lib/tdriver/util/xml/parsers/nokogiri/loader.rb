@@ -17,7 +17,6 @@
 ## 
 ############################################################################
 
-
 # nokogiri parser
 require 'nokogiri'
 
@@ -35,6 +34,9 @@ require File.expand_path( File.join( File.dirname( __FILE__ ), 'nodeset.rb' ) )
 
 # nokogiri parser wrapper
 require File.expand_path( File.join( File.dirname( __FILE__ ), 'element.rb' ) )
+
+# nokogiri parser wrapper
+require File.expand_path( File.join( File.dirname( __FILE__ ), 'builder.rb' ) )
 
 # nokogiri parser wrapper
 #require File.expand_path( File.join( File.dirname( __FILE__ ), 'attribute.rb' ) )

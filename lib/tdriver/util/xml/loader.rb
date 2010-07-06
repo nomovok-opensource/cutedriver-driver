@@ -24,8 +24,6 @@ require File.expand_path( File.join( File.dirname( __FILE__ ), 'parsers/loader.r
 # xml related errors
 require File.expand_path( File.join( File.dirname( __FILE__ ), 'error.rb' ) )
 
-# xml Builder module
-require File.expand_path( File.join( File.dirname( __FILE__ ), 'builder.rb' ) )
 
 # abstraction module for document, element and nodeset
 require File.expand_path( File.join( File.dirname( __FILE__ ), 'abstraction.rb' ) )
@@ -36,8 +34,14 @@ require File.expand_path( File.join( File.dirname( __FILE__ ), 'document.rb' ) )
 # element object
 require File.expand_path( File.join( File.dirname( __FILE__ ), 'element.rb' ) )
 
+# element object
+require File.expand_path( File.join( File.dirname( __FILE__ ), 'nil_element.rb' ) )
+
 # nodeset object
 require File.expand_path( File.join( File.dirname( __FILE__ ), 'nodeset.rb' ) )
+
+# xml Builder module
+require File.expand_path( File.join( File.dirname( __FILE__ ), 'builder.rb' ) )
 
 # xml api
 require File.expand_path( File.join( File.dirname( __FILE__ ), 'xml.rb' ) )

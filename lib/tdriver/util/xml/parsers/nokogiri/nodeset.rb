@@ -17,7 +17,6 @@
 ## 
 ############################################################################
 
-
 module MobyUtil
 
 	module XML
@@ -78,30 +77,37 @@ module MobyUtil
 
 				end
 		
-				# aliases for length method
-				alias size length
-
-				alias count length
 		
 				def to_a
-					
-					a = []
-					@xml.each do |element|
-						a << element_object( element )
-					end
-					a
+
+					@xml.collect{ | element | 
+
+						element_object( element ) 
+
+					}
 					
 				end
 				
 				def delete( node )
-					@xml.each do |element|
-						if (node.xml.content == element.content)
-							@xml.delete(element)
+
+					@xml.each do | element |
+
+						if ( node.xml.content == element.content )
+
+							@xml.delete( element )
+
 							break
+
 						end
+
 					end
 					
 				end
+
+				# aliases for length method
+				alias size length
+
+				alias count length
 
 				# enable hooking for performance measurement & debug logging
 				MobyUtil::Hooking.instance.hook_methods( self ) if defined?( MobyUtil::Hooking )

@@ -17,7 +17,6 @@
 ## 
 ############################################################################
 
-
 module MobyUtil
 
 	module XML
@@ -42,9 +41,14 @@ module MobyUtil
 
 				def attribute( attr_name )
 
-					(value = @xml.attribute( attr_name )).nil? ? nil : value.to_s
+					unless ( value = @xml.attribute( attr_name ) ).nil?
+
+						value.to_s
+
+					end
 
 				end
+
 
 				def children
 
@@ -54,13 +58,21 @@ module MobyUtil
 
 				def content
 
-					@xml.content.to_s
+					unless @xml.nil?
+
+						@xml.content.to_s
+
+					end
 
 				end
 
 				def each( &block )
 
-					@xml.each{ | element | yield( element_object( element ) ) }
+					@xml.each{ | element | 
+
+						yield( element_object( element ) ) 
+
+					}
 
 				end        
 
@@ -84,7 +96,11 @@ module MobyUtil
 
 				def xpath( xpath_query, *args, &block )
 
-					nodeset_object( @xml.xpath( xpath_query, *args, &block ) )
+					nodeset_object( 
+
+						@xml.xpath( xpath_query, *args, &block ) 
+
+					)
 
 				end
 

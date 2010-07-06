@@ -17,47 +17,28 @@
 ## 
 ############################################################################
 
-
 module MobyUtil
 
 	module XML    
 
-		class Builder
-
-			# Usage:
-			#	
-			# 	- How to generate simple xml:
-			#
-			#		MobyUtil::XML::Builder.new{
-			#			root{
-			#				element(:name => "element_name", :id => "0") {
-			#					child(:name => "1st_child_of_element_0", :value => "123" )				
-			#					child(:name => "2nd_child_of_element_0", :value => "456 )
-			#				}
-			#			}
-			#		}.to_xml
-			#
-
-			attr_accessor :xml
+		class Builder < Abstraction
 
 			def initialize( &block )
 
-				@xml = ::Nokogiri::XML::Builder.new( &block )
+				if block_given?
 
-			end
+					$stdout.puts "%s:%s warning: deprecated method %s#new, use %s instead" % [ caller.first.split( ":" )[ 0 .. 1 ], self.class, "MobyUtil::XML#build" ].flatten
 
-			def to_xml
+					# get current parser
+					@parser = MobyUtil::XML.current_parser
 
-				@xml.to_xml
+					# extend builder behaviour of current parser
+					self.extend( ( @parser )::Builder )
 
-			end
+					# create builder object
+					build( &block )
 
-			# support all Nokogiri::XML::Builder class instance methods
-			def method_missing( name, *args )
-
-				Kernel::raise NoMethodError.new( "Undefined method '#{ name }' for MobyUtil::XML::Builder class" ) unless @xml.respond_to? name
-
-				@xml.send name.to_sym, *args 
+				end
 
 			end
 

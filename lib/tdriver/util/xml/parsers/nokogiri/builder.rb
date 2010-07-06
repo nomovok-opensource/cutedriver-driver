@@ -17,30 +17,41 @@
 ## 
 ############################################################################
 
-
 module MobyUtil
 
 	module XML
 
-		class ParseError < StandardError
+		module Nokogiri
 
-			def initialize ( msg = nil )
-			
-				super( msg )
+			module Builder # behaviour
 
-			end
+				def build( &block )
 
-		end # ParseError
+					@xml = ::Nokogiri::XML::Builder.new( &block )
 
-		class BuilderError < StandardError
+				end
 
-			def initialize ( msg = nil )
-			
-				super( msg )
+				def to_xml
 
-			end
+					@xml.to_xml
 
-		end # ParseError
+				end
+
+				# support all Nokogiri::XML::Builder class instance methods
+				def method_missing( method, *args )
+
+					Kernel::raise NoMethodError.new( "Method '%s' is not supported by %s" % [ method, self.class ] ) unless @xml.respond_to?( method )
+
+					@xml.send( method.to_sym, *args )
+
+				end
+
+				# enable hooking for performance measurement & debug logging
+				MobyUtil::Hooking.instance.hook_methods( self ) if defined?( MobyUtil::Hooking )
+
+			end # Document
+
+		end # Nokogiri
 
 	end # XML
 

@@ -17,7 +17,6 @@
 ## 
 ############################################################################
 
-
 module MobyUtil
 
 	module XML
@@ -26,15 +25,15 @@ module MobyUtil
 
 			attr_accessor :xml, :parser
 
-			def initialize()
+			def initialize( xml = nil, parser = nil )
 
-				@xml, @parser = nil, nil
+				@xml, @parser = xml, parser
 
 			end
 
 			def method_missing( *args )
 
-				Kernel::raise RuntimeError.new( "This is abstraction class of #{ self } - XML parser type was not specified correctly" ) 
+				Kernel::raise RuntimeError.new( "This is abstraction class of %s - XML parser type was not specified correctly" % self.class ) 
 
 			end      
 

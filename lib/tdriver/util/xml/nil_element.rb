@@ -17,30 +17,70 @@
 ## 
 ############################################################################
 
-
 module MobyUtil
 
 	module XML
 
-		class ParseError < StandardError
+		class NilElement < Abstraction
 
-			def initialize ( msg = nil )
-			
-				super( msg )
+			def method_missing( method, *method_arguments )
 
-			end
-
-		end # ParseError
-
-		class BuilderError < StandardError
-
-			def initialize ( msg = nil )
-			
-				super( msg )
+				raise RuntimeError.new( "Method '%s' is not supported by %s (%s)" % [ method, self.class, @parser ] )
 
 			end
 
-		end # ParseError
+			def xml=( value )
+
+				@xml = nil
+
+			end
+
+			def name
+
+				nil
+
+			end
+
+			def size
+
+				0
+
+			end
+
+			def nil?
+
+				true
+
+			end
+
+			def eql?( object )
+
+				nil == object.xml.content
+
+			end
+
+			def empty?
+
+				true
+
+			end
+
+			def to_s
+
+				""
+
+			end
+
+			def inner_xml
+
+				""
+
+			end
+
+			# enable hooking for performance measurement & debug logging
+			MobyUtil::Hooking.instance.hook_methods( self ) if defined?( MobyUtil::Hooking )
+
+		end # NilElement
 
 	end # XML
 
