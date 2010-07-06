@@ -8,7 +8,7 @@ module MobyBehaviour
 	# MyBehaviour
 	#
 	# == requires
-	# my-matti-plugin
+	# my-testability-driver-plugin
 	#
 	# == input_type
 	# *
