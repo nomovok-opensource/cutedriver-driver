@@ -49,7 +49,7 @@ module RDoc
 
   			GENERATORS[ name.to_s.downcase ] = Generator.new(
 				filename,
-				"#{ name.to_s.upcase }Generator".intern,
+				"#{ name.to_s }Generator".intern,
 				name.to_s.downcase
 			)
 
