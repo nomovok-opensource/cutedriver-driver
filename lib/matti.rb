@@ -17,9 +17,12 @@
 ## 
 ############################################################################
 
-
-file, line = caller.first.split(":")
+=begin
+file, line = ( caller.first || "%s:%s" % [ __FILE__, __LINE__ ] ).split(":")
 $stdout.puts "%s:%s warning: require 'matti' deprecated, use require 'tdriver' instead also 'MATTI' is deprecated, use 'TDriver' instead " % [ file, line]
+=end
+
+$stdout.puts "%s:%s warning: require 'matti' deprecated, use require 'tdriver' instead. Please note that class 'MATTI' is also deprecated, use 'TDriver' instead " % ( caller.first || "%s:%s" % [ __FILE__, __LINE__ ] ).split(":")[ 0..1 ]
 
 # load matti resources and framework
 require File.expand_path( File.join( File.dirname( __FILE__ ), 'tdriver/env' ) )
