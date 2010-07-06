@@ -16,6 +16,7 @@
 ## of this file. 
 ## 
 ############################################################################
+
 # generated behaviour implementation
 module MobyBehaviour
 

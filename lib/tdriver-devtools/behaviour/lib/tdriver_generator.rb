@@ -266,9 +266,7 @@ module Generators
 
 				macros.each{ | hash |
 
-					#p hash[ :value ]
-
-					h = hash[:value]
+					h = hash[ :value ]
 
 					h = h.first if h.kind_of?( Array )
 
@@ -282,6 +280,18 @@ module Generators
 
 		end
 
+		def encode_string( string )
+
+			result = "%s" % string
+
+			result.gsub!( '&', '&amp;')
+			result.gsub!( '<', '&lt;')
+			result.gsub!( '>', '&gt;')
+
+			result
+
+		end
+
 		def behaviour_methods_arguments( arguments )
 
 			( arguments || [] ).collect{ | argument | 
@@ -289,11 +299,11 @@ module Generators
 				apply_macros( 
 					@xml_argument_template,
 					[
-						{ :key => '$ARGUMENT_NAME', :value => argument[ :section ] },
-						{ :key => '$ARGUMENT_TYPE', :value => argument[ :type ].first },
-						{ :key => '$ARGUMENT_DESCRIPTION', :value => argument[ :description ].join( '\n' ) },
-						{ :key => '$ARGUMENT_EXAMPLE', :value => argument[ :example ].first },
-						{ :key => '$ARGUMENT_DEFAULT', :value => argument[ :default ].first }
+						{ :key => '$ARGUMENT_NAME', :value => encode_string( argument[ :section ] ) },
+						{ :key => '$ARGUMENT_TYPE', :value => encode_string( argument[ :type ].first ) },
+						{ :key => '$ARGUMENT_DESCRIPTION', :value => encode_string( argument[ :description ].join( '\n' ) ) },
+						{ :key => '$ARGUMENT_EXAMPLE', :value => encode_string( argument[ :example ].first ) },
+						{ :key => '$ARGUMENT_DEFAULT', :value => encode_string( argument[ :default ].first ) }
 
 					]
 
@@ -310,8 +320,8 @@ module Generators
 				apply_macros( 
 					@xml_exception_template, 
 					[
-						{ :key => '$EXCEPTION_NAME', :value => exception[ :section ] },
-						{ :key => '$EXCEPTION_DESCRIPTION', :value => exception[ :description ].join('\n') }
+						{ :key => '$EXCEPTION_NAME', :value => encode_string( exception[ :section ] ) },
+						{ :key => '$EXCEPTION_DESCRIPTION', :value => encode_string( exception[ :description ].join('\n') ) }
 
 					] 
 				)
@@ -326,9 +336,9 @@ module Generators
 				apply_macros( 
 					@xml_method_template, 
 					[
-						{ :key => '$METHOD_NAME', :value => method[ :method_name ] },
-						{ :key => '$METHOD_DESCRIPTION', :value => method[ :description ] },
-						{ :key => '$METHOD_EXAMPLE', :value => method[ :example ] },
+						{ :key => '$METHOD_NAME', :value => encode_string( method[ :method_name ] ) },
+						{ :key => '$METHOD_DESCRIPTION', :value => encode_string( method[ :description ] ) },
+						{ :key => '$METHOD_EXAMPLE', :value => encode_string( method[ :example ] ) },
 						{ :key => '$METHOD_ARGUMENTS', :value => behaviour_methods_arguments( method[ :arguments ] ) }, 
 						{ :key => '$METHOD_EXCEPTIONS', :value => behaviour_methods_exceptions( method[ :exceptions ] ) }
 
@@ -341,27 +351,30 @@ module Generators
 
 		def generate_behaviour( module_header, methods )
 
-			puts apply_macros( 
-				@xml_behaviour_template, 
-				[
-					{ :key => '$REQUIRED_PLUGIN', :value => module_header[ :requires ] || [].join( ";" ) },
-					{ :key => '$BEHAVIOUR_NAME', :value => module_header[ :behaviour ] || [].first },
-					{ :key => '$OBJECT_TYPE', :value => module_header[ :objects ] || [].join( ";" ) },
-					{ :key => '$SUT_TYPE', :value => module_header[ :sut_type ] || [].join( ";" ) },
-					{ :key => '$INPUT_TYPE', :value => module_header[ :input_type ] || [].join( ";" ) },
-					{ :key => '$VERSION', :value => module_header[ :sut_version ] || [].join( ";" ) },
-					{ :key => '$MODULE_NAME', :value => module_header[ :module ] },
-					{ :key => '$BEHAVIOUR_METHODS', :value => behaviour_methods( methods ) }
-				]
+			unless module_header[ :module ].to_s == "MobyBehaviour"
 
-			).gsub( /\n\n\n/, "\n\n" ) unless module_header[:module].to_s == "MobyBehaviour" #.empty?
+				xml = apply_macros( 
+					@xml_behaviour_template, 
+					[
+						{ :key => '$REQUIRED_PLUGIN', :value => module_header[ :requires ] || [].join( ";" ) },
+						{ :key => '$BEHAVIOUR_NAME', :value => module_header[ :behaviour ] || [].first },
+						{ :key => '$OBJECT_TYPE', :value => module_header[ :objects ] || [].join( ";" ) },
+						{ :key => '$SUT_TYPE', :value => module_header[ :sut_type ] || [].join( ";" ) },
+						{ :key => '$INPUT_TYPE', :value => module_header[ :input_type ] || [].join( ";" ) },
+						{ :key => '$VERSION', :value => module_header[ :sut_version ] || [].join( ";" ) },
+						{ :key => '$MODULE_NAME', :value => module_header[ :module ] },
+						{ :key => '$BEHAVIOUR_METHODS', :value => behaviour_methods( methods ) }
+					]
+
+				).gsub( /\n\n\n/, "\n\n" ) unless module_header[ :module ].to_s == "MobyBehaviour"
+
+				File.open( "%s.xml" % module_header[ :behaviour ], 'w'){ | file | file << xml }
+
+				puts xml
+
+			end
 
 		end
-
-
-
-
-
 
 		def process_object( file )
 
@@ -370,20 +383,6 @@ module Generators
 				file.send( list ).each{ | child | send( method, child ) }
 
 			} 
-
-=begin
-			file.method_list.each { | child | process_method( child ) }
-
-			file.aliases.each { | child | process_alias( child ) }
-
-			file.constants.each { | child | process_constant( child ) }
-
-			file.requires.each { | child | process_require( child ) }
-
-			file.includes.each { | child | process_include( child ) }
-
-			file.attributes.each { | child | process_attribute( child ) }   
-=end
 
 		end
 
@@ -394,7 +393,7 @@ module Generators
 
 			@behaviours = {}
 	
-			@output[ :files ].push( file )
+			@output[ :files ] << file
 
 			#puts "#{file.comment}"
 
@@ -408,11 +407,9 @@ module Generators
 
 			end
 
-			#p @behaviours
-
 			@behaviours.each_pair{ | key, value |
 
-				generate_behaviour value[:header], value[:methods]
+				generate_behaviour value[ :header ], value[ :methods ]
 
 			}
 
@@ -428,15 +425,6 @@ module Generators
 		def process_class_or_module( obj )
 
 			type = obj.is_module? ? ( :modules ) : ( :classes )
-
-			# One important note about the code_objects.rb structure. A class or module
-			# definition can be spread a cross many files in Ruby so code_objects.rb handles
-			# this by keeping only *one* reference to each class or module that has a definition
-			# at the root level of a file (ie. not contained in another class or module).
-			# This means that when we are processing files we may run into the same class/module
-			# twice. So we need to keep track of what classes/modules we have
-			# already seen and make sure we don't create two INSERT statements for the same
-			# object.
 
 			if( !@already_processed.has_key?( obj.full_name ) ) then      
 
@@ -478,11 +466,11 @@ module Generators
 
 			#obj.source_code = get_source_code( obj )
 
-			if obj.visibility == :public
+			if ( obj.visibility == :public )
 
 				comment = process_comment( obj.comment || "" )
 
-				process_method_comment( comment ) #unless comment[ :methods ].nil?
+				process_method_comment( comment )
 
 				comment[ :method_name ] = obj.name.to_str
 
@@ -495,19 +483,19 @@ module Generators
 
 			end
 
-			@output[ :methods ].push( obj )
+			@output[ :methods ] << obj
 
 		end
 
 		def process_alias( obj )
 
-			@output[ :aliases ].push( obj )
+			@output[ :aliases ] << obj
 
 		end
 
 		def process_constant( obj )
 
-			@output[ :constants ].push( obj )
+			@output[ :constants ] << obj
 
 		end
 
@@ -516,21 +504,19 @@ module Generators
 			#puts "\n%s (%s, %s)" % [ obj.name, obj.visibility, obj.rw ] #{obj.param_seq}"
 			#p process_comment( obj.comment || "" )
 
-			@output[ :attributes ].push( obj )     
+			@output[ :attributes ] << obj     
 
 		end
 
-		def process_require(obj)
+		def process_require( obj )
 
-			@output[:requires].push( obj ) 
+			@output[ :requires ] << obj 
 
 		end
 
 		def process_include( obj )
 
-			#p obj.name
-
-			@output[ :includes ].push( obj )     
+			@output[ :includes ] << obj
 
 		end   
 
