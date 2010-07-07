@@ -205,8 +205,6 @@ module MobyBehaviour
 
 		end
 
-
-		# TODO: Team TE: review me @ 'Brakes'
 		# Creates a test object for a child object of this test object
 		# Associates child object as current object's child.
 		# and associates self as child object's parent.
@@ -221,176 +219,39 @@ module MobyBehaviour
 		# attributes:: Hash object holding information for identifying which child to create, eg. :type => :slider
 		# === returns
 		# TestObject:: new child test object or reference to existing child
-		def child( attributes )
+		def _child( attributes )
 
-			creation_data = attributes.clone
-			logging_enabled = MobyUtil::Logger.instance.enabled
+			# verify attributes argument format
+			raise TypeError.new( 'Unexpected argument type (%s) for attributes, expecting %s' % [ attributes.class, "Hash" ] ) unless attributes.kind_of?( Hash ) 
 
-			MobyUtil::Logger.instance.enabled = false if ( creation_data.delete( :__logging ) == 'false' )
-			creation_data.delete( :__timeout )
-
-			# check if the hash contains symbols as values and translate those into strings
-			translate!( creation_data )
-
-			refresh_args = ( creation_data[ :type ] == 'application' ? { :name => creation_data[ :name ], :id => creation_data[ :id ] } : { :id => get_application_id } )
-
-			if !( @_active )
-
-				@sut.refresh refresh_args
-
-				begin 
-					@parent.child( :type => @type, :id => @id )
-
-				rescue MobyBase::TestObjectNotFoundError
-
-					MobyUtil::Logger.instance.log("behaviour", "FAIL;Parent test object no longer visible.;#{ identity };child;#{ creation_data.inspect }")
-					MobyUtil::Logger.instance.enabled = logging_enabled
-					Kernel::raise MobyBase::TestObjectNotVisibleError
-
-				end
-			end
-
-			initial_timeout = @test_object_factory.timeout unless ( custom_timeout = nil || attributes[ :__timeout ] ).nil?
-
-			# add symbols to dynamic attributes list -- to avoid IRB bug
-			MobyUtil::DynamicAttributeFilter.instance.add_attributes( creation_data.keys )
-
-			begin
-
-				@test_object_factory.timeout = custom_timeout unless custom_timeout.nil?
-				child_object = @test_object_factory.make_child( self, MobyBase::TestObjectIdentificator.new( creation_data ) )
-
-			rescue MobyBase::MultipleTestObjectsIdentifiedError => exception
-
-				MobyUtil::Logger.instance.log("behaviour" , "FAIL;Multiple child objects matched criteria.;#{ identity };child;#{ creation_data.inspect }")
-				Kernel::raise exception
-
-			rescue MobyBase::TestObjectNotFoundError => exception
-
-				MobyUtil::Logger.instance.log("behaviour" , "FAIL;The child object could not be found.;#{ identity };child;#{ creation_data.inspect }")
-				Kernel::raise exception
-
-			rescue Exception => exception
-
-				MobyUtil::Logger.instance.log("behaviour" , "FAIL;Failed when trying to find child object.;#{ identity };child;#{ creation_data.inspect }")
-				Kernel::raise exception
-
-			ensure
-				@test_object_factory.timeout = initial_timeout unless custom_timeout.nil?
-				MobyUtil::Logger.instance.enabled = logging_enabled
-			end
-
-			#MobyUtil::Logger.instance.log "behaviour", "PASS;Object found with matching criteria.;#{ identity };child;#{ creation_data.inspect }"
-
-			# Type information is stored in a separate member, not in the Hash
-			creation_data.delete( :type )
-
-			# use cached test object if once already retrieved
-			get_cached_test_object!( child_object ).tap{ | found_in_cache |
-
-				# Store/update the attributes that were used to create the child object.
-				child_object.creation_attributes = creation_data
-
-				# add child to objects cache 
-				add_child( child_object ) unless found_in_cache
-
-			}
-
-			child_object
+			# retrieve child object
+			get_child_objects( attributes )
 
 		end
 
 		# Function similar to child, but returns an array of children test objects that meet the given criteria
 		# === params
 		# attributes:: Hash object holding information for identifying which child to create, eg. :type => :slider
-	        #find_all:: Boolean specifying whether all children under the test node or just immediate children should be retreived.
+	        # find_all_children:: Boolean specifying whether all children under the test node or just immediate children should be retreived.
 		# === returns
 		# An array of TestObjects
-		def children( attributes={}, find_all=true)
-		  
-			raise TypeError.new( 'Input parameter not of Type: Hash.\nIt is: ' + attributes.class.to_s ) unless attributes.kind_of?( Hash ) #and !attributes.empty?
-			
+		def _children( attributes, find_all_children = true )
+
+			# verify attributes argument format
+			raise TypeError.new( 'Unexpected argument type (%s) for attributes, expecting %s' % [ attributes.class, "Hash" ] ) unless attributes.kind_of?( Hash ) 
+
+			# respect the original attributes variable value
+			creation_attributes = attributes.clone
+
 			# If empty or only special attributes then add :type => "any" to search all
-			temp_attributes = attributes.clone
-			temp_attributes.delete_if {|k,v| (k.to_s =~ /^__/) != nil }
-			attributes.merge!({:type => "any"}) if temp_attributes.empty?
-			
-			child_objects = Array.new
-		  
-			creation_data = attributes.clone
-			logging_enabled = MobyUtil::Logger.instance.enabled
+			creation_attributes.merge!( :type => "any" ) if creation_attributes.select{ | key, value | key.to_s !~ /^__/ ? true : false }.empty?
 
-			MobyUtil::Logger.instance.enabled = false if ( creation_data.delete( :__logging ) == 'false' )
-			creation_data.delete( :__timeout )
+			# children method specific settings
+			creation_attributes.merge!( :__multiple_objects => true, :__find_all_children => find_all_children )
 
-			# check if the hash contains symbols as values and translate those into strings
-			translate!( creation_data )
+			# retrieve child objects
+			get_child_objects( creation_attributes )
 
-			refresh_args = ( creation_data[ :type ] == 'application' ? { :name => creation_data[ :name ], :id => creation_data[ :id ] } : { :id => get_application_id } )
-
-			# add symbols to dynamic attributes list -- to avoid IRB bug
-			MobyUtil::DynamicAttributeFilter.instance.add_attributes( creation_data.keys )
-
-			if !( @_active )
-
-				@sut.refresh refresh_args
-
-				begin 
-					@parent.child( :type => @type, :id => @id )
-
-				rescue MobyBase::TestObjectNotFoundError
-
-					MobyUtil::Logger.instance.log("behaviour", "FAIL;Parent test object no longer visible.;#{ identity };child;#{ creation_data.inspect }")
-					MobyUtil::Logger.instance.enabled = logging_enabled
-					Kernel::raise MobyBase::TestObjectNotVisibleError
-
-				end
-			end
-
-			initial_timeout = @test_object_factory.timeout unless ( custom_timeout = nil || attributes[ :__timeout ] ).nil?
-
-			begin
-
-				@test_object_factory.timeout = custom_timeout unless custom_timeout.nil?
-				child_objects = @test_object_factory.make_multiple_children( self, MobyBase::TestObjectIdentificator.new( creation_data ), find_all )
-
-			rescue MobyBase::TestObjectNotFoundError => exception
-
-				MobyUtil::Logger.instance.log("behaviour" , "FAIL;The child object could not be found.;#{ identity };child;#{ creation_data.inspect }")
-				Kernel::raise exception
-
-			rescue Exception => exception
-
-				MobyUtil::Logger.instance.log("behaviour" , "FAIL;Failed when trying to find child object.;#{ identity };child;#{ creation_data.inspect }")
-				Kernel::raise exception
-
-			ensure
-				@test_object_factory.timeout = initial_timeout unless custom_timeout.nil?
-				MobyUtil::Logger.instance.enabled = logging_enabled
-			end
-
-			#MobyUtil::Logger.instance.log "behaviour", "PASS;Object found with matching criteria.;#{ identity };child;#{ creation_data.inspect }"
-
-			# Type information is stored in a separate member, not in the Hash
-			creation_data.delete( :type )
-
-			child_objects.each do | child_object |
-
-				# use cached test object if once already retrieved
-				get_cached_test_object!( child_object ).tap{ | found_in_cache |
-
-					# Store/update the attributes that were used to create the child object.
-					child_object.creation_attributes = creation_data
-
-					# add child to objects cache 
-					add_child( child_object ) unless found_in_cache
-
-				}
-
-			end
-
-			# return test objects
-			child_objects
 		end
     
 		# Updates this test object to match the data in the provided xml document
@@ -593,10 +454,7 @@ module MobyBehaviour
 			dynamic_attributes = strip_dynamic_attributes!( creation_data )
 
 			# store and set logger state if given, use default value if none given
-			#MATTI.logger.push_enabled( /^(true|false)$/i.match( dynamic_attributes[ :__logging ].to_s ) ? $1.downcase == 'true' : nil )
-
-			# store and set logger state if given, use default value if none given
-			MATTI.logger.push_enabled( MobyUtil::KernelHelper.to_boolean( dynamic_attributes[ :__logging ], MATTI.logger.enabled ) )
+			TDriver.logger.push_enabled( MobyUtil::KernelHelper.to_boolean( dynamic_attributes[ :__logging ], TDriver.logger.enabled ) )
 
 			# determine if multiple matches is allowed, default: false
 			#multiple_objects = dynamic_attributes[ :__multiple_objects ].to_s =~ /^true$/i ? true : false
@@ -677,7 +535,7 @@ module MobyBehaviour
 
 				end
 
-				MATTI.logger.behaviour(
+				TDriver.logger.behaviour(
 
 					"%s;%s;%s;%s;%s" % [ "FAIL", description, identity, multiple_objects ? "children" : "child", creation_data.inspect ]
 
@@ -753,6 +611,195 @@ module MobyBehaviour
 
 			activate
 
+		end
+
+	public # deprecated
+
+		# TODO: Team TE: review me @ 'Brakes'
+		# Creates a test object for a child object of this test object
+		# Associates child object as current object's child.
+		# and associates self as child object's parent.
+		#
+		# NOTE:
+		# Subsequent calls to TestObject#child(rule) always returns reference to same Testobject:
+		# a = to.child(rule) ; b = to.child(rule) ; a.equal?( b ); # => true
+		# note the usage of equal? above instead of normally used eql?. Please refer to Ruby manual for more information.
+		#
+		# NOTE: The accessor methods for child objects created automatically by the DataGenerator are dependent on this method.
+		# === params
+		# attributes:: Hash object holding information for identifying which child to create, eg. :type => :slider
+		# === returns
+		# TestObject:: new child test object or reference to existing child
+		def child( attributes )
+
+			creation_data = attributes.clone
+			logging_enabled = MobyUtil::Logger.instance.enabled
+
+			MobyUtil::Logger.instance.enabled = false if ( creation_data.delete( :__logging ) == 'false' )
+			creation_data.delete( :__timeout )
+
+			# check if the hash contains symbols as values and translate those into strings
+			translate!( creation_data )
+
+			refresh_args = ( creation_data[ :type ] == 'application' ? { :name => creation_data[ :name ], :id => creation_data[ :id ] } : { :id => get_application_id } )
+
+			if !( @_active )
+
+				@sut.refresh refresh_args
+
+				begin 
+					@parent.child( :type => @type, :id => @id )
+
+				rescue MobyBase::TestObjectNotFoundError
+
+					MobyUtil::Logger.instance.log("behaviour", "FAIL;Parent test object no longer visible.;#{ identity };child;#{ creation_data.inspect }")
+					MobyUtil::Logger.instance.enabled = logging_enabled
+					Kernel::raise MobyBase::TestObjectNotVisibleError
+
+				end
+			end
+
+			initial_timeout = @test_object_factory.timeout unless ( custom_timeout = nil || attributes[ :__timeout ] ).nil?
+
+			# add symbols to dynamic attributes list -- to avoid IRB bug
+			MobyUtil::DynamicAttributeFilter.instance.add_attributes( creation_data.keys )
+
+			begin
+
+				@test_object_factory.timeout = custom_timeout unless custom_timeout.nil?
+				child_object = @test_object_factory.make_child( self, MobyBase::TestObjectIdentificator.new( creation_data ) )
+
+			rescue MobyBase::MultipleTestObjectsIdentifiedError => exception
+
+				MobyUtil::Logger.instance.log("behaviour" , "FAIL;Multiple child objects matched criteria.;#{ identity };child;#{ creation_data.inspect }")
+				Kernel::raise exception
+
+			rescue MobyBase::TestObjectNotFoundError => exception
+
+				MobyUtil::Logger.instance.log("behaviour" , "FAIL;The child object could not be found.;#{ identity };child;#{ creation_data.inspect }")
+				Kernel::raise exception
+
+			rescue Exception => exception
+
+				MobyUtil::Logger.instance.log("behaviour" , "FAIL;Failed when trying to find child object.;#{ identity };child;#{ creation_data.inspect }")
+				Kernel::raise exception
+
+			ensure
+				@test_object_factory.timeout = initial_timeout unless custom_timeout.nil?
+				MobyUtil::Logger.instance.enabled = logging_enabled
+			end
+
+			#MobyUtil::Logger.instance.log "behaviour", "PASS;Object found with matching criteria.;#{ identity };child;#{ creation_data.inspect }"
+
+			# Type information is stored in a separate member, not in the Hash
+			creation_data.delete( :type )
+
+			# use cached test object if once already retrieved
+			get_cached_test_object!( child_object ).tap{ | found_in_cache |
+
+				# Store/update the attributes that were used to create the child object.
+				child_object.creation_attributes = creation_data
+
+				# add child to objects cache 
+				add_child( child_object ) unless found_in_cache
+
+			}
+
+			child_object
+
+		end
+
+		# Function similar to child, but returns an array of children test objects that meet the given criteria
+		# === params
+		# attributes:: Hash object holding information for identifying which child to create, eg. :type => :slider
+	        #find_all:: Boolean specifying whether all children under the test node or just immediate children should be retreived.
+		# === returns
+		# An array of TestObjects
+		def children( attributes={}, find_all=true)
+		  
+			raise TypeError.new( 'Input parameter not of Type: Hash.\nIt is: ' + attributes.class.to_s ) unless attributes.kind_of?( Hash ) #and !attributes.empty?
+			
+			# If empty or only special attributes then add :type => "any" to search all
+			temp_attributes = attributes.clone
+			temp_attributes.delete_if {|k,v| (k.to_s =~ /^__/) != nil }
+			attributes.merge!({:type => "any"}) if temp_attributes.empty?
+			
+			child_objects = Array.new
+		  
+			creation_data = attributes.clone
+			logging_enabled = MobyUtil::Logger.instance.enabled
+
+			MobyUtil::Logger.instance.enabled = false if ( creation_data.delete( :__logging ) == 'false' )
+			creation_data.delete( :__timeout )
+
+			# check if the hash contains symbols as values and translate those into strings
+			translate!( creation_data )
+
+			refresh_args = ( creation_data[ :type ] == 'application' ? { :name => creation_data[ :name ], :id => creation_data[ :id ] } : { :id => get_application_id } )
+
+			# add symbols to dynamic attributes list -- to avoid IRB bug
+			MobyUtil::DynamicAttributeFilter.instance.add_attributes( creation_data.keys )
+
+			if !( @_active )
+
+				@sut.refresh refresh_args
+
+				begin 
+					@parent.child( :type => @type, :id => @id )
+
+				rescue MobyBase::TestObjectNotFoundError
+
+					MobyUtil::Logger.instance.log("behaviour", "FAIL;Parent test object no longer visible.;#{ identity };child;#{ creation_data.inspect }")
+					MobyUtil::Logger.instance.enabled = logging_enabled
+					Kernel::raise MobyBase::TestObjectNotVisibleError
+
+				end
+			end
+
+			initial_timeout = @test_object_factory.timeout unless ( custom_timeout = nil || attributes[ :__timeout ] ).nil?
+
+			begin
+
+				@test_object_factory.timeout = custom_timeout unless custom_timeout.nil?
+				child_objects = @test_object_factory.make_multiple_children( self, MobyBase::TestObjectIdentificator.new( creation_data ), find_all )
+
+			rescue MobyBase::TestObjectNotFoundError => exception
+
+				MobyUtil::Logger.instance.log("behaviour" , "FAIL;The child object could not be found.;#{ identity };child;#{ creation_data.inspect }")
+				Kernel::raise exception
+
+			rescue Exception => exception
+
+				MobyUtil::Logger.instance.log("behaviour" , "FAIL;Failed when trying to find child object.;#{ identity };child;#{ creation_data.inspect }")
+				Kernel::raise exception
+
+			ensure
+				@test_object_factory.timeout = initial_timeout unless custom_timeout.nil?
+				MobyUtil::Logger.instance.enabled = logging_enabled
+			end
+
+			#MobyUtil::Logger.instance.log "behaviour", "PASS;Object found with matching criteria.;#{ identity };child;#{ creation_data.inspect }"
+
+			# Type information is stored in a separate member, not in the Hash
+			creation_data.delete( :type )
+
+			child_objects.each do | child_object |
+
+				# use cached test object if once already retrieved
+				get_cached_test_object!( child_object ).tap{ | found_in_cache |
+
+					# Store/update the attributes that were used to create the child object.
+					child_object.creation_attributes = creation_data
+
+					# add child to objects cache 
+					add_child( child_object ) unless found_in_cache
+
+				}
+
+			end
+
+			# return test objects
+			child_objects
 		end
 
 		# enable hooking for performance measurement & debug logging

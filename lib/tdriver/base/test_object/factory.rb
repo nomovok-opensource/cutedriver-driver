@@ -207,6 +207,84 @@ module MobyBase
 
 	private
 
+		# TODO: This method should be in application test object
+		def get_layout_direction( sut )
+
+			sut.xml_data.xpath('*//object[@type="application"]/attributes/attribute[@name="layoutDirection"]/value/text()').first.content || 'LeftToRight'
+
+		end
+
+		# TODO: Documentation
+		def get_test_objects( rules )
+
+			# get parent object
+			parent = rules[ :parent ]
+
+			# get application id
+			#application_id = rules[ :application ] #parent.get_application_id
+
+			refresh_arguments = rules[ :application ].nil? ? { :id => rules[ :application ] } : {}
+
+			# get associated sut object
+			sut = rules.fetch( :sut )
+
+			# determine that are we going to retrieve multiple test objects
+			#multiple_objects = rules.fetch( :multiple_objects, true )
+			multiple_objects = rules.fetch( :multiple_objects, false )
+
+			# determine that should all child objects childrens be retrieved
+			#find_all_children = rules.fetch( :find_all_children, true )
+			find_all_children = rules.fetch( :find_all_children, true )
+
+			# creation attributes for test object
+			creation_attributes = rules.fetch( :attributes )
+
+			# dynamic attributes for test object
+			#dynamic_attributes = rules.fetch( :dynamic_attributes )
+			dynamic_attributes = rules.fetch( :dynamic_attributes, {} )
+
+			# sorting is disabled by default
+			#sorting = ( dynamic_attributes[ :__xy_sorting ].to_s.downcase == 'true' )
+			sorting = MobyUtil::KernelHelper.to_boolean( dynamic_attributes[ :__xy_sorting ], false )
+
+			# determine that did user give index value
+			index_given = dynamic_attributes.has_key?( :__index )
+
+			# index for test object, default is 0 (first) if not defined by caller
+			index = dynamic_attributes.fetch( :__index, 0 ).to_i
+			#index = dynamic_attributes[ :__index ].to_i || 0
+
+			# create test object identificator object with given creation attributes
+			test_object_identificator = MobyBase::TestObjectIdentificator.new( creation_attributes ) 
+
+			MobyUtil::Retryable.until( 
+
+				:timeout => ( rules[ :timeout ] || @timeout ), 
+				:interval => ( rules[ :interval ] || @_retry_interval ),
+				:exception => [ MobyBase::TestObjectNotFoundError, MobyBase::MultipleTestObjectsIdentifiedError ] ) {
+
+					# refresh sut ui state				
+					sut.refresh( refresh_arguments )
+
+					# identify test objects from xml
+					matches, rule = test_object_identificator.find_objects( parent.xml_data, find_all_children )
+
+					# raise exception if multiple objects flag is false and more than one match found
+					raise MobyBase::MultipleTestObjectsIdentifiedError.new( "Multiple test objects found with rule:\n%s" % creation_attributes.merge( dynamic_attributes ).inspect ) if ( !multiple_objects ) && ( matches.count > 1 && !index_given )
+
+					# raise exception if no matching object(s) found
+					raise MobyBase::TestObjectNotFoundError.new( "Cannot find object with rule:\n%s" % creation_attributes.merge( dynamic_attributes ).inspect ) if matches.empty?
+
+					# sort elements 
+					test_object_identificator.sort_elements_by_xy_layout!( matches, get_layout_direction( sut ) ) if sorting
+
+					# return result
+					multiple_objects && !index_given ? matches.to_a : [ matches[ index ] ]
+
+			}
+
+		end
+
 		# Function for making a child test object (a test object that is not directly a accessible from the sut) 
 		# Creates accessors for children of the new object, applies any behaviours applicable for its type. 
 		# Does not associate child object to parent / vice versa - leaves that to the client. 

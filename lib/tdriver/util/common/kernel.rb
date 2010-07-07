@@ -20,25 +20,49 @@
 
 module MobyUtil
 
-    # Helper class to store verifyblock for 
-    # constant verifications for sut state
-    class VerifyBlock 
-      attr_accessor :block,:expected, :message,:source, :timeout
-      def initialize(block, expected, message = nil, timeout = nil, source = "")
-        @block = block
-        @expected = expected
-        @message = message
-        @timeout = timeout
-        @source = source
-      end
-    end
+	# Helper class to store verifyblock for 
+	# constant verifications for sut state
+	class VerifyBlock 
 
+		attr_accessor :block,:expected, :message,:source, :timeout
 
+		def initialize(block, expected, message = nil, timeout = nil, source = "")
+
+			@block = block
+			@expected = expected
+			@message = message
+			@timeout = timeout
+			@source = source
+
+		end
+
+	end
 
 	class KernelHelper
 
+		# Function to determine if given value is boolean
+		# == params
+		# value:: String containing boolean
+		# == returns
+		# TrueClass::
+		# FalseClass::
+		def self.boolean?( value )
 
+			/^(true|false)$/i.match( value.to_s ).kind_of?( MatchData ) rescue false
 
+		end
+
+		# Function to return boolean of given value
+		# == params
+		# value:: String containing boolean
+		# == returns
+		# TrueClass::
+		# FalseClass::
+		def self.to_boolean( value, default = nil )
+
+			/^(true|false)$/i.match( value.to_s ) ? $1.downcase == 'true' : default
+
+		end
 
 		# Function to return class constant from a string
 		# == params
@@ -82,11 +106,6 @@ module MobyUtil
 			$stderr.puts output
 
 		end
-
-
-
-
-
 
     # Searches for the given source file for a line
     #
