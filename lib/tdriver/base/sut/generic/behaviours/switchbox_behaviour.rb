@@ -17,12 +17,6 @@
 ## 
 ############################################################################
 
-
-# Describes the behaviour of SUT, aka the methods that can be used to control SUT
-
-require 'set'
-
-
 module MobyBehaviour
   
     module SwitchboxBehaviour
@@ -148,6 +142,8 @@ module MobyBehaviour
       end
     end
 
-  end
+	# enable hooking for performance measurement & debug logging
+	MobyUtil::Hooking.instance.hook_methods( self ) if defined?( MobyUtil::Hooking )
 
-MobyUtil::Logger.instance.hook_methods( MobyBehaviour::SwitchboxBehaviour )
+
+end

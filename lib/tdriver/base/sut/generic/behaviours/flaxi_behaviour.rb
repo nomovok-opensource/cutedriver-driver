@@ -17,15 +17,10 @@
 ## 
 ############################################################################
 
-
-# Describes the behaviour of SUT, aka the methods that can be used to control SUT
-
-require 'set'
-
-
 module MobyBehaviour
 
     module FlaxiBehaviour
+
       include MobyBehaviour::Behaviour
 
       # Instructs the SUT to flash
@@ -61,7 +56,6 @@ module MobyBehaviour
         #start flashing
         result=start_flashing(flash_command)
         Kernel::raise MobyBase::BehaviourError.new("flash_images", "Flashing failed") if result.to_s == 'false'
-
 
       end
 
@@ -169,7 +163,10 @@ module MobyBehaviour
 
       end
 
+	# enable hooking for performance measurement & debug logging
+	MobyUtil::Hooking.instance.hook_methods( self ) if defined?( MobyUtil::Hooking )
 
     end
-  end
-MobyUtil::Logger.instance.hook_methods( MobyBehaviour::FlaxiBehaviour )
+
+end
+
