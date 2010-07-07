@@ -17,7 +17,6 @@
 ## 
 ############################################################################
 
-
 module MobyBase
 
 	class TestObject
@@ -160,8 +159,10 @@ module MobyBase
 		def xml_data()
 
 			#Kernel::raise MobyBase::TestObjectNotFoundError.new( 'The test object does not exist on the sut anymore.' ) if ( elements = @sut.xml_data.xpath( @x_path ) ).size.zero?
-      
-      Kernel::raise MobyBase::TestObjectNotFoundError.new( "The test object with id: \"#{ @id.to_s }\", type: \"#{ @type.to_s }\" and name: \"#{ @name.to_s }\" does not exist on sut \"#{ @sut.id.to_s }\" anymore" ) if ( elements = @sut.xml_data.xpath( @x_path ) ).size.zero?
+
+			#Kernel::raise MobyBase::TestObjectNotFoundError.new( "The test object with id: \"#{ @id.to_s }\", type: \"#{ @type.to_s }\" and name: \"#{ @name.to_s }\" does not exist on sut \"#{ @sut.id.to_s }\" anymore" ) if ( elements = @sut.xml_data.xpath( @x_path ) ).size.zero?
+
+			Kernel::raise MobyBase::TestObjectNotFoundError.new( 'The test object (id: "%s", type: "%s", name: "%s") does not exist on sut (%s) anymore' % [ @id, @type, @name, @sut.id ]  ) if ( elements = @sut.xml_data.xpath( @x_path ) ).size.zero?
 
 			elements.first
 

@@ -17,7 +17,6 @@
 ## 
 ############################################################################
 
-
 module MobyBase
 
 	# TODO: document BehaviourFactory class
@@ -136,7 +135,7 @@ module MobyBase
 
 					Kernel::raise exception.class.new( 
 
-						"Implementation for behaviour %s does not exist. (%s)" % [ @@behaviours[ behaviour_index ][ :name ], @@behaviours[ behaviour_index ][ :module ][ :name ] ]
+						"Implementation for behaviour %s does not exist. (%s)" % [ behaviour_data[ :name ], behaviour_data[ :module ][ :name ] ]
 
 					)
 
@@ -147,8 +146,8 @@ module MobyBase
 
 						"Error while applying %s (%s) behaviour to target object. Reason: %s (%s)" % [
 
-							@@behaviours[ behaviour_index ][ :name ],
-							@@behaviours[ behaviour_index ][ :module ][ :name ],	
+							behaviour_data[ :name ],
+							behaviour_data[ :module ][ :name ],	
 							exception.message,
 							exception.class
 
