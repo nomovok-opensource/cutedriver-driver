@@ -61,7 +61,14 @@ module MobyUtil
 		# == returns
 		def log( text, *arguments )
 
-			@logger_instance.log( "debug", "#{ text }" ) unless @logger_instance.nil?
+
+			unless @logger_instance.nil?
+
+				@logger_instance.debug( "%s" % text ) # if @logger_instance.enabled
+
+			end
+
+			#@logger_instance.log( "debug", "%s" % text ) unless @logger_instance.nil?
 
 			nil
 

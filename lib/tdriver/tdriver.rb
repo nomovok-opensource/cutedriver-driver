@@ -128,7 +128,13 @@ class TDriver
 	# Wrapper for MobyUtil::ParameterUserAPI class with methods e.g. [] and []=, files and load_xml etc.
 	def self.parameter
 
-		MobyUtil::ParameterUserAPI.instance
+		@matti_parameter_instance || ( @matti_parameter_instance = MobyUtil::ParameterUserAPI.instance )
+
+	end
+
+	def self.logger
+
+		@tdriver_logger_instance || ( @tdriver_logger_instance = MobyUtil::Logger.instance )
 
 	end
 
