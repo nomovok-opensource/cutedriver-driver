@@ -27,7 +27,13 @@ module MobyUtil
 
 				include Abstraction 
 
-				def [](value)
+				def <=>( object )
+
+					@xml <=> object.xml
+
+				end
+
+				def []( value )
 
 					@xml.attributes[ value ]
 
@@ -35,7 +41,8 @@ module MobyUtil
 
 				def attributes
 
-					@xml.attributes
+					# return hash of attributes
+					Hash[ @xml.attributes.collect{ | key, value | [ key, value.to_s ] }]
 
 				end
 
@@ -52,7 +59,7 @@ module MobyUtil
 
 				def children
 
-					@xml.children
+					nodeset_object( @xml.children )
 
 				end
 
@@ -73,6 +80,8 @@ module MobyUtil
 						yield( element_object( element ) ) 
 
 					}
+
+					nil
 
 				end        
 
@@ -108,6 +117,8 @@ module MobyUtil
 
 					@xml.replace( other.xml )
 
+					self
+
 				end
 
 				def add_previous_sibling( other )
@@ -119,6 +130,8 @@ module MobyUtil
 				def remove
 
 					@xml.remove
+
+					self
 
 				end
 

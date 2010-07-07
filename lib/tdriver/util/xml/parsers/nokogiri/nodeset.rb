@@ -33,32 +33,6 @@ module MobyUtil
 
 				end
 
-				def each( &block )
-
-					@xml.each{ | element | 
-
-						yield( element_object( element ) ) 
-
-					}
-
-				end
-
-				def collect( &block )
-
-					@xml.collect{ | element | 
-
-						yield( element_object( element ) ) 
-
-					}
-
-				end
-
-				def empty?
-
-					@xml.empty?
-
-				end
-
 				def first
 
 					element_object( @xml.first )
@@ -70,6 +44,67 @@ module MobyUtil
 					element_object( @xml.last )
 
 				end
+
+				def each( &block )
+
+					@xml.each{ | element | 
+
+						yield( element_object( element ) ) 
+
+					}
+
+					self
+
+				end
+
+				def collect( &block )
+
+					nodeset_object( _collect( &block ) )
+
+				end
+
+				def collect!( &block )
+
+					@xml = _collect( &block )
+
+					self
+
+				end
+
+				def compact
+
+					nodeset_object( @xml.compact )
+
+				end
+
+				def compact!
+
+					@xml = @xml.compact
+
+					self
+
+				end
+
+				def sort( &block )
+
+					nodeset_object( _sort( &block ) ) 
+
+				end
+
+				def sort!( &block )
+
+					@xml = _sort( &block )
+
+					self
+
+				end
+
+				def empty?
+
+					@xml.empty?
+
+				end
+
 				
 				def length
 
@@ -108,6 +143,36 @@ module MobyUtil
 				alias size length
 
 				alias count length
+
+			private
+
+				def _collect( &block )
+
+					@xml.collect{ | element | 
+
+						yield( element_object( element ) ) 
+
+					} 
+
+				end
+
+				def _sort( &block )
+
+					@xml.sort{ | element_a, element_b | 
+				
+						if block_given?
+
+							yield( element_object( element_a ), element_object( element_b ) ) 
+
+						else
+
+							element_a <=> element_b
+
+						end
+
+					} 
+
+				end
 
 				# enable hooking for performance measurement & debug logging
 				MobyUtil::Hooking.instance.hook_methods( self ) if defined?( MobyUtil::Hooking )
