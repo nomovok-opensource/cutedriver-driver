@@ -1,16 +1,16 @@
-
-
 <templates>
 
     <!--
-                ** DO NOT MODIFY THIS FILE - USE TDriver PARAMETERS XML TO CONFIGURE YOUR ENVIRONMENT **
+                *** DO NOT MODIFY THIS FILE - Use TDriver parameters XML to configure your environment ***
 
-                NOTICE:
-                DUE TO THIS FILE WILL BE UPDATED BY TDriver DEVELOPERS, PLEASE USE TDRIVER PARAMETERS XML FILE INSTEAD.
-                SEE TDRIVER PARAMETERS EXAMPLE XML FOR HOW TO CONFIGURE YOUR TDRIVER PARAMETERS USING TEMPLATES.
-        -->
+                Notice:
 
-        <!-- templates file version -->
+                Due to this file will be updated by TDriver development team, please use TDriver parameters XML file instead.
+                See TDriver parameters example XML (../tdriver_parameters.xml) for how to configure TDriver using templates.
+
+    -->
+
+    <!-- templates file version -->
     <version>0.1</version>
 
     <template name="global" inherits="logging;localisation;reporting">
@@ -125,6 +125,7 @@
 
 
     </template>
+
     <template name="error_recovery">
         <!-- Parameters for error recovery situations -->
         <parameter name="error_recovery_enabled" value="false" />
@@ -141,22 +142,22 @@
 
     </template>
 	
-	<!-- Examples of how sut settings models are created and used  -->
-	<template name="sut_settings_model_sut_1" inherits="sut_settings_model"> <!-- settings for a single device, overwrites some parameters -->
-		<parameter name="sut_settings_phone_number" value="0987654321" />
-		<parameter name="sut_settings_mac_wlan" value="ca:fe:ba:be:04:03:02:01" />
-	</template>
+    <!-- Examples of how sut settings models are created and used  -->
+    <template name="sut_settings_model_sut_1" inherits="sut_settings_model"> <!-- settings for a single device, overwrites some parameters -->
+        <parameter name="sut_settings_phone_number" value="0987654321" />
+        <parameter name="sut_settings_mac_wlan" value="ca:fe:ba:be:04:03:02:01" />
+    </template>
 	
-	<template name="sut_settings_model" inherits=""> <!-- sut specific settings, model -->
-		<parameter name="sut_settings_phone_number" value="1234567890" />
-		<parameter name="sut_settings_language" value="English" />
-		<parameter name="sut_settings_keypad_layout" value="finnish_english_finnish" />
-		<parameter name="sut_settings_operator" value="O2" />
-		<parameter name="sut_settings_variant" value="01" />
-		<parameter name="sut_settings_codes_pin" value="1234" />
-		<parameter name="sut_settings_codes_puk" value="12345678" />
-		<parameter name="sut_settings_mac_bluetooth" value="de:ad:be:ef:01:02:03:04" />
-		<parameter name="sut_settings_mac_wlan" value="de:ad:be:ef:04:03:02:01" />
-	</template>
+    <template name="sut_settings_model" inherits=""> <!-- sut specific settings, model -->
+        <parameter name="sut_settings_phone_number" value="1234567890" />
+        <parameter name="sut_settings_language" value="English" />
+        <parameter name="sut_settings_keypad_layout" value="finnish_english_finnish" />
+        <parameter name="sut_settings_operator" value="O2" />
+        <parameter name="sut_settings_variant" value="01" />
+        <parameter name="sut_settings_codes_pin" value="1234" />
+        <parameter name="sut_settings_codes_puk" value="12345678" />
+        <parameter name="sut_settings_mac_bluetooth" value="de:ad:be:ef:01:02:03:04" />
+        <parameter name="sut_settings_mac_wlan" value="de:ad:be:ef:04:03:02:01" />
+    </template>
 
 </templates>
