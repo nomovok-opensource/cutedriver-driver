@@ -17,7 +17,6 @@
 ## 
 ############################################################################
 
-
 module MobyBehaviour
 
 	module ObjectComposition
@@ -63,7 +62,7 @@ module MobyBehaviour
 		# === raises
 		def add_child( new_child_object ) 
 
-			@_child_objects.add( new_child_object )
+			@_child_object_cache.merge!( new_child_object.hash => new_child_object )
 
 		end
 
@@ -75,7 +74,7 @@ module MobyBehaviour
 		# === raises
 		def remove_child( target_child_object )
 
-			@_child_objects.delete target_child_object
+			@_child_object_cache.delete( target_child_object.hash )
 
 		end
 

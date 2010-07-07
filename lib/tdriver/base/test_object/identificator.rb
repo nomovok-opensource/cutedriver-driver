@@ -17,7 +17,6 @@
 ## 
 ############################################################################
 
-
 module MobyBase
 
 	# Class to represent TestObjectIdentificator
@@ -63,6 +62,13 @@ module MobyBase
 
 		end
 
+		# TODO: Documentation
+		def find_objects( from_xml_element, find_all_children )
+
+			[ from_xml_element.xpath( rule = xpath_to_identify( find_all_children ) ), rule ]
+
+		end
+
 		# getter to return the rules used in identification
 		# == returns
 		# Hash:: Hash object containing the rules
@@ -70,6 +76,355 @@ module MobyBase
 
 			@_attributes_used_to_identify_object
 
+		end
+
+  
+	private
+
+		# Sort XML nodeset of test objects with layout direction
+		def sort_elements_by_xy_layout!( nodeset, layout_direction = "LeftToRight" )
+
+			attribute_pattern = "./attributes/attribute[@name='%s']/value"
+
+			# collect only nodes that has x_absolute and y_absolute attributes
+			nodeset.collect!{ | node |
+
+				node unless node.xpath( attribute_pattern % 'x_absolute' ).empty? || node.xpath( attribute_pattern % 'y_absolute' ).empty?
+
+			}.compact!.sort!{ | a, b |
+
+				a_x = a.xpath( attribute_pattern % 'x_absolute' ).first.content.to_i
+				a_y = a.xpath( attribute_pattern % 'y_absolute' ).first.content.to_i
+
+				b_x = b.xpath( attribute_pattern % 'x_absolute' ).first.content.to_i
+				b_y = b.xpath( attribute_pattern % 'y_absolute' ).first.content.to_i
+
+				if ( layout_direction =~ /LeftToRight/i )
+
+					( a_y == b_y ) ? ( a_x <=> b_x ) : ( a_y <=> b_y ) 
+
+				elsif ( layout_direction =~ /RightToLeft/i )
+
+					( a_y == b_y ) ? ( b_x <=> a_x ) : ( a_y <=> b_y ) 
+
+				else
+
+					Kernel::raise ArgumentError.new( "Unexpected layout direction: %s" % layout_direction )
+
+				end
+
+			}
+
+		end
+
+		# function create x_path that included required attributes type, id and/or name
+		# == returns
+		# String:: x_path containing required attributes
+		def create_xpath_from_required_attributes
+
+			return "@*" if @_attributes_used_to_identify_object[ :type ].to_s == "any"
+
+			xpath = ""
+
+			pattern = "@%s=%s or attributes/attribute[translate(@name,'ABCDEFGHIJKLMNOPQRSTUVWXYZ','abcdefghijklmnopqrstuvwxyz')=%s]/value=%s"
+
+			@_attributes_used_to_identify_object.each_pair{ | attribute_name, attribute_value | 
+
+				next unless @@required_attributes.include?( attribute_name )
+
+				xpath << ' and ' unless xpath.empty?
+
+				xpath << '('
+
+				if attribute_value.kind_of?( Array )
+
+					# multiple (optional) attributes for object identification
+					attribute_value.each_with_index{ | attribute_value_option, index |
+						
+						xpath << ' or ' unless index.zero?
+
+						a_v_o = convertToXPathLiteral( attribute_value_option )
+
+						xpath << pattern % [ 
+							attribute_name, 
+							a_v_o, 
+							convertToXPathLiteral( attribute_name.to_s.downcase), 
+							a_v_o
+						]
+
+					}
+
+				else
+
+					a_v = convertToXPathLiteral( attribute_value )
+
+					# one attribute used for object identification
+					xpath << "%s" % [
+						pattern % [ 
+							attribute_name, 
+							a_v, 
+							convertToXPathLiteral( attribute_name.to_s.downcase), 
+							a_v
+						]
+					]
+
+				end
+
+				xpath << ')'
+
+			}
+			
+			xpath
+
+		end
+
+		# Private function to define rule for a given MobyUtil::XML::Element element.
+		# Uses xml_elements namespace in the rule. 
+		# Uses private instance variable to define the actual rule. Instance variable is set in constructor
+		# == params
+		# xml_element:: MobyUtil::XML::Element element frow which objects are being identified
+		# == returns
+		# Array (<String>, Array(<String>) ):: returns array of two element as defined below
+		# String:: Rule to be used in xpath
+		def xpath_to_identify( get_all_children = true )
+
+			xpath = create_xpath_from_required_attributes
+
+			pattern = "attributes/attribute[translate(@name,'ABCDEFGHIJKLMNOPQRSTUVWXYZ','abcdefghijklmnopqrstuvwxyz')=%s]/"
+			
+			@_attributes_used_to_identify_object.each_pair do | attribute_key, attribute_value |
+
+				# Relaxing conditions, no need for mandatory :name, :type, :parent, :id or :__index. See class instance constructor.
+				next if @insignificant_attributes.include?( attribute_key ) 
+				
+				xpath << ' and ' unless xpath.empty?
+
+				xpath << pattern % convertToXPathLiteral( attribute_key.to_s.downcase )
+
+				# convert single value to array, due to value can contain multiple values and no use to have duplicate code for processing
+				attribute_value = [ attribute_value ] unless attribute_value.kind_of?( Array ) 
+
+				attribute_value.each_with_index do | value, index |
+
+					xpath << " or " unless index.zero?
+
+					# allow partial match when value of :type and attribute name matches. see class instance constructor.
+					if @@partial_match_allowed.include?( [ @_attributes_used_to_identify_object[ :type ], attribute_key ] )
+
+						xpath << "value[contains(.,%s)]" % convertToXPathLiteral( value )
+
+					else
+
+						xpath << "value=%s" % convertToXPathLiteral( value )
+
+
+					end
+				end
+
+			end
+
+			( get_all_children ? "*//object[%s]" : "objects[1]/object[%s]" ) % xpath
+
+		end
+	
+		# TODO: This method needs to refactored
+		# function to deal with case where string literals in XPath expressions contains single or double quotes
+		# If string literal value contain only one type - double or single, then delimit with the other.
+		# E.g. "'"  or '"'
+		# If value contains both then you can not do it directly in a string literal but need to construct the string using
+		# concat("'",'"')
+		def convertToXPathLiteral( value )
+
+			# convert to string if needed
+			value_string = value.kind_of?( String ) ? value : value.to_s
+
+			if !value_string.include?("\'")
+
+				# return value
+				"\'%s\'" % value_string
+
+			elsif !value_string.include?("\"")
+
+				# return value
+				"\"%s\"" % value_string
+
+			else
+
+				result = ""
+
+				substrings = value_string.split( "\"" )
+
+				substrings.each_with_index do | s, i | 
+
+					needComma = true if i > 0
+
+					unless s.empty?
+
+						result << ", " if i > 0
+
+						result << "\"%s\"" % s 
+
+						needComma = true
+
+					end
+
+					# other than last one 
+					if i < substrings.length - 1
+
+						result << ", " if needComma
+
+						result << "'\"'"
+
+					end 
+
+				end
+
+				# return value
+				"concat(%s)" % result
+
+			end
+
+		end
+
+	public # deprecated
+
+		# function create x_path that included required attributes type, id and/or name
+		# == returns
+		# String:: x_path containing required attributes
+		def create_x_path_from_required_attributes
+
+			return "@*" if @_attributes_used_to_identify_object[ :type ].to_s == "any"
+
+			xpath = ""
+
+			pattern = "@%s=%s or attributes/attribute[translate(@name,'ABCDEFGHIJKLMNOPQRSTUVWXYZ','abcdefghijklmnopqrstuvwxyz')=%s]/value=%s"
+
+			@_attributes_used_to_identify_object.each_pair{ | attribute_name, attribute_value | 
+
+				next unless @@required_attributes.include?( attribute_name )
+
+				xpath << ' and ' unless xpath.empty?
+
+				xpath << '('
+
+				if attribute_value.kind_of?( Array )
+
+					# multiple (optional) attributes for object identification
+					attribute_value.each_with_index{ | attribute_value_option, index |
+						
+						xpath << ' or ' unless index.zero?
+
+						xpath << pattern % [ 
+							attribute_name, 
+							convertToXPathLiteral( attribute_value_option), 
+							convertToXPathLiteral( attribute_name.to_s.downcase), 
+							convertToXPathLiteral( attribute_value_option)
+						]
+
+					}
+
+				else
+
+					# one attribute used for object identification
+					xpath << "%s" % [
+						pattern % [ 
+							attribute_name, 
+							convertToXPathLiteral( attribute_value), 
+							convertToXPathLiteral( attribute_name.to_s.downcase), 
+							convertToXPathLiteral( attribute_value)
+						]
+					]
+
+				end
+
+				xpath << ')'
+
+			}
+			
+			xpath
+
+		end
+
+		# Private function to define rule for a given MobyUtil::XML::Element element.
+		# Uses xml_elements namespace in the rule. 
+		# Uses private instance variable to define the actual rule. Instance variable is set in constructor
+		# == params
+		# xml_element:: MobyUtil::XML::Element element frow which objects are being identified
+		# == returns
+		# Array (<String>, Array(<String>) ):: returns array of two element as defined below
+		# String:: Rule to be used in xpath
+		def get_xpath_to_identify( from_xml_element, namespace = nil, get_all_children= true )
+
+			xpath = create_x_path_from_required_attributes
+			pattern = "attributes/attribute[translate(@name,'ABCDEFGHIJKLMNOPQRSTUVWXYZ','abcdefghijklmnopqrstuvwxyz')=%s]/"
+			
+			@_attributes_used_to_identify_object.each_pair do | attribute_key, attribute_value |
+
+				# Relaxing conditions, no need for mandatory :name, :type, :parent, :id or :__index. See class instance constructor.
+				next if @insignificant_attributes.include?( attribute_key ) 
+				
+				xpath << ' and ' unless xpath.empty?
+
+				xpath << pattern % convertToXPathLiteral( attribute_key.to_s.downcase )
+
+				# convert single value to array, due to value can contain multiple values and no use to have duplicate code for processing
+				attribute_value = [ attribute_value ] unless attribute_value.kind_of?( Array ) 
+
+				attribute_value.each_with_index do | value, index |
+
+					xpath << " or " unless index.zero?
+
+					# allow partial match when value of :type and attribute name matches. see class instance constructor.
+					if @@partial_match_allowed.include?( [ @_attributes_used_to_identify_object[ :type ], attribute_key ] )
+
+						xpath << "value[contains(.,%s)]" % convertToXPathLiteral( value )
+
+					else
+
+						xpath << "value=%s" % convertToXPathLiteral( value )
+
+
+					end
+				end
+
+			end
+
+			( get_all_children ? "*//object[%s]" : "objects[1]/object[%s]" ) % xpath
+
+		end
+
+		## Returns array of element nodes
+		def sort_elements_by_xy_layout( element_set, layout_direction = "LeftToRight" )
+
+			# MobyUtil::XML::NodeSet and Elements
+			# Take out all test_objects with no x_absolute or y_absolute
+			to_delete = []
+			element_set.each do |node|
+				begin
+					node.xpath("./attributes/attribute[@name = 'x_absolute']/value").first.content
+					node.xpath("./attributes/attribute[@name = 'y_absolute']/value").first.content
+				rescue
+					to_delete << node
+				end
+			end
+			to_delete.each do |node|
+				element_set.delete(node) 
+			end
+			# Sort remaining by layout direction and up to down
+			# Requires .to_a to return an array of MobyUtil::XML::Elements
+			element_set.to_a.sort!{ |a, b| 
+				a_x = a.xpath("./attributes/attribute[@name = 'x_absolute']/value").first.content.to_i
+				a_y = a.xpath("./attributes/attribute[@name = 'y_absolute']/value").first.content.to_i
+				b_x = b.xpath("./attributes/attribute[@name = 'x_absolute']/value").first.content.to_i
+				b_y = b.xpath("./attributes/attribute[@name = 'y_absolute']/value").first.content.to_i
+				if ( layout_direction.downcase == "LeftToRight".downcase )
+					( a_y == b_y ) ? ( a_x <=> b_x ) : ( a_y <=> b_y ) 
+				elsif ( layout_direction.downcase == "RightToLeft".downcase ) 
+					( a_y == b_y ) ? ( b_x <=> a_x ) : ( a_y <=> b_y ) 
+				else
+					Kernel::raise ArgumentError.new("Unexpected layout direction: " + layout_direction)
+				end
+			}
 		end
 
 		# Function to identify an object from tasMessage xml content
@@ -146,244 +501,6 @@ module MobyBase
 
 			ret
 		  
-		end
-  
-		# Private function to define rule for a given MobyUtil::XML::Element element.
-		# Uses xml_elements namespace in the rule. 
-		# Uses private instance variable to define the actual rule. Instance variable is set in constructor
-		# == params
-		# xml_element:: MobyUtil::XML::Element element frow which objects are being identified
-		# == returns
-		# Array (<String>, Array(<String>) ):: returns array of two element as defined below
-		# String:: Rule to be used in xpath
-		def get_xpath_to_identify( from_xml_element, namespace = nil, get_all_children= true )
-
-			xpath = create_x_path_from_required_attributes
-			pattern = "attributes/attribute[translate(@name,'ABCDEFGHIJKLMNOPQRSTUVWXYZ','abcdefghijklmnopqrstuvwxyz')=%s]/"
-			
-			@_attributes_used_to_identify_object.each_pair do | attribute_key, attribute_value |
-
-				# Relaxing conditions, no need for mandatory :name, :type, :parent, :id or :__index. See class instance constructor.
-				next if @insignificant_attributes.include?( attribute_key ) 
-				
-				xpath << ' and ' unless xpath.empty?
-
-				xpath << pattern % convertToXPathLiteral( attribute_key.to_s.downcase )
-
-				# convert single value to array, due to value can contain multiple values and no use to have duplicate code for processing
-				attribute_value = [ attribute_value ] unless attribute_value.kind_of?( Array ) 
-
-				attribute_value.each_with_index do | value, index |
-
-					xpath << " or " unless index.zero?
-
-					# allow partial match when value of :type and attribute name matches. see class instance constructor.
-					if @@partial_match_allowed.include?( [ @_attributes_used_to_identify_object[ :type ], attribute_key ] )
-
-						xpath << "value[contains(.,%s)]" % convertToXPathLiteral( value )
-
-					else
-
-						xpath << "value=%s" % convertToXPathLiteral( value )
-
-
-					end
-				end
-
-			end
-
-			( get_all_children ? "*//object[%s]" : "objects[1]/object[%s]" ) % xpath
-
-		end
-
-		# function create x_path that included required attributes type, id and/or name
-		# == returns
-		# String:: x_path containing required attributes
-		def create_x_path_from_required_attributes
-
-			return "@*" if @_attributes_used_to_identify_object[ :type ].to_s == "any"
-
-			xpath = ""
-
-			pattern = "@%s=%s or attributes/attribute[translate(@name,'ABCDEFGHIJKLMNOPQRSTUVWXYZ','abcdefghijklmnopqrstuvwxyz')=%s]/value=%s"
-
-			@_attributes_used_to_identify_object.each_pair{ | attribute_name, attribute_value | 
-
-				next unless @@required_attributes.include?( attribute_name )
-
-				xpath << ' and ' unless xpath.empty?
-
-				xpath << '('
-
-				if attribute_value.kind_of?( Array )
-
-					# multiple (optional) attributes for object identification
-					attribute_value.each_with_index{ | attribute_value_option, index |
-						
-						xpath << ' or ' unless index.zero?
-
-						xpath << pattern % [ 
-							attribute_name, 
-							convertToXPathLiteral( attribute_value_option), 
-							convertToXPathLiteral( attribute_name.to_s.downcase), 
-							convertToXPathLiteral( attribute_value_option)
-						]
-
-					}
-
-				else
-
-					# one attribute used for object identification
-					xpath << "%s" % [
-						pattern % [ 
-							attribute_name, 
-							convertToXPathLiteral( attribute_value), 
-							convertToXPathLiteral( attribute_name.to_s.downcase), 
-							convertToXPathLiteral( attribute_value)
-						]
-					]
-
-				end
-
-				xpath << ')'
-
-			}
-			
-			xpath
-
-		end
-		
-		## Returns array of element nodes
-		def sort_elements_by_xy_layout( element_set, layout_direction = "LeftToRight" )
-			# MobyUtil::XML::NodeSet and Elements
-			# Take out all test_objects with no x_absolute or y_absolute
-			to_delete = []
-			element_set.each do |node|
-				begin
-					node.xpath("./attributes/attribute[@name = 'x_absolute']/value").first.content
-					node.xpath("./attributes/attribute[@name = 'y_absolute']/value").first.content
-				rescue
-					to_delete << node
-				end
-			end
-			to_delete.each do |node|
-				element_set.delete(node) 
-			end
-			# Sort remaining by layout direction and up to down
-			# Requires .to_a to return an array of MobyUtil::XML::Elements
-			element_set.to_a.sort!{ |a, b| 
-				a_x = a.xpath("./attributes/attribute[@name = 'x_absolute']/value").first.content.to_i
-				a_y = a.xpath("./attributes/attribute[@name = 'y_absolute']/value").first.content.to_i
-				b_x = b.xpath("./attributes/attribute[@name = 'x_absolute']/value").first.content.to_i
-				b_y = b.xpath("./attributes/attribute[@name = 'y_absolute']/value").first.content.to_i
-				if ( layout_direction.downcase == "LeftToRight".downcase )
-					( a_y == b_y ) ? ( a_x <=> b_x ) : ( a_y <=> b_y ) 
-				elsif ( layout_direction.downcase == "RightToLeft".downcase ) 
-					( a_y == b_y ) ? ( b_x <=> a_x ) : ( a_y <=> b_y ) 
-				else
-					Kernel::raise ArgumentError.new("Unexpected layout direction: " + layout_direction)
-				end
-			}
-		end
-
-    
-		# TODO: This method needs to refactored
-		# function to deal with case where string literals in XPath expressions contains single or double quotes
-		# If string literal value contain only one type - double or single, then delimit with the other.
-		# E.g. "'"  or '"'
-		# If value contains both then you can not do it directly in a string literal but need to construct the string using
-		# concat("'",'"')
-		def convertToXPathLiteral( value )
-
-			# convert to string if needed
-			value_string = value.kind_of?( String ) ? value : value.to_s
-
-			if !value_string.include?("\'")
-
-				# return value
-				"\'%s\'" % value_string
-
-			elsif !value_string.include?("\"")
-
-				# return value
-				"\"%s\"" % value_string
-
-			else
-
-				result = ""
-
-				substrings = value_string.split( "\"" )
-
-				substrings.each_with_index do | s, i | 
-
-					needComma = true if i > 0
-
-					unless s.empty?
-
-						result << ", " if i > 0
-
-						result << "\"%s\"" % s 
-
-						needComma = true
-
-					end
-
-					# other than last one 
-					if i < substrings.length - 1
-
-						result << ", " if needComma
-
-						result << "'\"'"
-
-					end 
-
-				end
-
-				# return value
-				"concat(%s)" % result
-
-			end
-
-=begin
-			return "\'%s\'" % value_string unless value_string.include?("\'")
-
-			return "\"%s\"" % value_string unless value_string.include?("\"")
-
-			substrings = value_string.split( "\"" )
-
-			result = ""
-
-			substrings.each_with_index do | s, i | 
-
-				needComma = true if i > 0
-
-				unless s.empty?
-
-					result << ", " if i > 0
-
-					result << "\"%s\"" % s 
-
-					needComma = true
-
-				end
-
-				# other than last one 
-				if i < substrings.length - 1
-
-					result << ", " if needComma
-
-					result << "'\"'"
-
-				end 
-
-			end
-
-
-			# return
-			"concat(%s)" % result
-
-=end
-
 		end
 
 		# enable hooking for performance measurement & debug logging

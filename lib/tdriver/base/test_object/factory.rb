@@ -143,37 +143,6 @@ module MobyBase
 
 		end
 
-		# Function for making a child test object (a test object that is not directly a accessible from the sut) 
-		# Creates accessors for children of the new object, applies any behaviours applicable for its type. 
-		# Does not associate child object to parent / vice versa - leaves that to the client. 
-		#
-		# == params
-		# parent_test_object:: TestObject thas is the parent of the child object being created 
-		# test_object_identificator:: TestObjectIdentificator which is used to identify the child object from the xml data
-		# == returns
-		# TestObject:: new child test object, could be eql? to an existing TO
-		# == raises
-		# == raises, as defined in TestObjectIdentificator
-		# ArgumentError:: if test_object_identificator is not of type LibXML::XML::Node,
-		# MultipleTestObjectsIdentifiedError:: if multiple TestObjects can be identified using the test_object_identificator
-		# TestObjectNotFoundError:: The TestObject cannot be found or the parent object is no longer visible on the SUT
-		def make_child_objects( rules )
-
-			# make array of matching child test objects
-			get_test_objects( rules ).collect{ | test_object_xml |
-
-				make_test_object( 
-
-					self, 			# test object factory
-					rules[ :sut ], 		# sut object to t_o
-					rules[ :parent ], 	# parent object to t_o
-					test_object_xml 	# t_o xml
-
-				)
-
-			}
-
-		end
 
 		def verify_ui_dump( sut )
 
@@ -237,6 +206,38 @@ module MobyBase
 		end
 
 	private
+
+		# Function for making a child test object (a test object that is not directly a accessible from the sut) 
+		# Creates accessors for children of the new object, applies any behaviours applicable for its type. 
+		# Does not associate child object to parent / vice versa - leaves that to the client. 
+		#
+		# == params
+		# parent_test_object:: TestObject thas is the parent of the child object being created 
+		# test_object_identificator:: TestObjectIdentificator which is used to identify the child object from the xml data
+		# == returns
+		# TestObject:: new child test object, could be eql? to an existing TO
+		# == raises
+		# == raises, as defined in TestObjectIdentificator
+		# ArgumentError:: if test_object_identificator is not of type LibXML::XML::Node,
+		# MultipleTestObjectsIdentifiedError:: if multiple TestObjects can be identified using the test_object_identificator
+		# TestObjectNotFoundError:: The TestObject cannot be found or the parent object is no longer visible on the SUT
+		def make_child_objects( rules )
+
+			# make array of matching child test objects
+			get_test_objects( rules ).collect{ | test_object_xml |
+
+				make_test_object( 
+
+					self, 			# test object factory
+					rules[ :sut ], 		# sut object to t_o
+					rules[ :parent ], 	# parent object to t_o
+					test_object_xml 	# t_o xml
+
+				)
+
+			}
+
+		end
 
 		# Function to get the xml element for a test object
 		# TODO: Remove TestObjectFactory::makeXML function & refactor the 'user' of this function!

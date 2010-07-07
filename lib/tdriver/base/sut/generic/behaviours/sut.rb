@@ -351,6 +351,20 @@ module MobyBehaviour
 			# Type information is stored in a separate member, not in the Hash
 			creation_hash.delete( :type )
 
+			@_child_object_cache.each_value do | _child |
+
+				if _child.eql?( child_test_object )
+
+					# Update the attributes that were used to create the child object.
+					_child.creation_attributes = creation_hash
+
+					return _child
+
+				end
+
+			end
+
+=begin
 			@_child_objects.each do | _child |
 
 				if _child.eql? child_test_object
@@ -362,7 +376,7 @@ module MobyBehaviour
 				end
 
 			end
-
+=end
 			# Store the attributes that were used to create the child object.
 			child.creation_attributes = creation_hash
 
@@ -752,7 +766,18 @@ module MobyBehaviour
 		# === raises
 		def update
 
-			@_child_objects.each{ | test_object | test_object.update( @xml_data ) } if !@childs_updated
+			#@_child_objects.each{ | test_object | test_object.update( @xml_data ) } if !@childs_updated
+
+			unless @childs_updated
+
+				@_child_object_cache.each_value{ | test_object | 
+
+					test_object.update( @xml_data ) 
+
+				}
+
+
+			end
 
 			@childs_updated = true
 
@@ -845,8 +870,10 @@ module MobyBehaviour
 
 			@frozen = false
 
+			@_child_object_cache = {}
+
 			@current_application_id = nil
-			@_child_objects = Set.new
+
 
 			@dump_count = 0
 

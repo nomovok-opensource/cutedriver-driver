@@ -93,14 +93,17 @@ module MobyBehaviour
 
 			@_active = false
 
-			#create a copy of the array to iterate items as deactivation may alter the array
+			@_child_object_cache.each_value{ | test_object | 
 
-			Set.new( @_child_objects ).each { |to| to.deactivate }
+				# deactivate test object					
+				test_object.deactivate	
 
-			#TODO: Should be empty anyway.. so some extra defensive coding ok?
-			@_child_objects.clear
+			}
+
+			@_child_object_cache.clear
 
 			@parent.remove_child( self )
+
 
 		end
 
@@ -282,29 +285,16 @@ module MobyBehaviour
 			# Type information is stored in a separate member, not in the Hash
 			creation_data.delete( :type )
 
-			# return reference if test object already exists in cache
-			if @_child_objects.include?( child_object )
+			# use cached test object if once already retrieved
+			get_cached_test_object!( child_object ).tap{ | found_in_cache |
 
-				# return already existing child TestObject so that there is references to only one TestObject
-				@_child_objects.each do | _child |
+				# Store/update the attributes that were used to create the child object.
+				child_object.creation_attributes = creation_data
 
-					if _child.eql? child_object
+				# add child to objects cache 
+				add_child( child_object ) unless found_in_cache
 
-						# Update the attributes that were used to create the child object.
-						_child.creation_attributes = creation_data
-
-						return _child
-
-					end
-
-				end
-
-			end
-
-			# Store the attributes that were used to create the child object.
-			child_object.creation_attributes = creation_data
-
-			add_child( child_object )
+			}
 
 			child_object
 
@@ -384,20 +374,22 @@ module MobyBehaviour
 			# Type information is stored in a separate member, not in the Hash
 			creation_data.delete( :type )
 
-			child_objects.each do | a_child|
-				# return already existing child TestObject so that there is references to only one TestObject
-				@_child_objects.each do | _child |
-					if _child.eql? a_child
-						# Update the attributes that were used to create the child object.
-						_child.creation_attributes = creation_data
-						a_child = _child
-					end
-				end
-				# TODO: add_child of if child != a_child
-				# Store the attributes that were used to create the child object.
-				a_child.creation_attributes = creation_data			
-				add_child( a_child )
-			end		
+			child_objects.each do | child_object |
+
+				# use cached test object if once already retrieved
+				get_cached_test_object!( child_object ).tap{ | found_in_cache |
+
+					# Store/update the attributes that were used to create the child object.
+					child_object.creation_attributes = creation_data
+
+					# add child to objects cache 
+					add_child( child_object ) unless found_in_cache
+
+				}
+
+			end
+
+			# return test objects
 			child_objects
 		end
     
@@ -592,7 +584,6 @@ module MobyBehaviour
 
 		end
 
-
 		def get_child_objects( attributes )
 
 			# create copy of attributes hash
@@ -757,7 +748,8 @@ module MobyBehaviour
 			# defaults
 			@_application_id = nil
 			@creation_attributes = nil
-			@_child_objects = Set.new
+
+			@_child_object_cache = {}
 
 			activate
 
