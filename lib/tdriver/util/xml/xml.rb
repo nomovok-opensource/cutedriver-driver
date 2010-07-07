@@ -25,17 +25,29 @@ module MobyUtil
 		#@@parser = MobyUtil::XML::LibXML 
 		@@parser = MobyUtil::XML::Nokogiri
 
-		# TODO: Documentation
+		# Get current XML parser
+		# == params
+		# == return
+		# Module:: 
+		# == raises
 		def self.current_parser
 
 			@@parser
 
 		end
 
-		# TODO: Documentation
+		# Set XML parser to be used
+		# == params
+		# Module:: 
+		# == return
+		# nil
+		# Document:: XML document object
+		# == raises
 		def self.current_parser=( value )
 
 			@@parser = value
+
+			nil
 
 		end
 
@@ -54,11 +66,9 @@ module MobyUtil
 
 			begin
 
-				MobyUtil::XML::Document.new().extend( @@parser::Document ).tap{ | document | 
+				MobyUtil::XML::Document.new( nil, current_parser ).extend( @@parser::Document ).tap{ | document | 
 
 					document.xml = document.parse( xml_string ) 
-
-					document.parser = current_parser
 
 				}
 
@@ -92,19 +102,24 @@ module MobyUtil
 
 		end
 
+		# Create XML builder object dynamically
+		#
 		# Usage:
-		#	
-		# 	- How to generate simple xml:
 		#
-		#		MobyUtil::XML.build{
-		#			root{
-		#				element(:name => "element_name", :id => "0") {
-		#					child(:name => "1st_child_of_element_0", :value => "123" )				
-		#					child(:name => "2nd_child_of_element_0", :value => "456" )
-		#				}
+		#	MobyUtil::XML.build{
+		#		root{
+		#			element(:name => "element_name", :id => "0") {
+		#				child(:name => "1st_child_of_element_0", :value => "123" )				
+		#				child(:name => "2nd_child_of_element_0", :value => "456" )
 		#			}
-		#		}.to_xml
+		#		}
+		#	}.to_xml
 		#
+		# == params
+		# &block:: 
+		# == return
+		# MobyUtil::XML::Builder
+		# == raises
 		def self.build( &block )
 
 			begin

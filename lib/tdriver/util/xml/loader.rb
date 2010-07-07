@@ -17,13 +17,11 @@
 ## 
 ############################################################################
 
-
 # load parser implementation(s)
 require File.expand_path( File.join( File.dirname( __FILE__ ), 'parsers/loader.rb' ) )
 
 # xml related errors
 require File.expand_path( File.join( File.dirname( __FILE__ ), 'error.rb' ) )
-
 
 # abstraction module for document, element and nodeset
 require File.expand_path( File.join( File.dirname( __FILE__ ), 'abstraction.rb' ) )

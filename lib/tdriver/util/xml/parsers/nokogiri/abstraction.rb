@@ -65,12 +65,7 @@ module MobyUtil
 				# method to create MobyUtil::XML::Attribute object
 				def attribute_object( xml_data )
 
-					MobyUtil::XML::Attribute.new().extend( Attribute ).tap{ | attr | 
-						
-						attr.xml = xml_data 
-						attr.parser = @parser 
-
-					}
+					MobyUtil::XML::Attribute.new( xml_data, @parser ).extend( Attribute )
 
 				end
 
@@ -79,23 +74,21 @@ module MobyUtil
 
 					unless xml_data.nil?
 
-						MobyUtil::XML::Element.new.extend( Element ).tap{ | element | 
-
-							element.xml = xml_data 
-							element.parser = @parser
-
-						}
-
+						MobyUtil::XML::Element.new( xml_data, @parser ).extend( Element )
 
 					else
 
-						MobyUtil::XML::NilElement.new.tap { | element | 
-
-							element.parser = @parser
-
-						}
+						MobyUtil::XML::NilElement.new( nil, @parser )
 
 					end
+
+				end
+
+				# method to create MobyUtil::XML::Nodeset object
+				def nodeset_object( xml_data )
+
+					MobyUtil::XML::Nodeset.new( xml_data, @parser ).extend( Nodeset )
+
 
 				end
 
@@ -103,18 +96,6 @@ module MobyUtil
 				def method_missing( method, *args, &block )
 
 					raise RuntimeError.new( "Method '%s' is not supported by %s (%s)" % [ method, self.class, @parser ] )
-
-				end
-
-				# method to create MobyUtil::XML::Nodeset object
-				def nodeset_object( xml_data )
-
-					MobyUtil::XML::Nodeset.new().extend( Nodeset ).tap{ | node | 
-
-						node.xml = xml_data
-						node.parser = @parser
-
-					}
 
 				end
 

@@ -17,12 +17,13 @@
 ## 
 ############################################################################
 
-
 module MobyUtil
 
 	module XML
 
-		class Element < Abstraction
+		class Element
+
+			include Abstraction
 
 		end # Element
 

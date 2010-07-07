@@ -17,12 +17,13 @@
 ## 
 ############################################################################
 
-
 module MobyUtil
 
 	module XML
 
-		class Nodeset < Abstraction
+		class Nodeset
+
+			include Abstraction
 
 		end # Nodeset
 

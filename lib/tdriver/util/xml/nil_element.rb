@@ -21,7 +21,9 @@ module MobyUtil
 
 	module XML
 
-		class NilElement < Abstraction
+		class NilElement
+
+			include Abstraction
 
 			def method_missing( method, *method_arguments )
 

@@ -21,7 +21,7 @@ module MobyUtil
 
 	module XML
 
-		class Abstraction
+		module Abstraction
 
 			attr_accessor :xml, :parser
 

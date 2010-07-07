@@ -21,7 +21,9 @@ module MobyUtil
 
 	module XML    
 
-		class Builder < Abstraction
+		class Builder
+
+			include Abstraction
 
 			def initialize( &block )
 
