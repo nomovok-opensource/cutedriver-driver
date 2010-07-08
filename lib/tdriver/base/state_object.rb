@@ -47,7 +47,7 @@ module MobyBase
 
 				xml_element = xml_source
 
-			elsif xml_source.kind_of?(String)
+			elsif xml_source.kind_of?( String )
 
 				xml_element = MobyUtil::XML.parse_string(xml_source).root
 
@@ -61,7 +61,8 @@ module MobyBase
 			add_parent( parent ) unless parent.nil?
 
 			self.xml_data= xml_element
-			@_child_objects = Set.new
+
+			@_child_object_cache = {}
 
 			# Create accessor methods for any child state objects.
 			TestObjectFactory.instance.create_child_accessors!( self )
@@ -171,7 +172,9 @@ module MobyBase
 		# === returns
 		# MobyUtil::XML::Element:: XML representation of this state object 
 		def xml_data()
-			@_xml_data 
+
+			@_xml_data
+
 		end
 
 		# Function provides access to parameters of the state object 
@@ -199,6 +202,24 @@ module MobyBase
 
 		end
 
+		def get_cached_test_object!( object )
+
+			object_hash = object.hash
+
+			if @_child_object_cache.has_key?( object_hash ) 
+
+				object = @_child_object_cache[ object_hash ]
+
+				true
+
+			else
+
+				false
+
+			end
+
+		end
+
 		# Creates a state object for a child object of this state object
 		# Associates child object as current object's child.
 		# and associates self as child object's parent.
@@ -215,13 +236,15 @@ module MobyBase
 
 			child_object = StateObject.new( identified_object_xml, self )
 
-			# return already existing child StateObject so that there is references to only one StateObject
-			@_child_objects.each do | _child | 
-				return _child if _child.eql? child_object
-			end
+			# use cached test object if once already retrieved
+			get_cached_test_object!( child_object ).tap{ | found_in_cache |
 
-			add_child( child_object ) 
-			return child_object
+				# add child to objects cache 
+				add_child( child_object ) unless found_in_cache
+
+			}
+
+			child_object
 
 		end
 
