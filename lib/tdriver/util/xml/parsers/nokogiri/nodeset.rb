@@ -59,7 +59,8 @@ module MobyUtil
 
 				def collect( &block )
 
-					nodeset_object( _collect( &block ) )
+					_collect( &block )
+					#nodeset_object( _collect( &block ) )
 
 				end
 
