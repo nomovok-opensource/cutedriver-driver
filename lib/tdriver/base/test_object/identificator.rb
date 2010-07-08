@@ -78,9 +78,6 @@ module MobyBase
 
 		end
 
-  
-	private
-
 		# Sort XML nodeset of test objects with layout direction
 		def sort_elements_by_xy_layout!( nodeset, layout_direction = "LeftToRight" )
 
@@ -116,6 +113,9 @@ module MobyBase
 			}
 
 		end
+  
+	private
+
 
 		# function create x_path that included required attributes type, id and/or name
 		# == returns
