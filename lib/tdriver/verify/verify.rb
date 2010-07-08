@@ -17,15 +17,6 @@
 ## 
 ############################################################################
 
-
-
-
-#require File.expand_path( File.join( File.dirname( __FILE__ ), 'common' ) )
-#require File.expand_path( File.join( File.dirname( __FILE__ ), 'logger' ) )
-#require File.expand_path( File.join( File.dirname( __FILE__ ), '../../base/lib/base_errors' ) )
-#require File.expand_path( File.join( File.dirname( __FILE__ ), '../../base/lib/sut' ) )
-#require File.expand_path( File.join( File.dirname( __FILE__ ), '../../base/lib/sut_factory' ) )
-
 module TDriverVerify
 
 
