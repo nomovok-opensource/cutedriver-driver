@@ -252,20 +252,16 @@ module MobyBase
 			# get parent object
 			parent = rules[ :parent ]
 
-			# get application id
-			#application_id = rules[ :application ] #parent.get_application_id
-
-			refresh_arguments = rules[ :application ].nil? ? { :id => rules[ :application ] } : {}
+			# determine which application to refresh when identifying desired object(s)
+			refresh_arguments = rules.fetch( :application, {} )
 
 			# get associated sut object
 			sut = rules.fetch( :sut )
 
 			# determine that are we going to retrieve multiple test objects
-			#multiple_objects = rules.fetch( :multiple_objects, true )
 			multiple_objects = rules.fetch( :multiple_objects, false )
 
 			# determine that should all child objects childrens be retrieved
-			#find_all_children = rules.fetch( :find_all_children, true )
 			find_all_children = rules.fetch( :find_all_children, true )
 
 			# creation attributes for test object
@@ -276,7 +272,6 @@ module MobyBase
 			dynamic_attributes = rules.fetch( :dynamic_attributes, {} )
 
 			# sorting is disabled by default
-			#sorting = ( dynamic_attributes[ :__xy_sorting ].to_s.downcase == 'true' )
 			sorting = MobyUtil::KernelHelper.to_boolean( dynamic_attributes[ :__xy_sorting ], false )
 
 			# determine that did user give index value
@@ -284,15 +279,19 @@ module MobyBase
 
 			# index for test object, default is 0 (first) if not defined by caller
 			index = dynamic_attributes.fetch( :__index, 0 ).to_i
-			#index = dynamic_attributes[ :__index ].to_i || 0
 
 			# create test object identificator object with given creation attributes
 			test_object_identificator = MobyBase::TestObjectIdentificator.new( creation_attributes ) 
 
 			MobyUtil::Retryable.until( 
 
+				# maximum time used for retrying, if timeout exceeds pass last raised exception
 				:timeout => ( rules[ :timeout ] || @timeout ), 
+
+				# interval used before retrying
 				:interval => ( rules[ :interval ] || @_retry_interval ),
+
+				# following exceptions are allowed; Retry until timeout exceeds or other exception type is raised
 				:exception => [ MobyBase::TestObjectNotFoundError, MobyBase::MultipleTestObjectsIdentifiedError ] ) {
 
 					# refresh sut ui state				
@@ -312,6 +311,7 @@ module MobyBase
 
 					# return result
 					multiple_objects && !index_given ? matches.to_a : [ matches[ index ] ]
+
 
 			}
 
@@ -410,7 +410,7 @@ Removed object cache usage
 				:timeout => @timeout, 
 				:interval => @_retry_interval,
 				:exception => [ MobyBase::TestObjectNotFoundError, MobyBase::MultipleTestObjectsIdentifiedError ] ) {
-				
+		
 				parent_test_object.refresh( :id => parent_test_object.get_application_id )
 
 				if test_object_identificator.dynamic_attributes.include?( :__xy_sorting )

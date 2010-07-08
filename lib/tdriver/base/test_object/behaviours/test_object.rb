@@ -205,6 +205,7 @@ module MobyBehaviour
 
 		end
 
+=begin
 		# Creates a test object for a child object of this test object
 		# Associates child object as current object's child.
 		# and associates self as child object's parent.
@@ -235,7 +236,7 @@ module MobyBehaviour
 	        # find_all_children:: Boolean specifying whether all children under the test node or just immediate children should be retreived.
 		# === returns
 		# An array of TestObjects
-		def _children( attributes, find_all_children = true )
+		def children( attributes, find_all_children = true )
 
 			# verify attributes argument format
 			raise TypeError.new( 'Unexpected argument type (%s) for attributes, expecting %s' % [ attributes.class, "Hash" ] ) unless attributes.kind_of?( Hash ) 
@@ -253,6 +254,7 @@ module MobyBehaviour
 			get_child_objects( creation_attributes )
 
 		end
+=end
     
 		# Updates this test object to match the data in the provided xml document
 		# Propagates updating to all child TestObjects
@@ -396,7 +398,7 @@ module MobyBehaviour
 			begin 
 				@parent.child( :type => @type, :id => @id )
 
-			rescue MobyBase::TestObjectNotFoundError
+			rescue MobyBase::TestObjectNotFoundError => exception
 
 				Kernel::raise MobyBase::TestObjectNotVisibleError
 
@@ -456,9 +458,6 @@ module MobyBehaviour
 			# store and set logger state if given, use default value if none given
 			TDriver.logger.push_enabled( MobyUtil::KernelHelper.to_boolean( dynamic_attributes[ :__logging ], TDriver.logger.enabled ) )
 
-			# determine if multiple matches is allowed, default: false
-			#multiple_objects = dynamic_attributes[ :__multiple_objects ].to_s =~ /^true$/i ? true : false
-
 			# determine if multiple matches is allowed, default value is false
 			multiple_objects = MobyUtil::KernelHelper.to_boolean( dynamic_attributes[ :__multiple_objects ], false )
 
@@ -469,6 +468,9 @@ module MobyBehaviour
 
 			# use custom timeout if defined
 			timeout = ( dynamic_attributes[ :__timeout ] || @test_object_factory.timeout ).to_i
+
+			# determine which application to refresh
+			application_id_hash = ( creation_data[ :type ] == 'application' ? { :name => creation_data[ :name ], :id => creation_data[ :id ] } : { :id => get_application_id } )
 
 			# add symbols to dynamic attributes list -- to avoid IRB bug
 			MobyUtil::DynamicAttributeFilter.instance.add_attributes( creation_data.keys )
@@ -486,7 +488,7 @@ module MobyBehaviour
 
 					:parent => self,
 					:sut => @sut,
-					:application => self.get_application_id,
+					:application => application_id_hash,
 
 					:timeout => timeout,
 					:multiple_objects => multiple_objects,
@@ -541,7 +543,7 @@ module MobyBehaviour
 
 				)
 
-				Kernel::raise
+				Kernel::raise exception
 
 			ensure
 
@@ -667,6 +669,7 @@ module MobyBehaviour
 			begin
 
 				@test_object_factory.timeout = custom_timeout unless custom_timeout.nil?
+
 				child_object = @test_object_factory.make_child( self, MobyBase::TestObjectIdentificator.new( creation_data ) )
 
 			rescue MobyBase::MultipleTestObjectsIdentifiedError => exception
@@ -801,6 +804,58 @@ module MobyBehaviour
 			# return test objects
 			child_objects
 		end
+
+public
+
+		# Creates a test object for a child object of this test object
+		# Associates child object as current object's child.
+		# and associates self as child object's parent.
+		#
+		# NOTE:
+		# Subsequent calls to TestObject#child(rule) always returns reference to same Testobject:
+		# a = to.child(rule) ; b = to.child(rule) ; a.equal?( b ); # => true
+		# note the usage of equal? above instead of normally used eql?. Please refer to Ruby manual for more information.
+		#
+		# NOTE: The accessor methods for child objects created automatically by the DataGenerator are dependent on this method.
+		# === params
+		# attributes:: Hash object holding information for identifying which child to create, eg. :type => :slider
+		# === returns
+		# TestObject:: new child test object or reference to existing child
+		def _child( attributes )
+
+			# verify attributes argument format
+			raise TypeError.new( 'Unexpected argument type (%s) for attributes, expecting %s' % [ attributes.class, "Hash" ] ) unless attributes.kind_of?( Hash ) 
+
+			# retrieve child object
+			get_child_objects( attributes )
+
+		end
+
+		# Function similar to child, but returns an array of children test objects that meet the given criteria
+		# === params
+		# attributes:: Hash object holding information for identifying which child to create, eg. :type => :slider
+	        # find_all_children:: Boolean specifying whether all children under the test node or just immediate children should be retreived.
+		# === returns
+		# An array of TestObjects
+		def _children( attributes, find_all_children = true )
+
+			# verify attributes argument format
+			raise TypeError.new( 'Unexpected argument type (%s) for attributes, expecting %s' % [ attributes.class, "Hash" ] ) unless attributes.kind_of?( Hash ) 
+
+			# respect the original attributes variable value
+			creation_attributes = attributes.clone
+
+			# If empty or only special attributes then add :type => "any" to search all
+			creation_attributes.merge!( :type => "any" ) if creation_attributes.select{ | key, value | key.to_s !~ /^__/ ? true : false }.empty?
+
+			# children method specific settings
+			creation_attributes.merge!( :__multiple_objects => true, :__find_all_children => find_all_children )
+
+			# retrieve child objects
+			get_child_objects( creation_attributes )
+
+		end
+
 
 		# enable hooking for performance measurement & debug logging
 		MobyUtil::Hooking.instance.hook_methods( self ) if defined?( MobyUtil::Hooking )
