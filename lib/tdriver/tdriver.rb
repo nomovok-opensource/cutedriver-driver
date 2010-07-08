@@ -17,8 +17,6 @@
 ## 
 ############################################################################
 
-
-
 # Framework main file that needs to be included in tests.
 # Used for setting up testing environment, eg
 # 
@@ -31,12 +29,6 @@ $KCODE = 'u'
 
 # Following line to prevent Object#id Warnings
 Object.send :undef_method, :id if Object.respond_to?( :id )
-
-# for debugging to see every occured exception
-#def Kernel::raise( *args )
-#	p args.first, args.first.backtrace, caller
-#	super
-#end
 
 require File.expand_path( File.join( File.dirname( __FILE__ ), 'loader' ) )
 
@@ -143,6 +135,23 @@ class TDriver
 
 
 end # TDriver
+
+if ARGV.include?( '--debug_exceptions' ) || TDriver.parameter[ :debug_exceptions ].to_s.downcase == 'true'
+
+	# for debugging to see every occured exception
+	def Kernel::raise( *args )
+
+		exception = args.first || $!
+
+		backtrace = caller.collect{ | line | "  %s" % line }.join("\n")
+
+		puts "%s: %s\nBacktrace: \n%s\n\n" % [ exception.class, exception.message, backtrace ]
+
+		super
+
+	end
+
+end
 
 # Enable logging engine
 MobyUtil::Logger.instance.enable_logging()
