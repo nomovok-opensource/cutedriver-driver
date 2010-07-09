@@ -136,7 +136,7 @@ class TDriver
 
 end # TDriver
 
-if ARGV.include?( '--debug_exceptions' ) || TDriver.parameter[ :debug_exceptions ].to_s.downcase == 'true'
+if ARGV.include?( '--debug_exceptions' ) || TDriver.parameter[ :debug_exceptions, 'false' ].to_s.downcase == 'true'
 
 	# for debugging to see every occured exception
 	def Kernel::raise( *args )
