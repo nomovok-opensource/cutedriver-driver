@@ -128,22 +128,20 @@ module MobyBehaviour
         @switch_box_power_status = true
       end
 
-    end
-
-    # Gets the current power status of the switchbox
-    # === params
-    # === returns
-    # === raises
-    def power_status
-      if @switch_box_power_status == nil
-        false
-      else
-        @switch_box_power_status
-      end
-    end
-
+	    # Gets the current power status of the switchbox
+	    # === params
+	    # === returns
+	    # === raises
+	    def power_status
+	      if @switch_box_power_status == nil
+		false
+	      else
+		@switch_box_power_status
+	      end
+	    end
 	# enable hooking for performance measurement & debug logging
 	MobyUtil::Hooking.instance.hook_methods( self ) if defined?( MobyUtil::Hooking )
 
+    end
 
 end
