@@ -41,37 +41,6 @@ module MobyBase
 
 		end
 
-	private
-
-
-		def matches( a, b )
-
-			result = false
-
-			if b.kind_of?( Array )
-
-				b.each{ | value |
-
-					if value == a or value == '*'
-
-						
-
-					end
-
-				}
-
-			elsif b.kind_of?( String )
-
-				result = ( a == b )
-
-			else
-
-			end
-
-			result
-
-		end
-
 	public
 
 		def to_xml( rules = {} ) 
