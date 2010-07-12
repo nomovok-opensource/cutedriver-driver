@@ -468,7 +468,7 @@
         <methods>
             <method name="find">
                 <description>temp description</description>
-                <template>find({:id => '1'})</template>
+                <example>find({:id => '1'})</example>
             </method>
         </methods>
 
@@ -481,7 +481,7 @@
         <methods>
             <method name="execution_order">
                 <description>Change SUT controller execution order, can be used when multiple controllers for one SUT</description>
-                <template>execution_order</template>
+                <example>execution_order</example>
             </method>
         </methods>
 
