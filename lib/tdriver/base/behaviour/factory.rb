@@ -41,11 +41,52 @@ module MobyBase
 
 		end
 
+	private
+
+
+		def matches( a, b )
+
+			result = false
+
+			if b.kind_of?( Array )
+
+				b.each{ | value |
+
+					if value == a or value == '*'
+
+						
+
+					end
+
+				}
+
+			elsif b.kind_of?( String )
+
+				result = ( a == b )
+
+			else
+
+			end
+
+			result
+
+		end
+
+	public
+
 		def to_xml( rules = {} ) 
 
 			@_method_index = nil
 
-			MobyUtil::XML::Builder.new{
+			rules.default = [ '*' ]
+
+			rules.each_pair{ | key, value |
+
+				rules[ key ] = [ value ] if value.kind_of?( String )
+
+			}
+
+			MobyUtil::XML.build{
 
 				behaviours{
 
@@ -55,13 +96,15 @@ module MobyBase
 
 						behaviour = @@behaviours[ @_method_index ]
 
-						if ( 	( rules[ :name ] == behaviour[ :name ] ) ||  
+						if ( ( rules[ :name ] == behaviour[ :name ] ) ||  
 
-								( rules[ :name ] = [ '*' ] ) &&
+								( rules[ :name ] == [ '*' ] ) &&
+
 								( !( rules[ :sut_type ] & behaviour[ :sut_type ] ).empty? ) && 
 								( !( rules[ :input_type ] & behaviour[ :input_type ] ).empty? ) && 
 								( !( rules[ :object_type ] & behaviour[ :object_type ] ).empty? ) && 
 								( !( rules[ :version ] & behaviour[ :version ] ).empty? )
+
 
 							) 
 
@@ -69,8 +112,8 @@ module MobyBase
 									object_methods{
 										@@behaviours[ @_method_index ][ :methods ].each { | key, value |
 											object_method( :name => key.to_s ) {	
-												description value[:description]
-												example value[:example]
+												description( value[:description] )
+												example( value[:example] )
 											}
 										}
 									}
@@ -265,8 +308,8 @@ module MobyBase
 						# retrieve method description & example and store to methods hash
 						methods_hash[ method.attribute( "name" ).to_s.to_sym ] = {
 
-							:description => method.xpath( 'description' ).first.to_s, 
-							:example => method.xpath( 'example' ).first.to_s
+							:description => ( method.xpath( 'description' ).first.content rescue "" ), 
+							:example => ( method.xpath( 'example' ).first.content rescue "" )
 
 						}
 
