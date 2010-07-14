@@ -713,9 +713,46 @@ module MobyBehaviour
 		# ==return
 		# String:: Value matching the parameter_name
 		# nil:: In case of non existing parameter_name
-		def parameter( parameter_name )
+#		def parameter( parameter_name )
+#			MobyUtil::Parameter[ self.id ][ parameter_name ] #*[ parameter_name, default_value ] ]
+#		end
 
-			MobyUtil::Parameter[ self.id ][ parameter_name ] #*[ parameter_name, default_value ] ]
+		# Wrapper function to access sut specific parameters
+		# ==usage
+		#
+		# # returns the hash of all sut parameters
+		# sut.parameter
+		#
+		# # returns the value for parameter 'product' for this particular sut
+		# sut.parameter['product']
+		#
+		# # raises exception that 'non_existing_parameter' was not found
+		# sut.parameter['non_existing_parameter']
+		#
+		# # return default value if given parameter is not found
+		# sut.parameter['non_existing_parameter', 'default']
+		#
+		# # set the value of parameter 'product' for this particular sut
+		# sut.parameter['product'] ='new_value'
+		#
+		# parameters for each sut are stored in the file under group tag with name attribute matching the SUT id
+		# ==params
+		# ==return
+		# String:: Value matching the parameter_name
+		# MobyUtil::ParameterHash:: Hash of values
+		def parameter( *arguments )
+
+			if ( arguments.count == 0 )
+
+				MobyUtil::ParameterUserAPI.instance[ self.id ]
+
+			else
+
+				$stdout.puts "%s:%s warning: deprecated method usage convention, please use sut#parameter[] instead of sut#parameter()" % ( caller.first || "%s:%s" % [ __FILE__, __LINE__ ] ).split(":")[ 0..1 ]
+
+				MobyUtil::ParameterUserAPI.instance[ self.id ][ *arguments ]
+
+			end
 
 		end
 
