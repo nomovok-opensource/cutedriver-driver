@@ -20,16 +20,10 @@
 
 module MobyUtil
 
-	# This error should be raised when referred language is not found
-	class LanguageNotFoundError < CustomError; end;
+    # This error should be raised when no database type is defined
+	class DbTypeNotDefinedError < CustomError; end;
 
-	# This error should be raised when referred table is not found
-	class TableNotFoundError < CustomError; end;
-
-	# This error should be raised when referred logical name is not found for specified language
-	class LogicalNameNotFoundError < CustomError; end;
-
-	# This error should be raised when there is connectivity problem with sql database
-	class MySqlConnectError < CustomError; end;
-
+	# This error should be raised when not supported db type is defined
+	class DbTypeNotSupportedError < CustomError; end;
+	
 end

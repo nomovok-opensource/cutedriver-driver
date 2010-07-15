@@ -17,37 +17,15 @@
 ## 
 ############################################################################
 
-
-
-
 # Utility for handling localisation database
-#
 
 module MobyUtil
 
 	class Localisation
 
-    DB_TYPE_MYSQL = 'mysql'
-    DB_TYPE_SQLITE = 'sqlite'
-
-	include Singleton
-
-		# Initialize the singleton
-		# connection is maintained as long as the connectivity parameters remain the same
-		# this is to avoid constant connect as this takes time
-		def initialize
-			# default values
-			@@_db_type = nil
-			@@_mysql = nil
-            @@_sqlite = nil
-            @@_connection = nil
-		end
-
-		def create_sql_query_string( query_hash ) 
-
-			"select `#{ query_hash[ :language ] }` from #{ query_hash[ :table_name ] } where lname = \'#{ query_hash[ :logical_name ] }' and `#{ query_hash[ :language ] }` <>\'#MISSING\'"
-		end
-
+		DB_TYPE_MYSQL = 'mysql'
+		DB_TYPE_SQLITE = 'sqlite'
+		
 		# Function for fetching translation  
 		# == params
 		# language:: String containing language to be used in fetching the translation
@@ -61,31 +39,32 @@ module MobyUtil
 		# TableNotFoundError:: in case the table name not found
 		# MySqlConnectError:: in case of the other problem with the connectivity 
 		def self.translation( logical_name, language, table_name )
-
-			self.instance
-
+			
 			Kernel::raise LogicalNameNotFoundError.new( "Logical name cannot be nil" ) if logical_name == nil
 			Kernel::raise LanguageNotFoundError.new( "Language cannot be nil" ) if language == nil
 			Kernel::raise TableNotFoundError.new( "Table name cannot be nil" ) if table_name == nil
-
-			# connect to database if not connected already
-			self.instance.connect_db
-
-			query_string = self.instance.create_sql_query_string( :language => language, :table_name => table_name, :logical_name => logical_name )
-
-
-			begin        
-				# execute the SQL query
-				result = @@_connection.query( query_string ) if @@_db_type == DB_TYPE_MYSQL
-                result = @@_connection.execute( query_string ) if @@_db_type == DB_TYPE_SQLITE
-
+			
+			# Get Localization parameters for DB Connection 
+			type =  MobyUtil::Parameter[ :localisation_db_type, nil ].to_s.downcase
+			host =  MobyUtil::Parameter[ :localisation_server_ip ], 
+			username = MobyUtil::Parameter[ :localisation_server_username ], 
+			password = MobyUtil::Parameter[ :localisation_server_password ], 
+			database_name MobyUtil::Parameter[ :localisation_server_database_name ]
+			
+			query_string = "select `#{ language }` from #{ table_name } where lname = \'#{ logical_name }' and `#{ language }` <>\'#MISSING\'"
+			
+			begin
+				result = MobyUtil::DBAccess.query( type, host, username, password, database_name, query_string )
 			rescue        
 				# if column referring to language is not found then Kernel::raise error for language not found
 				Kernel::raise LanguageNotFoundError.new( "No language '#{ language }' found" ) unless $!.message.index( "Unknown column" ) == nil
 				Kernel::raise MySqlConnectError.new( $!.message )
-			end      
-
-            if @@_db_type == DB_TYPE_MYSQL
+			end    
+			
+			# Validate result and return either a String or an Array
+			### TODO take away the type dependency.. return Rows in a uniform way!!
+			
+			if type == DB_TYPE_MYSQL
 			    Kernel::raise LogicalNameNotFoundError.new( "No logical name '#{ logical_name }' found for language '#{ language }'" ) if ( result.nil? || result.num_rows <= 0 )
 				if ( result.num_rows() == 1 ) 
 					return result.fetch_row[0]
@@ -96,57 +75,11 @@ module MobyUtil
 					end			
 					return result_array
 				end
-			elsif @@_db_type == DB_TYPE_SQLITE
+			elsif type == DB_TYPE_SQLITE
 			    Kernel::raise LogicalNameNotFoundError.new( "No logical name '#{ logical_name }' found for language '#{ language }'" ) if ( result.nil? || result.size <= 0 )
 				return result[0]
 			end
 			
-		end
-
-		# Function establishes a connection to mysql server if needed     
-		# == throws
-		# MySqlConnectError:: In case the connection fails
-		# == returns
-		# MySql:: Class that encapsulated the connection into MySQL database
-		def connect_db()
-
-            @@_db_type = MobyUtil::Parameter[ :localisation_db_type, nil ]
-            Kernel::raise DbTypeNotDefinedError.new( "Database type need to be either 'mysql' or 'sqlite'!" ) if @@_db_type == nil 
-            @@_db_type = @@_db_type.to_s.downcase
-
-            Kernel::raise DbTypeNotSupportedError.new( "Database type '#{@@_db_type}' not supported! Type need to be either 'mysql' or 'sqlite'!" ) unless @@_db_type == DB_TYPE_MYSQL or @@_db_type == DB_TYPE_SQLITE
-            
-			# if mysql API and connection are not initialized, then initialize the mysql API
-			if ( @@_db_type == DB_TYPE_MYSQL ) && ( @@_mysql.nil? ) && ( @@_connection.nil? )
-				require 'mysql'
-				@@_mysql = Mysql::init
-            elsif @@_db_type == DB_TYPE_SQLITE
-                require 'sqlite3'
-			end
-
-			# default table name
-			#@@_default_table_name = MobyUtil::Parameter[ :localisation_server_database_tablename ]
-
-			begin
-
-				@@_connection = @@_mysql.connect( 
-					MobyUtil::Parameter[ :localisation_server_ip ], 
-					MobyUtil::Parameter[ :localisation_server_username ], 
-					MobyUtil::Parameter[ :localisation_server_password ], 
-					MobyUtil::Parameter[ :localisation_server_database_name ]
-				) if @@_connection.nil? && @@_db_type == DB_TYPE_MYSQL
-
-				# set the utf8 encoding
-				@@_connection.query 'SET NAMES utf8' if @@_db_type == DB_TYPE_MYSQL
-
-                @@_connection = SQLite3::Database.new( MobyUtil::Parameter[ :localisation_server_database_name ] ) if @@_db_type == DB_TYPE_SQLITE
-
-			rescue
-
-				Kernel::raise MySqlConnectError.new( $!.message )
-
-			end
-
 		end
 
 	end # class

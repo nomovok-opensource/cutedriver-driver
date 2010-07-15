@@ -20,16 +20,16 @@
 
 module MobyUtil
 
-	# This error should be raised when referred language is not found
-	class LanguageNotFoundError < CustomError; end;
+	class DBConnection
+	
+		# Initialize the singleton
+		def initialize( type, host, connector)
+			@type = type
+			@host = host
+			@connector = connector			
+		end
+		
+	end # class
 
-	# This error should be raised when referred table is not found
-	class TableNotFoundError < CustomError; end;
+end # module
 
-	# This error should be raised when referred logical name is not found for specified language
-	class LogicalNameNotFoundError < CustomError; end;
-
-	# This error should be raised when there is connectivity problem with sql database
-	class MySqlConnectError < CustomError; end;
-
-end

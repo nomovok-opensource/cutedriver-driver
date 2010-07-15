@@ -45,6 +45,9 @@ require File.expand_path( File.join( File.dirname( __FILE__ ), 'plugin/loader.rb
 # Parameter modules
 require File.expand_path( File.join( File.dirname( __FILE__ ), 'parameter/loader.rb' ) )
 
+# DBAccess module
+require File.expand_path( File.join( File.dirname( __FILE__ ), 'dbaccess/loader.rb' ) )
+
 # Localisation module
 require File.expand_path( File.join( File.dirname( __FILE__ ), 'localisation/loader.rb' ) )
 

@@ -18,18 +18,12 @@
 ############################################################################
 
 
-module MobyUtil
 
-	# This error should be raised when referred language is not found
-	class LanguageNotFoundError < CustomError; end;
 
-	# This error should be raised when referred table is not found
-	class TableNotFoundError < CustomError; end;
+# dbaccess related errors
+require File.expand_path( File.join( File.dirname( __FILE__ ), 'error.rb' ) )
 
-	# This error should be raised when referred logical name is not found for specified language
-	class LogicalNameNotFoundError < CustomError; end;
+# dbaccess module implementation 
+require File.expand_path( File.join( File.dirname( __FILE__ ), 'dbaccess.rb' ) )
+require File.expand_path( File.join( File.dirname( __FILE__ ), 'dbconnection.rb' ) )
 
-	# This error should be raised when there is connectivity problem with sql database
-	class MySqlConnectError < CustomError; end;
-
-end
