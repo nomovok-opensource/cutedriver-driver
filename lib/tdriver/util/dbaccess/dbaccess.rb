@@ -51,51 +51,48 @@ module MobyUtil
 	    # SearchColumnNotFoundError:: in case the name of the data column to be searched is not found
 	    # SearchStringNotFoundError:: when information about the criteria the search column must match is not found
 	    # MySqlConnectError:: in case there is a problem with the connectivity
-	    def self.query( type, host, username, password, database_name, query_string )
+	    def self.query( db_type, host, username, password, database_name, query_string )
 			# Create first instance of this class if it doesn't exist
 			self.instance
 			
 			# Check creation parameters
-		    Kernel::raise DbTypeNotDefinedError.new( "Database type need to be either 'mysql' or 'sqlite'!" ) if type == nil 
-            Kernel::raise DbTypeNotSupportedError.new( "Database type '#{type}' not supported! Type need to be either 'mysql' or 'sqlite'!" ) unless type == DB_TYPE_MYSQL or type == DB_TYPE_SQLITE
+		    Kernel::raise DbTypeNotDefinedError.new( "Database type need to be either 'mysql' or 'sqlite'!" ) if  db_type == nil 
+            Kernel::raise DbTypeNotSupportedError.new( "Database type '#{db_type}' not supported! Type need to be either 'mysql' or 'sqlite'!" ) unless  db_type == DB_TYPE_MYSQL or  db_type == DB_TYPE_SQLITE
 			
-			### TODO check for type host username password and dbnam,,,,, not beeing emty
+			### TODO check for  db_type host username password and dbnam,,,,, not beeing emty
 			#Kernel::raise ArgumentException.new("")
 			
 			# Check for exsting connection for that host and create it if needed
-			if !@@_connections.has_key?( host ) or @@_connections[ host ].type != type
-				connector = connect_db( type, host, username, password, database_name )
-				@@_connections[ host ] = DBConnection.new( type, host, connector )
+			if !@@_connections.has_key?( host ) or @@_connections[ host ].db_type !=  db_type
+				connector = self.instance.connect_db(  db_type, host, username, password, database_name )
+				@@_connections[ host ] = DBConnection.new(  db_type, host, connector )
 			end
 			
-			return @@_connections[ host ].query( query_string )
+			return @@_connections[ host ].connector.query( query_string )
 			
 		end
 	
-		
-		# private methods from here
-		private 
 		
 		# Function establishes a connection to mysql server if needed     
 		# == throws
 		# MySqlConnectError:: In case the connection fails
 		# == returns
 		# MySql:: Class that encapsulated the connection into MySQL database
-		def connect_db( type, host, username, password, database_name )
+		def connect_db(  db_type, host, username, password, database_name )
 
 			# if mysql API and connection are not initialized, then initialize the mysql API
-			if ( type == DB_TYPE_MYSQL ) && ( @@_mysql.nil? )
+			if (  db_type == DB_TYPE_MYSQL ) && ( @@_mysql.nil? )
 				require 'mysql'
 				@@_mysql = Mysql::init
-            elsif type == DB_TYPE_SQLITE
+            elsif  db_type == DB_TYPE_SQLITE
                 require 'sqlite3'
 			end
 
 			begin
-				connector = @@_mysql.connect( host, username, password, database_name) if @@_connection.nil? && @@_db_type == DB_TYPE_MYSQL
+				connector = @@_mysql.connect( host, username, password, database_name) if  db_type == DB_TYPE_MYSQL
 				# set the utf8 encoding
-				connector.query 'SET NAMES utf8' if type == DB_TYPE_MYSQL
-                connector = SQLite3::Database.new( database_name ) if type == DB_TYPE_SQLITE				
+				connector.query 'SET NAMES utf8' if  db_type == DB_TYPE_MYSQL
+                connector = SQLite3::Database.new( database_name ) if  db_type == DB_TYPE_SQLITE				
 			rescue
 				Kernel::raise MySqlConnectError.new( $!.message )
 			end

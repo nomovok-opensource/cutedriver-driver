@@ -45,16 +45,16 @@ module MobyUtil
 			Kernel::raise TableNotFoundError.new( "Table name cannot be nil" ) if table_name == nil
 			
 			# Get Localization parameters for DB Connection 
-			type =  MobyUtil::Parameter[ :localisation_db_type, nil ].to_s.downcase
-			host =  MobyUtil::Parameter[ :localisation_server_ip ], 
-			username = MobyUtil::Parameter[ :localisation_server_username ], 
-			password = MobyUtil::Parameter[ :localisation_server_password ], 
-			database_name MobyUtil::Parameter[ :localisation_server_database_name ]
+			db_type =  MobyUtil::Parameter[ :localisation_db_type, nil ].to_s.downcase
+			host =  MobyUtil::Parameter[ :localisation_server_ip ]
+			username = MobyUtil::Parameter[ :localisation_server_username ]
+			password = MobyUtil::Parameter[ :localisation_server_password ]
+			database_name = MobyUtil::Parameter[ :localisation_server_database_name ]
 			
 			query_string = "select `#{ language }` from #{ table_name } where lname = \'#{ logical_name }' and `#{ language }` <>\'#MISSING\'"
 			
 			begin
-				result = MobyUtil::DBAccess.query( type, host, username, password, database_name, query_string )
+				result = MobyUtil::DBAccess.query( db_type, host, username, password, database_name, query_string )
 			rescue        
 				# if column referring to language is not found then Kernel::raise error for language not found
 				Kernel::raise LanguageNotFoundError.new( "No language '#{ language }' found" ) unless $!.message.index( "Unknown column" ) == nil
@@ -62,9 +62,9 @@ module MobyUtil
 			end    
 			
 			# Validate result and return either a String or an Array
-			### TODO take away the type dependency.. return Rows in a uniform way!!
+			### TODO take away the db_type dependency.. return Rows in a uniform way!!
 			
-			if type == DB_TYPE_MYSQL
+			if db_type == DB_TYPE_MYSQL
 			    Kernel::raise LogicalNameNotFoundError.new( "No logical name '#{ logical_name }' found for language '#{ language }'" ) if ( result.nil? || result.num_rows <= 0 )
 				if ( result.num_rows() == 1 ) 
 					return result.fetch_row[0]
@@ -75,7 +75,7 @@ module MobyUtil
 					end			
 					return result_array
 				end
-			elsif type == DB_TYPE_SQLITE
+			elsif db_type == DB_TYPE_SQLITE
 			    Kernel::raise LogicalNameNotFoundError.new( "No logical name '#{ logical_name }' found for language '#{ language }'" ) if ( result.nil? || result.size <= 0 )
 				return result[0]
 			end
