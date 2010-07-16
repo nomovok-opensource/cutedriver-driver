@@ -77,7 +77,7 @@ module MobyUtil
 				end
 			elsif db_type == DB_TYPE_SQLITE
 			    Kernel::raise UserDataNotFoundError.new( "No user data for '#{ user_data_lname }' was found for language '#{ language }'" ) if ( result.nil? || result.to_a.size <= 0 )
-				return result[0]
+				return result.to_a.to_s
 			end
 			
 		end

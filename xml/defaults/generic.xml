@@ -25,7 +25,7 @@
         <parameter name="user_data_server_username" value="root" /> <!--valid only for mysql! -->
         <parameter name="user_data_server_password" value="" /> <!--valid only for mysql! -->
         <parameter name="user_data_server_database_name" value="default_tdriver_db" /> <!--path to the file for sqlite -->
-		<parameter name="user_data_server_database_tablename " value="default_userinputs_tablename" />
+		<parameter name="user_data_server_database_tablename" value="default_userinputs_tablename" />
 
 
         <!-- Logging levels:
