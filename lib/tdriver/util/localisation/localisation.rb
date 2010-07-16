@@ -77,7 +77,7 @@ module MobyUtil
 				end
 			elsif db_type == DB_TYPE_SQLITE
 				first_row = result.next()
-				Kernel::raise UserDataNotFoundError.new( "No user data for '#{ user_data_lname }' was found for language '#{ language }'" ) if ( first_row.nil? )
+				Kernel::raise LogicalNameNotFoundError.new( "No user data for '#{ user_data_lname }' was found for language '#{ language }'" ) if ( first_row.nil? )
 				return first_row[0]
 			end
 			

@@ -68,8 +68,9 @@ module MobyUtil
 				Kernel::raise OperatorDataNotFoundError.new( "No matches found for search string '#{ operator_data_lname }' in search column 'LogicalName'" ) if ( result.nil? || result.num_rows <= 0 )
 				return result.fetch_row[ 0 ]
 		    elsif db_type == DB_TYPE_SQLITE
-				Kernel::raise OperatorDataNotFoundError.new( "No matches found for search string '#{ operator_data_lname }' in search column 'LogicalName'" ) if ( result.nil? || result.size <= 0 )
-				return result[0]
+				first_row = result.next()
+				Kernel::raise OperatorDataNotFoundError.new( "No user data for '#{ user_data_lname }' was found for language '#{ language }'" ) if ( first_row.nil? )
+				return first_row[0]
 		    end
 			
 		end
