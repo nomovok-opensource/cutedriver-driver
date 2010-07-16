@@ -70,6 +70,8 @@ module MobyUtil
 			
 			return @@_connections[ host ].connector.query( query_string )
 			
+			#### TODO return same format of row/array of rows regardless of DB type
+			
 		end
 	
 		
