@@ -48,8 +48,8 @@ module MobyUtil
 			username = MobyUtil::Parameter[ :user_data_server_username ]
 			password = MobyUtil::Parameter[ :user_data_server_password ]
 			database_name = MobyUtil::Parameter[ :user_data_server_database_name ]
-			language = MobyUtil::Parameter[ $sut_id.to_sym ][ :language ]
-			table_name = MobyUtil::Parameter[ $sut_id.to_sym ][ :user_data_server_database_tablename ] 
+			language = MobyUtil::Parameter[ :language ]
+			table_name = MobyUtil::Parameter[ :user_data_server_database_tablename ] 
 
 			query_string = "select `#{ language }` from #{ table_name } where lname = \'#{ user_data_lname }' and `#{ language }` <>\'#MISSING\'"
 			
@@ -76,7 +76,7 @@ module MobyUtil
 					return result_array
 				end
 			elsif db_type == DB_TYPE_SQLITE
-			    Kernel::raise UserDataNotFoundError.new( "No user data for '#{ user_data_lname }' was found for language '#{ language }'" ) if ( result.nil? || result.size <= 0 )
+			    Kernel::raise UserDataNotFoundError.new( "No user data for '#{ user_data_lname }' was found for language '#{ language }'" ) if ( result.nil? || result.to_a.size <= 0 )
 				return result[0]
 			end
 			

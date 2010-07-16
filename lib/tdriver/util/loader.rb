@@ -51,6 +51,12 @@ require File.expand_path( File.join( File.dirname( __FILE__ ), 'dbaccess/loader.
 # Localisation module
 require File.expand_path( File.join( File.dirname( __FILE__ ), 'localisation/loader.rb' ) )
 
+# User Data module
+require File.expand_path( File.join( File.dirname( __FILE__ ), 'user_data/loader.rb' ) )
+
+# Operator Data module
+require File.expand_path( File.join( File.dirname( __FILE__ ), 'operator_data/loader.rb' ) )
+
 # Recorder module
 require File.expand_path( File.join( File.dirname( __FILE__ ), 'recorder.rb' ) )
 

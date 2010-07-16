@@ -76,7 +76,7 @@ module MobyUtil
 					return result_array
 				end
 			elsif db_type == DB_TYPE_SQLITE
-			    Kernel::raise LogicalNameNotFoundError.new( "No logical name '#{ logical_name }' found for language '#{ language }'" ) if ( result.nil? || result.size <= 0 )
+			    Kernel::raise LogicalNameNotFoundError.new( "No logical name '#{ logical_name }' found for language '#{ language }'" ) if ( result.nil? || result.to_a.size <= 0 )
 				return result[0]
 			end
 			
