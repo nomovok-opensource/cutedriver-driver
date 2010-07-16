@@ -52,6 +52,7 @@ module MobyUtil
 			table_name = MobyUtil::Parameter[ :user_data_server_database_tablename ] 
 
 			query_string = "select `#{ language }` from #{ table_name } where lname = \'#{ user_data_lname }' and `#{ language }` <>\'#MISSING\'"
+			puts query_string
 			
 			begin
 				result = MobyUtil::DBAccess.query( db_type, host, username, password, database_name, query_string )
