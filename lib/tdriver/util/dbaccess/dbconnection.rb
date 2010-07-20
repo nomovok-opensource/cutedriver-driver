@@ -21,12 +21,13 @@
 module MobyUtil
 
 	class DBConnection
-		attr_accessor :db_type, :host, :connector
+		attr_accessor :db_type, :host, :database_name, :connector
 		
 		# Initialize the singleton
-		def initialize( db_type, host, connector)
+		def initialize( db_type, host, database_name, connector)
 			@db_type = db_type
 			@host = host
+			@database_name = database_name
 			@connector = connector			
 		end
 		

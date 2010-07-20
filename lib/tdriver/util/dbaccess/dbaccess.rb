@@ -63,12 +63,12 @@ module MobyUtil
 			#Kernel::raise ArgumentException.new("")
 			
 			# Check for exsting connection for that host and create it if needed
-			if !@@_connections.has_key?( host ) or @@_connections[ host ].db_type !=  db_type
+			if !@@_connections.has_key?( host + db_type + database_name ) # make connection ID unique by using host, type and db on the key
 				connector = self.instance.connect_db(  db_type, host, username, password, database_name )
-				@@_connections[ host ] = DBConnection.new(  db_type, host, connector )
+				@@_connections[ host + db_type + database_name ] = DBConnection.new(  db_type, host, database_name, connector )
 			end
 			
-			return @@_connections[ host ].connector.query( query_string )
+			return @@_connections[ host + db_type + database_name ].connector.query( query_string )
 			
 			#### TODO return same format of row/array of rows regardless of DB type
 			
@@ -93,8 +93,8 @@ module MobyUtil
 			begin
 				connector = @@_mysql.connect( host, username, password, database_name) if  db_type == DB_TYPE_MYSQL
 				# set the utf8 encoding
-				connector.query 'SET NAMES utf8' if  db_type == DB_TYPE_MYSQL
-                connector = SQLite3::Database.new( database_name ) if  db_type == DB_TYPE_SQLITE				
+				connector.query 'SET NAMES utf8' if db_type == DB_TYPE_MYSQL
+                connector = SQLite3::Database.new( database_name ) if db_type == DB_TYPE_SQLITE				
 			rescue
 				Kernel::raise MySqlConnectError.new( $!.message )
 			end

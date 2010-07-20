@@ -39,8 +39,7 @@ module MobyUtil
 		# TableNotFoundError:: in case the table name not found
 		# MySqlConnectError:: in case of the other problem with the connectivity 
 		def self.retrieve( operator_data_lname )
-				
-		    Kernel::raise TableNotFoundError.new( "Table name parameter cannot be nil" ) if table_name == nil
+			
 		    Kernel::raise OperatorDataNotFoundError.new( "Search string parameter cannot be nil" ) if operator_data_lname == nil
 
 			# Get Localization parameters for DB Connection 
