@@ -49,8 +49,8 @@ module MobyUtil
 			password = MobyUtil::Parameter[ :operator_data_server_password ]
 			database_name = MobyUtil::Parameter[ :operator_data_server_database_name ]
 			table_name = MobyUtil::Parameter[ :operator_data_server_database_tablename]
-			search_string = "#{ operator_data_lname }' AND `Operator` = '#{ MobyUtil::Parameter[ :operator_selected ] }"
-				
+			search_string = "#{ operator_data_lname }' AND `Operator` = '#{ MobyUtil::Parameter[ :operator_selected ] }"			
+			
 			query_string =  "select `Value` from `#{ table_name }` where `LogicalName` = '#{ search_string }' and `LogicalName` <> '#MISSING'"
 			
 			begin

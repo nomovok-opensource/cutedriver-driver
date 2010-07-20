@@ -58,9 +58,13 @@ module MobyUtil
 			# Check creation parameters
 		    Kernel::raise DbTypeNotDefinedError.new( "Database type need to be either 'mysql' or 'sqlite'!" ) if  db_type == nil 
             Kernel::raise DbTypeNotSupportedError.new( "Database type '#{db_type}' not supported! Type need to be either 'mysql' or 'sqlite'!" ) unless  db_type == DB_TYPE_MYSQL or  db_type == DB_TYPE_SQLITE
-			
-			### TODO check for  db_type host username password and dbnam,,,,, not beeing emty
-			Kernel::raise ArgumentException.new("") if host.nil? or host.class != String or host.isEmpty?
+			if db_type == DB_TYPE_MYSQL
+				Kernel::raise ArgumentError.new("Host must be provided as a non empty string.") if host.nil? or host.class != String or host.empty?
+				Kernel::raise ArgumentError.new("Username must be provided as a non empty string.") if username.nil? or username.class != String or username.empty?
+				Kernel::raise ArgumentError.new("Password must be provided as a non empty string.") if password.nil? or password.class != String or password.empty?
+			end
+			Kernel::raise ArgumentError.new("The database name must be provided as a non empty string.") if database_name.nil? or database_name.class != String or database_name.empty?
+			Kernel::raise ArgumentError.new("The query qtring must be provided as a non empty string.") if query_string.nil? or query_string.class != String or query_string.empty?
 			
 			# Check for exsting connection for that host and create it if needed
 			if !@@_connections.has_key?( host + db_type + database_name ) # make connection ID unique by using host, type and db on the key
