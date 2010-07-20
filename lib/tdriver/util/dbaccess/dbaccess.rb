@@ -60,7 +60,7 @@ module MobyUtil
             Kernel::raise DbTypeNotSupportedError.new( "Database type '#{db_type}' not supported! Type need to be either 'mysql' or 'sqlite'!" ) unless  db_type == DB_TYPE_MYSQL or  db_type == DB_TYPE_SQLITE
 			
 			### TODO check for  db_type host username password and dbnam,,,,, not beeing emty
-			#Kernel::raise ArgumentException.new("")
+			Kernel::raise ArgumentException.new("") if host.nil? or host.class != String or host.isEmpty?
 			
 			# Check for exsting connection for that host and create it if needed
 			if !@@_connections.has_key?( host + db_type + database_name ) # make connection ID unique by using host, type and db on the key
@@ -71,6 +71,14 @@ module MobyUtil
 			return @@_connections[ host + db_type + database_name ].connector.query( query_string )
 			
 			#### TODO return same format of row/array of rows regardless of DB type
+			# if db_type == DB_TYPE_MYSQL
+				# Kernel::raise OperatorDataNotFoundError.new( "No matches found for search string '#{ operator_data_lname }' in search column 'LogicalName'" ) if ( result.nil? || result.num_rows <= 0 )
+				# return result.fetch_row[ 0 ]
+		    # elsif db_type == DB_TYPE_SQLITE
+				# first_row = result.next()
+				# Kernel::raise OperatorDataNotFoundError.new( "No user data for '#{ user_data_lname }' was found for language '#{ language }'" ) if ( first_row.nil? )
+				# return first_row[0]
+		    # end
 			
 		end
 	
