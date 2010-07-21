@@ -22,9 +22,6 @@
 module MobyUtil
 
 	class OperatorData
-
-		DB_TYPE_MYSQL = 'mysql'
-		DB_TYPE_SQLITE = 'sqlite'
 		
 		# Function for fetching translation  
 		# == params
@@ -34,9 +31,7 @@ module MobyUtil
 		# == returns
 		# String:: value of the localisation
 		# == throws
-		# LogicalNameNotFoundError:: in case the localisation for logical name not found
-		# LanguageNotFoundError:: in case the language not found
-		# TableNotFoundError:: in case the table name not found
+		# OperatorDataNotFoundError:: in case the localisation for logical name not found
 		# MySqlConnectError:: in case of the other problem with the connectivity 
 		def self.retrieve( operator_data_lname )
 			
@@ -49,7 +44,8 @@ module MobyUtil
 			password = MobyUtil::Parameter[ :operator_data_server_password ]
 			database_name = MobyUtil::Parameter[ :operator_data_server_database_name ]
 			table_name = MobyUtil::Parameter[ :operator_data_server_database_tablename]
-			search_string = "#{ operator_data_lname }' AND `Operator` = '#{ MobyUtil::Parameter[ :operator_selected ] }"			
+			operator = MobyUtil::Parameter[ :operator_selected ]
+			search_string = "#{ operator_data_lname }' AND `Operator` = '#{ operator }"			
 			
 			query_string =  "select `Value` from `#{ table_name }` where `LogicalName` = '#{ search_string }' and `LogicalName` <> '#MISSING'"
 			
@@ -61,16 +57,9 @@ module MobyUtil
 			    Kernel::raise MySqlConnectError.new( $!.message )
 		    end
 
-			
-			## TODO, proper validation should not depend on dbtype, deal with this on the dbaccess module
-		    if db_type == DB_TYPE_MYSQL
-				Kernel::raise OperatorDataNotFoundError.new( "No matches found for search string '#{ operator_data_lname }' in search column 'LogicalName'" ) if ( result.nil? || result.num_rows <= 0 )
-				return result.fetch_row[ 0 ]
-		    elsif db_type == DB_TYPE_SQLITE
-				first_row = result.next()
-				Kernel::raise OperatorDataNotFoundError.new( "No user data for '#{ user_data_lname }' was found for language '#{ language }'" ) if ( first_row.nil? )
-				return first_row[0]
-		    end
+			# Return always the first column of the row
+			Kernel::raise OperatorDataNotFoundError.new("No matches found for search string '#{ operator_data_lname }' in search column 'LogicalName' for opreator #{ operator }" ) if ( result.empty?)
+			return result[0][0] # array of rows! We want the first column of the first row
 			
 		end
 

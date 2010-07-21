@@ -44,13 +44,10 @@ module MobyUtil
 	    # search_column:: string containing the name of the data column to be searched
 	    # search_string:: string containing information about the criteria the search column must match
 	    # == returns
-	    # String:: value of the localisation
+	    # Array<Array<String>>:: Returns an Array of rows, where each row is and Array of Strings
 	    # == throws
-	    # ResultColumnNotFoundError:: in case the desired data column name to be used for the output is not found
-	    # TableNotFoundError:: in case the table name is not found
-	    # SearchColumnNotFoundError:: in case the name of the data column to be searched is not found
-	    # SearchStringNotFoundError:: when information about the criteria the search column must match is not found
-	    # MySqlConnectError:: in case there is a problem with the connectivity
+	    # DbTypeNotDefinedError:: 
+	    # ArgumentError:: 
 	    def self.query( db_type, host, username, password, database_name, query_string )
 			# Create first instance of this class if it doesn't exist
 			self.instance
@@ -72,17 +69,21 @@ module MobyUtil
 				@@_connections[ host + db_type + database_name ] = DBConnection.new(  db_type, host, database_name, connector )
 			end
 			
-			return @@_connections[ host + db_type + database_name ].connector.query( query_string )
+			query_result = @@_connections[ host + db_type + database_name ].connector.query( query_string )
 			
-			#### TODO return same format of row/array of rows regardless of DB type
-			# if db_type == DB_TYPE_MYSQL
-				# Kernel::raise OperatorDataNotFoundError.new( "No matches found for search string '#{ operator_data_lname }' in search column 'LogicalName'" ) if ( result.nil? || result.num_rows <= 0 )
-				# return result.fetch_row[ 0 ]
-		    # elsif db_type == DB_TYPE_SQLITE
-				# first_row = result.next()
-				# Kernel::raise OperatorDataNotFoundError.new( "No user data for '#{ user_data_lname }' was found for language '#{ language }'" ) if ( first_row.nil? )
-				# return first_row[0]
-		    # end
+			# Return a uniform set of results as an array of rows, rows beeing an array of values ( Array<Array<String>> )
+			result = Array.new
+			if db_type == DB_TYPE_MYSQL
+				query_result.num_rows.times do |i|
+					result << query_result.fetch_row
+				end				
+		    elsif db_type == DB_TYPE_SQLITE
+				
+				while ( row = query_result.next ) 
+					result << row
+				end
+		    end
+			return result
 			
 		end
 	
@@ -92,6 +93,8 @@ module MobyUtil
 		# MySqlConnectError:: In case the connection fails
 		# == returns
 		# MySql:: Class that encapsulated the connection into MySQL database
+		# == throws
+		# MySqlConnectError:: in case there is a problem with the connectivity
 		def connect_db(  db_type, host, username, password, database_name )
 
 			# if mysql API and connection are not initialized, then initialize the mysql API

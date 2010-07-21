@@ -23,9 +23,6 @@ module MobyUtil
 
 	class UserData
 
-		DB_TYPE_MYSQL = 'mysql'
-		DB_TYPE_SQLITE = 'sqlite'
-		
 		# Function for fetching user data
 		# == params
 		# language:: String containing language to be used in fetching the translation
@@ -34,9 +31,7 @@ module MobyUtil
 		# == returns
 		# String:: value of the localisation
 		# == throws
-		# LogicalNameNotFoundError:: in case the localisation for logical name not found
-		# LanguageNotFoundError:: in case the language not found
-		# TableNotFoundError:: in case the table name not found
+		# UserDataNotFoundError:: in case the localisation for logical name not found
 		# MySqlConnectError:: in case of the other problem with the connectivity 
 		def self.retrieve( user_data_lname )
 			
@@ -61,24 +56,15 @@ module MobyUtil
 				Kernel::raise MySqlConnectError.new( $!.message )
 			end    
 			
-			# Validate result and return either a String or an Array
-			### TODO take away the db_type dependency.. return Rows in a uniform way!!
-			
-			if db_type == DB_TYPE_MYSQL
-			    Kernel::raise UserDataNotFoundError.new( "No user data for '#{ user_data_lname }' was found for language '#{ language }'" ) if ( result.nil? || result.num_rows <= 0 )
-				if ( result.num_rows() == 1 ) 
-					return result.fetch_row[0]
-				else
-					result_array = []
-					while( row = result.fetch_row )
-						result_array << row[0]
-					end			
-					return result_array
+			# Return only the first column of the row or and array of the values of the first column if multiple rows have been found
+			Kernel::raise UserDataNotFoundError.new( "No user data for '#{ user_data_lname }' found for language '#{ language }'" ) if ( result.empty?)
+			if result.length > 1
+				result_array = Array.new
+				result.each do |row|
+					result_array << row[0]
 				end
-			elsif db_type == DB_TYPE_SQLITE
-				first_row = result.next()
-				Kernel::raise UserDataNotFoundError.new( "No user data for '#{ user_data_lname }' was found for language '#{ language }'" ) if ( first_row.nil? )
-				return first_row[0]
+			else
+				return result[0][0] # array of rows! We want the first column of the first row
 			end
 			
 		end
