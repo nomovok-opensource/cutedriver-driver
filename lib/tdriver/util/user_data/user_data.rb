@@ -23,16 +23,16 @@ module MobyUtil
 
 	class UserData
 
-		# Function for fetching user data
+		# Function for fetching user data from the user data DB
 		# == params
-		# language:: String containing language to be used in fetching the translation
-		# logical_name:: Symbol containing the logical name that acts as a key when fetching translation
-		# table_name:: String containing the name of table to be used when fetching translation
+		# user_data_lname:: String containing user_data_lname to be used in fetching the translation
 		# == returns
-		# String:: value of the localisation
+		# String:: User data string
+		# Array<String>:: Array of values when multiple user data strings found
 		# == throws
-		# UserDataNotFoundError:: in case the localisation for logical name not found
-		# MySqlConnectError:: in case of the other problem with the connectivity 
+		# UserDataNotFoundError:: in case the desired user data is not found
+		# UserDataColumnNotFoundError:: in case the desired data column name to be used for the output is not found
+		# SqlError:: in case of the other problem with the query
 		def self.retrieve( user_data_lname )
 			
 			Kernel::raise UserDataNotFoundError.new( "User data logical name can't be empty" ) if user_data_lname == nil
@@ -52,8 +52,8 @@ module MobyUtil
 				result = MobyUtil::DBAccess.query( db_type, host, username, password, database_name, query_string )
 			rescue        
 				# if column referring to language is not found then Kernel::raise error for language not found
-				Kernel::raise UserDataNotFoundError.new( "No user data for '#{ user_data_lname }' was found" ) unless $!.message.index( "Unknown column" ) == nil
-				Kernel::raise MySqlConnectError.new( $!.message )
+				Kernel::raise UserDataColumnNotFoundError.new( "User data language column '#{ language }' was not found" ) unless $!.message.index( "Unknown column" ) == nil
+				Kernel::raise SqlError.new( $!.message )
 			end    
 			
 			# Return only the first column of the row or and array of the values of the first column if multiple rows have been found

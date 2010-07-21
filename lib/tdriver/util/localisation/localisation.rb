@@ -23,18 +23,19 @@ module MobyUtil
 
 	class Localisation
 		
-		# Function for fetching translation  
+		# Function for fetching a translation from the localisation DB
 		# == params
-		# language:: String containing language to be used in fetching the translation
 		# logical_name:: Symbol containing the logical name that acts as a key when fetching translation
+		# language:: String containing language to be used in fetching the translation
 		# table_name:: String containing the name of table to be used when fetching translation
 		# == returns
-		# String:: value of the localisation
+		# String:: Value of the localisation
+		# Array<String>:: Array of values when multiple translations found
 		# == throws
 		# LogicalNameNotFoundError:: in case the localisation for logical name not found
 		# LanguageNotFoundError:: in case the language not found
 		# TableNotFoundError:: in case the table name not found
-		# MySqlConnectError:: in case of the other problem with the connectivity 
+		# SqlError:: in case of the other problem with the query 
 		def self.translation( logical_name, language, table_name )
 			
 			Kernel::raise LogicalNameNotFoundError.new( "Logical name cannot be nil" ) if logical_name == nil
@@ -55,7 +56,7 @@ module MobyUtil
 			rescue        
 				# if column referring to language is not found then Kernel::raise error for language not found
 				Kernel::raise LanguageNotFoundError.new( "No language '#{ language }' found" ) unless $!.message.index( "Unknown column" ) == nil
-				Kernel::raise MySqlConnectError.new( $!.message )
+				Kernel::raise SqlError.new( $!.message )
 			end    
 			
 			# Return only the first column of the row or and array of the values of the first column if multiple rows have been found

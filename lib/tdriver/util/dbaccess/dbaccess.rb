@@ -39,10 +39,12 @@ module MobyUtil
 		
 		# Function for fetching SQL data  
 	    # == params
-	    # result_column:: string containing the desired data column name to be used for the output
-	    # table_name:: string containing the name of table to be used
-	    # search_column:: string containing the name of the data column to be searched
-	    # search_string:: string containing information about the criteria the search column must match
+	    # db_type::
+		# host::
+		# username::
+		# password::
+		# database_name::
+		# query_string::
 	    # == returns
 	    # Array<Array<String>>:: Returns an Array of rows, where each row is and Array of Strings
 	    # == throws
@@ -69,7 +71,7 @@ module MobyUtil
 				@@_connections[ host + db_type + database_name ] = DBConnection.new(  db_type, host, database_name, connector )
 			end
 			
-			query_result = @@_connections[ host + db_type + database_name ].connector.query( query_string )
+				query_result = @@_connections[ host + db_type + database_name ].connector.query( query_string )
 			
 			# Return a uniform set of results as an array of rows, rows beeing an array of values ( Array<Array<String>> )
 			result = Array.new
@@ -88,13 +90,18 @@ module MobyUtil
 		end
 	
 		
-		# Function establishes a connection to mysql server if needed     
-		# == throws
-		# MySqlConnectError:: In case the connection fails
+		# Function establishes a connection to mysql server if needed
+	    # == params
+	    # db_type::
+		# host::
+		# username::
+		# password::
+		# database_name::
 		# == returns
-		# MySql:: Class that encapsulated the connection into MySQL database
+		# MySql:: MySql object that encapsulated the connection into MySQL database
+		# SQLite3::Database SQLite Database object that encapsulated the connection into SQLite database
 		# == throws
-		# MySqlConnectError:: in case there is a problem with the connectivity
+		# SqlConnectError:: in case there is a problem with the connectivity
 		def connect_db(  db_type, host, username, password, database_name )
 
 			# if mysql API and connection are not initialized, then initialize the mysql API
@@ -107,11 +114,10 @@ module MobyUtil
 
 			begin
 				connector = @@_mysql.connect( host, username, password, database_name) if  db_type == DB_TYPE_MYSQL
-				# set the utf8 encoding
-				connector.query 'SET NAMES utf8' if db_type == DB_TYPE_MYSQL
+				connector.query 'SET NAMES utf8' if db_type == DB_TYPE_MYSQL # set the utf8 encoding
                 connector = SQLite3::Database.new( database_name ) if db_type == DB_TYPE_SQLITE				
 			rescue
-				Kernel::raise MySqlConnectError.new( $!.message )
+				Kernel::raise SqlConnectError.new( $!.message )
 			end
 			
 			return connector

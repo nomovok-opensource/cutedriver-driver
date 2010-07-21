@@ -29,7 +29,4 @@ module MobyUtil
 	# This error should be raised when referred logical name is not found for specified language
 	class LogicalNameNotFoundError < CustomError; end;
 
-	# This error should be raised when there is connectivity problem with sql database
-	class MySqlConnectError < CustomError; end;
-
 end

@@ -17,22 +17,21 @@
 ## 
 ############################################################################
 
-# Utility for handling user data inputs database
+# Utility for handling operator data inputs database
 
 module MobyUtil
 
 	class OperatorData
 		
-		# Function for fetching translation  
+		# Function for fetching operator data from the operator data DB 
 		# == params
-		# language:: String containing language to be used in fetching the translation
-		# logical_name:: Symbol containing the logical name that acts as a key when fetching translation
-		# table_name:: String containing the name of table to be used when fetching translation
+		# operator_data_lname:: String containing operator_data_lname to be used in fetching the translation
 		# == returns
-		# String:: value of the localisation
+		# String:: Operator data string
 		# == throws
-		# OperatorDataNotFoundError:: in case the localisation for logical name not found
-		# MySqlConnectError:: in case of the other problem with the connectivity 
+		# OperatorDataNotFoundError:: in case the desired operator data is not found
+		# OperatorDataColumnNotFoundError:: in case the desired data column name to be used for the output is not found
+		# SqlError:: in case of the other problem with the query
 		def self.retrieve( operator_data_lname )
 			
 		    Kernel::raise OperatorDataNotFoundError.new( "Search string parameter cannot be nil" ) if operator_data_lname == nil
@@ -53,8 +52,8 @@ module MobyUtil
 				result = MobyUtil::DBAccess.query( db_type, host, username, password, database_name, query_string )
 			rescue            
 			    # if data column to be searched is not found then Kernel::raise error for search column not found
-			    Kernel::raise OperatorDataNotFoundError.new( "Search column 'Value' not found in database" ) unless $!.message.index( "Unknown column" ) == nil
-			    Kernel::raise MySqlConnectError.new( $!.message )
+			    Kernel::raise OperatorDataColumnNotFoundError.new( "Search column 'Value' not found in database" ) unless $!.message.index( "Unknown column" ) == nil
+			    Kernel::raise SqlError.new( $!.message )
 		    end
 
 			# Return always the first column of the row

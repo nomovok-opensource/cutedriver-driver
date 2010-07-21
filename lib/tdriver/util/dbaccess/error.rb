@@ -26,4 +26,10 @@ module MobyUtil
 	# This error should be raised when not supported db type is defined
 	class DbTypeNotSupportedError < CustomError; end;
 	
+	# This error should be raised when there is connectivity problem with sql database
+	class SqlConnectError < CustomError; end;
+	
+	# This error should be raised when there is problem with sql query
+	class SqlError < CustomError; end;
+	
 end

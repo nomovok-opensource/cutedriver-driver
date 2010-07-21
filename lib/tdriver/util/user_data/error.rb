@@ -20,7 +20,10 @@
 
 module MobyUtil
 	
-	# This error should be raised when the desired data column name to be used for the output is not found
+	# This error should be raised when the desired user data is not found
 	class UserDataNotFoundError < StandardError; def initialize ( msg = nil ); super( msg ); end; end # class
+	
+	# This error should be raised when the desired data column name to be used for the output is not found
+	class UserDataColumnNotFoundError < StandardError; def initialize ( msg = nil ); super( msg ); end; end # class
 	
 end

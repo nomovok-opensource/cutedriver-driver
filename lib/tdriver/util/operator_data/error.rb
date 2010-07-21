@@ -20,7 +20,10 @@
 
 module MobyUtil
 		
-	# This error should be raised when information about the criteria the search column must match is not found
+	# This error should be raised when information about operator data is not found
 	class OperatorDataNotFoundError < StandardError; def initialize ( msg = nil ); super( msg ); end; end # class
+	
+	# This error should be raised when the search column is not found
+	class OperatorDataColumnNotFoundError < StandardError; def initialize ( msg = nil ); super( msg ); end; end # class
 	
 end
