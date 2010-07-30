@@ -28,7 +28,7 @@
 $KCODE = 'u'
 
 # Following line to prevent Object#id Warnings
-Object.send :undef_method, :id if Object.respond_to?( :id )
+Object.send( :undef_method, :id ) if Object.respond_to?( :id )
 
 require File.expand_path( File.join( File.dirname( __FILE__ ), 'loader' ) )
 
