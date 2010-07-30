@@ -36,6 +36,7 @@ module MobyBehaviour
 			hash_rule = ( method_arguments.first.kind_of?( Hash ) ? method_arguments.first : {} ).merge( :type => method_id )
 
 			begin
+
 				child( hash_rule )
 
 			rescue MobyBase::TestObjectNotFoundError, MobyBase::TestObjectNotVisibleError
@@ -204,57 +205,6 @@ module MobyBehaviour
 			end
 
 		end
-
-=begin
-		# Creates a test object for a child object of this test object
-		# Associates child object as current object's child.
-		# and associates self as child object's parent.
-		#
-		# NOTE:
-		# Subsequent calls to TestObject#child(rule) always returns reference to same Testobject:
-		# a = to.child(rule) ; b = to.child(rule) ; a.equal?( b ); # => true
-		# note the usage of equal? above instead of normally used eql?. Please refer to Ruby manual for more information.
-		#
-		# NOTE: The accessor methods for child objects created automatically by the DataGenerator are dependent on this method.
-		# === params
-		# attributes:: Hash object holding information for identifying which child to create, eg. :type => :slider
-		# === returns
-		# TestObject:: new child test object or reference to existing child
-		def _child( attributes )
-
-			# verify attributes argument format
-			raise TypeError.new( 'Unexpected argument type (%s) for attributes, expecting %s' % [ attributes.class, "Hash" ] ) unless attributes.kind_of?( Hash ) 
-
-			# retrieve child object
-			get_child_objects( attributes )
-
-		end
-
-		# Function similar to child, but returns an array of children test objects that meet the given criteria
-		# === params
-		# attributes:: Hash object holding information for identifying which child to create, eg. :type => :slider
-	        # find_all_children:: Boolean specifying whether all children under the test node or just immediate children should be retreived.
-		# === returns
-		# An array of TestObjects
-		def children( attributes, find_all_children = true )
-
-			# verify attributes argument format
-			raise TypeError.new( 'Unexpected argument type (%s) for attributes, expecting %s' % [ attributes.class, "Hash" ] ) unless attributes.kind_of?( Hash ) 
-
-			# respect the original attributes variable value
-			creation_attributes = attributes.clone
-
-			# If empty or only special attributes then add :type => "any" to search all
-			creation_attributes.merge!( :type => "any" ) if creation_attributes.select{ | key, value | key.to_s !~ /^__/ ? true : false }.empty?
-
-			# children method specific settings
-			creation_attributes.merge!( :__multiple_objects => true, :__find_all_children => find_all_children )
-
-			# retrieve child objects
-			get_child_objects( creation_attributes )
-
-		end
-=end
     
 		# Updates this test object to match the data in the provided xml document
 		# Propagates updating to all child TestObjects
@@ -382,6 +332,55 @@ module MobyBehaviour
 				hash[ _key ] = sut.translate( _value ) if _value.kind_of?( Symbol ) 
 
 			end if !hash.nil?
+
+		end
+
+		# Creates a test object for a child object of this test object
+		# Associates child object as current object's child.
+		# and associates self as child object's parent.
+		#
+		# NOTE:
+		# Subsequent calls to TestObject#child(rule) always returns reference to same Testobject:
+		# a = to.child(rule) ; b = to.child(rule) ; a.equal?( b ); # => true
+		# note the usage of equal? above instead of normally used eql?. Please refer to Ruby manual for more information.
+		#
+		# NOTE: The accessor methods for child objects created automatically by the DataGenerator are dependent on this method.
+		# === params
+		# attributes:: Hash object holding information for identifying which child to create, eg. :type => :slider
+		# === returns
+		# TestObject:: new child test object or reference to existing child
+		def child( attributes )
+
+			# verify attributes argument format
+			raise TypeError.new( 'Unexpected argument type (%s) for attributes, expecting %s' % [ attributes.class, "Hash" ] ) unless attributes.kind_of?( Hash ) 
+
+			# retrieve child object
+			get_child_objects( attributes )
+
+		end
+
+		# Function similar to child, but returns an array of children test objects that meet the given criteria
+		# === params
+		# attributes:: Hash object holding information for identifying which child to create, eg. :type => :slider
+    # find_all_children:: Boolean specifying whether all children under the test node or just immediate children should be retreived.
+		# === returns
+		# An array of TestObjects
+		def children( attributes, find_all_children = true )
+
+			# verify attributes argument format
+			raise TypeError.new( 'Unexpected argument type (%s) for attributes, expecting %s' % [ attributes.class, "Hash" ] ) unless attributes.kind_of?( Hash ) 
+
+			# respect the original attributes variable value
+			creation_attributes = attributes.clone
+
+			# If empty or only special attributes then add :type => "any" to search all
+			creation_attributes.merge!( :type => "any" ) if creation_attributes.select{ | key, value | key.to_s !~ /^__/ ? true : false }.empty?
+
+			# children method specific settings
+			creation_attributes.merge!( :__multiple_objects => true, :__find_all_children => find_all_children )
+
+			# retrieve child objects
+			get_child_objects( creation_attributes )
 
 		end
 
@@ -617,22 +616,7 @@ module MobyBehaviour
 
 	public # deprecated
 
-		# TODO: Team TE: review me @ 'Brakes'
-		# Creates a test object for a child object of this test object
-		# Associates child object as current object's child.
-		# and associates self as child object's parent.
-		#
-		# NOTE:
-		# Subsequent calls to TestObject#child(rule) always returns reference to same Testobject:
-		# a = to.child(rule) ; b = to.child(rule) ; a.equal?( b ); # => true
-		# note the usage of equal? above instead of normally used eql?. Please refer to Ruby manual for more information.
-		#
-		# NOTE: The accessor methods for child objects created automatically by the DataGenerator are dependent on this method.
-		# === params
-		# attributes:: Hash object holding information for identifying which child to create, eg. :type => :slider
-		# === returns
-		# TestObject:: new child test object or reference to existing child
-		def child( attributes )
+		def _child( attributes )
 
 			creation_data = attributes.clone
 			logging_enabled = MobyUtil::Logger.instance.enabled
@@ -712,13 +696,7 @@ module MobyBehaviour
 
 		end
 
-		# Function similar to child, but returns an array of children test objects that meet the given criteria
-		# === params
-		# attributes:: Hash object holding information for identifying which child to create, eg. :type => :slider
-	        #find_all:: Boolean specifying whether all children under the test node or just immediate children should be retreived.
-		# === returns
-		# An array of TestObjects
-		def children( attributes={}, find_all=true)
+		def _children( attributes={}, find_all=true)
 		  
 			raise TypeError.new( 'Input parameter not of Type: Hash.\nIt is: ' + attributes.class.to_s ) unless attributes.kind_of?( Hash ) #and !attributes.empty?
 			
@@ -804,58 +782,6 @@ module MobyBehaviour
 			# return test objects
 			child_objects
 		end
-
-public
-
-		# Creates a test object for a child object of this test object
-		# Associates child object as current object's child.
-		# and associates self as child object's parent.
-		#
-		# NOTE:
-		# Subsequent calls to TestObject#child(rule) always returns reference to same Testobject:
-		# a = to.child(rule) ; b = to.child(rule) ; a.equal?( b ); # => true
-		# note the usage of equal? above instead of normally used eql?. Please refer to Ruby manual for more information.
-		#
-		# NOTE: The accessor methods for child objects created automatically by the DataGenerator are dependent on this method.
-		# === params
-		# attributes:: Hash object holding information for identifying which child to create, eg. :type => :slider
-		# === returns
-		# TestObject:: new child test object or reference to existing child
-		def _child( attributes )
-
-			# verify attributes argument format
-			raise TypeError.new( 'Unexpected argument type (%s) for attributes, expecting %s' % [ attributes.class, "Hash" ] ) unless attributes.kind_of?( Hash ) 
-
-			# retrieve child object
-			get_child_objects( attributes )
-
-		end
-
-		# Function similar to child, but returns an array of children test objects that meet the given criteria
-		# === params
-		# attributes:: Hash object holding information for identifying which child to create, eg. :type => :slider
-	        # find_all_children:: Boolean specifying whether all children under the test node or just immediate children should be retreived.
-		# === returns
-		# An array of TestObjects
-		def _children( attributes, find_all_children = true )
-
-			# verify attributes argument format
-			raise TypeError.new( 'Unexpected argument type (%s) for attributes, expecting %s' % [ attributes.class, "Hash" ] ) unless attributes.kind_of?( Hash ) 
-
-			# respect the original attributes variable value
-			creation_attributes = attributes.clone
-
-			# If empty or only special attributes then add :type => "any" to search all
-			creation_attributes.merge!( :type => "any" ) if creation_attributes.select{ | key, value | key.to_s !~ /^__/ ? true : false }.empty?
-
-			# children method specific settings
-			creation_attributes.merge!( :__multiple_objects => true, :__find_all_children => find_all_children )
-
-			# retrieve child objects
-			get_child_objects( creation_attributes )
-
-		end
-
 
 		# enable hooking for performance measurement & debug logging
 		MobyUtil::Hooking.instance.hook_methods( self ) if defined?( MobyUtil::Hooking )
