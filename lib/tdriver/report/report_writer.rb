@@ -1088,7 +1088,7 @@ display: none;
       #create the table rows
       user_data_rows.each do |row_hash|
         row = '<tr>'
-        row_hash.sort{|a,b| a[0]<=>b[0]} .each do |value|
+        row_hash.sort{|a,b| a[0]<=>b[0]}.each do |value|
           row=row+'<td>'+value[1].to_s+'</td>'
         end
         formatted_user_data << row+'</tr>'

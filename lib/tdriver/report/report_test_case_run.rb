@@ -37,6 +37,7 @@ module TDriverReportCreator
       @test_case_execution_log=nil
       @test_case_user_data=nil
       @test_case_user_data_columns=nil
+      @test_case_chronological_view_data=nil
       @capture_screen_error=nil
       @failed_dump_error=nil
       @test_case_reboots=0
@@ -230,6 +231,16 @@ module TDriverReportCreator
       @test_case_user_data=data
       @test_case_user_data_columns=columns    
     end
+    #This method sets the users data to display in chronological table
+    #
+    # === params
+    # value: test case user data
+    # === returns
+    # nil
+    # === raises
+    def set_test_case_chronological_view_data(data)
+      @test_case_chronological_view_data=data
+    end    
     #This method sets the test case behaviour log
     #
     # === params
@@ -487,6 +498,16 @@ module TDriverReportCreator
     # === raises
     def get_test_case_group()
       @test_case_group
+    end
+    #This method gets the test case displays data
+    #
+    # === params
+    # value: test case report folder
+    # === returns
+    # nil
+    # === raises
+    def get_test_case_chronological_view_data()
+      @test_case_chronological_view_data
     end
     #This method updates the tdrivertest case details page
     #
