@@ -68,6 +68,7 @@ module TDriverReportCreator
         $tdriver_reporter.update_test_case_summary_pages('failed')
         $tdriver_reporter.update_test_case_summary_pages('not run')
         $tdriver_reporter.update_test_case_summary_pages('statistics')
+        $tdriver_reporter.create_csv if MobyUtil::Parameter[ :create_run_table_csv, false ]=='true'
         $new_junit_xml_results.create_junit_xml()
         #$tdriver_reporter.delete_result_storage()
         $tdriver_reporter.disconnect_connected_devices()
@@ -129,11 +130,14 @@ module TDriverReportCreator
       $tdriver_reporter.set_total_passed(1)
     end
     if(status!='passed' && status!='failed')
+      
       current_status=$tdriver_reporter.get_not_run_status
       $tdriver_reporter.set_total_not_run(1)
     end
-    $tdriver_reporter.write_to_result_storage(current_status,test_case_name,group,reboots,crashes,
+    
+     $tdriver_reporter.write_to_result_storage(current_status,test_case_name,group,reboots,crashes,
       @new_test_case.get_test_case_start_time,
+      @new_test_case.get_test_case_chronological_view_data,
       @new_test_case.get_test_case_run_time,
       @new_test_case.get_tc_memory_amount_end,
       @new_test_case.get_test_case_index,
@@ -191,13 +195,14 @@ module TDriverReportCreator
   # nil
   # === raises
   def update_test_case_user_data()
-
     if @new_test_case != nil
       user_data_rows, user_data_cols=$tdriver_reporter.get_user_data
       @new_test_case.set_test_case_user_data(user_data_rows, user_data_cols)
+      chronological_data_rows=$tdriver_reporter.get_user_chronological_table_data
+      @new_test_case.set_test_case_chronological_view_data(chronological_data_rows)
       $tdriver_reporter.set_user_data(nil)
+      $tdriver_reporter.set_user_chronological_table_data(nil)
     end
-
   end
   
   #This method starts a new test case run

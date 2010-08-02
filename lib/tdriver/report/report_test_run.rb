@@ -43,7 +43,9 @@ module TDriverReportCreator
       @test_case_user_defined_status=nil
       @test_run_behaviour_log = Array.new
       @test_run_user_log = Array.new
+      @test_case_user_data=Array.new
       @test_case_user_data_columns = Array.new
+      @test_case_user_chronological_table_data = Hash.new
       @attached_test_reports = Array.new
       @memory_amount_start='-'
       @memory_amount_end='-'
@@ -88,20 +90,30 @@ module TDriverReportCreator
     # === raises
     # TypeError exception
     def set_user_data(value)
-      if value==nil
-        @test_case_user_data = nil
-        @test_case_user_data_columns = nil
-        
+      if value==nil        
         @test_case_user_data = Array.new
         @test_case_user_data_columns = Array.new
       else
+        raise TypeError.new( 'Input parameter not of Type: Hash or Array.\nIt is: ' + value.class.to_s ) unless value.kind_of?( Hash ) || value.kind_of?( Array )
         if value.kind_of?( Hash )
           add_data_from_hash(value,@test_case_user_data,@test_case_user_data_columns)
-        elsif value.kind_of?( Array )
-          add_data_from_array(value,@test_case_user_data,@test_case_user_data_columns)
-        else
-          raise TypeError.new( 'Input parameter not of Type: Hash or Array.\nIt is: ' + value.class.to_s )
         end
+        if value.kind_of?( Array )
+          add_data_from_array(value,@test_case_user_data,@test_case_user_data_columns)
+        end
+      end
+    end
+    #This method adds user table data
+    #
+    # === params
+    # column_name: the column name in chronological table
+    # value: the data 
+    # === returns
+    # nil
+    # === raises
+    def set_user_table_data(column_name,value)
+      if (!column_name.empty? && column_name!=nil)
+        @test_case_user_chronological_table_data[column_name.to_s]=value.to_s 
       end
     end
     #This method sets the test run behaviour log
@@ -522,6 +534,30 @@ module TDriverReportCreator
     def get_user_data()
       return @test_case_user_data,@test_case_user_data_columns
     end
+    #This method gets user data to display in chronological table
+    #
+    # === params
+    # nil
+    # === returns
+    # the testcase data and column objects
+    # === raises
+    def get_user_chronological_table_data()
+      @test_case_user_chronological_table_data
+    end
+    #This method sets user data to display in chronological table
+    #
+    # === params
+    # nil
+    # === returns
+    # the testcase data and column objects
+    # === raises
+    def set_user_chronological_table_data(value)
+      if (value==nil)
+        @test_case_user_chronological_table_data=Hash.new
+      else
+        @test_case_user_chronological_table_data=value
+      end
+    end
     #This method will parse duplicate groups out
     #
     # === params
@@ -815,8 +851,8 @@ module TDriverReportCreator
         return  memory
       end
     end
-
-    def write_to_result_storage(status,testcase,group,reboots=0,crashes=0,start_time=nil,duration=0,memory_usage=0,index=0,log='',comment='',link='')
+    
+    def write_to_result_storage(status,testcase,group,reboots=0,crashes=0,start_time=nil,user_data=nil,duration=0,memory_usage=0,index=0,log='',comment='',link='')
       while $result_storage_in_use==true
         sleep 1
       end
@@ -857,6 +893,7 @@ module TDriverReportCreator
           test_comment.content = comment
           test_link = Nokogiri::XML::Node.new("link",test)
           test_link.content = html_link
+      
           test << test_name
           test << test_group
           test << test_reboots
@@ -869,11 +906,30 @@ module TDriverReportCreator
           test << test_log
           test << test_comment
           test << test_link
+         
+          if user_data!=nil && !user_data.empty?
+            test_data = Nokogiri::XML::Node.new("user_display_data",test)
+            user_data.each { |key,value| 
+              data_value=Nokogiri::XML::Node.new("data",test_data)
+              data_value.content = value.to_s
+              data_value.set_attribute("id",key.to_s)
+              test_data << data_value
+            }
+            test<<test_data
+          end
+
           xml_data.root.add_child(test)
           File.open(file, 'w') {|f| f.write(xml_data.to_xml) }
           test=nil
           xml_data=nil
         else
+          counter=0
+          if user_data!=nil && !user_data.empty?
+            #to avoid odd number list for hash error!
+            user_data_keys = user_data.keys
+            user_data_values = user_data.values
+            counter = user_data_values.size-1
+          end
           builder = Nokogiri::XML::Builder.new do |xml|
             xml.tests {
               xml.test {
@@ -889,7 +945,17 @@ module TDriverReportCreator
                 xml.log log
                 xml.comment comment
                 xml.link html_link
-              }
+                if user_data!=nil && !user_data.empty?
+                  xml.user_display_data {
+                    (0..counter).each { |i|
+                      xml.data("id"=>user_data_keys.at(i).to_s){ 
+                        xml.text user_data_values.at(i).to_s{
+                        }
+                      }
+                    }
+                  }
+                end
+                }
             }
           end
           File.open(file, 'w') {|f| f.write(builder.to_xml) }
@@ -901,7 +967,7 @@ module TDriverReportCreator
         puts "caught exception when writing results: #{e}"
       end
     end
-
+    
     def read_result_storage(results)
       while $result_storage_in_use==true
         sleep 1
@@ -930,21 +996,29 @@ module TDriverReportCreator
             log=node.search("log").text #9
             comment=node.search("comment").text #10
             link=node.search("link").text #11
+            
+            user_data = Hash.new
+            node.xpath("user_display_data/data").each do |data_node|
+              value_name =  data_node.get_attribute("id")  
+              val = data_node.text
+              user_data[value_name] = val
+            end
+        
             case results
             when 'passed'
               if @pass_statuses.include?(status)
-                result_storage << [value,group,reboots,crashes,start_time,duration,memory_usage,status,index,log,comment,link]
+                result_storage << [value,group,reboots,crashes,start_time,duration,memory_usage,status,index,log,comment,link,user_data]
               end
             when 'failed'
               if @fail_statuses.include?(status)
-                result_storage << [value,group,reboots,crashes,start_time,duration,memory_usage,status,index,log,comment,link]
+                result_storage << [value,group,reboots,crashes,start_time,duration,memory_usage,status,index,log,comment,link,user_data]
               end
             when 'not run'
               if @not_run_statuses.include?(status)
-                result_storage << [value,group,reboots,crashes,start_time,duration,memory_usage,status,index,log,comment,link]
+                result_storage << [value,group,reboots,crashes,start_time,duration,memory_usage,status,index,log,comment,link,user_data]
               end
             when 'all'
-              result_storage << [value,group,reboots,crashes,start_time,duration,memory_usage,status,index,log,comment,link]
+              result_storage << [value,group,reboots,crashes,start_time,duration,memory_usage,status,index,log,comment,link,user_data]
             end
           end
           xml_data=nil
@@ -956,7 +1030,7 @@ module TDriverReportCreator
         end
       rescue Nokogiri::XML::SyntaxError => e
         $result_storage_in_use=false
-        puts "caught exception when reading results: #{e}"
+         "caught exception when reading results: #{e}"
         result_storage
       end
     end
@@ -1051,5 +1125,62 @@ module TDriverReportCreator
       end
       return nil
     end
+    
+  def create_csv
+    storage_file='all_cases.xml'
+    csv_file = 'all_cases.csv'
+    csv_array = Array.new
+    not_added=false
+    
+    file=@report_folder+'/'+storage_file
+    csv =  nil 
+    begin
+    if File.exist?(file)
+      io = File.open(file, 'r')
+      csv = File.new(@report_folder+'/'+ csv_file, 'w')
+      xml_data = Nokogiri::XML(io){ |config| config.options = Nokogiri::XML::ParseOptions::STRICT }
+      io.close
+      xml_data.root.xpath("//tests/test").each do |node|
+        
+        line=Array.new
+        first_line=Array.new
+        
+        value=node.search("name").text
+        first_line<<"name" if !not_added
+        line<<value
+        start_time=node.search("start_time").text 
+        first_line<<"start_time" if !not_added
+        line<<start_time
+        duration=node.search("duration").text 
+        first_line<<"duration" if !not_added
+        line<<duration
+        memory_usage=node.search("memory_usage").text 
+        first_line<<"memory_usage" if !not_added
+        line<<memory_usage
+        status=node.search("status").text 
+        first_line<<"status" if !not_added
+        line<<status
+
+        node.xpath("user_display_data/data").each do |data_node|
+            value_name = data_node.get_attribute("id")  
+            value = data_node.text
+            first_line<<value_name if !not_added
+            line<<value
+          end
+
+        csv.puts(first_line.join(",")) if !not_added
+        csv.puts(line.join(","))
+        not_added=true
+      end
+      csv.close
+    else
+        puts "Unable to create csv file"
+    end   
+    rescue Exception => e
+      puts "Error creating csv file"
+      puts e.to_s
+    end
+  end
+  
   end
 end
