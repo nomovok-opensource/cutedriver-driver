@@ -13,10 +13,18 @@ Description: Testability Driver Testing framework for Maemo environment
  This is a metapackage that should fetch all the required depencies
  and sets up the local testing environment.
 
+Package: matti
+Architecture: all
+Depends: libtestability-driver (>= ${source:Version})
+Description: Testability Driver Testing framework for Maemo environment
+ .
+ This is a metapackage provided for users of old matti metapackage.
 
 Package: libtestability-driver-ruby1.8
 Architecture: all
 Depends: ruby1.8, rubygems1.8, libtestability-driver-ruby-config-default (>= ${source:Version}), libhoe-ruby1.8, liblog4r-ruby1.8, libnokogiri-ruby1.8, librubyforge-ruby1.8, librake-ruby1.8, libbuilder-ruby1.8
+Replaces: libmatti-ruby1.8 (<< 0.8.4-1~)
+Conflicts: libmatti-ruby1.8 (<< 0.8.4-1~)
 Description: Testability Driver Testing framework for Maemo environment
 
 Package: libtestability-driver-ruby-config-default
