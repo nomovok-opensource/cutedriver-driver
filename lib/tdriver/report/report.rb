@@ -1,20 +1,20 @@
 ############################################################################
-## 
-## Copyright (C) 2010 Nokia Corporation and/or its subsidiary(-ies). 
-## All rights reserved. 
-## Contact: Nokia Corporation (testabilitydriver@nokia.com) 
-## 
-## This file is part of Testability Driver. 
-## 
-## If you have questions regarding the use of this file, please contact 
-## Nokia at testabilitydriver@nokia.com . 
-## 
-## This library is free software; you can redistribute it and/or 
-## modify it under the terms of the GNU Lesser General Public 
-## License version 2.1 as published by the Free Software Foundation 
-## and appearing in the file LICENSE.LGPL included in the packaging 
-## of this file. 
-## 
+##
+## Copyright (C) 2010 Nokia Corporation and/or its subsidiary(-ies).
+## All rights reserved.
+## Contact: Nokia Corporation (testabilitydriver@nokia.com)
+##
+## This file is part of Testability Driver.
+##
+## If you have questions regarding the use of this file, please contact
+## Nokia at testabilitydriver@nokia.com .
+##
+## This library is free software; you can redistribute it and/or
+## modify it under the terms of the GNU Lesser General Public
+## License version 2.1 as published by the Free Software Foundation
+## and appearing in the file LICENSE.LGPL included in the packaging
+## of this file.
+##
 ############################################################################
 
 
@@ -27,6 +27,7 @@ require File.expand_path( File.join( File.dirname( __FILE__ ), 'report_data_pres
 
 module TDriverReportCreator
   include TDriverErrorRecovery
+
   #This method initializes new test run
   #
   # === params
@@ -48,7 +49,7 @@ module TDriverReportCreator
       $tdriver_reporter.initialize_tdriver_report_folder()
       $tdriver_report_created=false
       $current_tdriver_report_folder=$tdriver_reporter.get_report_folder
-      
+
       $new_junit_xml_results=ReportJUnitXml.new($current_tdriver_report_folder)
       $tdriver_reporter.set_end_time(Time.now)
       $tdriver_reporter.set_total_failed(0)
@@ -86,6 +87,17 @@ module TDriverReportCreator
     else
       initialize_error_recovery
     end
+  end
+  #This method registers a connection error
+  #
+  # === params
+  # status: last test case result
+  # === returns
+  # nil
+  # === raises
+  def error_in_connection_detected
+      $tdriver_reporter.set_total_device_resets(1)
+      @new_test_case.set_test_case_reboots(1) if @new_test_case!=nil
   end
   #This method returns the group where the test case belongs
   #
@@ -181,12 +193,12 @@ module TDriverReportCreator
       $tdriver_reporter.set_log(nil)
     end
   end
-  
-  
+
+
   #This method updates the current test case user data
   #
   # === params
-  # 
+  #
   # === returns
   # nil
   # === raises
@@ -199,7 +211,7 @@ module TDriverReportCreator
     end
 
   end
-  
+
   #This method starts a new test case run
   #
   # === params
@@ -235,7 +247,7 @@ module TDriverReportCreator
     logging_enabled = MobyUtil::Logger.instance.enabled
     begin
       if MobyUtil::Parameter[:report_video] == "true"
-        # copy previous recording        
+        # copy previous recording
         MobyUtil::Logger.instance.enabled=false
 
         begin
@@ -292,8 +304,7 @@ module TDriverReportCreator
   def capture_screen_test_case()
     @new_test_case.create_test_case_folder($tdriver_reporter.get_failed_status)
     if start_error_recovery()==true
-      $tdriver_reporter.set_total_device_resets(1)
-      @new_test_case.set_test_case_reboots(1)
+      error_in_connection_detected
     end
     @new_test_case.capture_failed_dump()
     if @new_test_case.video_recording?
@@ -389,12 +400,12 @@ module TDriverReportCreator
       @new_test_case.set_test_case_end_time(Time.now)
       update_test_case_behaviour_log()
       update_test_case_memory_usage()
-      execution_log=@new_test_case.get_test_case_execution_log      
+      execution_log=@new_test_case.get_test_case_execution_log
       if MobyUtil::Parameter[:report_trace_capture_only_in_failed_case, 'true']!='true'
-        @new_test_case.capture_trace_files() 
+        @new_test_case.capture_trace_files()
       else
         if status=='failed'
-          @new_test_case.capture_trace_files() 
+          @new_test_case.capture_trace_files()
         end
       end
       if found_files.to_i > 0
@@ -406,7 +417,7 @@ module TDriverReportCreator
 
       update_run(@new_test_case.get_test_case_name.to_s,status,@new_test_case.get_test_case_reboots,@new_test_case.get_test_case_crash_files,execution_log)
       $new_junit_xml_results.add_test_result(status, @new_test_case.get_test_case_start_time, @new_test_case.get_test_case_end_time)
-      
+
       @new_test_case=nil
       execution_log=nil
 
