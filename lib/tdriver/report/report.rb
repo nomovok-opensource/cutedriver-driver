@@ -440,7 +440,8 @@ module TDriverReportCreator
 
 end #TDriverReportCreator
 require File.expand_path( File.join( File.dirname( __FILE__ ), 'report_cucumber' ) )
-require File.expand_path( File.join( File.dirname( __FILE__ ), 'report_cucumber_listener' ) )
+require File.expand_path( File.join( File.dirname( __FILE__ ), 'report_cucumber_listener' ) ) 
+require File.expand_path( File.join( File.dirname( __FILE__ ), 'report_cucumber_reporter' ) )
 require File.expand_path( File.join( File.dirname( __FILE__ ), 'report_rspec' ) )
 require File.expand_path( File.join( File.dirname( __FILE__ ), 'report_test_unit' ) )
 

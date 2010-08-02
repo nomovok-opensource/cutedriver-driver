@@ -23,7 +23,7 @@ require File.expand_path( File.join( File.dirname( __FILE__ ), 'report' ) )
 begin
 module TDriverReport
   #Class for formatting cucumber report
-  class CucumberListener
+  class CucumberReporter
     include TDriverReportCreator
     #This method initializes new test run
     #
@@ -31,8 +31,6 @@ module TDriverReport
     # === returns
     # === raises
     def initialize(step_mother, io, options)
-      file, line = caller.first.split(":")
-      $stdout.puts "Please note that CucumberListener may soon be deprecated. Use TDriverReport::CucumberReporter instead." % [ file, line]
       #super(step_mother, io, options)
       start_run()
       @options = options
@@ -94,8 +92,8 @@ module TDriverReport
     def scenario_name(keyword, name, file_colon_line, source_indent)
       visit_feature_element_name(keyword, name, file_colon_line, source_indent)
     end
-    def feature_name(name)
-      @current_feature_group=name.gsub(/[:]/,'')
+    def feature_name(keyword,name)
+      @current_feature_group=keyword + " " + name      
       add_report_group('Features:'+@current_feature_group+'|')
     end
     #This method determines when new test case needs to be started
@@ -178,7 +176,7 @@ end
 
 module MattiReport
   #Class for formatting cucumber report
-  class CucumberListener
+  class CucumberReporter
     include TDriverReportCreator
     #This method initializes new test run
     #
@@ -249,8 +247,8 @@ module MattiReport
     def scenario_name(keyword, name, file_colon_line, source_indent)
       visit_feature_element_name(keyword, name, file_colon_line, source_indent)
     end
-    def feature_name(name)
-      @current_feature_group=name.gsub(/[:]/,'')
+    def feature_name(keyword, name)
+      @current_feature_group=keyword + " " + name      
       add_report_group('Features:'+@current_feature_group+'|')
     end
     #This method determines when new test case needs to be started
