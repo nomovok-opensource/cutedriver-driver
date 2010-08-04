@@ -53,8 +53,6 @@ module MobyUtil
 			query_string += " and fname = '#{ file_name }'" unless file_name.nil?
 			query_string += " and `#{ language }` <> \'#MISSING\'"
 			
-			puts query_string
-			
 			begin
 				result = MobyUtil::DBAccess.query( db_type, host, username, password, database_name, query_string )
 			rescue        
