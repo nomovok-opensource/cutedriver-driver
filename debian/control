@@ -15,7 +15,7 @@ Description: Testability Driver Testing framework for Maemo environment
 
 Package: matti
 Architecture: all
-Depends: libtestability-driver (>= ${source:Version})
+Depends: testability-driver (>= ${source:Version})
 Description: Testability Driver Testing framework for Maemo environment
  .
  This is a metapackage provided for users of old matti metapackage.
