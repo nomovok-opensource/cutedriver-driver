@@ -769,28 +769,23 @@ module MobyBehaviour
 		# LanguageNotFoundError:: In case of language is not found
 		# LogicalNameNotFoundError:: In case of logical name is not found for current language
 		# MySqlConnectError:: In case problems with the db connectivity
-		def translate( logical_name )
-
+		def translate( logical_name, file_name = nil )
 			Kernel::raise LogicalNameNotFoundError.new("Logical name is nil") if logical_name.nil?
-    
-      language=nil
-      if ( MobyUtil::Parameter[ self.id ][:read_lang_from_app]=='true')
-        #read localeName app
-        language=self.application.attribute("localeName")
-        
-        #determine the language from the locale
-        language=language.split('_')[0].to_s if (language!=nil && !language.empty?)
-      else
-        language=MobyUtil::Parameter[ self.id ][ :language ]
-      end
-  
-      Kernel::raise LanguageNotFoundError.new("Language cannot be determind to perform translation") if (language==nil || language.empty?)
-      
+			language=nil
+			if ( MobyUtil::Parameter[ self.id ][:read_lang_from_app]=='true')
+				#read localeName app
+				language=self.application.attribute("localeName")
+				#determine the language from the locale
+				language=language.split('_')[0].to_s if (language!=nil && !language.empty?)
+			else
+				language=MobyUtil::Parameter[ self.id ][ :language ]
+			end
+			Kernel::raise LanguageNotFoundError.new("Language cannot be determind to perform translation") if (language==nil || language.empty?)
 			MobyUtil::Localisation.translation(
 				logical_name,
 				language,
-        #MobyUtil::Parameter[ self.id ][ :language ],
-				MobyUtil::Parameter[ self.id ][ :localisation_server_database_tablename ]
+				MobyUtil::Parameter[ self.id ][ :localisation_server_database_tablename ],
+				file_name
 			)
 
 		end

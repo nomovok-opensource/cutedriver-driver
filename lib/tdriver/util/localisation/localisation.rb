@@ -36,7 +36,7 @@ module MobyUtil
 		# LanguageNotFoundError:: in case the language not found
 		# TableNotFoundError:: in case the table name not found
 		# SqlError:: in case of the other problem with the query 
-		def self.translation( logical_name, language, table_name )
+		def self.translation( logical_name, language, table_name, file_name = nil )
 			
 			Kernel::raise LogicalNameNotFoundError.new( "Logical name cannot be nil" ) if logical_name == nil
 			Kernel::raise LanguageNotFoundError.new( "Language cannot be nil" ) if language == nil
@@ -49,7 +49,11 @@ module MobyUtil
 			password = MobyUtil::Parameter[ :localisation_server_password ]
 			database_name = MobyUtil::Parameter[ :localisation_server_database_name ]
 			
-			query_string = "select `#{ language }` from #{ table_name } where lname = \'#{ logical_name }' and `#{ language }` <>\'#MISSING\'"
+			query_string = "select `#{ language }` from #{ table_name } where lname = '#{ logical_name }'" 
+			query_string += " and fname = '#{ file_name }'" unless file_name.nil?
+			query_string += " and `#{ language }` <> \'#MISSING\'"
+			
+			puts query_string
 			
 			begin
 				result = MobyUtil::DBAccess.query( db_type, host, username, password, database_name, query_string )
