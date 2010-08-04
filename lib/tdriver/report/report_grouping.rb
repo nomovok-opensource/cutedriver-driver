@@ -236,6 +236,29 @@ class ReportingGroups
     status_selection << selection_data << "</select>"
     status_selection
   end
+  
+  def get_user_cols(status,tc_arr)
+    cols=nil
+    if status=='all' && tc_arr!= nil 
+      cols = Array.new
+      tc_arr.each do |x|
+        data_hash=x[12]
+        cols << data_hash.keys
+      end
+      cols=cols.flatten.uniq
+    end
+    cols
+  end
+  
+  def pad_user_data(status,data_hash,all_cols)
+    if (status=='all' && all_cols!=nil && !all_cols.empty?)
+      keys_need_adding = all_cols - data_hash.keys
+      keys_need_adding.each do |new_key|
+        data_hash[new_key] = "-"
+      end
+    end
+  end
+  
   def generate_test_results_table(status,tc_arr,item)
     table_body=Array.new
     if item==nil
@@ -254,9 +277,18 @@ class ReportingGroups
         '<td>'<<
         '<b>Result</b></td>'<<
         '<td>'<<
-        '<b>Comment</b></td>'<<
-        '</tr>'
-      tc_arr.each do |x|
+        '<b>Comment</b></td>'
+        
+      user_cols=get_user_cols(status,tc_arr)
+      if (user_cols!=nil && !user_cols.empty?)
+        user_cols.sort.each do |col|
+          table_body<<'<td>'<<'<b>'<<col.to_s<<'</b></td>'
+        end
+      end
+  
+      table_body<<'</tr>'
+      
+      tc_arr.each do |x|        
         cases_in_group+=1
         @main_total+=1
         tc_status=x[7].to_s
@@ -267,7 +299,8 @@ class ReportingGroups
         @main_passed+=1 if tc_status=='passed' || @pass_statuses.include?(tc_status)
         @main_failed+=1 if tc_status=='failed' || @fail_statuses.include?(tc_status)
         @main_not_run+=1 if tc_status=='not run' || @not_run_statuses.include?(tc_status)
-        tc_name=x[0].to_s.gsub('_',' ')        
+        tc_name=x[0].to_s.gsub('_',' ')    
+        
         table_body << '<tr' <<
           tc_style_tag <<
           '>'<<
@@ -291,8 +324,18 @@ class ReportingGroups
           '</td>'<<
           '<td>'<<
           "<textarea name=\"#{x[8]}_text_area\"  cols=\"23\" rows=\"2\">#{x[10]}</textarea>" <<
-          '</td>'<<
-          '</tr>'
+          '</td>'
+
+          data_hash=x[12] 
+          if (data_hash!=nil && !data_hash.empty?)
+            #display user data
+            pad_user_data(status,data_hash,user_cols)
+            user_cols.sort.each do |col|
+              row = '<td>'+data_hash[col].to_s+'</td>'
+              table_body<<row
+            end
+          end
+          table_body<<'</tr>'
       end
       if cases_in_group>0
         table_body << '</table>'
@@ -324,7 +367,7 @@ class ReportingGroups
             @main_passed+=1 if tc_status=='passed' || @pass_statuses.include?(tc_status)
             @main_failed+=1 if tc_status=='failed' || @fail_statuses.include?(tc_status)
             @main_not_run+=1 if tc_status=='not run' || @not_run_statuses.include?(tc_status)
-            tc_name=x[0].to_s.gsub('_',' ')            
+            tc_name=x[0].to_s.gsub('_',' ')     
             table_body << '<tr' <<
               tc_style_tag<<
               '>'<<
@@ -349,6 +392,7 @@ class ReportingGroups
           table_body << '</table>'
         else
           table_body='<br/>'
+          
         end
       else
         tc_style_tag=' id=""'
