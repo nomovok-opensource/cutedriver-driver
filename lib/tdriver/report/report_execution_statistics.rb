@@ -139,10 +139,10 @@ class ReportingStatistics
     tc_style_tag
   end
   def add_result_link(test_case,status,total)
-    tc_link='<a href="chronological_total_run_index.html">'
-    tc_link='<a href="chronological_total_run_index.html#'+test_case.gsub(' ','_')+'_' + @pass_statuses.first + '">' if @pass_statuses.include?(status) && total>0
-    tc_link='<a href="chronological_total_run_index.html#'+test_case.gsub(' ','_')+'_' + @fail_statuses.first + '">' if @fail_statuses.include?(status) && total>0
-    tc_link='<a href="chronological_total_run_index.html#'+test_case.gsub(' ','_')+'_' + @not_run_statuses.first + '">' if @not_run_statuses.include?(status) && total>0
+    tc_link='<a href="1_chronological_total_run_index.html">'
+    tc_link='<a href="1_chronological_total_run_index.html#'+test_case.gsub(' ','_')+'_' + @pass_statuses.first + '">' if @pass_statuses.include?(status) && total>0
+    tc_link='<a href="1_chronological_total_run_index.html#'+test_case.gsub(' ','_')+'_' + @fail_statuses.first + '">' if @fail_statuses.include?(status) && total>0
+    tc_link='<a href="1_chronological_total_run_index.html#'+test_case.gsub(' ','_')+'_' + @not_run_statuses.first + '">' if @not_run_statuses.include?(status) && total>0
     tc_link
   end
 
