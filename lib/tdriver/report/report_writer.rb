@@ -38,6 +38,16 @@ module TDriverReportWriter
   font-family: sans-serif;
 	font-size: medium;
 }
+.page_navigation_section
+{
+	background-color:#0191C8;
+	width:800px;
+	height:40px;
+    margin-left : auto;
+    margin-right: auto;
+  font-family: sans-serif;
+	font-size: medium;
+}
 .summary
 {
 	background-color:White;
@@ -148,9 +158,9 @@ a:hover { color:White; background-color:#005B9A;}
 #navigation
 {
 	list-style-type:none;
-	padding:10px 10px 20px 10px;
-	margin-left : auto;
-    margin-right: auto;
+	padding:10px 10px 20px 10px;	
+  width: 47em;
+	margin: auto;
 }
 
 #navigation li {
@@ -377,7 +387,7 @@ display: none;
       '-'
     end
   end
-  def write_page_start(page, title)
+  def write_page_start(page, title,report_page=nil,report_pages=nil)
     case title
     when "TDriver test results"
       stylesheet='<link rel="stylesheet" title="TDriverReportStyle" href="tdriver_report_style.css"/>'
@@ -400,7 +410,7 @@ display: none;
     end
     html_start='<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">' <<
       '<html xmlns="http://www.w3.org/1999/xhtml">'<<
-      '<head><meta http-equiv="Content-Type" content="text/html; charset=utf-8"><meta http-eqiv="cache-control" content="no-cache">'<<
+      '<head><meta http-equiv="Content-Type" content="text/html; charset=utf-8"><META HTTP-EQUIV="CACHE-CONTROL" CONTENT="NO-CACHE"><META HTTP-EQUIV="PRAGMA" CONTENT="NO-CACHE">'<<
       stylesheet<<
       get_java_script()<<
       '<title>'+title+'</title>'<<
@@ -410,7 +420,7 @@ display: none;
     end
     html_start=nil
     stylesheet=nil
-    write_navigation_menu(page,title)
+    write_navigation_menu(page,title,report_page,report_pages)
     page=nil
     title=nil
   end
@@ -650,8 +660,8 @@ display: none;
     html_body='</dd>'<<
       '</dl>'
     html_body
-  end
-  def write_test_case_summary_body(page,status,tc_arr,chronological_page=nil)
+  end  
+  def write_test_case_summary_body(page,status,tc_arr,chronological_page=nil,report_page=nil)
     html_body=Array.new
     case status
     when 'passed'
@@ -708,8 +718,8 @@ display: none;
     else
       chronological_html_body=Array.new
       title='<div class="page_title"><center><h1>Total run</h1></center></div>'
-      view_selection='<div class="summary_view_select"><center><input type="button" value="Grouped view" ONCLICK="location.assign(\'total_run_index.html\');"/>'<<
-        '<input type="button" value="Chronological view" ONCLICK="location.assign(\'chronological_total_run_index.html\');"/></center></div>'<<
+      view_selection='<div class="summary_view_select"><center><input type="button" value="Grouped view" ONCLICK="location.assign(\''+report_page.to_s+'_total_run_index.html\');"/>'<<
+        '<input type="button" value="Chronological view" ONCLICK="location.assign(\''+report_page.to_s+'_chronological_total_run_index.html\');"/></center></div>'<<
         '<div class="summary_total_run">' <<
         '<form action="save_total_run_results" >'
       title << view_selection
@@ -778,19 +788,19 @@ display: none;
       '<td>'+format_duration(run_time)+'</td>'<<
       '</tr>'<<
       '<tr>'<<
-      '<td><a href="cases/total_run_index.html"><b>Total run</b></a></td>'<<
+      '<td><a href="cases/1_total_run_index.html"><b>Total run</b></a></td>'<<
       '<td>'+total_run.to_s+'</td>'<<
       '</tr>'<<
       '<tr>'<<
-      '<td><a href="cases/passed_index.html"><b>Passed</b></a></td>'<<
+      '<td><a href="cases/1_passed_index.html"><b>Passed</b></a></td>'<<
       '<td>'+total_passed.to_s+'</td>'<<
       '</tr>'<<
       '<tr>'<<
-      '<td><a href="cases/failed_index.html"><b>Failed</b></a></td>'<<
+      '<td><a href="cases/1_failed_index.html"><b>Failed</b></a></td>'<<
       '<td>'+total_failed.to_s+'</td>'<<
       '</tr>'<<
       '<tr>'<<
-      '<td><a href="cases/not_run_index.html"><b>Not run</b></a></td>'<<
+      '<td><a href="cases/1_not_run_index.html"><b>Not run</b></a></td>'<<
       '<td>'+total_not_run.to_s+'</td>'<<
       '</tr>'<<
       '<tr>'<<
@@ -928,89 +938,89 @@ display: none;
       end
     end
   end
-  def write_navigation_menu(page,title)
+  def write_navigation_menu(page,title,report_page=nil,report_pages=nil)
     case title
     when "TDriver test results"
       tdriver_test_results_link='index.html" class="current"'
       tdriver_test_environment_link='environment/index.html"'
       tdriver_log_link='cases/tdriver_log_index.html"'
-      total_run_link='cases/total_run_index.html"'
-      statistics_link='cases/statistics_index.html"'
-      passed_link='cases/passed_index.html"'
-      failed_link='cases/failed_index.html"'
-      not_run_link='cases/not_run_index.html"'
+      total_run_link="cases/1_total_run_index.html\""
+      statistics_link="cases/statistics_index.html\""
+      passed_link="cases/1_passed_index.html\""
+      failed_link="cases/1_failed_index.html\""
+      not_run_link="cases/1_not_run_index.html\""
     when "TDriver test environment"
       tdriver_test_results_link='../index.html"'
       tdriver_test_environment_link='index.html" class="current"'
       tdriver_log_link='../cases/tdriver_log_index.html"'
-      total_run_link='../cases/total_run_index.html"'
+      total_run_link="../cases/1_total_run_index.html\""
       statistics_link='../cases/statistics_index.html"'
-      passed_link='../cases/passed_index.html"'
-      failed_link='../cases/failed_index.html"'
-      not_run_link='../cases/not_run_index.html"'
+      passed_link="../cases/1_passed_index.html\""
+      failed_link="../cases/1_failed_index.html\""
+      not_run_link="../cases/1_not_run_index.html\""
     when "Total run"
       tdriver_test_results_link='../index.html"'
       tdriver_test_environment_link='../environment/index.html"'
       tdriver_log_link='tdriver_log_index.html"'
-      total_run_link='total_run_index.html" class="current"'
-      statistics_link='statistics_index.html"'
-      passed_link='passed_index.html"'
-      failed_link='failed_index.html"'
-      not_run_link='not_run_index.html"'
+      total_run_link="#{report_page}_total_run_index.html\" class=\"current\""
+      statistics_link="statistics_index.html\""
+      passed_link="1_passed_index.html\""
+      failed_link="1_failed_index.html\""
+      not_run_link="1_not_run_index.html\""
     when "Statistics"
       tdriver_test_results_link='../index.html"'
       tdriver_test_environment_link='../environment/index.html"'
       tdriver_log_link='tdriver_log_index.html"'
-      total_run_link='total_run_index.html"'
+      total_run_link="1_total_run_index.html\""
       statistics_link='statistics_index.html" class="current"'
-      passed_link='passed_index.html"'
-      failed_link='failed_index.html"'
-      not_run_link='not_run_index.html"'
+      passed_link="1_passed_index.html\""
+      failed_link="1_failed_index.html\""
+      not_run_link="1_not_run_index.html\""
     when "Passed"
       tdriver_test_results_link='../index.html"'
       tdriver_test_environment_link='../environment/index.html"'
       tdriver_log_link='tdriver_log_index.html"'
-      total_run_link='total_run_index.html"'
+      total_run_link="1_total_run_index.html\""
       statistics_link='statistics_index.html"'
-      passed_link='passed_index.html" class="current"'
-      failed_link='failed_index.html"'
-      not_run_link='not_run_index.html"'
+      passed_link="#{report_page}_passed_index.html\" class=\"current\""
+      failed_link="1_failed_index.html\""
+      not_run_link="1_not_run_index.html\""
     when "Failed"
       tdriver_test_results_link='../index.html"'
       tdriver_test_environment_link='../environment/index.html"'
       tdriver_log_link='tdriver_log_index.html"'
-      total_run_link='total_run_index.html"'
+      total_run_link="1_total_run_index.html\""
       statistics_link='statistics_index.html"'
-      passed_link='passed_index.html"'
-      failed_link='failed_index.html" class="current"'
-      not_run_link='not_run_index.html"'
+      passed_link="1_passed_index.html\""
+      failed_link="#{report_page}_failed_index.html\" class=\"current\""
+      not_run_link="1_not_run_index.html\""
     when "Not run"
       tdriver_test_results_link='../index.html"'
       tdriver_test_environment_link='../environment/index.html"'
       tdriver_log_link='tdriver_log_index.html"'
-      total_run_link='total_run_index.html"'
+      total_run_link="1_total_run_index.html\""
       statistics_link='statistics_index.html"'
-      passed_link='passed_index.html"'
-      failed_link='failed_index.html"'
-      not_run_link='not_run_index.html" class="current"'
+      passed_link="1_passed_index.html\""
+      failed_link="1_failed_index.html\""
+      not_run_link="#{report_page}_not_run_index.html\" class=\"current\""
     when "TDriver log"
       tdriver_test_results_link='../index.html"'
       tdriver_test_environment_link='../environment/index.html"'
       tdriver_log_link='tdriver_log_index.html" class="current"'
-      total_run_link='total_run_index.html"'
+      total_run_link="#{report_page}_total_run_index.html\""
       statistics_link='statistics_index.html"'
-      passed_link='passed_index.html"'
-      failed_link='failed_index.html"'
-      not_run_link='not_run_index.html"'
+      passed_link="#{report_page}_passed_index.html\""
+      failed_link="#{report_page}_failed_index.html\""
+      not_run_link="#{report_page}_not_run_index.html\""
     else
       tdriver_test_results_link='../../index.html"'
       tdriver_test_environment_link='../../environment/index.html"'
       tdriver_log_link='../tdriver_log_index.html"'
-      total_run_link='../total_run_index.html"'
+      total_run_link="../1_total_run_index.html\""
       statistics_link='../statistics_index.html"'
-      passed_link='../passed_index.html"'
-      failed_link='../failed_index.html"'
-      not_run_link='../not_run_index.html"'
+      passed_link="../1_passed_index.html\""
+      failed_link="../1_failed_index.html\""
+      not_run_link="../1_not_run_index.html\""
     end
     html_body='<div class="navigation_section">'<<
       '<ul id="navigation">'<<
@@ -1042,11 +1052,72 @@ display: none;
     end
     html_body=nil
   end
-  def write_page_end(page)
-    html_end='</body></html>'
-    File.open(page, 'a') do |f2|
-      f2.puts html_end
+
+  def write_page_navigation_div(page,report_page,report_pages)
+    page_with_no_number=page.gsub("#{report_page}_","")
+    page_base_name=File.basename(page_with_no_number)    
+    div_body=Array.new
+    div_body<<"<div class=\"page_navigation_section\"><center>"<<
+      "<ul id=\"navigation\">"      
+    max=10
+    start_page=report_page/max
+    if start_page==0
+      start_page=1
+    else
+      if (report_page%max)!=0
+        start_page=(start_page*max)+1
+      else
+        start_page=(start_page*max)+1-max
+      end
     end
+    if (start_page+max)<report_pages
+      end_page=(start_page+max)-1
+    else
+      end_page=report_pages
+    end
+
+    div_body<<"<li><a href=\"#{start_page-max}_#{page_base_name}\">Previous</a></li>" if start_page!=1
+
+    for i in (start_page..end_page)
+      div_body<<"<li><a href=\""
+      if i==report_page
+        div_body<<"#{i}_#{page_base_name}\" class=\"current\""
+      else
+        div_body<<"#{i}_#{page_base_name}\""
+      end
+      div_body<<">#{i}</a></li>"
+    end
+    div_body<<"<li><a href=\"#{end_page+1}_#{page_base_name}\">Next</a></li>" if end_page < report_pages
+    div_body<<"</ul></center></div>"
+    div_body
+  end
+
+  def write_page_end(page,report_page=nil,report_pages=nil)    
+    if report_page!=nil      
+      navigation_div="#{write_page_navigation_div(page,report_page,report_pages)}"      
+      html_end="#{navigation_div}</body></html>"
+      doc = Nokogiri::HTML(open(page))
+      b_div_found=false
+      doc.xpath('//div[@class="page_navigation_section"]').each do |div|                
+        b_div_found=true          
+        div.replace(Nokogiri.make(navigation_div))
+      end     
+      if b_div_found==false 
+        File.open(page, 'a') do |f|
+          f.puts html_end
+        end
+      else
+        File.open(page, 'w') do |f|
+          f.puts doc
+        end
+      end
+    else
+      html_end="</body></html>"
+      File.open(page, 'a') do |f|
+        f.puts html_end
+      end
+    end
+    
     html_end=nil
   end
   def get_java_script()

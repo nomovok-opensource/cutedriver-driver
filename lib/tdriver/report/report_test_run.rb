@@ -51,6 +51,7 @@ module TDriverReportCreator
       @memory_amount_end='-'
       @memory_amount_total='-'
       $result_storage_in_use=false
+      @pages=MobyUtil::Parameter[ :report_results_per_page, 10]
       @pass_statuses=MobyUtil::Parameter[ :report_passed_statuses, "passed" ].split('|')
       @fail_statuses=MobyUtil::Parameter[ :report_failed_statuses, "failed" ].split('|')
       @not_run_statuses=MobyUtil::Parameter[ :report_not_run_statuses, "not run" ].split('|')
@@ -607,14 +608,14 @@ module TDriverReportCreator
           end
         end
         write_style_sheet(@report_folder+'/tdriver_report_style.css')
-        write_page_start(@report_folder+'/cases/passed_index.html','Passed')
-        write_page_end(@report_folder+'/cases/passed_index.html')
-        write_page_start(@report_folder+'/cases/failed_index.html','Failed')
-        write_page_end(@report_folder+'/cases/failed_index.html')
-        write_page_start(@report_folder+'/cases/not_run_index.html','Not run')
-        write_page_end(@report_folder+'/cases/not_run_index.html')
-        write_page_start(@report_folder+'/cases/total_run_index.html','Total run')
-        write_page_end(@report_folder+'/cases/total_run_index.html')
+        write_page_start(@report_folder+'/cases/1_passed_index.html','Passed')
+        write_page_end(@report_folder+'/cases/1_passed_index.html')
+        write_page_start(@report_folder+'/cases/1_failed_index.html','Failed')
+        write_page_end(@report_folder+'/cases/1_failed_index.html')
+        write_page_start(@report_folder+'/cases/1_not_run_index.html','Not run')
+        write_page_end(@report_folder+'/cases/1_not_run_index.html')
+        write_page_start(@report_folder+'/cases/1_total_run_index.html','Total run')
+        write_page_end(@report_folder+'/cases/1_total_run_index.html')
         #write_page_start(@report_folder+'/cases/tdriver_log_index.html','TDriver log')
         #write_page_end(@report_folder+'/cases/tdriver_log_index.html')
         write_page_start(@report_folder+'/cases/statistics_index.html','Statistics')
@@ -955,7 +956,7 @@ module TDriverReportCreator
                     }
                   }
                 end
-                }
+              }
             }
           end
           File.open(file, 'w') {|f| f.write(builder.to_xml) }
@@ -1030,7 +1031,7 @@ module TDriverReportCreator
         end
       rescue Nokogiri::XML::SyntaxError => e
         $result_storage_in_use=false
-         "caught exception when reading results: #{e}"
+        "caught exception when reading results: #{e}"
         result_storage
       end
     end
@@ -1074,6 +1075,16 @@ module TDriverReportCreator
         end
       end
     end
+
+    def split_array(splittable_array,chunks)
+      a = []
+      splittable_array.each_with_index do |x,i|
+        a << [] if i % chunks == 0
+        a.last << x
+      end
+      a
+    end
+
     #This method updates the tdriver test run enviroment page
     #
     # === params
@@ -1081,28 +1092,52 @@ module TDriverReportCreator
     # === returns
     # nil
     # === raises
-    def update_test_case_summary_pages(status)
+    def update_test_case_summary_pages(status,rewrite=false)
       @passed_cases_arr=Array.new
       @failed_cases_arr=Array.new
       @not_run_cases_arr=Array.new
       @all_cases_arr=Array.new
-      begin
+      begin        
         case status
         when 'passed'
-          @passed_cases_arr=read_result_storage(status)
-          write_page_start(@report_folder+'/cases/passed_index.html','Passed')
-          write_test_case_summary_body(@report_folder+'/cases/passed_index.html',status,@passed_cases_arr)
-          write_page_end(@report_folder+'/cases/passed_index.html')
+          @passed_cases_arr=read_result_storage(status)          
+          splitted_arr=Array.new
+          splitted_arr=split_array(@passed_cases_arr,@pages.to_i)
+          page=1
+          splitted_arr.each do |case_arr|
+            if File.exist?(@report_folder+"/cases/#{page+1}_passed_index.html")==false || rewrite==true
+              write_page_start(@report_folder+"/cases/#{page}_passed_index.html",'Passed',page,splitted_arr.length)
+              write_test_case_summary_body(@report_folder+"/cases/#{page}_passed_index.html",status,case_arr,nil)              
+            end
+            write_page_end(@report_folder+"/cases/#{page}_passed_index.html",page,splitted_arr.length)
+            page+=1
+          end
         when 'failed'
           @failed_cases_arr=read_result_storage(status)
-          write_page_start(@report_folder+'/cases/failed_index.html','Failed')
-          write_test_case_summary_body(@report_folder+'/cases/failed_index.html',status,@failed_cases_arr)
-          write_page_end(@report_folder+'/cases/failed_index.html')
+          splitted_arr=Array.new
+          splitted_arr=split_array(@failed_cases_arr,@pages.to_i)
+          page=1
+          splitted_arr.each do |case_arr|
+            if File.exist?(@report_folder+"/cases/#{page+1}_failed_index.html")==false || rewrite==true
+              write_page_start(@report_folder+"/cases/#{page}_failed_index.html",'Failed',page,splitted_arr.length)
+              write_test_case_summary_body(@report_folder+"/cases/#{page}_failed_index.html",status,case_arr,nil)              
+            end
+            write_page_end(@report_folder+"/cases/#{page}_failed_index.html",page,splitted_arr.length)
+            page+=1
+          end
         when 'not run'
           @not_run_cases_arr=read_result_storage(status)
-          write_page_start(@report_folder+'/cases/not_run_index.html','Not run')
-          write_test_case_summary_body(@report_folder+'/cases/not_run_index.html',status,@not_run_cases_arr)
-          write_page_end(@report_folder+'/cases/not_run_index.html')
+          splitted_arr=Array.new
+          splitted_arr=split_array(@not_run_cases_arr,@pages.to_i)
+          page=1
+          splitted_arr.each do |case_arr|
+            if File.exist?(@report_folder+"/cases/#{page+1}_not_run_index.html")==false || rewrite==true
+              write_page_start(@report_folder+"/cases/#{page}_not_run_index.html",'Not run',page,splitted_arr.length)
+              write_test_case_summary_body(@report_folder+"/cases/#{page}_not_run_index.html",status,case_arr,nil)              
+            end
+            write_page_end(@report_folder+"/cases/#{page}_not_run_index.html",page,splitted_arr.length)
+            page+=1
+          end
         when 'statistics'
           @all_cases_arr=read_result_storage('all')
           write_page_start(@report_folder+'/cases/statistics_index.html','Statistics')
@@ -1110,11 +1145,19 @@ module TDriverReportCreator
           write_page_end(@report_folder+'/cases/statistics_index.html')
         when 'all'
           @all_cases_arr=read_result_storage(status)
-          write_page_start(@report_folder+'/cases/total_run_index.html','Total run')
-          write_page_start(@report_folder+'/cases/chronological_total_run_index.html','Total run')
-          write_test_case_summary_body(@report_folder+'/cases/total_run_index.html','total run',@all_cases_arr,@report_folder+'/cases/chronological_total_run_index.html')
-          write_page_end(@report_folder+'/cases/chronological_total_run_index.html')
-          write_page_end(@report_folder+'/cases/total_run_index.html')
+          splitted_arr=Array.new
+          splitted_arr=split_array(@all_cases_arr,@pages.to_i)
+          page=1
+          splitted_arr.each do |case_arr|
+            if File.exist?(@report_folder+"/cases/#{page+1}_total_run_index.html")==false || rewrite==true
+              write_page_start(@report_folder+"/cases/#{page}_total_run_index.html",'Total run',page,splitted_arr.length)
+              write_page_start(@report_folder+"/cases/#{page}_chronological_total_run_index.html",'Total run',page,splitted_arr.length)
+              write_test_case_summary_body(@report_folder+"/cases/#{page}_total_run_index.html",'total run',case_arr,@report_folder+"/cases/#{page}_chronological_total_run_index.html",page)
+            end
+            write_page_end(@report_folder+"/cases/#{page}_chronological_total_run_index.html",page,splitted_arr.length)
+            write_page_end(@report_folder+"/cases/#{page}_total_run_index.html",page,splitted_arr.length)
+            page+=1
+          end
         end
         @passed_cases_arr=nil
         @failed_cases_arr=nil
@@ -1126,61 +1169,61 @@ module TDriverReportCreator
       return nil
     end
     
-  def create_csv
-    storage_file='all_cases.xml'
-    csv_file = 'all_cases.csv'
-    csv_array = Array.new
-    not_added=false
+    def create_csv
+      storage_file='all_cases.xml'
+      csv_file = 'all_cases.csv'
+      csv_array = Array.new
+      not_added=false
     
-    file=@report_folder+'/'+storage_file
-    csv =  nil 
-    begin
-    if File.exist?(file)
-      io = File.open(file, 'r')
-      csv = File.new(@report_folder+'/'+ csv_file, 'w')
-      xml_data = Nokogiri::XML(io){ |config| config.options = Nokogiri::XML::ParseOptions::STRICT }
-      io.close
-      xml_data.root.xpath("//tests/test").each do |node|
+      file=@report_folder+'/'+storage_file
+      csv =  nil
+      begin
+        if File.exist?(file)
+          io = File.open(file, 'r')
+          csv = File.new(@report_folder+'/'+ csv_file, 'w')
+          xml_data = Nokogiri::XML(io){ |config| config.options = Nokogiri::XML::ParseOptions::STRICT }
+          io.close
+          xml_data.root.xpath("//tests/test").each do |node|
         
-        line=Array.new
-        first_line=Array.new
+            line=Array.new
+            first_line=Array.new
         
-        value=node.search("name").text
-        first_line<<"name" if !not_added
-        line<<value
-        start_time=node.search("start_time").text 
-        first_line<<"start_time" if !not_added
-        line<<start_time
-        duration=node.search("duration").text 
-        first_line<<"duration" if !not_added
-        line<<duration
-        memory_usage=node.search("memory_usage").text 
-        first_line<<"memory_usage" if !not_added
-        line<<memory_usage
-        status=node.search("status").text 
-        first_line<<"status" if !not_added
-        line<<status
-
-        node.xpath("user_display_data/data").each do |data_node|
-            value_name = data_node.get_attribute("id")  
-            value = data_node.text
-            first_line<<value_name if !not_added
+            value=node.search("name").text
+            first_line<<"name" if !not_added
             line<<value
-          end
+            start_time=node.search("start_time").text
+            first_line<<"start_time" if !not_added
+            line<<start_time
+            duration=node.search("duration").text
+            first_line<<"duration" if !not_added
+            line<<duration
+            memory_usage=node.search("memory_usage").text
+            first_line<<"memory_usage" if !not_added
+            line<<memory_usage
+            status=node.search("status").text
+            first_line<<"status" if !not_added
+            line<<status
 
-        csv.puts(first_line.join(",")) if !not_added
-        csv.puts(line.join(","))
-        not_added=true
+            node.xpath("user_display_data/data").each do |data_node|
+              value_name = data_node.get_attribute("id")
+              value = data_node.text
+              first_line<<value_name if !not_added
+              line<<value
+            end
+
+            csv.puts(first_line.join(",")) if !not_added
+            csv.puts(line.join(","))
+            not_added=true
+          end
+          csv.close
+        else
+          puts "Unable to create csv file"
+        end
+      rescue Exception => e
+        puts "Error creating csv file"
+        puts e.to_s
       end
-      csv.close
-    else
-        puts "Unable to create csv file"
-    end   
-    rescue Exception => e
-      puts "Error creating csv file"
-      puts e.to_s
     end
-  end
   
   end
 end
