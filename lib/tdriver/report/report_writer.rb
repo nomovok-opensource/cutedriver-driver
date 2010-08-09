@@ -1092,13 +1092,17 @@ display: none;
     div_body
   end
 
-  def write_page_end(page,report_page=nil,report_pages=nil)    
+  def write_page_end(page,report_page=nil,report_pages=nil)
+    page_ready=nil
     if report_page!=nil      
       navigation_div="#{write_page_navigation_div(page,report_page,report_pages)}"      
       html_end="#{navigation_div}</body></html>"
       doc = Nokogiri::HTML(open(page))
       b_div_found=false
-      doc.xpath('//div[@class="page_navigation_section"]').each do |div|                
+      doc.xpath('//div[@class="page_navigation_section"]').each do |div|
+        if div.text.include?('Next')
+          page_ready=report_page
+        end
         b_div_found=true          
         div.replace(Nokogiri.make(navigation_div))
       end     
@@ -1116,9 +1120,9 @@ display: none;
       File.open(page, 'a') do |f|
         f.puts html_end
       end
-    end
-    
+    end    
     html_end=nil
+    page_ready
   end
   def get_java_script()
     java_script='<script type="text/javascript">'<<
