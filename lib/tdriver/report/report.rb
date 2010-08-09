@@ -23,10 +23,15 @@ require File.expand_path( File.join( File.dirname( __FILE__ ), 'report_api' ) )
 require File.expand_path( File.join( File.dirname( __FILE__ ), 'report_test_run' ) )
 require File.expand_path( File.join( File.dirname( __FILE__ ), 'report_test_case_run' ) )
 require File.expand_path( File.join( File.dirname( __FILE__ ), 'error_recovery/tdriver_error_recovery' ) )
+require File.expand_path( File.join( File.dirname( __FILE__ ), 'error_recovery/tdriver_custom_error_recovery' ) )
+if MobyUtil::Parameter[ :custom_error_recovery_module, nil ]!=nil
+  require MobyUtil::Parameter[ :custom_error_recovery_module ]
+end
 require File.expand_path( File.join( File.dirname( __FILE__ ), 'report_data_presentation' ) )
 
 module TDriverReportCreator
   include TDriverErrorRecovery
+  include TDriverCustomErrorRecovery
 
   #This method initializes new test run
   #
@@ -77,6 +82,7 @@ module TDriverReportCreator
         puts 'Report generated to:'
         puts $tdriver_reporter.get_report_folder()
         clean_video_files
+        ending_test_set_run if MobyUtil::Parameter[ :custom_error_recovery_module, nil ]!=nil
         if $tdriver_reporter.get_total_failed.to_i > 0
           Kernel.exit(1)
         elsif $tdriver_reporter.get_total_run.to_i == 0
@@ -88,6 +94,7 @@ module TDriverReportCreator
     else
       initialize_error_recovery
     end
+    starting_test_set_run if MobyUtil::Parameter[ :custom_error_recovery_module, nil ]!=nil
   end
   #This method registers a connection error
   #
@@ -99,6 +106,7 @@ module TDriverReportCreator
   def error_in_connection_detected
       $tdriver_reporter.set_total_device_resets(1)
       $new_test_case.set_test_case_reboots(1) if $new_test_case!=nil
+      error_in_connection
   end
   #This method returns the group where the test case belongs
   #
@@ -142,11 +150,11 @@ module TDriverReportCreator
       $tdriver_reporter.set_total_passed(1)
     end
     if(status!='passed' && status!='failed')
-      
+
       current_status=$tdriver_reporter.get_not_run_status
       $tdriver_reporter.set_total_not_run(1)
     end
-    
+
      $tdriver_reporter.write_to_result_storage(current_status,test_case_name,group,reboots,crashes,
       $new_test_case.get_test_case_start_time,
       $new_test_case.get_test_case_chronological_view_data,
@@ -273,6 +281,7 @@ module TDriverReportCreator
     end
     update_test_case_user_log()
     update_test_case_user_data()
+    starting_test_case(test_case, MobyBase::SUTFactory.instance.connected_suts) if MobyUtil::Parameter[ :custom_error_recovery_module, nil ]!=nil
   end
   #This method updates the current test case execution log
   #
@@ -315,6 +324,7 @@ module TDriverReportCreator
     if $new_test_case.video_recording?
       $new_test_case.copy_video_capture()
     end
+    error_in_test_case(MobyBase::SUTFactory.instance.connected_suts) if MobyUtil::Parameter[ :custom_error_recovery_module, nil ]!=nil
   end
   #This updates the test case behaviour log
   #
@@ -427,6 +437,7 @@ module TDriverReportCreator
       execution_log=nil
 
     end
+    ending_test_case(status, MobyBase::SUTFactory.instance.connected_suts) if MobyUtil::Parameter[ :custom_error_recovery_module, nil ]!=nil
   end
   def add_report_group(value)
     $tdriver_reporter.set_generic_reporting_groups(value)
@@ -451,7 +462,7 @@ module TDriverReportCreator
 
 end #TDriverReportCreator
 require File.expand_path( File.join( File.dirname( __FILE__ ), 'report_cucumber' ) )
-require File.expand_path( File.join( File.dirname( __FILE__ ), 'report_cucumber_listener' ) ) 
+require File.expand_path( File.join( File.dirname( __FILE__ ), 'report_cucumber_listener' ) )
 require File.expand_path( File.join( File.dirname( __FILE__ ), 'report_cucumber_reporter' ) )
 require File.expand_path( File.join( File.dirname( __FILE__ ), 'report_rspec' ) )
 require File.expand_path( File.join( File.dirname( __FILE__ ), 'report_test_unit' ) )
