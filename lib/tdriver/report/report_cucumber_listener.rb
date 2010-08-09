@@ -32,7 +32,7 @@ module TDriverReport
     # === raises
     def initialize(step_mother, io, options)
       file, line = caller.first.split(":")
-      $stdout.puts "Please note that CucumberListener may soon be deprecated. Use TDriverReport::CucumberReporter instead." % [ file, line]
+      $stderr.puts "Please note that CucumberListener may soon be deprecated. Use TDriverReport::CucumberReporter instead." % [ file, line]
       #super(step_mother, io, options)
       start_run()
       @options = options
@@ -187,7 +187,7 @@ module MattiReport
     # === raises
     def initialize(step_mother, io, options)
       file, line = caller.first.split(":")
-      $stdout.puts "%s:%s warning: MattiReport deprecated, use TDriverReport instead" % [ file, line]
+      $stderr.puts "%s:%s warning: MattiReport deprecated, use TDriverReport instead" % [ file, line]
       #super(step_mother, io, options)
       start_run()
       @options = options

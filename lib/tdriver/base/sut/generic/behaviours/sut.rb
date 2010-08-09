@@ -748,7 +748,7 @@ module MobyBehaviour
 
 			else
 
-				#$stdout.puts "%s:%s warning: deprecated method usage convention, please use sut#parameter[] instead of sut#parameter()" % ( caller.first || "%s:%s" % [ __FILE__, __LINE__ ] ).split(":")[ 0..1 ]
+				#$stderr.puts "%s:%s warning: deprecated method usage convention, please use sut#parameter[] instead of sut#parameter()" % ( caller.first || "%s:%s" % [ __FILE__, __LINE__ ] ).split(":")[ 0..1 ]
 
 				MobyUtil::ParameterUserAPI.instance[ self.id ][ *arguments ]
 

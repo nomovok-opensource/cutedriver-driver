@@ -124,67 +124,67 @@ module TDriverReportAPI
 
   def matti_log_data(data)
     file, line = caller.first.split(":")
-    $stdout.puts "%s:%s warning: method deprecated" % [ file, line]
+    $stderr.puts "%s:%s warning: method deprecated" % [ file, line]
     tdriver_log_data(data)
   end
   def matti_report_log(message)
     file, line = caller.first.split(":")
-    $stdout.puts "%s:%s warning: method deprecated" % [ file, line]
+    $stderr.puts "%s:%s warning: method deprecated" % [ file, line]
   	tdriver_report_log(message)
   end
   def matti_report_set_test_case_status(status)
     file, line = caller.first.split(":")
-    $stdout.puts "%s:%s warning: method deprecated" % [ file, line]
+    $stderr.puts "%s:%s warning: method deprecated" % [ file, line]
   	tdriver_report_set_test_case_status(status)
   end
   def matti_report_total_tests_run()
     file, line = caller.first.split(":")
-    $stdout.puts "%s:%s warning: method deprecated" % [ file, line]
+    $stderr.puts "%s:%s warning: method deprecated" % [ file, line]
     tdriver_report_total_tests_run()
   end
   def matti_report_total_passed_tests()
     file, line = caller.first.split(":")
-    $stdout.puts "%s:%s warning: method deprecated" % [ file, line]
+    $stderr.puts "%s:%s warning: method deprecated" % [ file, line]
     tdriver_report_total_passed_tests()
   end
   def matti_report_total_failed_tests()
     file, line = caller.first.split(":")
-    $stdout.puts "%s:%s warning: method deprecated" % [ file, line]
+    $stderr.puts "%s:%s warning: method deprecated" % [ file, line]
     tdriver_report_total_failed_tests()
   end
   def matti_report_total_not_run_tests()
     file, line = caller.first.split(":")
-    $stdout.puts "%s:%s warning: method deprecated" % [ file, line]
+    $stderr.puts "%s:%s warning: method deprecated" % [ file, line]
     tdriver_report_total_not_run_tests()
   end
   def matti_report_folder()
     file, line = caller.first.split(":")
-    $stdout.puts "%s:%s warning: method deprecated" % [ file, line]
+    $stderr.puts "%s:%s warning: method deprecated" % [ file, line]
     tdriver_report_folder()
   end
   def matti_report_start_time()
     file, line = caller.first.split(":")
-    $stdout.puts "%s:%s warning: method deprecated" % [ file, line]
+    $stderr.puts "%s:%s warning: method deprecated" % [ file, line]
     tdriver_report_start_time()
   end
   def matti_report_run_time()
     file, line = caller.first.split(":")
-    $stdout.puts "%s:%s warning: method deprecated" % [ file, line]
+    $stderr.puts "%s:%s warning: method deprecated" % [ file, line]
     tdriver_report_run_time()
   end
   def matti_report_total_crash_files()
     file, line = caller.first.split(":")
-    $stdout.puts "%s:%s warning: method deprecated" % [ file, line]
+    $stderr.puts "%s:%s warning: method deprecated" % [ file, line]
     tdriver_report_total_crash_files()
   end
   def matti_report_total_device_resets()
     file, line = caller.first.split(":")
-    $stdout.puts "%s:%s warning: method deprecated" % [ file, line]
+    $stderr.puts "%s:%s warning: method deprecated" % [ file, line]
     tdriver_report_total_device_resets()
   end
   def matti_report_combine_reports(reports)
     file, line = caller.first.split(":")
-    $stdout.puts "%s:%s warning: method deprecated" % [ file, line]
+    $stderr.puts "%s:%s warning: method deprecated" % [ file, line]
     tdriver_report_combine_reports(reports)
   end
   
