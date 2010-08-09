@@ -54,6 +54,15 @@ module TDriverCustomErrorRecovery
 
   end
 
+  # This method is called by TDriver Reporter when test case details are updated
+  # === params
+  # details: Execution details recived from the current test case
+  # === returns
+  # === raises
+  def updating_test_case_details(details)
+
+  end
+
   # This method is called by TDriver Reporter when test case execution is ended
   # === params
   # connected_suts: All the connected TDriver suts

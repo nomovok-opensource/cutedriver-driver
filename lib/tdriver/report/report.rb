@@ -293,6 +293,7 @@ module TDriverReportCreator
   def update_test_case(details)
     update_test_case_user_log()
     $new_test_case.set_test_case_execution_log(details)
+    updating_test_case_details(details) if MobyUtil::Parameter[ :custom_error_recovery_module, nil ]!=nil
     begin
       start_memory=$new_test_case.get_tc_memory_amount_start()
       if start_memory==0
