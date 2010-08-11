@@ -47,6 +47,7 @@ module TDriverReportCreator
       @test_case_user_data_columns = Array.new
       @test_case_user_chronological_table_data = Hash.new
       @attached_test_reports = Array.new
+      @report_pages_ready=Array.new
       @memory_amount_start='-'
       @memory_amount_end='-'
       @memory_amount_total='-'
@@ -1105,11 +1106,17 @@ module TDriverReportCreator
           splitted_arr=split_array(@passed_cases_arr,@pages.to_i)
           page=1
           splitted_arr.each do |case_arr|
-            if File.exist?(@report_folder+"/cases/#{page+1}_passed_index.html")==false || rewrite==true
+            #if File.exist?(@report_folder+"/cases/#{page+1}_passed_index.html")==false || rewrite==true
+            if @report_pages_ready.include?("#{page}_passed")==false || rewrite==true
               write_page_start(@report_folder+"/cases/#{page}_passed_index.html",'Passed',page,splitted_arr.length)
-              write_test_case_summary_body(@report_folder+"/cases/#{page}_passed_index.html",status,case_arr,nil)              
+              write_test_case_summary_body(@report_folder+"/cases/#{page}_passed_index.html",status,case_arr,nil)
+              #end
+              page_ready=write_page_end(@report_folder+"/cases/#{page}_passed_index.html",page,splitted_arr.length)
             end
-            write_page_end(@report_folder+"/cases/#{page}_passed_index.html",page,splitted_arr.length)
+            if page_ready!=nil
+              @report_pages_ready << "#{page_ready}_passed"
+            end
+            page_ready=nil
             page+=1
           end
         when 'failed'
@@ -1119,10 +1126,16 @@ module TDriverReportCreator
           page=1
           splitted_arr.each do |case_arr|
             if File.exist?(@report_folder+"/cases/#{page+1}_failed_index.html")==false || rewrite==true
-              write_page_start(@report_folder+"/cases/#{page}_failed_index.html",'Failed',page,splitted_arr.length)
-              write_test_case_summary_body(@report_folder+"/cases/#{page}_failed_index.html",status,case_arr,nil)              
+              if @report_pages_ready.include?("#{page}_failed")==false || rewrite==true
+                write_page_start(@report_folder+"/cases/#{page}_failed_index.html",'Failed',page,splitted_arr.length)
+                write_test_case_summary_body(@report_folder+"/cases/#{page}_failed_index.html",status,case_arr,nil)
+              end
             end
-            write_page_end(@report_folder+"/cases/#{page}_failed_index.html",page,splitted_arr.length)
+            page_ready=write_page_end(@report_folder+"/cases/#{page}_failed_index.html",page,splitted_arr.length) if @report_pages_ready.include?("#{page}_failed")==false || rewrite==true
+            if page_ready!=nil
+              @report_pages_ready << "#{page_ready}_failed"
+            end
+            page_ready=nil
             page+=1
           end
         when 'not run'
@@ -1132,10 +1145,16 @@ module TDriverReportCreator
           page=1
           splitted_arr.each do |case_arr|
             if File.exist?(@report_folder+"/cases/#{page+1}_not_run_index.html")==false || rewrite==true
-              write_page_start(@report_folder+"/cases/#{page}_not_run_index.html",'Not run',page,splitted_arr.length)
-              write_test_case_summary_body(@report_folder+"/cases/#{page}_not_run_index.html",status,case_arr,nil)              
+              if @report_pages_ready.include?("#{page}_not_run")==false || rewrite==true
+                write_page_start(@report_folder+"/cases/#{page}_not_run_index.html",'Not run',page,splitted_arr.length)
+                write_test_case_summary_body(@report_folder+"/cases/#{page}_not_run_index.html",status,case_arr,nil)
+              end
             end
-            write_page_end(@report_folder+"/cases/#{page}_not_run_index.html",page,splitted_arr.length)
+            page_ready=write_page_end(@report_folder+"/cases/#{page}_not_run_index.html",page,splitted_arr.length) if @report_pages_ready.include?("#{page}_not_run")==false || rewrite==true
+            if page_ready!=nil
+              @report_pages_ready << "#{page_ready}_not_run"
+            end
+            page_ready=nil
             page+=1
           end
         when 'statistics'
@@ -1150,12 +1169,19 @@ module TDriverReportCreator
           page=1
           splitted_arr.each do |case_arr|
             if File.exist?(@report_folder+"/cases/#{page+1}_total_run_index.html")==false || rewrite==true
-              write_page_start(@report_folder+"/cases/#{page}_total_run_index.html",'Total run',page,splitted_arr.length)
-              write_page_start(@report_folder+"/cases/#{page}_chronological_total_run_index.html",'Total run',page,splitted_arr.length)
-              write_test_case_summary_body(@report_folder+"/cases/#{page}_total_run_index.html",'total run',case_arr,@report_folder+"/cases/#{page}_chronological_total_run_index.html",page)
+              if @report_pages_ready.include?("#{page}_all")==false || rewrite==true
+                write_page_start(@report_folder+"/cases/#{page}_total_run_index.html",'Total run',page,splitted_arr.length)
+                write_page_start(@report_folder+"/cases/#{page}_chronological_total_run_index.html",'Total run',page,splitted_arr.length)
+                write_test_case_summary_body(@report_folder+"/cases/#{page}_total_run_index.html",'total run',case_arr,@report_folder+"/cases/#{page}_chronological_total_run_index.html",page)
+              end
             end
-            write_page_end(@report_folder+"/cases/#{page}_chronological_total_run_index.html",page,splitted_arr.length)
-            write_page_end(@report_folder+"/cases/#{page}_total_run_index.html",page,splitted_arr.length)
+            write_page_end(@report_folder+"/cases/#{page}_chronological_total_run_index.html",page,splitted_arr.length) if @report_pages_ready.include?("#{page}_all")==false || rewrite==true
+            page_ready=write_page_end(@report_folder+"/cases/#{page}_total_run_index.html",page,splitted_arr.length) if @report_pages_ready.include?("#{page}_all")==false || rewrite==true
+
+            if page_ready!=nil
+              @report_pages_ready << "#{page_ready}_all"
+            end
+            page_ready=nil
             page+=1
           end
         end

@@ -27,6 +27,7 @@ class ReportingStatistics
     @pass_statuses=MobyUtil::Parameter[ :report_passed_statuses, "passed" ].split('|')
     @fail_statuses=MobyUtil::Parameter[ :report_failed_statuses, "failed" ].split('|')
     @not_run_statuses=MobyUtil::Parameter[ :report_not_run_statuses, "not run" ].split('|')
+    @test_results_per_page=MobyUtil::Parameter[ :report_results_per_page, 10]
     @statistics_arr=Array.new
     @total_statistics_arr=Array.new
   end
