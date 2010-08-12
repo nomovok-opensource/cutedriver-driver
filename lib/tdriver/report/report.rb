@@ -104,9 +104,9 @@ module TDriverReportCreator
   # nil
   # === raises
   def error_in_connection_detected
-      $tdriver_reporter.set_total_device_resets(1)
-      $new_test_case.set_test_case_reboots(1) if $new_test_case!=nil
-      error_in_connection
+    $tdriver_reporter.set_total_device_resets(1)
+    $new_test_case.set_test_case_reboots(1) if $new_test_case!=nil
+    error_in_connection
   end
   #This method returns the group where the test case belongs
   #
@@ -154,8 +154,8 @@ module TDriverReportCreator
       current_status=$tdriver_reporter.get_not_run_status
       $tdriver_reporter.set_total_not_run(1)
     end
-
-     $tdriver_reporter.write_to_result_storage(current_status,test_case_name,group,reboots,crashes,
+     
+    $tdriver_reporter.write_to_result_storage(current_status,test_case_name,group,reboots,crashes,
       $new_test_case.get_test_case_start_time,
       $new_test_case.get_test_case_chronological_view_data,
       $new_test_case.get_test_case_run_time,
@@ -232,13 +232,18 @@ module TDriverReportCreator
   # === returns
   # nil
   # === raises
-  def start_test_case(test_case)
+  def start_test_case(test_case)    
+    if $new_test_case!=nil
+      if $new_test_case.get_test_case_ended==false
+        end_test_case($new_test_case.get_test_case_name,@tc_status)
+      end
+    end
     $test_case_run_index=$test_case_run_index.to_i+1
     $new_test_case=TestCaseRun.new
     $new_test_case.set_test_cases_folder($current_tdriver_report_folder.to_s+'/cases')
     $new_test_case.set_test_case_name(test_case.to_s)
     $new_test_case.set_test_case_start_time(Time.now)
-    $new_test_case.set_test_case_index($test_case_run_index.to_i)
+    $new_test_case.set_test_case_index($test_case_run_index.to_i)    
     if start_error_recovery()==true
       $tdriver_reporter.set_total_device_resets(1)
       $new_test_case.set_test_case_reboots(1)
@@ -290,7 +295,7 @@ module TDriverReportCreator
   # === returns
   # nil
   # === raises
-  def update_test_case(details)
+  def update_test_case(details)    
     update_test_case_user_log()
     $new_test_case.set_test_case_execution_log(details)
     updating_test_case_details(details) if MobyUtil::Parameter[ :custom_error_recovery_module, nil ]!=nil
@@ -372,8 +377,9 @@ module TDriverReportCreator
   # nil
   # === raises
   def end_test_case(test_case,status)
+    $new_test_case.set_test_case_ended(true)
     update_test_case_user_log()
-    update_test_case_user_data()
+    update_test_case_user_data()   
     if $new_test_case != nil
       if MobyUtil::Parameter[:report_crash_file_monitor] == 'true'
         found_crash_files = $new_test_case.check_if_crash_files_exist()

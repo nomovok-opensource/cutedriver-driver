@@ -28,6 +28,7 @@ module TDriverReportCreator
       @test_case_folder=nil
       @test_cases_folder=nil
       @test_case_name=nil
+      @test_case_ended=false
       @test_case_name_full=nil
       @test_case_index=nil
       @test_case_start_time=nil
@@ -114,6 +115,16 @@ module TDriverReportCreator
     # === raises
     def set_test_cases_folder(value)
       @test_cases_folder=value
+    end
+    #This method sets the tdriver test case has ended
+    #
+    # === params
+    # value: test cases report folder
+    # === returns
+    # nil
+    # === raises
+    def set_test_case_ended(value)
+      @test_case_ended=value
     end
     #This method sets the tdriver test case report folder
     #
@@ -388,6 +399,16 @@ module TDriverReportCreator
     # === raises
     def get_test_case_index()
       @test_case_index
+    end
+    #This method gets the tdriver test case ended status
+    #
+    # === params
+    # value: test cases report folder
+    # === returns
+    # nil
+    # === raises
+    def get_test_case_ended()
+      @test_case_ended
     end
     #This method gets the test case logging level
     #

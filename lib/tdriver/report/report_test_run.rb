@@ -860,7 +860,7 @@ module TDriverReportCreator
       end
       $result_storage_in_use=true
       begin
-        storage_file=nil
+        storage_file=nil       
         html_link=status+'_'+index.to_s+'_'+testcase+'/index.html' if link==''
         storage_file='all_cases.xml'
 
