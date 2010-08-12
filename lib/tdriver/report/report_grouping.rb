@@ -267,6 +267,8 @@ class ReportingGroups
       table_body='<table align="center" style="width:100%;">'<<
         '<tr>'<<
         '<td>'<<
+        '<b>Execution</b></td>'<<
+        '<td>'<<
         '<b>Start Time</b></td>'<<
         '<td>'<<
         '<b>Name</b></td>'<<
@@ -304,6 +306,9 @@ class ReportingGroups
         table_body << '<tr' <<
           tc_style_tag <<
           '>'<<
+        '<td>'<<
+          x[8]<< #testcase execution number
+        '</td>'<<
           '<td>'<<
           x[4]<< #testcase start time
         '</td>'<<
