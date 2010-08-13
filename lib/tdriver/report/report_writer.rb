@@ -661,6 +661,24 @@ display: none;
       '</dl>'
     html_body
   end  
+  def write_duration_graph(page, folder, graph_file_name, tc_arr)
+  
+	tdriver_group=ReportingStatistics.new(tc_arr)
+	tdriver_group.generate_duration_graph(folder + '/cases/' + graph_file_name)
+	
+	html_body=Array.new
+	html_body << '<div>'
+	html_body << '<H1 ALIGN=center><img border="0" src="./'+graph_file_name+'"/></H1>'
+	html_body << '<center>This graph displays the duration for each test case during the run.</center>'
+	html_body << '<center>If a test case has been executed several time, this duration is the sum of all the durations for this specific test case.</center>'
+	html_body << '</div>'
+	File.open(page, 'a') do |f2|
+	f2.puts html_body
+	end
+	tdriver_group = nil
+	html_body=nil
+	GC.start
+  end
   def write_test_case_summary_body(page,status,tc_arr,chronological_page=nil,report_page=nil)
     html_body=Array.new
     case status
