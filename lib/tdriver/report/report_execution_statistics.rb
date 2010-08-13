@@ -1,20 +1,20 @@
 ############################################################################
-## 
-## Copyright (C) 2010 Nokia Corporation and/or its subsidiary(-ies). 
-## All rights reserved. 
-## Contact: Nokia Corporation (testabilitydriver@nokia.com) 
-## 
-## This file is part of Testability Driver. 
-## 
-## If you have questions regarding the use of this file, please contact 
-## Nokia at testabilitydriver@nokia.com . 
-## 
-## This library is free software; you can redistribute it and/or 
-## modify it under the terms of the GNU Lesser General Public 
-## License version 2.1 as published by the Free Software Foundation 
-## and appearing in the file LICENSE.LGPL included in the packaging 
-## of this file. 
-## 
+##
+## Copyright (C) 2010 Nokia Corporation and/or its subsidiary(-ies).
+## All rights reserved.
+## Contact: Nokia Corporation (testabilitydriver@nokia.com)
+##
+## This file is part of Testability Driver.
+##
+## If you have questions regarding the use of this file, please contact
+## Nokia at testabilitydriver@nokia.com .
+##
+## This library is free software; you can redistribute it and/or
+## modify it under the terms of the GNU Lesser General Public
+## License version 2.1 as published by the Free Software Foundation
+## and appearing in the file LICENSE.LGPL included in the packaging
+## of this file.
+##
 ############################################################################
 
 
@@ -73,7 +73,7 @@ class ReportingStatistics
       tc_status=test_case[7]
       tc_name=test_case[0].to_s.gsub('_',' ')
       reboots=test_case[2]
-      crashes=test_case[3]      
+      crashes=test_case[3]
       current_index=0
       b_test_in_statistics=false
       @total_statistics_arr.each do |total_status|
@@ -139,12 +139,21 @@ class ReportingStatistics
     tc_style_tag=' id="not_run_case"' if @not_run_statuses.include?(status) && total>0
     tc_style_tag
   end
-  def add_result_link(test_case,status,total)
-    tc_link='<a href="1_chronological_total_run_index.html">'
-    tc_link='<a href="1_chronological_total_run_index.html#'+test_case.gsub(' ','_')+'_' + @pass_statuses.first + '">' if @pass_statuses.include?(status) && total>0
-    tc_link='<a href="1_chronological_total_run_index.html#'+test_case.gsub(' ','_')+'_' + @fail_statuses.first + '">' if @fail_statuses.include?(status) && total>0
-    tc_link='<a href="1_chronological_total_run_index.html#'+test_case.gsub(' ','_')+'_' + @not_run_statuses.first + '">' if @not_run_statuses.include?(status) && total>0
+  def add_result_link(test_case,status,total,test_index)
+
+    result_page=test_index/@test_results_per_page.to_i
+    result_page_mod=test_index % @test_results_per_page.to_i
+    if result_page_mod>0
+      result_page=result_page.to_i+1
+    end
+    result_page=1 if result_page==0
+
+    tc_link='<a href="'+result_page.to_i.to_s+'_chronological_total_run_index.html">'
+    tc_link='<a href="'+result_page.to_i.to_s+'_chronological_total_run_index.html#'+test_case.gsub(' ','_')+'_' + @pass_statuses.first + '">' if @pass_statuses.include?(status) && total>0
+    tc_link='<a href="'+result_page.to_i.to_s+'_chronological_total_run_index.html#'+test_case.gsub(' ','_')+'_' + @fail_statuses.first + '">' if @fail_statuses.include?(status) && total>0
+    tc_link='<a href="'+result_page.to_i.to_s+'_chronological_total_run_index.html#'+test_case.gsub(' ','_')+'_' + @not_run_statuses.first + '">' if @not_run_statuses.include?(status) && total>0
     tc_link
+
   end
 
   def generate_statistics_table()
@@ -161,6 +170,7 @@ class ReportingStatistics
       '</tr>'
 
     test_case_added=Array.new
+    test_index=1
     @statistics_arr.each do |test_case|
       tc_name=test_case[0].to_s.gsub('_',' ')
       if test_case_added.include?(tc_name)==false
@@ -168,13 +178,13 @@ class ReportingStatistics
         table_body << "<td>#{tc_name}</td>"
         @statistics_arr.each do |test_case_statistics|
           if test_case_statistics[0]==tc_name
-            table_body << "<td#{add_result_style_tag(test_case_statistics[1],test_case_statistics[2])}>#{add_result_link(test_case_statistics[0],test_case_statistics[1],test_case_statistics[2])}#{test_case_statistics[2]}</a></td>"
+            table_body << "<td#{add_result_style_tag(test_case_statistics[1],test_case_statistics[2])}>#{add_result_link(test_case_statistics[0],test_case_statistics[1],test_case_statistics[2],test_index)}#{test_case_statistics[2]}</a></td>"
           end
         end
         table_body << "</tr>"
         test_case_added << tc_name
+      test_index+=1
       end
-
     end
 
 
