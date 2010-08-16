@@ -18,8 +18,8 @@
 ############################################################################
 
 
-require File.expand_path( File.join( File.dirname( __FILE__ ), 'report_writer' ) )
-require File.expand_path( File.join( File.dirname( __FILE__ ), 'report_crash_file_capture' ) )
+
+
 module TDriverReportCreator
   #Test case class for new test case run
   class TestCaseRun < TDriverReportCrashFileCapture
@@ -231,7 +231,7 @@ module TDriverReportCreator
     def set_test_case_execution_log(value)
       @test_case_execution_log=@test_case_execution_log.to_s + '<br />' + value.to_s.gsub(/\n/,'<br />')
     end
-     #This method sets the test case user data
+    #This method sets the test case user data
     #
     # === params
     # value: test case user data
@@ -580,7 +580,7 @@ module TDriverReportCreator
     # === returns
     # nil
     # === raises
-    def capture_failed_dump()
+    def capture_dump(take_screenshot=true)      
       MobyUtil::Logger.instance.enabled=false
       begin
         dump_folder=@test_case_folder+'/state_xml'
@@ -588,16 +588,21 @@ module TDriverReportCreator
           FileUtils.mkdir_p dump_folder
         end
         MobyBase::SUTFactory.instance.connected_suts.each do |sut_id, sut_attributes|
-          begin
-            sut_attributes[:sut].capture_screen( :Filename => dump_folder+'/failed_state.png', :Redraw => true ) if sut_attributes[:is_connected]
-          rescue Exception=>e
-            @capture_screen_error="Unable to capture sceen image: " + e.message
+          
+          t = Time.now
+          time_stamp=t.strftime( "%Y%m%d%H%M%S" )
+          if take_screenshot==true
+            begin
+              sut_attributes[:sut].capture_screen( :Filename => dump_folder+'/'+time_stamp+'_state.png', :Redraw => true ) if sut_attributes[:is_connected]
+            rescue Exception=>e             
+              @capture_screen_error="Unable to capture sceen image: " + e.message
+            end
           end
         
           begin
             failed_xml_state=sut_attributes[:sut].xml_data() if sut_attributes[:is_connected]
-            File.open(dump_folder+'/failed_state.xml', 'w') { |file| file.write(failed_xml_state) }
-          rescue Exception=>e
+            File.open(dump_folder+'/'+time_stamp+'_state.xml', 'w') { |file| file.write(failed_xml_state) }
+          rescue Exception=>e           
             @failed_dump_error="Unable to capture state xml: " + e.message
           end
   			end
@@ -651,6 +656,29 @@ module TDriverReportCreator
       end
       return nil
     end
+
+    #This method renames a new TDriver test case folder when testing is ended
+    #
+    # === params
+    # nil
+    # === returns
+    # nil
+    # === raises
+    def  rename_test_case_folder(status)
+      begin
+        #check if report directory exists
+        old_test_case_folder=@test_case_folder
+        new_test_case_folder=@test_case_folder.gsub('result',status)        
+        if File::directory?(new_test_case_folder)==false
+          FileUtils.mv old_test_case_folder, new_test_case_folder , :force => true  # no error
+          @test_case_folder=new_test_case_folder
+        end
+      rescue Exception => e
+        Kernel::raise e
+      end
+      return nil
+    end
+
     def video_recording?
       @tc_video_recording
     end

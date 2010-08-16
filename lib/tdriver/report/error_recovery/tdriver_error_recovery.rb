@@ -18,8 +18,6 @@
 ############################################################################
 
 
-require File.expand_path( File.join( File.dirname( __FILE__ ), 'tdriver_error_recovery_settings' ) )
-
 module TDriverErrorRecovery
 
   # Initializes error recovery settings

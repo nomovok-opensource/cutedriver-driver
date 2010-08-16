@@ -18,7 +18,6 @@
 ############################################################################
 
 
-require File.expand_path( File.join( File.dirname( __FILE__ ), 'report_writer' ) )
 class ReportingGroups
   def initialize(tdriver_groups,test_cases_array,grouping=true)
     #@reporting_groups='Common:Application:Close:Open|Common:Connect to|Common:Disconnect|Qt:Tap|Qt:Drag:Drag to|Qt:Type Text'

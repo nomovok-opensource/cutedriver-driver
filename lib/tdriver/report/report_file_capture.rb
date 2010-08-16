@@ -19,8 +19,6 @@
 
 
 
-
-
 module TDriverReportFileCapture
   def initialize
     @file_locations=Array.new

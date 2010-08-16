@@ -26,6 +26,12 @@ module TDriverReportAPI
       $tdriver_reporter.set_user_data(data)
     end
   end
+
+  def tdriver_capture_state(capture_screen_shot=true)    
+    if $tdriver_reporter
+      $new_test_case.capture_dump(capture_screen_shot) if $new_test_case
+    end
+  end
   
   def tdriver_log_data_in_total_run_table(column_name,value)
     Kernel::raise ArgumentError.new("Argument to method cannot be nil.") if column_name.nil? || value.nil?

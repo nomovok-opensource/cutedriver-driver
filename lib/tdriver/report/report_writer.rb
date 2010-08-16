@@ -18,8 +18,6 @@
 ############################################################################
 
 
-require File.expand_path( File.join( File.dirname( __FILE__ ), 'report_grouping' ) )
-require File.expand_path( File.join( File.dirname( __FILE__ ), 'report_execution_statistics' ) )
 module TDriverReportWriter
   def write_style_sheet(page)
     css='body
@@ -496,7 +494,7 @@ display: none;
       d=Dir.entries(folder.to_s+'/state_xml')
       d.each do |x|
         if (x !='.' && x != '..')
-          if (x.include? '.png') && (capture_screen_error==nil)
+          if (x.include? '.png') 
             html_body=html_body<<
               '<tr>'<<
               '<td style="font-weight: 700">'<<
@@ -508,16 +506,9 @@ display: none;
               x<<
               '" /></a></td>'<<
               '</tr>'
-          elsif capture_screen_error!=nil
-            html_body=html_body<<
-              '<tr>'<<
-              '<td style="font-weight: 700">'<<
-              'Screen capture</td>'<<
-              '<td style="font-weight: 700">'<<
-              capture_screen_error.to_s,'</td>'<<
-              '</tr>'
-          end
-          if (x.include? '.xml') && (failed_dump_error==nil)
+          end                    
+
+          if (x.include? '.xml')
             html_body=html_body<<
               '<tr>'<<
               '<td style="font-weight: 700">'<<
@@ -525,18 +516,29 @@ display: none;
               '<td>'<<
               '<a href="state_xml/'<<
               x<<
-              '">Sut XML State</a></td>'<<
+              '">'+x.to_s+'</a></td>'<<
               '</tr>'
-          elsif failed_dump_error!=nil
-            html_body=html_body<<
-              '<tr>'<<
-              '<td style="font-weight: 700">'<<
-              'State</td>'<<
-              '<td style="font-weight: 700">'<<
-              failed_dump_error.to_s,'</td>'<<
-              '</tr>'
-          end
+          end          
         end
+      end
+      if capture_screen_error!=nil
+        html_body=html_body<<
+          '<tr>'<<
+          '<td style="font-weight: 700">'<<
+          'Screen capture</td>'<<
+          '<td style="font-weight: 700">'<<
+          capture_screen_error.to_s,'</td>'<<
+          '</tr>'
+      end
+
+      if failed_dump_error!=nil
+        html_body=html_body<<
+          '<tr>'<<
+          '<td style="font-weight: 700">'<<
+          'State</td>'<<
+          '<td style="font-weight: 700">'<<
+          failed_dump_error.to_s,'</td>'<<
+          '</tr>'
       end
     end
     if File::directory?(folder.to_s+'/crash_files')==true

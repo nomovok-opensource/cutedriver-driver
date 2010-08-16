@@ -17,9 +17,7 @@
 ## 
 ############################################################################
 
-require File.expand_path( File.join( File.dirname( __FILE__ ), 'report_writer' ) )
-require File.expand_path( File.join( File.dirname( __FILE__ ), 'report_combine' ) )
-require File.expand_path( File.join( File.dirname( __FILE__ ), 'report_data_table' ) )
+
 module TDriverReportCreator
 
   #Test run class for new test run
@@ -966,7 +964,7 @@ module TDriverReportCreator
         builder=nil
       rescue Nokogiri::XML::SyntaxError => e
         $result_storage_in_use=false
-        puts "caught exception when writing results: #{e}"
+        $stderr.puts "caught exception when writing results: #{e}"
       end
     end
     
@@ -1032,7 +1030,7 @@ module TDriverReportCreator
         end
       rescue Nokogiri::XML::SyntaxError => e
         $result_storage_in_use=false
-        "caught exception when reading results: #{e}"
+        $stderr.puts "caught exception when reading results: #{e}"
         result_storage
       end
     end
