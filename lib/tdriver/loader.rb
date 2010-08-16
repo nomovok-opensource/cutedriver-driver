@@ -17,9 +17,6 @@
 ## 
 ############################################################################
 
-
-
-
 # load globally used external modules
 require 'singleton'
 require 'set'
