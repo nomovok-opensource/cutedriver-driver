@@ -38,7 +38,8 @@ module MobyBase
 		def initialize( sut_controller, test_object_factory, sut_id )
 
 			@_sutController = sut_controller    
-			@_testObjectFactory = test_object_factory
+			@test_object_factory = test_object_factory
+
 			@id = sut_id
 			@input = :key
 			@type = "sut"

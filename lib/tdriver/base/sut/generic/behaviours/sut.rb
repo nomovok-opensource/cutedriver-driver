@@ -291,7 +291,7 @@ module MobyBehaviour
 		# TODO: Document me when I'm ready
 		def get_object( object_id )
 
-			test_object = @_testObjectFactory.make( self, MobyBase::TestObjectIdentificator.new( object_id ) )
+			test_object = @test_object_factory.make( self, MobyBase::TestObjectIdentificator.new( object_id ) )
 
 		end
 
@@ -313,15 +313,15 @@ module MobyBehaviour
 
 			creation_hash = hash_rule.clone
 
-			initial_timeout = @_testObjectFactory.timeout unless ( custom_timeout = creation_hash.delete( :__timeout ) ).nil?
+			initial_timeout = @test_object_factory.timeout unless ( custom_timeout = creation_hash.delete( :__timeout ) ).nil?
 
 			logging_enabled = MobyUtil::Logger.instance.enabled
 			MobyUtil::Logger.instance.enabled = false if ( creation_hash.delete( :__logging ) == 'false' )
 
 			begin
 
-				@_testObjectFactory.timeout = custom_timeout unless custom_timeout.nil?
-				child_test_object = @_testObjectFactory.make( self, MobyBase::TestObjectIdentificator.new( creation_hash ) )
+				@test_object_factory.timeout = custom_timeout unless custom_timeout.nil?
+				child_test_object = @test_object_factory.make( self, MobyBase::TestObjectIdentificator.new( creation_hash ) )
 
 			rescue MobyBase::MultipleTestObjectsIdentifiedError => exception
 
@@ -339,7 +339,8 @@ module MobyBehaviour
 				Kernel::raise exception
 
 			ensure
-				@_testObjectFactory.timeout = initial_timeout unless custom_timeout.nil?
+
+				@test_object_factory.timeout = initial_timeout unless custom_timeout.nil?
 				MobyUtil::Logger.instance.enabled = logging_enabled
 
 			end
