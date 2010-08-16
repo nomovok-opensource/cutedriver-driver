@@ -966,7 +966,7 @@ module TDriverReportCreator
         builder=nil
       rescue Nokogiri::XML::SyntaxError => e
         $result_storage_in_use=false
-        puts "caught exception when writing results: #{e}"
+        $stderr.puts "caught exception when writing results: #{e}"
       end
     end
     
@@ -1032,7 +1032,7 @@ module TDriverReportCreator
         end
       rescue Nokogiri::XML::SyntaxError => e
         $result_storage_in_use=false
-        "caught exception when reading results: #{e}"
+        $stderr.puts "caught exception when reading results: #{e}"
         result_storage
       end
     end
