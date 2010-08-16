@@ -83,7 +83,7 @@ class ReportingStatistics
       total_duration = total_duration + duration
 
       b_test_in_statistics=false
-      
+
       current_index=0
       @total_statistics_arr.each do |total_status|
         if tc_status==total_status[0]
@@ -174,32 +174,34 @@ class ReportingStatistics
     tc_link
 
   end
-  
+
   def generate_duration_graph(file_name)
-  	
-	reset_total_statistics()
-	collect_test_case_statistics()
-    
-	labels = Hash.new   
-	durations = Array.new
-	test_case_added=Array.new
-	current_index = 0
-	@statistics_arr.each do |test_case|
-	  tc_name=test_case[0].to_s.gsub('_',' ')
-	  if test_case_added.include?(tc_name)==false && test_case[1].to_s=="duration"
+
+    reset_total_statistics()
+    collect_test_case_statistics()
+    begin
+      labels = Hash.new
+      durations = Array.new
+      test_case_added=Array.new
+      current_index = 0
+      @statistics_arr.each do |test_case|
+        tc_name=test_case[0].to_s.gsub('_',' ')
+        if test_case_added.include?(tc_name)==false && test_case[1].to_s=="duration"
 	      	durations << test_case[2]
 	      	labels[current_index] = tc_name
-	  		current_index += 1
-	  		test_case_added << tc_name
-	  end
-	end 
-        
-	g = Gruff::Bar.new
-	g.title = "Duration Distribution" 
-	g.data("Duration", durations)
-	g.labels = labels
-	g.write(file_name)
-	  
+          current_index += 1
+          test_case_added << tc_name
+        end
+      end
+
+      g = Gruff::Bar.new
+      g.title = "Duration Distribution"
+      g.data("Duration", durations)
+      g.labels = labels
+      g.write(file_name)
+    rescue Exception => e
+      $stderr.puts "Can't load the Gruff gem. If its missing from your system please run 'gem install gruff' to install it."
+    end
   end
 
   def generate_statistics_table()
@@ -228,7 +230,7 @@ class ReportingStatistics
           end
         end
         table_body << "</tr>"
-        test_case_added << tc_name      
+        test_case_added << tc_name
       end
     end
 

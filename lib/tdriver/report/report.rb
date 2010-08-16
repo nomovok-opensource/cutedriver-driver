@@ -36,6 +36,11 @@ require File.expand_path( File.join( File.dirname( __FILE__ ), 'report_cucumber_
 require File.expand_path( File.join( File.dirname( __FILE__ ), 'report_rspec' ) )
 require File.expand_path( File.join( File.dirname( __FILE__ ), 'report_test_unit' ) )
 require File.expand_path( File.join( File.dirname( __FILE__ ), 'report_grouping' ) )
+begin
+  require 'gruff'
+rescue LoadError
+  $stderr.puts "Can't load the Gruff gem. If its missing from your system please run 'gem install gruff' to install it."
+end
 require File.expand_path( File.join( File.dirname( __FILE__ ), 'report_execution_statistics' ) )
 require File.expand_path( File.join( File.dirname( __FILE__ ), 'report_data_presentation' ) )
 
