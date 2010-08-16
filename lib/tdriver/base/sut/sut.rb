@@ -17,8 +17,6 @@
 ## 
 ############################################################################
 
-
-
 # abstract class for SUT - no behaviours
 module MobyBase
 

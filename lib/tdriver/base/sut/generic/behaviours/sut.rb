@@ -17,7 +17,6 @@
 ## 
 ############################################################################
 
-
 module MobyBehaviour
 
 	# Describes the behaviour of SUT, aka the methods that can be used to control SUT

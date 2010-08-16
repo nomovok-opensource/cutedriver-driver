@@ -17,10 +17,6 @@
 ## 
 ############################################################################
 
-
-
-
-
 # rakefile for building and releasing Testability Driver
 
 @__release_mode = ENV['rel_mode']

@@ -17,7 +17,6 @@
 ## 
 ############################################################################
 
-
 module MobyBehaviour
 
 	# TDriver synchronization functionality. These methods make it possible to wait until the SUT is in 
