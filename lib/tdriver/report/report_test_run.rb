@@ -17,9 +17,7 @@
 ## 
 ############################################################################
 
-require File.expand_path( File.join( File.dirname( __FILE__ ), 'report_writer' ) )
-require File.expand_path( File.join( File.dirname( __FILE__ ), 'report_combine' ) )
-require File.expand_path( File.join( File.dirname( __FILE__ ), 'report_data_table' ) )
+
 module TDriverReportCreator
 
   #Test run class for new test run

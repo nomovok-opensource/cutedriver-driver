@@ -18,7 +18,7 @@
 ############################################################################
 
 
-require File.expand_path( File.join( File.dirname( __FILE__ ), 'report_file_capture' ) )
+
 
 class TDriverReportCrashFileCapture
   include TDriverReportFileCapture

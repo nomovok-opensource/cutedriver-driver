@@ -18,9 +18,6 @@
 ############################################################################
 
 
-require File.expand_path( File.join( File.dirname( __FILE__ ), 'report_writer' ) )
-require 'gruff'
-
 class ReportingStatistics
   def initialize(test_cases_array)
     @all_statuses=Array.new
@@ -79,11 +76,14 @@ class ReportingStatistics
       tc_execution=test_case[8].to_i
       reboots=test_case[2]
       crashes=test_case[3]
+
+      current_index=0
+
       duration=test_case[5].to_f
       total_duration = total_duration + duration
 
       b_test_in_statistics=false
-      
+
       current_index=0
       @total_statistics_arr.each do |total_status|
         if tc_status==total_status[0]
@@ -123,7 +123,7 @@ class ReportingStatistics
         end
         if total_status[1]=="duration" && total_status[0]==tc_name
           b_test_in_statistics=true
-          @statistics_arr[current_index]=[tc_name,"duration",total_status[2].to_f+duration]
+          @statistics_arr[current_index]=[tc_name,"duration",total_status[2].to_f+duration,tc_execution]
         end
         current_index+=1
       end
@@ -172,33 +172,36 @@ class ReportingStatistics
     tc_link='<a href="'+result_page.to_i.to_s+'_chronological_total_run_index.html#'+test_case.gsub(' ','_')+'_' + @fail_statuses.first + '">' if @fail_statuses.include?(status) && total>0
     tc_link='<a href="'+result_page.to_i.to_s+'_chronological_total_run_index.html#'+test_case.gsub(' ','_')+'_' + @not_run_statuses.first + '">' if @not_run_statuses.include?(status) && total>0
     tc_link
+
   end
-  
+
   def generate_duration_graph(file_name)
-  	
-	reset_total_statistics()
-	collect_test_case_statistics()
-    
-	labels = Hash.new   
-	durations = Array.new
-	test_case_added=Array.new
-	current_index = 0
-	@statistics_arr.each do |test_case|
-	  tc_name=test_case[0].to_s.gsub('_',' ')
-	  if test_case_added.include?(tc_name)==false && test_case[1].to_s=="duration"
+
+    reset_total_statistics()
+    collect_test_case_statistics()
+    begin
+      labels = Hash.new
+      durations = Array.new
+      test_case_added=Array.new
+      current_index = 0
+      @statistics_arr.each do |test_case|
+        tc_name=test_case[0].to_s.gsub('_',' ')
+        if test_case_added.include?(tc_name)==false && test_case[1].to_s=="duration"
 	      	durations << test_case[2]
 	      	labels[current_index] = tc_name
-	  		current_index += 1
-	  		test_case_added << tc_name
-	  end
-	end 
-        
-	g = Gruff::Bar.new
-	g.title = "Duration Distribution" 
-	g.data("Duration", durations)
-	g.labels = labels
-	g.write(file_name)
-	  
+          current_index += 1
+          test_case_added << tc_name
+        end
+      end
+
+      g = Gruff::Bar.new
+      g.title = "Duration Distribution"
+      g.data("Duration", durations)
+      g.labels = labels
+      g.write(file_name)
+    rescue Exception => e
+      $stderr.puts "Can't load the Gruff gem. If its missing from your system please run 'gem install gruff' to install it."
+    end
   end
 
   def generate_statistics_table()
