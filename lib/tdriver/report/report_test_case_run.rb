@@ -228,7 +228,7 @@ module TDriverReportCreator
     # === returns
     # nil
     # === raises
-    def set_test_case_execution_log(value)
+    def set_test_case_execution_log(value)     
       @test_case_execution_log=@test_case_execution_log.to_s + '<br />' + value.to_s.gsub(/\n/,'<br />')
     end
     #This method sets the test case user data
@@ -582,6 +582,9 @@ module TDriverReportCreator
     # === raises
     def capture_dump(take_screenshot=true)      
       MobyUtil::Logger.instance.enabled=false
+      image_html=Array.new
+      state_html=Array.new
+      self.set_test_case_execution_log('<hr />')
       begin
         dump_folder=@test_case_folder+'/state_xml'
         if File::directory?(dump_folder)==false
@@ -594,26 +597,40 @@ module TDriverReportCreator
           if take_screenshot==true
             begin
               sut_attributes[:sut].capture_screen( :Filename => dump_folder+'/'+time_stamp+'_state.png', :Redraw => true ) if sut_attributes[:is_connected]
+              image_html='<a href="state_xml/'<<
+                time_stamp+'_state.png'<<
+                '"><img alt="" src="state_xml/'<<
+                time_stamp+'_state.png'<<
+                '" width=20% height=20% /></a>'
+              self.set_test_case_execution_log(image_html.to_s)
             rescue Exception=>e             
-              @capture_screen_error="Unable to capture sceen image: " + e.message
+              @capture_screen_error="Unable to capture sceen image: " + e.message    
+              self.set_test_case_execution_log(@capture_screen_error.to_s)
             end
           end
         
           begin
             failed_xml_state=sut_attributes[:sut].xml_data() if sut_attributes[:is_connected]
             File.open(dump_folder+'/'+time_stamp+'_state.xml', 'w') { |file| file.write(failed_xml_state) }
+            state_html='<a href="state_xml/'<<
+              time_stamp+'_state.xml'<<
+              '">'+time_stamp+'_state.xml'+'</a>'
+              self.set_test_case_execution_log(state_html.to_s)
           rescue Exception=>e           
             @failed_dump_error="Unable to capture state xml: " + e.message
+            self.set_test_case_execution_log(@failed_dump_error.to_s)
           end
   			end
       rescue Exception => e
         @capture_screen_error="Unable to capture state: " + e.message
+        self.set_test_case_execution_log(@capture_screen_error.to_s)
       ensure
         if MobyUtil::Parameter[ :logging_level, 0 ].to_i > 0
           MobyUtil::Logger.instance.enabled=true
         else
           MobyUtil::Logger.instance.enabled=false
         end
+        self.set_test_case_execution_log('<hr />')
       end
     end
     #This method captures the trace files

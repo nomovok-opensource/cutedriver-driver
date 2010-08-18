@@ -180,23 +180,7 @@ module TDriverReportCreator
       end
     end
   end
-  #This method updates the current test case user log
-  #
-  # === params
-  # details: details to be added in to the execution log
-  # === returns
-  # nil
-  # === raises
-  def update_test_case_user_log()
-    user_log=$tdriver_reporter.get_log
-    if user_log != []
-      user_log.each do |log_entry|
-        $new_test_case.set_test_case_execution_log(log_entry)
-      end
-      $tdriver_reporter.set_log(nil)
-    end
-  end
-
+  
 
   #This method updates the current test case user data
   #
@@ -275,8 +259,7 @@ module TDriverReportCreator
 
     ensure
       MobyUtil::Logger.instance.enabled=logging_enabled
-    end
-    update_test_case_user_log()
+    end    
     update_test_case_user_data()
     starting_test_case(test_case, MobyBase::SUTFactory.instance.connected_suts) if MobyUtil::Parameter[ :custom_error_recovery_module, nil ]!=nil
   end
@@ -287,8 +270,7 @@ module TDriverReportCreator
   # === returns
   # nil
   # === raises
-  def update_test_case(details)    
-    update_test_case_user_log()
+  def update_test_case(details)        
     $new_test_case.set_test_case_execution_log(details)
     updating_test_case_details(details) if MobyUtil::Parameter[ :custom_error_recovery_module, nil ]!=nil
     begin
@@ -385,8 +367,7 @@ module TDriverReportCreator
   # nil
   # === raises
   def end_test_case(test_case,status)
-    $new_test_case.set_test_case_ended(true)
-    update_test_case_user_log()
+    $new_test_case.set_test_case_ended(true)    
     update_test_case_user_data()   
     if $new_test_case != nil
       if MobyUtil::Parameter[:report_crash_file_monitor] == 'true'

@@ -42,10 +42,11 @@ module TDriverReportAPI
   
   def tdriver_report_log(message)
   	Kernel::raise ArgumentError.new("Argument message was not a String.") unless message.nil? or message.kind_of?(String)
-    if $tdriver_reporter!=nil
-      $tdriver_reporter.set_log(message)
+    if $tdriver_reporter
+      $new_test_case.set_test_case_execution_log(message) if $new_test_case
     end
   end
+
   def tdriver_report_set_test_case_status(status)
   	Kernel::raise ArgumentError.new("Argument status was not a String.") unless status.nil? or status.kind_of?(String)
     if $tdriver_reporter!=nil
