@@ -122,7 +122,7 @@ module MobyUtil
 
 				Kernel::raise RuntimeError.new( 
 
-					"Error while loading plugin %s. Please verify that the plugin is installed properly." % [ plugin_name ]
+					"Error while loading plugin %s. Please verify that the plugin is installed properly (%s: %s)" % [ plugin_name, exception.class, exception.message ]
 
 				)
 
@@ -138,7 +138,7 @@ module MobyUtil
 
 			rescue Exception => exception
 
-				raise PluginError.new( "Error occured during calling %s method for %s. Reason: %s (%s)" % [ method_name, plugin_name, exception.message, exception.class ] )
+				raise PluginError.new( "Error occured during calling %s method for %s (%s: %s)" % [ method_name, plugin_name, exception.class, exception.message ] )
 
 			end
 
