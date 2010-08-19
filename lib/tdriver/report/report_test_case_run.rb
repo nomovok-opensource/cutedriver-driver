@@ -160,8 +160,7 @@ module TDriverReportCreator
       if stripped==nil then
         stripped=value.squeeze(" ")
       end
-      stripped1 = stripped.to_s.gsub(' ','_')
-      stripped1 = nil
+      stripped1 = stripped.to_s.gsub(' ','_')      
       if stripped1==nil
         stripped1=stripped
       end
