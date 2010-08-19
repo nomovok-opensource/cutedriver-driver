@@ -596,28 +596,28 @@ module TDriverReportCreator
           time_stamp=t.strftime( "%Y%m%d%H%M%S" )
           if take_screenshot==true
             begin
-              sut_attributes[:sut].capture_screen( :Filename => dump_folder+'/'+time_stamp+'_state.png', :Redraw => true ) if sut_attributes[:is_connected]
+              sut_attributes[:sut].capture_screen( :Filename => dump_folder+'/'+time_stamp+'_'+sut_id+'_state.png', :Redraw => true ) if sut_attributes[:is_connected]
               image_html='<a href="state_xml/'<<
-                time_stamp+'_state.png'<<
+                time_stamp+'_'+sut_id+'_state.png'<<
                 '"><img alt="" src="state_xml/'<<
-                time_stamp+'_state.png'<<
+                time_stamp+'_'+sut_id+'_state.png'<<
                 '" width=20% height=20% /></a>'
               self.set_test_case_execution_log(image_html.to_s)
             rescue Exception=>e             
-              @capture_screen_error="Unable to capture sceen image: " + e.message    
+              @capture_screen_error="Unable to capture sceen image #{sut_id}: " + e.message
               self.set_test_case_execution_log(@capture_screen_error.to_s)
             end
           end
         
           begin
             failed_xml_state=sut_attributes[:sut].xml_data() if sut_attributes[:is_connected]
-            File.open(dump_folder+'/'+time_stamp+'_state.xml', 'w') { |file| file.write(failed_xml_state) }
+            File.open(dump_folder+'/'+time_stamp+'_'+sut_id+'_state.xml', 'w') { |file| file.write(failed_xml_state) }
             state_html='<a href="state_xml/'<<
-              time_stamp+'_state.xml'<<
-              '">'+time_stamp+'_state.xml'+'</a>'
+              time_stamp+'_'+sut_id+'_state.xml'<<
+              '">'+time_stamp+'_'+sut_id+'_state.xml'+'</a>'
               self.set_test_case_execution_log(state_html.to_s)
           rescue Exception=>e           
-            @failed_dump_error="Unable to capture state xml: " + e.message
+            @failed_dump_error="Unable to capture state xml #{sut_id}: " + e.message
             self.set_test_case_execution_log(@failed_dump_error.to_s)
           end
   			end
