@@ -490,57 +490,7 @@ display: none;
       '<td style="font-size: small; font-weight: bold">'<<
       format_execution_log(@test_case_execution_log)<<
       '</td></tr>'
-    if File::directory?(folder.to_s+'/state_xml')==true
-      d=Dir.entries(folder.to_s+'/state_xml')
-      d.each do |x|
-        if (x !='.' && x != '..')
-          if (x.include? '.png') 
-            html_body=html_body<<
-              '<tr>'<<
-              '<td style="font-weight: 700">'<<
-              'Screen capture</td>'<<
-              '<td>'<<
-              '<a href="state_xml/'<<
-              x<<
-              '"><img alt="" src="state_xml/'<<
-              x<<
-              '" /></a></td>'<<
-              '</tr>'
-          end                    
 
-          if (x.include? '.xml')
-            html_body=html_body<<
-              '<tr>'<<
-              '<td style="font-weight: 700">'<<
-              'State</td>'<<
-              '<td>'<<
-              '<a href="state_xml/'<<
-              x<<
-              '">'+x.to_s+'</a></td>'<<
-              '</tr>'
-          end          
-        end
-      end
-      if capture_screen_error!=nil
-        html_body=html_body<<
-          '<tr>'<<
-          '<td style="font-weight: 700">'<<
-          'Screen capture</td>'<<
-          '<td style="font-weight: 700">'<<
-          capture_screen_error.to_s,'</td>'<<
-          '</tr>'
-      end
-
-      if failed_dump_error!=nil
-        html_body=html_body<<
-          '<tr>'<<
-          '<td style="font-weight: 700">'<<
-          'State</td>'<<
-          '<td style="font-weight: 700">'<<
-          failed_dump_error.to_s,'</td>'<<
-          '</tr>'
-      end
-    end
     if File::directory?(folder.to_s+'/crash_files')==true
       d=Dir.entries(folder.to_s+'/crash_files')
       d.each do |x|

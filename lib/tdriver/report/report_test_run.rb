@@ -51,6 +51,7 @@ module TDriverReportCreator
       @memory_amount_total='-'
       $result_storage_in_use=false
       @pages=MobyUtil::Parameter[ :report_results_per_page, 10]
+      @duration_graph=MobyUtil::Parameter[ :report_generate_duration_graph, false]
       @pass_statuses=MobyUtil::Parameter[ :report_passed_statuses, "passed" ].split('|')
       @fail_statuses=MobyUtil::Parameter[ :report_failed_statuses, "failed" ].split('|')
       @not_run_statuses=MobyUtil::Parameter[ :report_not_run_statuses, "not run" ].split('|')
@@ -1159,7 +1160,7 @@ module TDriverReportCreator
           @all_cases_arr=read_result_storage('all')
           write_page_start(@report_folder+'/cases/statistics_index.html','Statistics')
           write_test_case_summary_body(@report_folder+'/cases/statistics_index.html','statistics',@all_cases_arr)
-          write_duration_graph(@report_folder+'/cases/statistics_index.html', @report_folder, 'duration_graph.png', @all_cases_arr)      
+          write_duration_graph(@report_folder+'/cases/statistics_index.html', @report_folder, 'duration_graph.png', @all_cases_arr) if @duration_graph!=false
           write_page_end(@report_folder+'/cases/statistics_index.html')
         when 'all'
           @all_cases_arr=read_result_storage(status)

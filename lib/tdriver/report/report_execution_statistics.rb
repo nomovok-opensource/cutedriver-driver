@@ -99,7 +99,7 @@ class ReportingStatistics
           @total_statistics_arr[current_index]=["total",total_status[1].to_i+1]
         end
         if total_status[0]=="duration"
-          @total_statistics_arr[current_index]=["duration",total_status[1].to_f+duration]
+          @total_statistics_arr[current_index]=["duration",duration]
         end
         current_index+=1
       end
@@ -123,7 +123,7 @@ class ReportingStatistics
         end
         if total_status[1]=="duration" && total_status[0]==tc_name
           b_test_in_statistics=true
-          @statistics_arr[current_index]=[tc_name,"duration",total_status[2].to_f+duration,tc_execution]
+          @statistics_arr[current_index]=[tc_name,"duration",duration,tc_execution]
         end
         current_index+=1
       end
@@ -188,13 +188,18 @@ class ReportingStatistics
         tc_name=test_case[0].to_s.gsub('_',' ')
         if test_case_added.include?(tc_name)==false && test_case[1].to_s=="duration"
 	      	durations << test_case[2]
-	      	labels[current_index] = tc_name
+	      	labels[current_index] = "#{current_index + 1}" #tc_name
           current_index += 1
           test_case_added << tc_name
         end
       end
 
-      g = Gruff::Bar.new
+      if current_index > 50
+        g = Gruff::SideStackedBar.new("400x#{15*current_index.to_i}")
+      else
+        g = Gruff::SideStackedBar.new()
+      end
+
       g.title = "Duration Distribution"
       g.data("Duration", durations)
       g.labels = labels
@@ -211,6 +216,8 @@ class ReportingStatistics
     table_body='<table align="center" border="1" cellspacing="0" style="width:100%;">'<<
       '<tr>'<<
       '<td>'<<
+      '<b>Row</b></td>'<<
+      '<td>'<<
       '<b>Name</b></td>'<<
       '<td>'<<
       '<b>Total</b></td>'<<
@@ -218,11 +225,12 @@ class ReportingStatistics
       '</tr>'
 
     test_case_added=Array.new
-
+    row=1
     @statistics_arr.each do |test_case|
       tc_name=test_case[0].to_s.gsub('_',' ')
       if test_case_added.include?(tc_name)==false
         table_body << "<tr>"
+        table_body << "<td>#{row}</td>"
         table_body << "<td>#{tc_name}</td>"
         @statistics_arr.each do |test_case_statistics|
           if test_case_statistics[0]==tc_name
@@ -231,13 +239,14 @@ class ReportingStatistics
         end
         table_body << "</tr>"
         test_case_added << tc_name
+        row+=1
       end
     end
 
 
     table_body << '<tr></tr>'
     table_body << '<tr>' <<
-      '<td>'<<
+      '<td></td><td>'<<
       '<b>Total</b></td>'
     @total_statistics_arr.each do |statistic|
       table_body << "<td><b>#{statistic[1]}</b></td>"
