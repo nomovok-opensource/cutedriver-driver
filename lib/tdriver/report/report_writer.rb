@@ -431,7 +431,7 @@ display: none;
     rescue
       used_memory_difference='-'
     end
-    formatted_test_case_name=test_case_name #.gsub('_',' ')
+    formatted_test_case_name=test_case_name.gsub('_',' ')
     if formatted_test_case_name==nil
       formatted_test_case_name=test_case_name
     end
