@@ -367,7 +367,7 @@ module TDriverReportCreator
   # nil
   # === raises
   def end_test_case(test_case,status)
-    $new_test_case.set_test_case_ended(true)    
+    $new_test_case.set_test_case_ended(true) if $new_test_case
     update_test_case_user_data()   
     if $new_test_case != nil
       if MobyUtil::Parameter[:report_crash_file_monitor] == 'true'

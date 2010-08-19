@@ -99,7 +99,7 @@ class ReportingStatistics
           @total_statistics_arr[current_index]=["total",total_status[1].to_i+1]
         end
         if total_status[0]=="duration"
-          @total_statistics_arr[current_index]=["duration",total_status[1].to_f+duration]
+          @total_statistics_arr[current_index]=["duration",duration]
         end
         current_index+=1
       end
@@ -123,7 +123,7 @@ class ReportingStatistics
         end
         if total_status[1]=="duration" && total_status[0]==tc_name
           b_test_in_statistics=true
-          @statistics_arr[current_index]=[tc_name,"duration",total_status[2].to_f+duration,tc_execution]
+          @statistics_arr[current_index]=[tc_name,"duration",duration,tc_execution]
         end
         current_index+=1
       end
