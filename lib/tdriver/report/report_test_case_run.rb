@@ -156,11 +156,12 @@ module TDriverReportCreator
     def set_test_case_name(value)
       @test_case_name_full=value
       #Clean the test case name for unwanted chars
-      stripped=value.gsub(/[<\/?*>!)(}{\{@%"'.,:;~-]/,'').downcase.squeeze(" ")
+      stripped=value.gsub(/[<\/?*>!)(}{\{@%"'.,:;~-]/,'').squeeze(" ")
       if stripped==nil then
-        stripped=value.downcase.squeeze(" ")
+        stripped=value.squeeze(" ")
       end
-      stripped1 = stripped.to_s.gsub(' ','_')
+      #stripped1 = stripped.to_s.gsub(' ','_')
+      stripped1 = nil
       if stripped1==nil
         stripped1=stripped
       end

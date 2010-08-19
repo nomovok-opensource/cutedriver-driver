@@ -72,7 +72,7 @@ class ReportingStatistics
     total_duration = 0.0
     @group_test_case_arr.each do |test_case|
       tc_status=test_case[7]
-      tc_name=test_case[0].to_s.gsub('_',' ')
+      tc_name=test_case[0].to_s #.gsub('_',' ')
       tc_execution=test_case[8].to_i
       reboots=test_case[2]
       crashes=test_case[3]
@@ -185,7 +185,7 @@ class ReportingStatistics
       test_case_added=Array.new
       current_index = 0
       @statistics_arr.each do |test_case|
-        tc_name=test_case[0].to_s.gsub('_',' ')
+        tc_name=test_case[0].to_s #.gsub('_',' ')
         if test_case_added.include?(tc_name)==false && test_case[1].to_s=="duration"
 	      	durations << test_case[2]
 	      	labels[current_index] = "#{current_index + 1}" #tc_name
@@ -227,7 +227,7 @@ class ReportingStatistics
     test_case_added=Array.new
     row=1
     @statistics_arr.each do |test_case|
-      tc_name=test_case[0].to_s.gsub('_',' ')
+      tc_name=test_case[0].to_s #.gsub('_',' ')
       if test_case_added.include?(tc_name)==false
         table_body << "<tr>"
         table_body << "<td>#{row}</td>"

@@ -300,7 +300,7 @@ class ReportingGroups
         @main_passed+=1 if tc_status=='passed' || @pass_statuses.include?(tc_status)
         @main_failed+=1 if tc_status=='failed' || @fail_statuses.include?(tc_status)
         @main_not_run+=1 if tc_status=='not run' || @not_run_statuses.include?(tc_status)
-        tc_name=x[0].to_s.gsub('_',' ')    
+        tc_name=x[0].to_s #.gsub('_',' ')
         
         table_body << '<tr' <<
           tc_style_tag <<
@@ -371,7 +371,7 @@ class ReportingGroups
             @main_passed+=1 if tc_status=='passed' || @pass_statuses.include?(tc_status)
             @main_failed+=1 if tc_status=='failed' || @fail_statuses.include?(tc_status)
             @main_not_run+=1 if tc_status=='not run' || @not_run_statuses.include?(tc_status)
-            tc_name=x[0].to_s.gsub('_',' ')     
+            tc_name=x[0].to_s #.gsub('_',' ')
             table_body << '<tr' <<
               tc_style_tag<<
               '>'<<
@@ -422,7 +422,7 @@ class ReportingGroups
             @main_not_run+=1 if status=='not run' || @not_run_statuses.include?(status)
             cases_in_group+=1
             tc_status=x[7]
-            tc_name=x[0].to_s.gsub('_',' ')
+            tc_name=x[0].to_s #.gsub('_',' ')
             table_body << '<tr' <<
               tc_style_tag<<
               '>'<<
