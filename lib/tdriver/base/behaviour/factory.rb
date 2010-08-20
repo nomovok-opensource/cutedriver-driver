@@ -312,32 +312,43 @@ module MobyBase
 		end
 
 		def get_object_behaviours( rules )
-			
-			rules.default = [ '*' ]
 
-			extended_modules = []
+      # calculate hash for behaviour rules / hash value will be used to identify similar objects
+      behaviour_hash = Hash[ rules.select{ | key, value | key != :object  } ].hash
 
-			@@behaviours.each_index{ | index |
+      if @@behaviours_cache.has_key?( behaviour_hash )
 
-				behaviour = @@behaviours[ index ]
+        # retrieve behaviour module indexes from cache
+        @@behaviours_cache[ behaviour_hash ]
 
-				if ( 	( rules[ :name ] == behaviour[ :name ] ) || 
+      else
 
-					( rules[ :name ] == [ '*' ] && 
+			  rules.default = [ '*' ]
 
-						( !( rules[ :sut_type ] & behaviour[ :sut_type ] ).empty? ) && 
-						( !( rules[ :object_type ] & behaviour[ :object_type ] ).empty? ) &&
-						( !( rules[ :input_type ] & behaviour[ :input_type ] ).empty? ) &&
-						( !( rules[ :version ] & behaviour[ :version ] ).empty? ) ) )
+			  extended_modules = []
 
-						# retrieve list of extended modules
-						extended_modules << index
+			  @@behaviours.each_with_index{ | behaviour, index |
 
-				end
+				  if ( 	( rules[ :name ] == behaviour[ :name ] ) || 
 
-			}
+					  ( rules[ :name ] == [ '*' ] && 
 
-			extended_modules
+						  ( !( rules[ :sut_type ] & behaviour[ :sut_type ] ).empty? ) && 
+						  ( !( rules[ :object_type ] & behaviour[ :object_type ] ).empty? ) &&
+						  ( !( rules[ :input_type ] & behaviour[ :input_type ] ).empty? ) &&
+						  ( !( rules[ :version ] & behaviour[ :version ] ).empty? ) ) )
+
+						  # retrieve list of extended modules
+						  extended_modules << index
+
+				  end
+
+			  }
+
+        # store behaviour module indexes to cache
+        @@behaviours_cache[ behaviour_hash ] = extended_modules
+
+      end
 
 		end
 
