@@ -190,7 +190,8 @@ module MobyBehaviour
 
 					:id => element.attribute( "id" ), 
 					:name => element.attribute( "name" ), 
-					:type => element.attribute( "type" ) 
+					:type => element.attribute( "type" ),
+                    :__index => 0 # there was a case when the same parent was included twice in the ui dump
 
 				)
 
