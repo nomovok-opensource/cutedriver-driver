@@ -17,10 +17,65 @@
 ## 
 ############################################################################
 
-
 module MobyUtil
 
 	class EnvironmentHelper
+
+    LINUX = 0
+    WINDOWS = 1
+    OSX = 2
+    OTHER = 3
+
+    def self.linux?
+
+      platform == LINUX
+
+    end
+
+    def self.windows?
+
+      platform == WINDOWS
+
+    end
+
+    def self.osx?
+
+      platform == OSX
+
+    end
+
+    def self.unknown?
+
+      platform == OTHER
+
+    end
+
+		# Function to retrieve platform type
+		# == returns
+		# Integer:: LINUX 
+    def self.platform
+
+			case Config::CONFIG[ 'host_os' ]
+
+        when /mswin|mingw/i
+
+          WINDOWS
+
+        when /linux/i
+
+          LINUX
+
+        when /darwin/
+
+          OSX
+
+      else
+
+        OTHER
+
+      end
+
+    end
 
 		# Function to retrieve platform type
 		# == returns
