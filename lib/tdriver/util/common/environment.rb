@@ -21,10 +21,37 @@ module MobyUtil
 
   class EnvironmentHelper
 
-    LINUX = 0
-    WINDOWS = 1
-    OSX = 2
-    OTHER = 3
+    UNKNOWN = 0
+    
+    LINUX = 1
+    SOLARIS = 2
+    WINDOWS = 4
+    OSX = 8
+    CYGWIN = 16
+    
+    def self.java?
+    
+      RUBY_PLATFORM == "java"
+
+    end
+
+    def self.posix?
+    
+      ( platform == LINUX || platform == OSX || platform == CYGWIN || platform == SOLARIS ) 
+    
+    end
+
+    def self.cygwin?
+
+      platform == CYGWIN
+    
+    end
+
+    def self.solaris?
+
+      platform == SOLARIS
+    
+    end
 
     def self.linux?
 
@@ -44,9 +71,9 @@ module MobyUtil
 
     end
 
-    def self.unknown?
+    def self.unknown_os?
 
-      platform == OTHER
+      platform == UNKNOWN
 
     end
 
@@ -57,13 +84,21 @@ module MobyUtil
 
       case Config::CONFIG[ 'host_os' ]
 
-        when /mswin|mingw/i
+        when /mswin|mingw|windows/i
 
           WINDOWS
+
+        when /cygwin/i
+        
+          CYGWIN
 
         when /linux/i
 
           LINUX
+
+        when /sunos|solaris/i
+
+          SOLARIS
 
         when /darwin/
 
@@ -88,15 +123,18 @@ module MobyUtil
 
     def self.change_file_ownership!( target, user_name, user_group, recursively = true )
 
-      `chown -h #{ recursively ? '-R' : '' } #{ user_name }:#{ user_group } #{ target }` unless MobyUtil::EnvironmentHelper.ruby_platform =~ /mswin/
+      # `chown -h #{ recursively ? '-R' : '' } #{ user_name }:#{ user_group } #{ target }` unless MobyUtil::EnvironmentHelper.ruby_platform =~ /mswin/
+      `chown -h #{ recursively ? '-R' : '' } #{ user_name }:#{ user_group } #{ target }` if MobyUtil::EnvironmentHelper.posix?
 
     end
 
     # linux
     def self.user_group( name = nil )
 
-            `id -g -n #{ name }`.chomp unless MobyUtil::EnvironmentHelper.ruby_platform =~ /mswin/
+      # `id -g -n #{ name }`.chomp unless MobyUtil::EnvironmentHelper.ruby_platform =~ /mswin/
 
+      `id -g -n #{ name }`.chomp if MobyUtil::EnvironmentHelper.posix?
+      
     end
 
     # linux
