@@ -21,6 +21,9 @@
 require 'singleton'
 require 'set'
 
+# load native extensions is available
+begin; require File.expand_path( File.join( File.dirname( __FILE__ ), 'native_extensions' ) ); rescue LoadError; end
+
 # generic utility modules
 require File.expand_path( File.join( File.dirname( __FILE__ ), 'util/loader' ) )
 
