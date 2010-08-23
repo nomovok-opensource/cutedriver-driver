@@ -17,7 +17,6 @@
 ## 
 ############################################################################
 
-
 module MobyUtil
 
 	class GemHelper
@@ -28,27 +27,51 @@ module MobyUtil
 			# are built during the gem installation process and will not complete the installation 
 			# if these files are missing.
 
-			File.open( 'Makefile', 'w' ) { |f| f.write "all:\n\ninstall:\n\n" }
+      begin
 
-			if MobyUtil::EnvironmentHelper.ruby_platform =~ /mswin/
+        # remove following line when native extensions are supported by tdriver
+        raise LoadError
 
-				File.open('nmake.bat', 'w') { |f| f.write "SET ERRORLEVEL=0"}
-				File.open( 'extconf.dll', 'w' ) {}
+        # skip native extension build if running in java environment
+        raise LoadError if MobyUtil::EnvironmentHelper.java?
 
-			else
+        # make makefile
+        require 'mkmf'
+        
+        # name of ruby native extension
+        extension_name = 'tdriver_native_extensions'
 
-				File.open( 'make', 'w' ){ | f | f.write '#!/bin/sh'; f.chmod f.stat.mode | 0111; }
-				File.open( 'extconf.so', 'w' ) {}
+        # The destination
+        dir_config( extension_name )
 
+        # Do the work
+        create_makefile( extension_name )
+        
+      rescue Exception
 
-			end
+        # create dummy makefile if building native extension fails or is not supported
+			  File.open( 'Makefile', 'w' ) { | f | f.write "all:\n\ninstall:\n\n" }
+
+			  if MobyUtil::EnvironmentHelper.windows? 
+
+				  File.open( 'nmake.bat', 'w') { |f| f.write "SET ERRORLEVEL=0" }
+				  File.open( 'extconf.dll', 'w' ) {}
+
+			  else
+
+				  File.open( 'make', 'w' ){ | f | f.write '#!/bin/sh'; f.chmod f.stat.mode | 0111; }
+				  File.open( 'extconf.so', 'w' ) {}
+
+			  end
+
+      end
 
 		end
 
 
 		def self.grant_file_access_rights( folder, user_name = nil, user_group = nil )
 
-			if MobyUtil::EnvironmentHelper.ruby_platform !~ /mswin/
+			if MobyUtil::EnvironmentHelper.posix? #ruby_platform !~ /mswin/
 
 				# change folder ownership to user and add writing access to each file
 				user_name = MobyUtil::EnvironmentHelper.user_name if user_name.nil?
