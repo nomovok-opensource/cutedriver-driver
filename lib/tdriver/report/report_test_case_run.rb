@@ -685,7 +685,7 @@ module TDriverReportCreator
       begin
         #check if report directory exists
         old_test_case_folder=@test_case_folder
-        new_test_case_folder=@test_case_folder.gsub('result',status)        
+        new_test_case_folder=@test_case_folder.sub('result',status)        
         if File::directory?(new_test_case_folder)==false
           FileUtils.mv old_test_case_folder, new_test_case_folder , :force => true  # no error
           @test_case_folder=new_test_case_folder

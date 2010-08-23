@@ -60,3 +60,6 @@ require File.expand_path( File.join( File.dirname( __FILE__ ), 'operator_data/lo
 # Recorder module
 require File.expand_path( File.join( File.dirname( __FILE__ ), 'recorder.rb' ) )
 
+# Video rec module
+require File.expand_path( File.join( File.dirname( __FILE__ ), 'video_rec.rb' ) )
+
