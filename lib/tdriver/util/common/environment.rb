@@ -19,7 +19,7 @@
 
 module MobyUtil
 
-	class EnvironmentHelper
+  class EnvironmentHelper
 
     LINUX = 0
     WINDOWS = 1
@@ -50,12 +50,12 @@ module MobyUtil
 
     end
 
-		# Function to retrieve platform type
-		# == returns
-		# Integer:: LINUX 
+    # Function to retrieve platform type
+    # == returns
+    # Integer:: LINUX 
     def self.platform
 
-			case Config::CONFIG[ 'host_os' ]
+      case Config::CONFIG[ 'host_os' ]
 
         when /mswin|mingw/i
 
@@ -77,42 +77,42 @@ module MobyUtil
 
     end
 
-		# Function to retrieve platform type
-		# == returns
-		# String:: 
-		def self.ruby_platform
+    # Function to retrieve platform type
+    # == returns
+    # String:: 
+    def self.ruby_platform
 
-			Config::CONFIG[ 'target_os' ]
+      Config::CONFIG[ 'target_os' ]
 
-		end
+    end
 
-		def self.change_file_ownership!( target, user_name, user_group, recursively = true )
+    def self.change_file_ownership!( target, user_name, user_group, recursively = true )
 
-			`chown -h #{ recursively ? '-R' : '' } #{ user_name }:#{ user_group } #{ target }` unless MobyUtil::EnvironmentHelper.ruby_platform =~ /mswin/
+      `chown -h #{ recursively ? '-R' : '' } #{ user_name }:#{ user_group } #{ target }` unless MobyUtil::EnvironmentHelper.ruby_platform =~ /mswin/
 
-		end
+    end
 
-		# linux
-		def self.user_group( name = nil )
+    # linux
+    def self.user_group( name = nil )
 
-        		`id -g -n #{ name }`.chomp unless MobyUtil::EnvironmentHelper.ruby_platform =~ /mswin/
+            `id -g -n #{ name }`.chomp unless MobyUtil::EnvironmentHelper.ruby_platform =~ /mswin/
 
-		end
+    end
 
-		# linux
-		def self.user_name
+    # linux
+    def self.user_name
 
-			result = ENV[ 'LOGNAME' ]
-			result = ENV[ 'SUDO_USER' ] if result == "root" || result == ""
-			result = ENV[ 'USER' ] if result == "root" || result == ""
+      result = ENV[ 'LOGNAME' ]
+      result = ENV[ 'SUDO_USER' ] if result == "root" || result == ""
+      result = ENV[ 'USER' ] if result == "root" || result == ""
 
-			result
+      result
 
-		end
+    end
 
-		# enable hooking for performance measurement & debug logging
-		MobyUtil::Hooking.instance.hook_methods( self ) if defined?( MobyUtil::Hooking )
+    # enable hooking for performance measurement & debug logging
+    MobyUtil::Hooking.instance.hook_methods( self ) if defined?( MobyUtil::Hooking )
 
-	end # EnvironmentHelper
+  end # EnvironmentHelper
 
 end # MobyUtil
