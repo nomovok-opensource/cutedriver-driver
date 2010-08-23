@@ -39,7 +39,7 @@ module MobyUtil
         require 'mkmf'
         
         # name of ruby native extension
-        extension_name = 'tdriver_native_extensions'
+        extension_name = 'tdriver/native_extensions'
 
         # The destination
         dir_config( extension_name )
