@@ -129,7 +129,7 @@ module MobyBehaviour
 			# implementation
 
 		end
-
+=begin
 		# documentation for the method
 		def []=( value )
 
@@ -185,7 +185,7 @@ module MobyBehaviour
 			# implementation
 
 		end
-
+=end
 		attr_accessor :xxz
 
 		attr_reader :yys
