@@ -30,7 +30,7 @@ module MobyUtil
       begin
 
         # remove following line when native extensions are supported by tdriver
-        raise LoadError
+        #raise LoadError
 
         # skip native extension build if running in java environment
         raise LoadError if MobyUtil::EnvironmentHelper.java?
