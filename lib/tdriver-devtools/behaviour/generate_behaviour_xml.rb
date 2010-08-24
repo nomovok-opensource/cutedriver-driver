@@ -25,71 +25,71 @@ require 'rdoc/rdoc'
 module RDoc
 
 =begin
-	class Stats
-		
-		alias old_print print
+  class Stats
+    
+    alias old_print print
 
-		def print(*args)
+    def print(*args)
 
-			puts "---------------"
+      puts "---------------"
 
-			old_print
+      old_print
 
-			puts ""
+      puts ""
 
-		end
+    end
 
-	end
+  end
 =end
 
-	class RDoc
+  class RDoc
 
-		# install custom generator to RDoc
-		def install_generator( name, filename )
+    # install custom generator to RDoc
+    def install_generator( name, filename )
 
-  			GENERATORS[ name.to_s.downcase ] = Generator.new(
-				filename,
-				"#{ name.to_s }Generator".intern,
-				name.to_s.downcase
-			)
+        GENERATORS[ name.to_s.downcase ] = Generator.new(
+        filename,
+        "#{ name.to_s }Generator".intern,
+        name.to_s.downcase
+      )
 
-		end
+    end
 
-	end
+  end
 
 end
 
 if ARGV.count == 0
-	
-	puts "\nUsage: #{ $0 } filename.rb\n\n"
-	exit
+  
+  puts "\nUsage: #{ $0 } filename.rb\n\n"
+  exit
 
 else
 
-	ARGV.each{ | filename | 
+  ARGV.each{ | filename | 
 
-		abort("\nUnable to create behaviours XML due to implementation file %s not found\n\n" % [ filename ] ) unless File.exist?( File.expand_path( filename ) )
+    abort("\nUnable to create behaviours XML due to implementation file %s not found\n\n" % [ filename ] ) unless File.exist?( File.expand_path( filename ) )
 
-	}
+  }
 
 end
 
 begin
 
-	RDoc::RDoc.new.tap{ | rdoc |
+  RDoc::RDoc.new.tap{ | rdoc |
 
-		rdoc.install_generator( 'TDriver', File.expand_path( File.join( File.dirname( __FILE__ ), 'lib/tdriver_generator.rb' ) ) )
+    rdoc.install_generator( 'TDriver', File.expand_path( File.join( File.dirname( __FILE__ ), 'lib/tdriver_generator.rb' ) ) )
 
-		#rdoc.document( ['--inline-source', '--quiet', '--fmt', 'tdriver'] + ARGV )
-		rdoc.document( ['--inline-source', '--fmt', 'tdriver'] + ARGV )
+    #rdoc.document( ['--inline-source', '--quiet', '--fmt', 'tdriver'] + ARGV )
+    rdoc.document( ['--inline-source', '--fmt', 'tdriver'] + ARGV )
 
-	}
+  }
 
 rescue RDoc::RDocError => e
 
-	$stderr.puts e.message
+  $stderr.puts e.message
 
-	exit( 1 )
+  exit( 1 )
 
 end
 
