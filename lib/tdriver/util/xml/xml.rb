@@ -58,7 +58,7 @@ module MobyUtil
 		#
 		# == params
 		# xml_string:: String containing XML
-		# parser:: Pointer to XML parser class e.g. MobyUtil::XML::Nokogiri
+		# parser:: XML parser class e.g. MobyUtil::XML::Nokogiri
 		# == return
 		# Document:: XML document object
 		# == raises
@@ -68,14 +68,37 @@ module MobyUtil
 
 				MobyUtil::XML::Document.new( nil, current_parser ).extend( @@parser::Document ).tap{ | document | 
 
+          # parse given string
 					document.xml = document.parse( xml_string ) 
 
 				}
 
 			rescue Exception => exception
 
-				Kernel::raise MobyUtil::XML::ParseError.new( "%s (%s)" % [ exception.message, exception.class ] )
+        # string for exception message
+        dump_location = ""
 
+        # check if xml parse error logging is enabled
+        if MobyUtil::KernelHelper.to_boolean( MobyUtil::Parameter[ :logging_xml_parse_error_dump, 'true' ] )
+
+          # generate filename for xml dump
+          filename = MobyUtil::KernelHelper.to_boolean( MobyUtil::Parameter[ :logging_xml_parse_error_dump_overwrite, 'false' ] ) ? 'xml_error_dump.xml' : 'xml_error_dump_%i.xml' % Time.now
+
+          # ... join filename with xml dump output path 
+          path = File.join( MobyUtil::FileHelper.expand_path( MobyUtil::Parameter[ :logging_xml_parse_error_dump_path, 'logfiles/' ] ), filename )
+
+			    # create error dump folder if not exist, used e.g. when xml parse error
+			    MobyUtil::FileHelper.mkdir_path( File.dirname( path ) )
+
+          # write xml string to file
+          File.open( path, "w" ){ | file | file << xml_string }
+
+          dump_location = ". Saved to %s" % path
+
+        end
+
+        # raise exception
+				Kernel::raise MobyUtil::XML::ParseError.new( "%s (%s)%s" % [ exception.message.gsub("\n", ''), exception.class, dump_location ] )
 
 			end
 
@@ -88,7 +111,7 @@ module MobyUtil
 		#
 		# == params
 		# filename:: String containing path and filename of XML file.
-		# parser:: Pointer to XML parser class e.g. MobyUtil::XML::Nokogiri
+		# parser:: XML parser class e.g. MobyUtil::XML::Nokogiri
 		# == return
 		# Document:: XML document object
 		# == raises
