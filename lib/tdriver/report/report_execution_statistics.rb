@@ -99,7 +99,7 @@ class ReportingStatistics
           @total_statistics_arr[current_index]=["total",total_status[1].to_i+1]
         end
         if total_status[0]=="duration"
-          @total_statistics_arr[current_index]=["duration",duration]
+          @total_statistics_arr[current_index]=["duration",""]
         end
         current_index+=1
       end
