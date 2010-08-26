@@ -17,47 +17,140 @@
 ## 
 ############################################################################
 
-
 module MobyUtil
 
-	class EnvironmentHelper
+  class EnvironmentHelper
 
-		# Function to retrieve platform type
-		# == returns
-		# String:: 
-		def self.ruby_platform
+    UNKNOWN = 0
+    
+    LINUX = 1
+    SOLARIS = 2
+    WINDOWS = 4
+    OSX = 8
+    CYGWIN = 16
+    
+    def self.java?
+    
+      RUBY_PLATFORM == "java"
 
-			Config::CONFIG[ 'target_os' ]
+    end
 
-		end
+    def self.posix?
+    
+      ( platform == LINUX || platform == OSX || platform == CYGWIN || platform == SOLARIS ) 
+    
+    end
 
-		def self.change_file_ownership!( target, user_name, user_group, recursively = true )
+    def self.cygwin?
 
-			`chown -h #{ recursively ? '-R' : '' } #{ user_name }:#{ user_group } #{ target }` unless MobyUtil::EnvironmentHelper.ruby_platform =~ /mswin/
+      platform == CYGWIN
+    
+    end
 
-		end
+    def self.solaris?
 
-		# linux
-		def self.user_group( name = nil )
+      platform == SOLARIS
+    
+    end
 
-        		`id -g -n #{ name }`.chomp unless MobyUtil::EnvironmentHelper.ruby_platform =~ /mswin/
+    def self.linux?
 
-		end
+      platform == LINUX
 
-		# linux
-		def self.user_name
+    end
 
-			result = ENV[ 'LOGNAME' ]
-			result = ENV[ 'SUDO_USER' ] if result == "root" || result == ""
-			result = ENV[ 'USER' ] if result == "root" || result == ""
+    def self.windows?
 
-			result
+      platform == WINDOWS
 
-		end
+    end
 
-		# enable hooking for performance measurement & debug logging
-		MobyUtil::Hooking.instance.hook_methods( self ) if defined?( MobyUtil::Hooking )
+    def self.osx?
 
-	end # EnvironmentHelper
+      platform == OSX
+
+    end
+
+    def self.unknown_os?
+
+      platform == UNKNOWN
+
+    end
+
+    # Function to retrieve platform type
+    # == returns
+    # Integer:: LINUX 
+    def self.platform
+
+      case Config::CONFIG[ 'host_os' ]
+
+        when /mswin|mingw|windows/i
+
+          WINDOWS
+
+        when /cygwin/i
+        
+          CYGWIN
+
+        when /linux/i
+
+          LINUX
+
+        when /sunos|solaris/i
+
+          SOLARIS
+
+        when /darwin/
+
+          OSX
+
+      else
+
+        OTHER
+
+      end
+
+    end
+
+    # Function to retrieve platform type
+    # == returns
+    # String:: 
+    def self.ruby_platform
+
+      Config::CONFIG[ 'target_os' ]
+
+    end
+
+    def self.change_file_ownership!( target, user_name, user_group, recursively = true )
+
+      # `chown -h #{ recursively ? '-R' : '' } #{ user_name }:#{ user_group } #{ target }` unless MobyUtil::EnvironmentHelper.ruby_platform =~ /mswin/
+      `chown -h #{ recursively ? '-R' : '' } #{ user_name }:#{ user_group } #{ target }` if MobyUtil::EnvironmentHelper.posix?
+
+    end
+
+    # linux
+    def self.user_group( name = nil )
+
+      # `id -g -n #{ name }`.chomp unless MobyUtil::EnvironmentHelper.ruby_platform =~ /mswin/
+
+      `id -g -n #{ name }`.chomp if MobyUtil::EnvironmentHelper.posix?
+      
+    end
+
+    # linux
+    def self.user_name
+
+      result = ENV[ 'LOGNAME' ]
+      result = ENV[ 'SUDO_USER' ] if result == "root" || result == ""
+      result = ENV[ 'USER' ] if result == "root" || result == ""
+
+      result
+
+    end
+
+    # enable hooking for performance measurement & debug logging
+    MobyUtil::Hooking.instance.hook_methods( self ) if defined?( MobyUtil::Hooking )
+
+  end # EnvironmentHelper
 
 end # MobyUtil

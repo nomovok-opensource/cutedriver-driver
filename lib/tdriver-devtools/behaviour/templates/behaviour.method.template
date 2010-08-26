@@ -4,10 +4,14 @@
 		#
 		# == arguments
 		# argument1
-		#	type		Integer
-		#	description	Example argument1
-		#	example		10
-		#	default		
+		#	Integer
+		#		description	Example argument1
+		#		example		10
+		#		default					
+		#	Hash
+		#		description	Example argument 1 type 2
+		#		examples	{ :optional_1 => "value_1", :optional_2 => "value_2" }
+		#		default
 		#
 		# argument1
 		#	type		String

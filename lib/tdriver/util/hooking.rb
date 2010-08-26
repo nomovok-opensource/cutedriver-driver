@@ -39,7 +39,7 @@ module MobyUtil
 
 			@logger_method = nil
 			@logger_instance = nil
-
+  
 		end
 
 		# Function to set logger instance used by wrapper
@@ -329,11 +329,21 @@ module MobyUtil
 											"# store start time for performance measurement
 											start_time = Time.now
 
-											# call original method
-											result = self.method(:#{ original_method_name }).call( *args, &block )
+                      begin
 
-											# store performance results to benchmark hash
-											MobyUtil::Hooking.instance.update_method_benchmark( '#{ base_and_method_name }', start_time, Time.now )
+											  # call original method
+											  result = self.method(:#{ original_method_name }).call( *args, &block )
+
+                      rescue Exception => exception
+
+                        raise exception
+                      
+                      ensure
+                      
+											  # store performance results to benchmark hash
+											  MobyUtil::Hooking.instance.update_method_benchmark( '#{ base_and_method_name }', start_time, Time.now )
+
+                      end
 
 											# return results
 											result"

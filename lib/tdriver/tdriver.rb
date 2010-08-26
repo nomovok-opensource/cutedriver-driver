@@ -32,7 +32,7 @@ Object.send( :undef_method, :id ) if Object.respond_to?( :id )
 
 require File.expand_path( File.join( File.dirname( __FILE__ ), 'loader' ) )
 
-class TDriver
+module TDriver
 
 	# Function to create and (or if already created re-) connect SUT object 
 	# === params
@@ -80,6 +80,7 @@ class TDriver
 		Kernel::raise ArgumentError.new( "Sut id not given!" ) unless sut_attributes.has_key?( :Id )
 
 		MobyBase::SUTFactory.instance.disconnect_sut( sut_attributes[ :Id ] )
+
 	end
 
 	# Function to reboot SUT object.  
@@ -155,4 +156,3 @@ end
 
 # Enable logging engine
 MobyUtil::Logger.instance.enable_logging()
-

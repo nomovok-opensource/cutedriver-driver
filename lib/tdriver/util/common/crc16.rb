@@ -17,7 +17,6 @@
 ## 
 ############################################################################
 
-
 module CRC
 
 	class Crc16
@@ -69,14 +68,28 @@ module CRC
 			crc
 		end
 
-		def self.crc16_ibm( buf, crc = 0 )
-			crc = 0xffff
-			buf.each_byte do | c |
-				crc = ( ( crc >> 4 ) & 0x0fff ) ^ @@IBM_16[ ( ( crc ^ c ) & 15 ) ]
-				c >>= 4
-				crc = ( ( crc >> 4 ) & 0x0fff ) ^ @@IBM_16[ ( ( crc ^ c ) & 15 ) ]
-			end
-			~crc & 0xffff
+    # use native crc calculation routines if available; using native crc routines increase performance ~10%
+    if defined?( TDriver::NativeExtensions )
+
+		  def self.crc16_ibm( buf, crc = 0 )
+
+        TDriver::NativeExtensions::CRC.crc16_ibm( buf )
+
+		  end
+
+    else
+
+      # fallback when native extensions are not supported (e.g. jruby)
+		  def self.crc16_ibm( buf, crc = 0 )
+			  crc = 0xffff
+			  buf.each_byte do | c |
+				  crc = ( ( crc >> 4 ) & 0x0fff ) ^ @@IBM_16[ ( ( crc ^ c ) & 15 ) ]
+				  c >>= 4
+				  crc = ( ( crc >> 4 ) & 0x0fff ) ^ @@IBM_16[ ( ( crc ^ c ) & 15 ) ]
+			  end
+			  ~crc & 0xffff
+		  end
+		
 		end
 
 		# enable hooking for performance measurement & debug logging
