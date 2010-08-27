@@ -35,18 +35,25 @@ module MobyUtil
         # skip native extension build if running in java environment
         raise LoadError if MobyUtil::EnvironmentHelper.java?
 
-        # make makefile
+        # makefile creation module
         require 'mkmf'
         
         # name of ruby native extension
         extension_name = 'tdriver/native_extensions'
 
-        # The destination
+        # destination
         dir_config( extension_name )
 
-        # Do the work
+        # create makefile for implementation 
         create_makefile( extension_name )
-        
+
+        # create nmake.bat in windows env.
+			  if MobyUtil::EnvironmentHelper.windows? 
+
+				  File.open( 'nmake.bat', 'w') { |f| f.write "make" }
+
+			  end
+
       rescue Exception
 
         # create dummy makefile if building native extension fails or is not supported
