@@ -114,7 +114,7 @@ module MobyUtil
 			# load parameter templates
 			load_templates if load_template_files
 
-      # load global parameters (root level, e.g. MobyUtil::Parameter[ :logging_outputter_enabled ])
+            # load global parameters (root level, e.g. MobyUtil::Parameter[ :logging_outputter_enabled ])
 			@@parameters = MobyUtil::ParameterTemplates.instance.get_template_from_xml( 'global' )
 
 			# load and merge with default parameters 
@@ -123,8 +123,8 @@ module MobyUtil
 			# use filename from command line argument if one exists otherwise use default.
 			filename = load_command_line_parameters ? @@filename_from_command_list_arguments : nil 
 
-			# idoim: use default parameters file if nil
-			filename ||= MobyUtil::FileHelper.expand_path( "tdriver_parameters.xml" ) if load_default_parameters
+			# load default tdriver/tdriver_parameters.xml file
+			load_parameters_xml( "tdriver_parameters.xml" ) if load_default_parameters
 
 			# load parameters file unless file does not exist
 			load_parameters_xml( filename ) if filename && File.exist?( filename )
