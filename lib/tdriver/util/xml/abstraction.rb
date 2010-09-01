@@ -19,29 +19,29 @@
 
 module MobyUtil
 
-	module XML
+  module XML
 
-		module Abstraction
+    module Abstraction
 
-			attr_accessor :xml, :parser
+      attr_accessor :xml, :parser
 
-			def initialize( xml = nil, parser = nil )
+      def initialize( xml = nil, parser = nil )
 
-				@xml, @parser = xml, parser
+        @xml, @parser = xml, parser
 
-			end
+      end
 
-			def method_missing( *args )
+      def method_missing( *args )
 
-				Kernel::raise RuntimeError.new( "This is abstraction class of %s - XML parser type was not specified correctly" % self.class ) 
+        Kernel::raise RuntimeError.new( "This is abstraction class of %s - XML parser type was not specified correctly" % self.class ) 
 
-			end      
+      end      
 
-			# enable hooking for performance measurement & debug logging
-			MobyUtil::Hooking.instance.hook_methods( self ) if defined?( MobyUtil::Hooking )
+      # enable hooking for performance measurement & debug logging
+      MobyUtil::Hooking.instance.hook_methods( self ) if defined?( MobyUtil::Hooking )
 
-		end # Abstraction
+    end # Abstraction
 
-	end # XML
+  end # XML
 
 end # MobyUtil

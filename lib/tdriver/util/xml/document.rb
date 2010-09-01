@@ -19,14 +19,14 @@
 
 module MobyUtil
 
-	module XML
+  module XML
 
-		class Document
+    class Document
 
-			include Abstraction
+      include Abstraction
 
-		end # Document
+    end # Document
 
-	end # XML
+  end # XML
 
 end # MobyUtil

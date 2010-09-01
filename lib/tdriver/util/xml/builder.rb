@@ -19,36 +19,36 @@
 
 module MobyUtil
 
-	module XML    
+  module XML    
 
-		class Builder
+    class Builder
 
-			include Abstraction
+      include Abstraction
 
-			def initialize( &block )
+      def initialize( &block )
 
-				if block_given?
+        if block_given?
 
-					$stderr.puts "%s:%s warning: deprecated method %s#new, use %s instead" % [ caller.first.split( ":" )[ 0 .. 1 ], self.class, "MobyUtil::XML#build" ].flatten
+          $stderr.puts "%s:%s warning: deprecated method %s#new, use %s instead" % [ caller.first.split( ":" )[ 0 .. 1 ], self.class, "MobyUtil::XML#build" ].flatten
 
-					# get current parser
-					@parser = MobyUtil::XML.current_parser
+          # get current parser
+          @parser = MobyUtil::XML.current_parser
 
-					# extend builder behaviour of current parser
-					self.extend( ( @parser )::Builder )
+          # extend builder behaviour of current parser
+          self.extend( ( @parser )::Builder )
 
-					# create builder object
-					build( &block )
+          # create builder object
+          build( &block )
 
-				end
+        end
 
-			end
+      end
 
-			# enable hooking for performance measurement & debug logging
-			MobyUtil::Hooking.instance.hook_methods( self ) if defined?( MobyUtil::Hooking )
+      # enable hooking for performance measurement & debug logging
+      MobyUtil::Hooking.instance.hook_methods( self ) if defined?( MobyUtil::Hooking )
 
-		end # Builder
+    end # Builder
 
-	end # XML
+  end # XML
 
 end # MobyUtil

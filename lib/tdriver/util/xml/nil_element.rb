@@ -19,71 +19,71 @@
 
 module MobyUtil
 
-	module XML
+  module XML
 
-		class NilElement
+    class NilElement
 
-			include Abstraction
+      include Abstraction
 
-			def method_missing( method, *method_arguments )
+      def method_missing( method, *method_arguments )
 
-				raise RuntimeError.new( "Method '%s' is not supported by %s (%s)" % [ method, self.class, @parser ] )
+        raise RuntimeError.new( "Method '%s' is not supported by %s (%s)" % [ method, self.class, @parser ] )
 
-			end
+      end
 
-			def xml=( value )
+      def xml=( value )
 
-				@xml = nil
+        @xml = nil
 
-			end
+      end
 
-			def name
+      def name
 
-				nil
+        nil
 
-			end
+      end
 
-			def size
+      def size
 
-				0
+        0
 
-			end
+      end
 
-			def nil?
+      def nil?
 
-				true
+        true
 
-			end
+      end
 
-			def eql?( object )
+      def eql?( object )
 
-				nil == object.xml.content
+        nil == object.xml.content
 
-			end
+      end
 
-			def empty?
+      def empty?
 
-				true
+        true
 
-			end
+      end
 
-			def to_s
+      def to_s
 
-				""
+        ""
 
-			end
+      end
 
-			def inner_xml
+      def inner_xml
 
-				""
+        ""
 
-			end
+      end
 
-			# enable hooking for performance measurement & debug logging
-			MobyUtil::Hooking.instance.hook_methods( self ) if defined?( MobyUtil::Hooking )
+      # enable hooking for performance measurement & debug logging
+      MobyUtil::Hooking.instance.hook_methods( self ) if defined?( MobyUtil::Hooking )
 
-		end # NilElement
+    end # NilElement
 
-	end # XML
+  end # XML
 
 end # MobyUtil

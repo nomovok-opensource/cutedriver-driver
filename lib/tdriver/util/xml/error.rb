@@ -19,28 +19,28 @@
 
 module MobyUtil
 
-	module XML
+  module XML
 
-		class ParseError < StandardError
+    class ParseError < StandardError
 
-			def initialize ( msg = nil )
-			
-				super( msg )
+      def initialize ( msg = nil )
+      
+        super( msg )
 
-			end
+      end
 
-		end # ParseError
+    end # ParseError
 
-		class BuilderError < StandardError
+    class BuilderError < StandardError
 
-			def initialize ( msg = nil )
-			
-				super( msg )
+      def initialize ( msg = nil )
+      
+        super( msg )
 
-			end
+      end
 
-		end # ParseError
+    end # ParseError
 
-	end # XML
+  end # XML
 
 end # MobyUtil
