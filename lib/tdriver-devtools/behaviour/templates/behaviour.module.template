@@ -1,54 +1,54 @@
 # generated behaviour implementation
 module MobyBehaviour
 
-	# == description
-	# example behaviour description  
-	#
-	# == behaviour
-	# MyBehaviour
-	#
-	# == requires
-	# my-testability-driver-plugin
-	#
-	# == input_type
-	# *
-	#
-	# == sut_type
-	# *
-	#
-	# == sut_version
-	# *
-	#
-	# == objects
-	# *;sut
-	#
-	module $BEHAVIOUR_NAME
+  # == description
+  # example behaviour description  
+  #
+  # == behaviour
+  # MyBehaviour
+  #
+  # == requires
+  # my-testability-driver-plugin
+  #
+  # == input_type
+  # *
+  #
+  # == sut_type
+  # *
+  #
+  # == sut_version
+  # *
+  #
+  # == objects
+  # *;sut
+  #
+  module $BEHAVIOUR_NAME
 
-		# behaviour-plugin: 
+    # behaviour-plugin: 
 
-		include MobyBehaviour::Behaviour
+    include MobyBehaviour::Behaviour
 
-	private
+  private
 
-		# this method will be called once module is extended to test object	
-		def self.extended( object )
+    # this method will be called once module is extended to test object  
+    def self.extended( object )
 
-			object.instance_exec{
+      object.instance_exec{
 
-				# default settings (optional)
-				initialize_behaviour_settings
+        # default settings (optional)
+        initialize_behaviour_settings
 
-			}
+      }
 
-		end
-	
-		# this method will be called once behaviour is extended to test object
-		def initialize_behaviour_settings
+    end
+  
+    # this method will be called once behaviour is extended to test object
+    def initialize_behaviour_settings
 
-		end
+    end
 
-	public # behaviours
+  public # behaviours
 $BEHAVIOUR_METHOD
-	end # $BEHAVIOUR_NAME
+  end # $BEHAVIOUR_NAME
 
 end # MobyBehaviour

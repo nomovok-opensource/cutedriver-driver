@@ -1,23 +1,23 @@
 
-			<method name="$METHOD_NAME">
+      <method name="$METHOD_NAME">
 
-				<description>$METHOD_DESCRIPTION</description>
-				<example>$METHOD_EXAMPLE</example>
-				
-				<arguments>
-				$METHOD_ARGUMENTS
-				</arguments>
+        <description>$METHOD_DESCRIPTION</description>
+        <example>$METHOD_EXAMPLE</example>
+        
+        <arguments>
+        $METHOD_ARGUMENTS
+        </arguments>
 
-				<exceptions>
-				$METHOD_EXCEPTIONS
-				</exceptions>
-				
-				<howtos>
-				$METHOD_HOWTOS
-				</howtos>
-				
-				<info>
-				$METHOD_INFO
-				</info>
+        <exceptions>
+        $METHOD_EXCEPTIONS
+        </exceptions>
+        
+        <howtos>
+        $METHOD_HOWTOS
+        </howtos>
+        
+        <info>
+        $METHOD_INFO
+        </info>
 
-			</method>
+      </method>

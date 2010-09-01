@@ -1,7 +1,7 @@
 
-					<argument name="$ARGUMENT_NAME" >
-						<types>
-							$METHOD_ARGUMENT_TYPES
-						</types>
-					</argument>
+          <argument name="$ARGUMENT_NAME">
+            <types>
+              $METHOD_ARGUMENT_TYPES
+            </types>
+          </argument>
 
