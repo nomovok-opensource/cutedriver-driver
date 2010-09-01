@@ -16,8 +16,11 @@
 ## of this file. 
 ## 
 ############################################################################
+
 module Generators
   
+  abort("") unless defined?( RDoc )
+
 	class TDriverGenerator                 
 
 		TYPE = {
@@ -160,7 +163,7 @@ module Generators
 
 				if /^\s/.match( line )
 
-					raise RuntimeError.new( "No section defined for '%s'" % [ line ] ) if result.last.nil?
+					raise RuntimeError.new( "No section defined for '%s' in method '%s'" % [ line, $current_method ] ) if result.last.nil?
 
 					#if /^\s{1}(\w+)\s*(.*)$/.match( line )
 					if /^\s+(\w+):\s*(.*)$/.match( line )
@@ -171,7 +174,7 @@ module Generators
 
 					elsif /^\s+(.*)$/.match( line )
 
-						raise RuntimeError.new( "No tag defined for '%s'" % [ line ] ) unless tag
+						raise RuntimeError.new( "No tag defined for '%s' in method '%s'" % [ line, $current_method ] ) unless tag
 
 						value = $1.strip
 
@@ -536,9 +539,14 @@ module Generators
 
 				).gsub( /\n\n\n/, "\n\n" ) unless module_header[ :module ].to_s == "MobyBehaviour"
 
-				File.open( "%s.xml" % module_header[ :behaviour ], 'w'){ | file | file << xml }
+        unless module_header[ :behaviour ].to_s.empty?
 
-				puts xml
+  				File.open( "%s.xml" % module_header[ :behaviour ], 'w'){ | file | file << xml } 
+
+				  puts xml
+
+        end
+
 
 			end
 
@@ -585,7 +593,7 @@ module Generators
 
 		def template( filename )
 
-			open( "%s.template" % filename ).read
+			open( File.join( File.dirname( File.expand_path( __FILE__ ) ), "..", "%s.template" % filename ) ).read
 
 		end
 
@@ -635,6 +643,8 @@ module Generators
 			#obj.source_code = get_source_code( obj )
 
 			if ( obj.visibility == :public )
+
+        $current_method = obj.name.to_str
 
 				comment = process_comment( obj.comment || "" )
 
