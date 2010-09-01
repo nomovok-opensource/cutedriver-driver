@@ -20,39 +20,39 @@
 
 module MobyUtil
 
-	module XML
+  module XML
 
-		module Nokogiri
+    module Nokogiri
 
-			module Document # behaviour
+      module Document # behaviour
 
-				include Abstraction 
+        include Abstraction 
 
-				def parse( xml_string )
+        def parse( xml_string )
 
-					::Nokogiri::XML.parse( xml_string, '', 'UTF8', 0 )
+          ::Nokogiri::XML.parse( xml_string, '', 'UTF8', 0 )
 
-				end
+        end
 
-				def root
+        def root
 
-					element_object( @xml.root )
+          element_object( @xml.root )
 
-				end
+        end
 
-				def xpath( xpath_query, *args, &block )
+        def xpath( xpath_query, *args, &block )
 
-					nodeset_object( @xml.xpath( xpath_query ), *args, &block )
+          nodeset_object( @xml.xpath( xpath_query ), *args, &block )
 
-				end
+        end
 
-				# enable hooking for performance measurement & debug logging
-				MobyUtil::Hooking.instance.hook_methods( self ) if defined?( MobyUtil::Hooking )
+        # enable hooking for performance measurement & debug logging
+        MobyUtil::Hooking.instance.hook_methods( self ) if defined?( MobyUtil::Hooking )
 
-			end # Document
+      end # Document
 
-		end # Nokogiri
+    end # Nokogiri
 
-	end # XML
+  end # XML
 
 end # MobyUtil

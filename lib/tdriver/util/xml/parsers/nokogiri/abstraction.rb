@@ -19,93 +19,93 @@
 
 module MobyUtil
 
-	module XML
+  module XML
 
-		module Nokogiri
+    module Nokogiri
 
-			module Abstraction
+      module Abstraction
 
-				# TODO: Documentation
-				def empty?
+        # TODO: Documentation
+        def empty?
 
-					@xml.empty?
+          @xml.empty?
 
-				end
+        end
 
-				# TODO: Documentation
-				def name
+        # TODO: Documentation
+        def name
 
-					@xml.name
+          @xml.name
 
-				end
+        end
 
-				# TODO: Documentation
-				def nil?
+        # TODO: Documentation
+        def nil?
 
-					@xml.nil?
+          @xml.nil?
 
-				end
+        end
 
-				# TODO: Documentation
-				def size
+        # TODO: Documentation
+        def size
 
-					@xml.size
+          @xml.size
 
-				end
+        end
 
-				# TODO: Documentation
-				def to_s
+        # TODO: Documentation
+        def to_s
 
-					@xml.to_s
+          @xml.to_s
 
-				end
+        end
 
-			private
+      private
 
-				# method to create MobyUtil::XML::Attribute object
-				def attribute_object( xml_data )
+        # method to create MobyUtil::XML::Attribute object
+        def attribute_object( xml_data )
 
-					MobyUtil::XML::Attribute.new( xml_data, @parser ).extend( Attribute )
+          MobyUtil::XML::Attribute.new( xml_data, @parser ).extend( Attribute )
 
-				end
+        end
 
-				# method to create MobyUtil::XML::Element or MobyUtil::XML::NilElement object 
-				def element_object( xml_data )
+        # method to create MobyUtil::XML::Element or MobyUtil::XML::NilElement object 
+        def element_object( xml_data )
 
-					unless xml_data.nil?
+          unless xml_data.nil?
 
-						MobyUtil::XML::Element.new( xml_data, @parser ).extend( Element )
+            MobyUtil::XML::Element.new( xml_data, @parser ).extend( Element )
 
-					else
+          else
 
-						MobyUtil::XML::NilElement.new( nil, @parser )
+            MobyUtil::XML::NilElement.new( nil, @parser )
 
-					end
+          end
 
-				end
+        end
 
-				# method to create MobyUtil::XML::Nodeset object
-				def nodeset_object( xml_data )
+        # method to create MobyUtil::XML::Nodeset object
+        def nodeset_object( xml_data )
 
-					MobyUtil::XML::Nodeset.new( xml_data, @parser ).extend( Nodeset )
+          MobyUtil::XML::Nodeset.new( xml_data, @parser ).extend( Nodeset )
 
 
-				end
+        end
 
-				# TODO: Documentation
-				def method_missing( method, *args, &block )
+        # TODO: Documentation
+        def method_missing( method, *args, &block )
 
-					raise RuntimeError.new( "Method '%s' is not supported by %s (%s)" % [ method, self.class, @parser ] )
+          raise RuntimeError.new( "Method '%s' is not supported by %s (%s)" % [ method, self.class, @parser ] )
 
-				end
+        end
 
-				# enable hooking for performance measurement & debug logging
-				MobyUtil::Hooking.instance.hook_methods( self ) if defined?( MobyUtil::Hooking )
+        # enable hooking for performance measurement & debug logging
+        MobyUtil::Hooking.instance.hook_methods( self ) if defined?( MobyUtil::Hooking )
 
-			end # Abstraction
+      end # Abstraction
 
- 		end # Nokogiri
+     end # Nokogiri
 
-	end # XML
+  end # XML
 
 end # MobyUtil
