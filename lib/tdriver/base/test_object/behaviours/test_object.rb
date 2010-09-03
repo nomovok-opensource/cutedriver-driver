@@ -264,38 +264,35 @@ module MobyBehaviour
 
 		end
 
+
+		# Function for finding out the application for this test ojbect
+		# All test objects should be under application object now so this should be ok?
+		# === returns
+		# String:: representing the id of the application test object
+		def get_application
+			return self if application?
+			parent_object = @parent
+			while parent_object
+				return parent_object if parent_object.type == 'application'
+				parent_object = parent_object.parent
+			end
+			# last resort
+			begin
+				return @sut.child( :type => 'application' )
+			rescue e
+        # Not found
+			end
+			# no parent found
+			nil
+    end
+
 		# Function for finding out the application id for this test ojbect
 		# All test objects should be under application object now so this should be ok?
 		# === returns
 		# String:: representing the id of the application test object
 		def get_application_id
-
 			return @_application_id if @_application_id
-
-			return @id if application?
-
-			parent_object = @parent
-
-			while parent_object
-
-				return ( @_application_id = parent_object.id ) if parent_object.type == 'application'
-
-				parent_object = parent_object.parent
-
-			end
-
-			# last resort
-			begin
-
-				return @sut.child( :type => 'application' ).id
-
-			rescue e
-
-			end
-
-			# no parent found
-			nil
-
+      get_application.id
 		end
 
 		def set_application_id( application_id )
