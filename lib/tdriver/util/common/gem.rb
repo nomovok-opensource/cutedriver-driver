@@ -50,7 +50,7 @@ module MobyUtil
         # create nmake.bat in windows env.
 			  if MobyUtil::EnvironmentHelper.windows? 
 
-				  File.open( 'nmake.bat', 'w') { |f| f.write "make" }
+				  File.open( 'nmake.bat', 'w') { |f| f.write "SET ERRORLEVEL=0" }
 
 			  end
 
