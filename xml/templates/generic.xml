@@ -1,163 +1,232 @@
 <templates>
 
-    <!--
-                *** DO NOT MODIFY THIS FILE - Use TDriver parameters XML to configure your environment ***
+  <!-- templates file version -->
+  <version>0.1</version>
 
-                Notice:
+  <!--
+ 
+    *** DO NOT MODIFY THIS FILE - Use TDriver parameters XML to configure your environment ***
 
-                Due to this file will be updated by TDriver development team, please use TDriver parameters XML file instead.
-                See TDriver parameters example XML (../tdriver_parameters.xml) for how to configure TDriver using templates.
+    Notice:
+
+    Due to this file will be updated by TDriver development team, please use TDriver parameters XML file instead.
+    See TDriver parameters example XML (../tdriver_parameters.xml) for how to configure TDriver using templates.
+
+  -->
+
+  <!-- this template will be loaded automatically as global parameters; usage example: value = MobyUtil::Parameter[:app_path] -->
+  <template name="global" inherits="logging;localisation;reporting;user_data;operator_data">
+
+    <!-- orbit test application path -->
+    <parameter name="app_path" value="" />
+
+    <!-- default behaviours file -->
+    <parameter name="behaviours" value="behaviours.xml" />
+
+  </template>
+
+  <!-- default values for each SUT -->
+  <template name="sut_generic">
+
+    <parameter name="type" value="" />
+    <parameter name="product" value="" />
+
+    <parameter name="version" value="0" />
+    <parameter name="language" value="English-GB" />
+    <parameter name="read_lang_from_app" value="false" /> 
+
+		<!-- default sut specific localisation table name -->
+    <parameter name="localisation_server_database_tablename" value="TB10_1_week16_loc" />
+
+    <!-- default device input type (e.g. key, touch) -->
+    <parameter name="input_type" value="key" />
+
+    <!-- default tcp/ip socket read/write timeouts -->
+    <parameter name="socket_read_timeout" value="25" />
+    <parameter name="socket_write_timeout" value="25" />
+
+    <!-- application start, stop etc. related parameters -->
+    <parameter name="application_start_arguments" value="" /> <!-- start, e.g. value="-style, testability" -->
+    <parameter name="application_close_kill" value="true" /> <!-- stop -->
+    <parameter name="application_close_wait" value="10" /> <!-- time in seconds -->
+
+    <parameter name="application_synchronization_timeout" value="20" />
+    <parameter name="application_synchronization_retry_interval" value="0.25" />
+
+    <!--framework defaults DO NOT TOUCH UNLESS YOU KNOW WHAT YOU ARE DOING -->
+    <parameter name="synchronization_timeout" value="10" />
+    <parameter name="default_timeout" value="20" />
+
+    <!-- ui xml compression, in most of cases this will improve performace -->
+    <parameter name="ui_state_compression" value="true" />
+
+    <!-- how many times ui state request will be tried in error situation before raising exception -->
+    <parameter name="ui_state_refresh_tries" value="5" />
+
+    <!-- ui state request interval value. If set will prevent ui state request to occur faster than the value -->
+    <parameter name="refresh_interval" value="0" />
+
+    <parameter name="verify_blocks" value="" />
+      
+
+  </template>
+
+  <!-- default parameters for mysql localisation server settings -->
+  <template name="localisation">
+
+    <!--parameter name="localisation_db_type" value="sqlite" /-->
+    <parameter name="localisation_db_type" value="mysql" />
+    <parameter name="localisation_server_ip" value="127.0.0.1" /> <!--valid only for mysql! -->
+    <parameter name="localisation_server_username" value="root" /> <!--valid only for mysql! -->
+    <parameter name="localisation_server_password" value="" /> <!--valid only for mysql! -->
+    <parameter name="localisation_server_database_name" value="default_tdriver_db" /> <!--path to the file for sqlite -->
+		<parameter name="localisation_server_database_tablename" value="default_userinputs_tablename" />
+
+  </template>
+
+
+  <!-- default parameters for logging settings -->
+  <template name="logging" inherits="error_logging">
+
+    <!-- 
+
+      Logging levels:
+      0 = DISABLED    No logging done (default)
+      1 = DEBUG	Debug level logging
+      2 = BEHAVIOUR   Behaviour logging enabled (including all levels below)
+      2 = INFO        All levels below (suitable for most cases)
+      3 = WARNING     Warnings and all errors (not implemented)
+      4 = ERROR       All errors (not implemented)
+      5 = FATAL       Only fatal errors (not implemented)
 
     -->
 
-    <!-- templates file version -->
-    <version>0.1</version>
+    <parameter name="logging_level" value="0" />
 
-    <template name="global" inherits="logging;localisation;reporting">
+    <parameter name="logging_outputter_enabled" value="false" />
+    <parameter name="logging_outputter_path" value="logfiles/" />
+    <parameter name="logging_outputter_unique_filename" value="false" />
+    <parameter name="logging_outputter_append" value="false" />
 
-        <!-- this template will be loaded automatically as global parameters; usage example: value = MobyUtil::Parameter[:app_path] -->
+    <parameter name="logging_include_behaviour_info" value="false" />
 
-        <!-- orbit test application path -->
-        <parameter name="app_path" value="" />
+    <!-- pattern macros: %d date, %c log name, %l log level, %M text -->
+    <parameter name="logging_outputter_pattern" value="%d [%c] [%l] %M" />
 
-        <!-- default behaviours file -->
-        <parameter name="behaviours" value="behaviours.xml" />
+  </template>
 
-    </template>
+  <!-- error logging settings -->
+  <template name="error_logging">
 
-    <template name="sut_generic">
+    <!-- store xml file if error occured? -->
+    <parameter name="logging_xml_parse_error_dump" value="true" />
 
-        <!-- default values for each SUT -->
-        <parameter name="type" value="" />
-        <parameter name="product" value="" />
+    <!-- where to store errorneous xml dump -->
+    <parameter name="logging_xml_parse_error_dump_path" value="logfiles/" />
 
-        <parameter name="version" value="0" />
-        <parameter name="language" value="English-GB" />
-        <parameter name="read_lang_from_app" value="false" /> 
-		
-		<!-- default sut specific localisation table name -->
-        <parameter name="localisation_server_database_tablename" value="TB10_1_week16_loc" />
+    <!-- use static or unique filename for xml dump -->
+    <parameter name="logging_xml_parse_error_dump_overwrite" value="false" />
 
-        <!-- default device input type (e.g. key, touch) -->
-        <parameter name="input_type" value="key" />
+  </template>
 
-        <!-- default tcp/ip socket read/write timeouts -->
-        <parameter name="socket_read_timeout" value="25" />
-        <parameter name="socket_write_timeout" value="25" />
+  <!-- default parameters for reporting settings -->
+  <template name="reporting" inherits="error_recovery">
 
-        <!-- application start, stop etc. related parameters -->
-        <parameter name="application_start_arguments" value="" /> <!-- start, e.g. value="-style, testability" -->
-        <parameter name="application_close_kill" value="true" /> <!-- stop -->
-        <parameter name="application_close_wait" value="10" /> <!-- time in seconds -->
+    <!-- Parameters for report crash file monitoring -->
+    <parameter name="report_crash_file_monitor" value="false" />
+    <parameter name="report_crash_file_monitored_sut_ids" value="s60,qt_sut" />
+    <parameter name="report_crash_file_locations" value="C:,c:\data,E:,F:" />
+    <parameter name="report_crash_file_names" value="MobileCrash" />
+    <parameter name="report_disconnect_connected_devices" value="false" />
 
-        <parameter name="application_synchronization_timeout" value="20" />
-        <parameter name="application_synchronization_retry_interval" value="0.25" />
+    <!-- Parameters for report details -->
+    <parameter name="report_outputter_path" value="tdriver_reports/" />
+    <parameter name="behaviour_logging" value="true" />
+    <parameter name="realtime_status_page_update" value="true" />
 
-        <!--framework defaults DO NOT TOUCH UNLESS YOU KNOW WHAT YOU ARE DOING -->
-        <parameter name="synchronization_timeout" value="10" />
-        <parameter name="default_timeout" value="20" />
+    <parameter name="report_passed_statuses" value="passed" /> <!-- Different statuses can be separated with | -->
+    <parameter name="report_failed_statuses" value="failed" /> <!-- Different statuses can be separated with | -->
+    <parameter name="report_not_run_statuses" value="not run" /> <!-- Different statuses can be separated with | -->
+    <parameter name="report_editable" value="false" /> <!-- Set to true to make report editable -->
 
-        <!-- ui xml compression, in most of cases this will improve performace -->
-        <parameter name="ui_state_compression" value="true" />
+    <parameter name="report_trace_capture" value="false" /> <!-- capture traces to test case -->
+    <parameter name="report_trace_folder" value="C:/my_trace_folder/" /> <!-- Folder that contains the trace files that are attached to test case -->
+    <parameter name="report_trace_capture_only_in_failed_case" value="true" /> <!-- capture trace files only when test case fails -->
 
-        <!-- how many times ui state request will be tried in error situation before raising exception -->
-        <parameter name="ui_state_refresh_tries" value="5" />
+    <!-- Parameters for generic file capturing -->
+    <parameter name="report_file_monitor" value="false" />
+    <parameter name="report_file_monitored_sut_ids" value="sut_s60_qt,qt_sut" />
+    <parameter name="report_file_locations" value="C:\logs,E:\logs" />
+    <parameter name="report_file_names" value="*.log" />
+    <parameter name="report_clean_files_from_sut_after_capture" value="true" />
+    <parameter name="report_fail_test_if_files_found" value="true" />        
 
-        <!-- ui state request interval value. If set will prevent ui state request to occur faster than the value -->
-        <parameter name="refresh_interval" value="0" />
+  </template>
 
-        <parameter name="verify_blocks" value="" />
-        
+  <!-- Parameters for error recovery situations -->
+  <template name="error_recovery">
 
-    </template>
+    <parameter name="error_recovery_enabled" value="false" />
+    <parameter name="ats4_error_recovery_enabled" value="false" />
+    <parameter name="wait_time_for_ats4_error_recovery" value="60" />
+    <parameter name="error_recovery_monitored_sut_ids" value="s60" />
 
-    <template name="localisation">
+    <!-- Parameters for pinging the connection -->
+    <parameter name="ping_connection" value="true" />        
 
-        <!-- default parameters for mysql localisation server settings -->
-        <!--parameter name="localisation_db_type" value="sqlite" /-->
-        <parameter name="localisation_db_type" value="mysql" />
-        <parameter name="localisation_server_ip" value="127.0.0.1" /> <!--valid only for mysql! -->
-        <parameter name="localisation_server_username" value="root" /> <!--valid only for mysql! -->
-        <parameter name="localisation_server_password" value="" /> <!--valid only for mysql! -->
-        <parameter name="localisation_server_database_name" value="default_tdriver_db" /> <!--path to the file for sqlite -->
+    <!-- Parameters for reconnect attempts -->
+    <parameter name="reconnect_device" value="true" />
+    <parameter name="reconnect_attempts" value="1" />
 
-    </template>
+  </template>
 
-    <template name="logging">
+  <!-- default parameters for user data settings -->
+  <template name="user_data">
 
-        <!-- Logging levels:
-                        0 = DISABLED	No logging done (default)
-                        1 = DEBUG	Debug level logging
-                        2 = BEHAVIOUR   Behaviour logging enabled (including all levels below)
-                        2 = INFO	All levels below (suitable for most cases)
-                        3 = WARNING	Warnings and all errors (not implemented)
-                        4 = ERROR	All errors (not implemented)
-                        5 = FATAL	Only fatal errors (not implemented)
-                -->
+    <parameter name="user_data_db_type" value="mysql" />
+    <parameter name="user_data_server_ip" value="127.0.0.1" /> <!--valid only for mysql! -->
+    <parameter name="user_data_server_username" value="root" /> <!--valid only for mysql! -->
+    <parameter name="user_data_server_password" value="" /> <!--valid only for mysql! -->
+    <parameter name="user_data_server_database_name" value="default_tdriver_db" /> <!--path to the file for sqlite -->
+    <parameter name="user_data_server_database_tablename" value="default_userinputs_tablename" />
 
-        <parameter name="logging_level" value="0" />
+  </template>
 
-        <parameter name="logging_outputter_enabled" value="false" />
-        <parameter name="logging_outputter_path" value="logfiles/" />
-        <parameter name="logging_outputter_unique_filename" value="false" />
-        <parameter name="logging_outputter_append" value="false" />
+  <!-- default parameters for operator data settings -->
+  <template name="operator_data">
 
-        <parameter name="logging_include_behaviour_info" value="false" />
+	  <parameter name="operator_data_db_type" value="sqlite" />
+	  <parameter name="operator_data_server_ip" value="127.0.0.1" /> <!--valid only for mysql! -->
+	  <parameter name="operator_data_server_username" value="root" /> <!--valid only for mysql! -->
+	  <parameter name="operator_data_server_password" value="" /> <!--valid only for mysql! -->
+	  <parameter name="operator_data_server_database_name" value="c:\operator_data.sqlite" /> <!--path to the file for sqlite -->
+	  <parameter name="operator_data_server_database_tablename" value="operatorinput" />
+	  <parameter name="operator_selected" value="orange" /> <!-- vodafone, etc... can be overwritten dynamically during testing -->
 
-        <!-- pattern macros: %d date, %c log name, %l log level, %M text -->
-        <parameter name="logging_outputter_pattern" value="%d [%c] [%l] %M" />
+  </template>
 
-    </template>
+  <!-- sut specific settings, model -->
+  <template name="sut_settings_model">
 
-    <template name="reporting" inherits="error_recovery">
+    <parameter name="sut_settings_phone_number" value="1234567890" />
+    <parameter name="sut_settings_language" value="English" />
+    <parameter name="sut_settings_keypad_layout" value="finnish_english_finnish" />
+    <parameter name="sut_settings_operator" value="O2" />
+    <parameter name="sut_settings_variant" value="01" />
+    <parameter name="sut_settings_codes_pin" value="1234" />
+    <parameter name="sut_settings_codes_puk" value="12345678" />
+    <parameter name="sut_settings_mac_bluetooth" value="de:ad:be:ef:01:02:03:04" />
+    <parameter name="sut_settings_mac_wlan" value="de:ad:be:ef:04:03:02:01" />
 
-        <!-- Parameters for report crash file monitoring -->
-        <parameter name="report_crash_file_monitor" value="false" />
-        <parameter name="report_crash_file_monitored_sut_ids" value="s60,qt_sut" />
-        <parameter name="report_crash_file_locations" value="C:,c:\data,E:,F:" />
-        <parameter name="report_crash_file_names" value="MobileCrash" />
-        <parameter name="report_disconnect_connected_devices" value="false" />
+  </template>
 
-        <!-- Parameters for report details -->
-        <parameter name="report_outputter_path" value="tdriver_reports/" />
-        <parameter name="behaviour_logging" value="true" />
-        <parameter name="realtime_status_page_update" value="true" />
+  <!-- Examples of how sut settings models are created and used  -->
+  <template name="sut_settings_model_sut_1" inherits="sut_settings_model">
 
+    <!-- settings for a single device, overwrites some parameters -->
+    <parameter name="sut_settings_phone_number" value="0987654321" />
+    <parameter name="sut_settings_mac_wlan" value="ca:fe:ba:be:04:03:02:01" />
 
-    </template>
-
-    <template name="error_recovery">
-        <!-- Parameters for error recovery situations -->
-        <parameter name="error_recovery_enabled" value="false" />
-        <parameter name="ats4_error_recovery_enabled" value="false" />
-        <parameter name="wait_time_for_ats4_error_recovery" value="60" />
-        <parameter name="error_recovery_monitored_sut_ids" value="s60" />
-
-        <!-- Parameters for pinging the connection -->
-        <parameter name="ping_connection" value="true" />        
-
-        <!-- Parameters for reconnect attempts -->
-        <parameter name="reconnect_device" value="true" />
-        <parameter name="reconnect_attempts" value="1" />
-
-    </template>
-	
-    <!-- Examples of how sut settings models are created and used  -->
-    <template name="sut_settings_model_sut_1" inherits="sut_settings_model"> <!-- settings for a single device, overwrites some parameters -->
-        <parameter name="sut_settings_phone_number" value="0987654321" />
-        <parameter name="sut_settings_mac_wlan" value="ca:fe:ba:be:04:03:02:01" />
-    </template>
-	
-    <template name="sut_settings_model" inherits=""> <!-- sut specific settings, model -->
-        <parameter name="sut_settings_phone_number" value="1234567890" />
-        <parameter name="sut_settings_language" value="English" />
-        <parameter name="sut_settings_keypad_layout" value="finnish_english_finnish" />
-        <parameter name="sut_settings_operator" value="O2" />
-        <parameter name="sut_settings_variant" value="01" />
-        <parameter name="sut_settings_codes_pin" value="1234" />
-        <parameter name="sut_settings_codes_puk" value="12345678" />
-        <parameter name="sut_settings_mac_bluetooth" value="de:ad:be:ef:01:02:03:04" />
-        <parameter name="sut_settings_mac_wlan" value="de:ad:be:ef:04:03:02:01" />
-    </template>
+  </template>
 
 </templates>

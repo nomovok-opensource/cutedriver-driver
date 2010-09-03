@@ -19,40 +19,40 @@
 
 module MobyUtil
 
-	module XML
+  module XML
 
-		module Nokogiri
+    module Nokogiri
 
-			module Builder # behaviour
+      module Builder # behaviour
 
-				def build( &block )
+        def build( &block )
 
-					@xml = ::Nokogiri::XML::Builder.new( &block )
+          @xml = ::Nokogiri::XML::Builder.new( &block )
 
-				end
+        end
 
-				def to_xml
+        def to_xml
 
-					@xml.to_xml
+          @xml.to_xml
 
-				end
+        end
 
-				# support all Nokogiri::XML::Builder class instance methods
-				def method_missing( method, *args )
+        # support all Nokogiri::XML::Builder class instance methods
+        def method_missing( method, *args )
 
-					Kernel::raise NoMethodError.new( "Method '%s' is not supported by %s" % [ method, self.class ] ) unless @xml.respond_to?( method )
+          Kernel::raise NoMethodError.new( "Method '%s' is not supported by %s" % [ method, self.class ] ) unless @xml.respond_to?( method )
 
-					@xml.send( method.to_sym, *args )
+          @xml.send( method.to_sym, *args )
 
-				end
+        end
 
-				# enable hooking for performance measurement & debug logging
-				MobyUtil::Hooking.instance.hook_methods( self ) if defined?( MobyUtil::Hooking )
+        # enable hooking for performance measurement & debug logging
+        MobyUtil::Hooking.instance.hook_methods( self ) if defined?( MobyUtil::Hooking )
 
-			end # Document
+      end # Document
 
-		end # Nokogiri
+    end # Nokogiri
 
-	end # XML
+  end # XML
 
 end # MobyUtil

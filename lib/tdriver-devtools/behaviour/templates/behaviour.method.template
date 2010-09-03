@@ -1,39 +1,43 @@
 
-		# == description
-		# Cause a drag operation on the screen. Basically the same as flick or gesture but done slowly.
-		#
-		# == arguments
-		# argument1
-		#	type		Integer
-		#	description	Example argument1
-		#	example		10
-		#	default		
-		#
-		# argument1
-		#	type		String
-		#	description	Example argument2
-		#	example		"Hello"
-		#	default		
-		#
-		# == returns
-		# String
-		#	description	Return value type
-		# 	example		"World"
-		# 
-		# == exceptions
-		# RuntimeError
-		# 	description	example exception
-		#
-		# ArgumentError
-		# 	description	example exception
-		#		
-		# == example
-		# Place your example code here
-		#
-		# == see
-		# $METHOD_NAME
-		def $METHOD_NAME($METHOD_ARGUMENTS)
+    # == description
+    # Cause a drag operation on the screen. Basically the same as flick or gesture but done slowly.
+    #
+    # == arguments
+    # argument1
+    #  Integer
+    #    description  Example argument1
+    #    example    10
+    #    default          
+    #  Hash
+    #    description  Example argument 1 type 2
+    #    examples  { :optional_1 => "value_1", :optional_2 => "value_2" }
+    #    default
+    #
+    # argument1
+    #  type    String
+    #  description  Example argument2
+    #  example    "Hello"
+    #  default    
+    #
+    # == returns
+    # String
+    #  description  Return value type
+    #   example    "World"
+    # 
+    # == exceptions
+    # RuntimeError
+    #   description  example exception
+    #
+    # ArgumentError
+    #   description  example exception
+    #    
+    # == example
+    # Place your example code here
+    #
+    # == see
+    # $METHOD_NAME
+    def $METHOD_NAME($METHOD_ARGUMENTS)
 
-			# implementation
+      # implementation
 
-		end
+    end

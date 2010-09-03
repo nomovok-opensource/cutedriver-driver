@@ -19,8 +19,45 @@
 
 module TDriverVerify
 
-
   TIMEOUT_CYCLE_SECONDS = 0.1 if !defined?( TIMEOUT_CYCLE_SECONDS )
+
+  @@on_error_verify_block = nil
+
+  def on_error_verify_block( &block )
+
+    raise ArgumentError.new( "No verify block given" ) unless block_given?
+
+    @@on_error_verify_block = block
+
+  end
+
+  def reset_on_error_verify_block
+
+    @@on_error_verify_block = nil
+
+  end
+
+  def execute_on_error_verify_block
+
+    unless @@on_error_verify_block.nil?
+
+      begin
+
+        @@on_error_verify_block.call 
+
+      rescue Exception => exception
+
+        raise exception.class.new( "Exception was raised while executing on_error_verify_block. Reason: %s" % [ exception.message ]) 
+          
+      end
+
+    else
+
+      raise ArgumentError.new( "No verify block defined with on_error_verify_block method" )
+
+    end
+
+  end
 
   # Verifies that the block given to this method evaluates without throwing any exceptions. Verification is synchronized with all connected suts.
   # If this method is called for a sut, synchronization is only done with that sut.
@@ -35,6 +72,7 @@ module TDriverVerify
   # VerificationError:: The verification failed.
 
   def verify( timeout = nil, message = nil, &block )
+
     logging_enabled = MobyUtil::Logger.instance.enabled
 
     verify_caller = caller(1).first.to_s
@@ -54,24 +92,31 @@ module TDriverVerify
       #TIMEOUT_CYCLE_SECONDS
 
       loop do
+
         counter = ref_counter
+
         begin # catch errors thrown in the provided block
 
           yield
+
           # no error => verification ok
           break
 
         rescue Exception => e 
+
           raise if e.kind_of? MobyBase::ContinuousVerificationError
 
           source_contents = ""
           error_msg = ""
+
           if Time.new > timeout_time
 
             error_msg = "Verification #{message.nil? ? '' : '"' << message.to_s << '" '}at #{verify_caller} failed\n"
 
             begin
+
               source_contents = MobyUtil::KernelHelper.find_source(verify_caller)
+
             rescue Exception
               # failed to load line from file, do nothing
               MobyUtil::Logger.instance.enabled = logging_enabled
@@ -81,7 +126,9 @@ module TDriverVerify
             if !source_contents.empty?
               error_msg << source_contents
             end
+
             error_msg << "\nNested exception:" << e.message << "\n"
+
             Kernel::raise MobyBase::VerificationError.new(error_msg)
 
           end
@@ -91,19 +138,28 @@ module TDriverVerify
         sleep TIMEOUT_CYCLE_SECONDS
 
         refresh_suts if counter == ref_counter
+
       end # do
 
     rescue Exception => e
+
+      execute_on_error_verify_block unless @@on_error_verify_block.nil?
+
       raise if e.kind_of? MobyBase::ContinuousVerificationError
+
       MobyUtil::Logger.instance.enabled = logging_enabled
       MobyUtil::Logger.instance.log "behaviour" , "FAIL;Verification #{message.nil? ? '' : '\"' << message << '\" '}failed: #{e.to_s}#{timeout.nil? ? '' : ' using timeout ' + timeout.to_s}.;#{self.kind_of?(MobyBase::SUT) ? self.id.to_s + ';sut' : ';'};{};verify;"
       Kernel::raise e
+
     ensure
+
       MobyBase::TestObjectFactory.instance.timeout = original_sync_timeout unless original_sync_timeout.nil?
+
     end
 
     MobyUtil::Logger.instance.enabled = logging_enabled
     MobyUtil::Logger.instance.log "behaviour" , "PASS;Verification #{message.nil? ? '' : '\"' << message << '\" '}at #{verify_caller} was successful#{timeout.nil? ? '' : ' using timeout ' + timeout.to_s}.;#{self.kind_of?(MobyBase::SUT) ? self.id.to_s + ';sut' : ';'};{};verify;"
+
     return nil
 
   end
@@ -160,11 +216,13 @@ module TDriverVerify
           if Time.new > timeout_time
 
             error_msg = "Verification #{message.nil? ? '' : '"' << message.to_s << '" '}at #{verify_caller} failed\n"
+
             source_contents = MobyUtil::KernelHelper.find_source(verify_caller)
 
             if !source_contents.empty?
               error_msg << source_contents
             end
+
             Kernel::raise MobyBase::VerificationError.new(error_msg)
 
           end
@@ -179,13 +237,19 @@ module TDriverVerify
 
 
     rescue Exception => e
+
+      execute_on_error_verify_block unless @@on_error_verify_block.nil?
+
       raise if e.kind_of? MobyBase::ContinuousVerificationError
 
       MobyUtil::Logger.instance.enabled = logging_enabled
       MobyUtil::Logger.instance.log "behaviour" , "FAIL;Verification #{message.nil? ? '' : '\"' << message << '\" '}failed: #{e.to_s}#{timeout.nil? ? '' : ' using timeout ' + timeout.to_s}.;#{self.kind_of?(MobyBase::SUT) ? self.id.to_s + ';sut' : ';'};{};verify_not;"
       Kernel::raise e
+
     ensure
+
       MobyBase::TestObjectFactory.instance.timeout = original_sync_timeout unless original_sync_timeout.nil?
+
     end
 
     MobyUtil::Logger.instance.enabled = logging_enabled
@@ -210,6 +274,7 @@ module TDriverVerify
 
     logging_enabled = MobyUtil::Logger.instance.enabled
     verify_caller = caller(1).first.to_s
+
     begin
       MobyUtil::Logger.instance.enabled = false
       Kernel::raise ArgumentError.new("No block was given.") unless block_given?
@@ -224,25 +289,41 @@ module TDriverVerify
       #TIMEOUT_CYCLE_SECONDS
 
       loop do
+
         counter = ref_counter
+
         begin # catch errors thrown due to verification results
 
 
           begin # catch errors thrown in the provided block
+
             result = yield
+
           rescue Exception => e 
+
+            #@@on_error_verify_block.call unless @@on_error_verify_block.nil?
+
             raise if e.kind_of? MobyBase::ContinuousVerificationError
+
             error_msg = "Verification #{message.nil? ? '' : '"' << message.to_s << '" '}at #{verify_caller} failed as an exception was thrown when the verification block was executed."
             error_msg << MobyUtil::KernelHelper.find_source(verify_caller)
             error_msg << "\nDetails: "
             error_msg << "\n" << e.inspect
-            raise MobyBase::VerificationError.new(error_msg)
+
+            raise MobyBase::VerificationError.new( error_msg )
+
           end
 
-          error_msg = "Verification #{message.nil? ? '' : '"' << message.to_s << '" '}at #{verify_caller} failed."
-          error_msg << MobyUtil::KernelHelper.find_source(verify_caller)
-          error_msg << "\nThe block did not return true. It returned: " << result.inspect          
-          raise MobyBase::VerificationError.new(error_msg) unless result == true
+          unless result == true
+
+              error_msg = "Verification #{message.nil? ? '' : '"' << message.to_s << '" '}at #{verify_caller} failed."
+              error_msg << MobyUtil::KernelHelper.find_source(verify_caller)
+
+              error_msg << "\nThe block did not return true. It returned: " << result.inspect          
+
+              raise MobyBase::VerificationError.new( error_msg ) 
+
+          end
 
           # break loop if no exceptions thrown
           break
@@ -251,16 +332,24 @@ module TDriverVerify
 
           # refresh and retry unless timeout reached
 
-          if Time.new > timeout_time
+          if ( Time.new > timeout_time )
+
+            execute_on_error_verify_block unless @@on_error_verify_block.nil?
+
             Kernel::raise ve
+
           end
 
           sleep TIMEOUT_CYCLE_SECONDS
 
           refresh_suts if counter == ref_counter
+
         rescue Exception => e
+
           raise if e.kind_of? MobyBase::ContinuousVerificationError
+
           MobyUtil::Logger.instance.enabled = logging_enabled
+
           # an unexpected error has occurred
           Kernel::raise RuntimeError.new("An unexpected error was encountered during verification:\n" << e.inspect )
 
@@ -298,10 +387,15 @@ module TDriverVerify
   def verify_false( timeout = nil, message = nil, &block )
 
     logging_enabled = MobyUtil::Logger.instance.enabled
+
     verify_caller = caller(1).first.to_s
+
     begin
+
       MobyUtil::Logger.instance.enabled = false
+
       Kernel::raise ArgumentError.new("No block was given.") unless block_given?
+
       Kernel::raise ArgumentError.new("Argument timeout was not an Integer.") unless timeout.nil? or timeout.kind_of?(Integer)
       Kernel::raise ArgumentError.new("Argument message was not a String.") unless message.nil? or message.kind_of?(String)
 
@@ -359,10 +453,16 @@ module TDriverVerify
       end # do
 
     rescue Exception => e
+
+      execute_on_error_verify_block unless @@on_error_verify_block.nil?
+
       raise if e.kind_of? MobyBase::ContinuousVerificationError
+
       MobyUtil::Logger.instance.enabled = logging_enabled
       MobyUtil::Logger.instance.log "behaviour" , "FAIL;Verification #{message.nil? ? '' : '\"' << message << '\" '}failed:#{e.to_s}.\n #{timeout.nil? ? '' : ' using timeout ' + timeout.to_s}.;#{self.kind_of?(MobyBase::SUT) ? self.id.to_s + ';sut' : ';'};{};verify_false;"
+
       Kernel::raise e
+
     ensure
       MobyBase::TestObjectFactory.instance.timeout = original_sync_timeout unless original_sync_timeout.nil?
     end
@@ -450,6 +550,9 @@ module TDriverVerify
       end # do
 
     rescue Exception => e
+
+      execute_on_error_verify_block unless @@on_error_verify_block.nil?
+
       raise if e.kind_of? MobyBase::ContinuousVerificationError
 
       MobyUtil::Logger.instance.enabled = logging_enabled
@@ -471,12 +574,13 @@ module TDriverVerify
   # timeout:: Integer, defining the amount of seconds during which the verification must pass.
   # signal_name:: String, name of the signal
   # message:: (optional) A String that is displayed as additional information if the verification fails.
+  # block:: code to execute while listening signals
   # === returns
   # nil
   # === raises
   # ArgumentError:: message or signal_name was not a String or timeout a non negative Integer
   # VerificationError:: The verification failed.
-  def verify_signal( timeout, signal_name, message = nil )
+  def verify_signal( timeout, signal_name, message = nil, &block )
 
     logging_enabled = MobyUtil::Logger.instance.enabled
     verify_caller = caller(1).first.to_s
@@ -490,16 +594,23 @@ module TDriverVerify
 
       # wait for the signal
       begin
-        self.wait_for_signal(timeout, signal_name)
+
+        self.wait_for_signal( timeout, signal_name, &block )
+
       rescue Exception => e
+
         error_msg = "Verification #{message.nil? ? '' : '"' << message.to_s << '" '}at #{verify_caller} failed:"
         error_msg << MobyUtil::KernelHelper.find_source(verify_caller)
         error_msg << "The signal #{signal_name} was not emitted in #{timeout} seconds."        
         error_msg << "\nNested exception:\n" << e.inspect
         Kernel::raise MobyBase::VerificationError.new(error_msg)
+
       end
 
     rescue Exception => e
+
+      execute_on_error_verify_block unless @@on_error_verify_block.nil?
+
       MobyUtil::Logger.instance.enabled = logging_enabled
       MobyUtil::Logger.instance.log "behaviour" , "FAIL;Verification #{message.nil? ? '' : '\"' << message << '\" '}failed: #{e.to_s} using timeout '#{timeout}.;#{self.kind_of?(MobyBase::SUT) ? self.id.to_s + ';sut' : ';'};{};verify_signal;#{signal_name}"
       Kernel::raise e

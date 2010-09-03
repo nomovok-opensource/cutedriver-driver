@@ -407,7 +407,11 @@ Removed object cache usage
 
 			# do not make test object verifications if we are operating on the 
 			# base sut itself (allow run to pass)
-			verify_ui_dump( sut ) unless parent.kind_of? MobyBase::SUT
+			unless parent.kind_of?( MobyBase::SUT )
+
+			  verify_ui_dump( sut ) unless sut.verify_blocks.empty?
+
+      end
 
 			test_object
 

@@ -19,169 +19,169 @@
 
 module MobyUtil
 
-	module XML
+  module XML
 
-		module Nokogiri
+    module Nokogiri
 
-			module Nodeset # behaviour
+      module Nodeset # behaviour
 
-				include Abstraction 
+        include Abstraction 
 
-				def []( node )
+        def []( node )
 
-					element_object( @xml[ node ] )
+          element_object( @xml[ node ] )
 
-				end
+        end
 
-				def first
+        def first
 
-					element_object( @xml.first )
+          element_object( @xml.first )
 
-				end
+        end
 
-				def last
+        def last
 
-					element_object( @xml.last )
+          element_object( @xml.last )
 
-				end
+        end
 
-				def each( &block )
+        def each( &block )
 
-					@xml.each{ | element | 
+          @xml.each{ | element | 
 
-						yield( element_object( element ) ) 
+            yield( element_object( element ) ) 
 
-					}
+          }
 
-					self
+          self
 
-				end
+        end
 
-				def collect( &block )
+        def collect( &block )
 
-					_collect( &block )
-					#nodeset_object( _collect( &block ) )
+          _collect( &block )
+          #nodeset_object( _collect( &block ) )
 
-				end
+        end
 
-				def collect!( &block )
+        def collect!( &block )
 
-					@xml = _collect( &block )
+          @xml = _collect( &block )
 
-					self
+          self
 
-				end
+        end
 
-				def compact
+        def compact
 
-					nodeset_object( @xml.compact )
+          nodeset_object( @xml.compact )
 
-				end
+        end
 
-				def compact!
+        def compact!
 
-					@xml = @xml.compact
+          @xml = @xml.compact
 
-					self
+          self
 
-				end
+        end
 
-				def sort( &block )
+        def sort( &block )
 
-					nodeset_object( _sort( &block ) ) 
+          nodeset_object( _sort( &block ) ) 
 
-				end
+        end
 
-				def sort!( &block )
+        def sort!( &block )
 
-					@xml = _sort( &block )
+          @xml = _sort( &block )
 
-					self
+          self
 
-				end
+        end
 
-				def empty?
+        def empty?
 
-					@xml.empty?
+          @xml.empty?
 
-				end
+        end
 
-				
-				def length
+        
+        def length
 
-					@xml.length
+          @xml.length
 
-				end
-		
-		
-				def to_a
+        end
+    
+    
+        def to_a
 
-					@xml.collect{ | element | 
+          @xml.collect{ | element | 
 
-						element_object( element ) 
+            element_object( element ) 
 
-					}
-					
-				end
-				
-				def delete( node )
+          }
+          
+        end
+        
+        def delete( node )
 
-					@xml.each do | element |
+          @xml.each do | element |
 
-						if ( node.xml.content == element.content )
+            if ( node.xml.content == element.content )
 
-							@xml.delete( element )
+              @xml.delete( element )
 
-							break
+              break
 
-						end
+            end
 
-					end
-					
-				end
+          end
+          
+        end
 
-				# aliases for length method
-				alias size length
+        # aliases for length method
+        alias size length
 
-				alias count length
+        alias count length
 
-			private
+      private
 
-				def _collect( &block )
+        def _collect( &block )
 
-					@xml.collect{ | element | 
+          @xml.collect{ | element | 
 
-						yield( element_object( element ) ) 
+            yield( element_object( element ) ) 
 
-					} 
+          } 
 
-				end
+        end
 
-				def _sort( &block )
+        def _sort( &block )
 
-					@xml.sort{ | element_a, element_b | 
-				
-						if block_given?
+          @xml.sort{ | element_a, element_b | 
+        
+            if block_given?
 
-							yield( element_object( element_a ), element_object( element_b ) ) 
+              yield( element_object( element_a ), element_object( element_b ) ) 
 
-						else
+            else
 
-							element_a <=> element_b
+              element_a <=> element_b
 
-						end
+            end
 
-					} 
+          } 
 
-				end
+        end
 
-				# enable hooking for performance measurement & debug logging
-				MobyUtil::Hooking.instance.hook_methods( self ) if defined?( MobyUtil::Hooking )
+        # enable hooking for performance measurement & debug logging
+        MobyUtil::Hooking.instance.hook_methods( self ) if defined?( MobyUtil::Hooking )
 
-			end # Nodeset
+      end # Nodeset
 
-		end # Nokogiri
+    end # Nokogiri
 
-	end # XML
+  end # XML
 
 end # MobyUtil

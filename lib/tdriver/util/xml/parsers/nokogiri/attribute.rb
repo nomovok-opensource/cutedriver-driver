@@ -22,32 +22,32 @@
 
 module MobyUtil
 
-	module XML
+  module XML
 
-		module Nokogiri
+    module Nokogiri
 
-			module Attribute
+      module Attribute
 
-				def value
-					@xml.nil? ? nil : @xml.value.to_s
-				end
+        def value
+          @xml.nil? ? nil : @xml.value.to_s
+        end
 
-				def name
-					@xml.nil? ? nil : @xml.name
-				end
+        def name
+          @xml.nil? ? nil : @xml.name
+        end
 
-				#def to_s
-					#  value
-				#end
+        #def to_s
+          #  value
+        #end
 
-				# enable hooking for performance measurement & debug logging
-				MobyUtil::Hooking.instance.hook_methods( self ) if defined?( MobyUtil::Hooking )
+        # enable hooking for performance measurement & debug logging
+        MobyUtil::Hooking.instance.hook_methods( self ) if defined?( MobyUtil::Hooking )
 
-			end      
+      end      
 
-		end # Nokogiri
+    end # Nokogiri
 
-	end # XML
+  end # XML
 
 end # MobyUtil
 

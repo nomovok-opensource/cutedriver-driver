@@ -55,6 +55,7 @@ module MobyUtil
 
 					Kernel::raise ArgumentError.new( "MATTI parameters command line argument given without a filename" ) if ARGV.count == index + 1 
 					puts "--matti_parameters is deprecated, use -tdriver_parameters instead"
+
 					filename = MobyUtil::FileHelper.expand_path( ARGV[ index + 1 ] )
 
 					# remove argument from ARGV array; some testing framework fails due to invalid argument
@@ -66,6 +67,7 @@ module MobyUtil
 					break
 
 				end
+
 				if ARGV[ index ].to_s == '--tdriver_parameters'
 
 					Kernel::raise ArgumentError.new( "TDriver parameters command line argument given without a filename" ) if ARGV.count == index + 1 
@@ -112,14 +114,17 @@ module MobyUtil
 			# load parameter templates
 			load_templates if load_template_files
 
-			# load default parameters or empty parameters hash
-			@@parameters = load_parameter_defaults ? load_default_parameter_files : ParameterHash.new()
+            # load global parameters (root level, e.g. MobyUtil::Parameter[ :logging_outputter_enabled ])
+			@@parameters = MobyUtil::ParameterTemplates.instance.get_template_from_xml( 'global' )
+
+			# load and merge with default parameters 
+			@@parameters.merge_with_hash!( load_default_parameter_files ) if load_parameter_defaults
 
 			# use filename from command line argument if one exists otherwise use default.
 			filename = load_command_line_parameters ? @@filename_from_command_list_arguments : nil 
 
-			# idoim: use default parameters file if nil
-			filename ||= MobyUtil::FileHelper.expand_path( "tdriver_parameters.xml" ) if load_default_parameters
+			# load default tdriver/tdriver_parameters.xml file
+			load_parameters_xml( "tdriver_parameters.xml" ) if load_default_parameters
 
 			# load parameters file unless file does not exist
 			load_parameters_xml( filename ) if filename && File.exist?( filename )
@@ -148,6 +153,7 @@ module MobyUtil
 				}
 
 			)
+
 		end
 
 	public

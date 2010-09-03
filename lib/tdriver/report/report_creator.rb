@@ -331,9 +331,11 @@ module TDriverReportCreator
   def update_test_case_memory_usage()
     begin
       MobyBase::SUTFactory.instance.connected_suts.each do |sut_id, sut_attributes|
-        memory=$tdriver_reporter.get_sut_used_memory(sut_id,sut_attributes)
-        $new_test_case.set_tc_memory_amount_end(memory)
-        $tdriver_reporter.set_memory_amount_end(memory)
+        if sut_attributes[:is_connected]
+          memory=$tdriver_reporter.get_sut_used_memory(sut_id,sut_attributes)
+          $new_test_case.set_tc_memory_amount_end(memory)
+          $tdriver_reporter.set_memory_amount_end(memory)
+        end
       end
     rescue
       $new_test_case.set_tc_memory_amount_end(0)

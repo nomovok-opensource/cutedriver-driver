@@ -19,129 +19,129 @@
 
 module MobyUtil
 
-	module XML
+  module XML
 
-		module Nokogiri
+    module Nokogiri
 
-			module Element # behaviour
+      module Element # behaviour
 
-				include Abstraction 
+        include Abstraction 
 
-				def <=>( object )
+        def <=>( object )
 
-					@xml <=> object.xml
+          @xml <=> object.xml
 
-				end
+        end
 
-				def []( value )
+        def []( value )
 
-					@xml.attributes[ value ]
+          @xml.attributes[ value ]
 
-				end
+        end
 
-				def attributes
+        def attributes
 
-					# return hash of attributes
-					Hash[ @xml.attributes.collect{ | key, value | [ key, value.to_s ] }]
+          # return hash of attributes
+          Hash[ @xml.attributes.collect{ | key, value | [ key, value.to_s ] }]
 
-				end
+        end
 
-				def attribute( attr_name )
+        def attribute( attr_name )
 
-					unless ( value = @xml.attribute( attr_name ) ).nil?
+          unless ( value = @xml.attribute( attr_name ) ).nil?
 
-						value.to_s
+            value.to_s
 
-					end
+          end
 
-				end
+        end
 
 
-				def children
+        def children
 
-					nodeset_object( @xml.children )
+          nodeset_object( @xml.children )
 
-				end
+        end
 
-				def content
+        def content
 
-					unless @xml.nil?
+          unless @xml.nil?
 
-						@xml.content.to_s
+            @xml.content.to_s
 
-					end
+          end
 
-				end
+        end
 
-				def each( &block )
+        def each( &block )
 
-					@xml.each{ | element | 
+          @xml.each{ | element | 
 
-						yield( element_object( element ) ) 
+            yield( element_object( element ) ) 
 
-					}
+          }
 
-					nil
+          nil
 
-				end        
+        end        
 
-				def eql?( object )
+        def eql?( object )
 
-					@xml.content == object.xml.content
+          @xml.content == object.xml.content
 
-				end
+        end
 
-				def empty?
+        def empty?
 
-					@xml.nil?
+          @xml.nil?
 
-				end
+        end
 
-				def inner_xml
+        def inner_xml
 
-					@xml.inner_html.to_s
+          @xml.inner_html.to_s
 
-				end
+        end
 
-				def xpath( xpath_query, *args, &block )
+        def xpath( xpath_query, *args, &block )
 
-					nodeset_object( 
+          nodeset_object( 
 
-						@xml.xpath( xpath_query, *args, &block ) 
+            @xml.xpath( xpath_query, *args, &block ) 
 
-					)
+          )
 
-				end
+        end
 
-				def replace( other )
+        def replace( other )
 
-					@xml.replace( other.xml )
+          @xml.replace( other.xml )
 
-					self
+          self
 
-				end
+        end
 
-				def add_previous_sibling( other )
+        def add_previous_sibling( other )
 
-					@xml.add_previous_sibling( other.xml )
+          @xml.add_previous_sibling( other.xml )
 
-				end
+        end
 
-				def remove
+        def remove
 
-					@xml.remove
+          @xml.remove
 
-					self
+          self
 
-				end
+        end
 
-				# enable hooking for performance measurement & debug logging
-				MobyUtil::Hooking.instance.hook_methods( self ) if defined?( MobyUtil::Hooking )
+        # enable hooking for performance measurement & debug logging
+        MobyUtil::Hooking.instance.hook_methods( self ) if defined?( MobyUtil::Hooking )
 
-			end # Element
+      end # Element
 
-		end # Nokogiri
+    end # Nokogiri
 
-	end # XML
+  end # XML
 
 end # MobyUtil

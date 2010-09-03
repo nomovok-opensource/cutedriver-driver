@@ -258,6 +258,9 @@ module MobyUtil
 
 			@include_behaviour_info = ( MobyUtil::Parameter[ :logging_include_behaviour_info, 'false' ].downcase == 'true' )
 
+			# create error dump folder if not exist, used e.g. when xml parse error
+			MobyUtil::FileHelper.mkdir_path( MobyUtil::FileHelper.expand_path( MobyUtil::Parameter[ :logging_xml_parse_error_dump_path ] ) )
+
 			unless logging_level.zero?
 
 				# create new logger instance

@@ -88,7 +88,7 @@ def make_spec
 					'lib/tdriver/util/**/*',
 					'xml/**/*',
 					'bin/**/*',
-					'installer/**/*',
+					'ext/**/*',
           'config/**/*'
 					].to_a
 
@@ -100,7 +100,7 @@ def make_spec
 	  	s.add_dependency("nokogiri", "=1.4.1")
 		s.add_dependency("builder", "=2.1.2")
 
-	  	s.extensions << 'installer/extconf.rb'
+	  	s.extensions << 'ext/extconf.rb'
   
 	end
 

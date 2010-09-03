@@ -16,8 +16,11 @@
 ## of this file. 
 ## 
 ############################################################################
+
 module Generators
   
+  abort("") unless defined?( RDoc )
+
 	class TDriverGenerator                 
 
 		TYPE = {
@@ -70,8 +73,12 @@ module Generators
 			@xml_behaviour_template = template( "templates/behaviour.xml" )
 			@xml_method_template = template( "templates/behaviour.xml.method" )
 			@xml_argument_template = template( "templates/behaviour.xml.argument" )
+			@xml_argument_type_template = template( "templates/behaviour.xml.argument_type" )
 			@xml_exception_template = template( "templates/behaviour.xml.exception" )
-
+			@xml_howto_template = template( "templates/behaviour.xml.howto" )
+			@xml_howto_line_template = template( "templates/behaviour.xml.howto.line" )
+			
+			
 			# set up a hash to keep track of all of the objects to be output
 			@output = {
 				:files => [], 
@@ -156,7 +163,7 @@ module Generators
 
 				if /^\s/.match( line )
 
-					raise RuntimeError.new( "No section defined for '%s'" % [ line ] ) if result.last.nil?
+					raise RuntimeError.new( "No section defined for '%s' in method '%s'" % [ line, $current_method ] ) if result.last.nil?
 
 					#if /^\s{1}(\w+)\s*(.*)$/.match( line )
 					if /^\s+(\w+):\s*(.*)$/.match( line )
@@ -167,7 +174,7 @@ module Generators
 
 					elsif /^\s+(.*)$/.match( line )
 
-						raise RuntimeError.new( "No tag defined for '%s'" % [ line ] ) unless tag
+						raise RuntimeError.new( "No tag defined for '%s' in method '%s'" % [ line, $current_method ] ) unless tag
 
 						value = $1.strip
 
@@ -186,7 +193,63 @@ module Generators
 			result
 
 		end
+=begin		
+		def parse_to_sections_debug( array )
 
+			result = []
+
+			tag = nil
+
+			array.each{ | line |
+
+				if /^\w/.match( line )
+
+					result << { :section => line }
+
+					tag = nil
+
+				end
+
+				if /^\s/.match( line )
+
+					raise RuntimeError.new( "No section defined for '%s'" % [ line ] ) if result.last.nil?
+
+					puts "S1: " << line.inspect
+					#if /^\s{1}(\w+)\s*(.*)$/.match( line )
+					if /^\s+(\w+):\s*(.*)$/.match( line )
+
+						puts "S1-a: " << line.inspect
+						tag = $1
+
+						value = $2.strip
+
+					elsif /^\s+(.*)$/.match( line )
+
+						puts "S1-b: " << line.inspect
+						raise RuntimeError.new( "No tag defined for '%s'" % [ line ] ) unless tag
+
+						value = $1.strip
+
+					end
+					
+					puts "V: " << value.inspect
+
+					# store empty array to tag key if none already exists
+					( result.last[ tag.to_sym ] ||= [] ).tap{ | values |
+
+						values.concat( [ value ] )
+
+					}
+
+				end
+			}
+			
+			puts "R: " << result.inspect
+
+			result
+
+		end
+=end
 		def process_header_comment( module_header )
 
 			# process data
@@ -234,17 +297,21 @@ module Generators
 							# do nothing
 							method[ key ] = value.to_s.strip
 
-						when :example, :description
+						when :example, :description, :info
 
 							method[ key ] = value.join('\n')
 
 						when :see
 							method[ key ] = value.to_s.gsub(/\s+/, "").split(",")
 
-						when :arguments, :returns, :exceptions
+						when :returns, :exceptions, :howto
 
-							method[ key ] = parse_to_sections( value )
+							method[ key ] = parse_to_sections( value )							
 
+						when :arguments
+						
+							method[ key ] = parse_arguments( value )
+						
 						else
 
 							puts "Unknown method header tag: %s" % key
@@ -258,6 +325,59 @@ module Generators
 			method
 			#array
 
+		end
+		
+		def parse_arguments( arguments )
+					
+			args = {}
+			
+			result = []
+			last_key = nil
+
+			tag = nil
+
+			arguments.each{ | line |
+
+				if /^\w/.match( line )
+
+					if !last_key.nil?
+					
+						args[ last_key ] = parse_to_sections( args[ last_key ] )
+						
+					end
+					
+					last_key = line.strip.to_sym
+					args[ last_key ] = []
+
+					tag = nil
+
+				end
+				
+				
+				if /^\s/.match( line )
+
+					if /^\s+(\w+):\s*(.*)$/.match( line )
+						
+						args[ last_key ] << line
+
+					elsif /^\s+(.*)$/.match( line )
+
+						args[ last_key ] << line.strip
+						
+					end
+
+				end
+
+			}
+			
+			if !last_key.nil?
+
+				args[ last_key ] = parse_to_sections( args[ last_key ] )
+						
+			end
+		
+			args
+		
 		end
 
 		def apply_macros( template_string, macros )
@@ -294,16 +414,36 @@ module Generators
 
 		def behaviour_methods_arguments( arguments )
 
-			( arguments || [] ).collect{ | argument | 
+			#puts "ARG-in: " << arguments.inspect
+
+			arg_out = ""
+			if !arguments.empty?
+				arguments.each_pair do | arg_key, arg_value |
+					arg_out += apply_macros(
+						@xml_argument_template,
+						[
+							{ :key => '$ARGUMENT_NAME', :value => encode_string( arg_key.to_s ) },
+							{ :key => '$METHOD_ARGUMENT_TYPES', :value => behaviour_methods_argument_types( arg_value ) }
+						]
+					)		
+				end
+			end
+			
+			arg_out
+
+		end
+		
+		def behaviour_methods_argument_types( types )
+
+			( types || [] ).collect{ | type | 
 			 
 				apply_macros( 
-					@xml_argument_template,
-					[
-						{ :key => '$ARGUMENT_NAME', :value => encode_string( argument[ :section ] ) },
-						{ :key => '$ARGUMENT_TYPE', :value => encode_string( argument[ :type ].first ) },
-						{ :key => '$ARGUMENT_DESCRIPTION', :value => encode_string( argument[ :description ].join( '\n' ) ) },
-						{ :key => '$ARGUMENT_EXAMPLE', :value => encode_string( argument[ :example ].first ) },
-						{ :key => '$ARGUMENT_DEFAULT', :value => encode_string( argument[ :default ].first ) }
+					@xml_argument_type_template,
+					[						
+						{ :key => '$ARGUMENT_TYPE', :value => encode_string( type[ :section ].first ) },
+						{ :key => '$ARGUMENT_DESCRIPTION', :value => encode_string( type[ :description ].join( '\n' ) ) },
+						{ :key => '$ARGUMENT_EXAMPLE', :value => encode_string( type[ :example ].first ) },
+						{ :key => '$ARGUMENT_DEFAULT', :value => encode_string( type[ :default ].first ) }
 
 					]
 
@@ -328,7 +468,37 @@ module Generators
 			}.join 
 
 		end
+		
+		def behaviour_methods_howtos( howtos )
 
+			( howtos || [] ).collect{ | howto | 
+				
+				apply_macros( 
+					@xml_howto_template, 
+					[
+						{ :key => '$HOWTO_DESCRIPTION', :value => encode_string( howto[ :description ] ) },
+						{ :key => '$HOWTO_CODE', :value => behaviour_methods_howto_lines( howto[ :code ] ) }
+
+					] 
+				)
+			}.join 
+			
+		end
+		
+		def behaviour_methods_howto_lines( code_lines )
+
+			( code_lines || [] ).collect{ | code_line | 
+				
+				apply_macros( 
+					@xml_howto_line_template, 
+					[
+						{ :key => '$HOWTO_LINE', :value => encode_string( code_line ) }
+					] 
+				)
+			}.join 
+			
+		end
+		
 		def behaviour_methods( methods )
 
 			methods.collect{ | method | 
@@ -340,8 +510,9 @@ module Generators
 						{ :key => '$METHOD_DESCRIPTION', :value => encode_string( method[ :description ] ) },
 						{ :key => '$METHOD_EXAMPLE', :value => encode_string( method[ :example ] ) },
 						{ :key => '$METHOD_ARGUMENTS', :value => behaviour_methods_arguments( method[ :arguments ] ) }, 
-						{ :key => '$METHOD_EXCEPTIONS', :value => behaviour_methods_exceptions( method[ :exceptions ] ) }
-
+						{ :key => '$METHOD_EXCEPTIONS', :value => behaviour_methods_exceptions( method[ :exceptions ] ) },
+						{ :key => '$METHOD_HOWTOS', :value => behaviour_methods_howtos( method[ :howto ] ) },
+						{ :key => '$METHOD_INFO', :value => encode_string( method[ :info ] ) }
 					] 
 				) 
 
@@ -368,9 +539,14 @@ module Generators
 
 				).gsub( /\n\n\n/, "\n\n" ) unless module_header[ :module ].to_s == "MobyBehaviour"
 
-				File.open( "%s.xml" % module_header[ :behaviour ], 'w'){ | file | file << xml }
+        unless module_header[ :behaviour ].to_s.empty?
 
-				puts xml
+  				File.open( "%s.xml" % module_header[ :behaviour ], 'w'){ | file | file << xml } 
+
+				  puts xml
+
+        end
+
 
 			end
 
@@ -417,7 +593,7 @@ module Generators
 
 		def template( filename )
 
-			open( "%s.template" % filename ).read
+			open( File.join( File.dirname( File.expand_path( __FILE__ ) ), "..", "%s.template" % filename ) ).read
 
 		end
 
@@ -467,6 +643,8 @@ module Generators
 			#obj.source_code = get_source_code( obj )
 
 			if ( obj.visibility == :public )
+
+        $current_method = obj.name.to_str
 
 				comment = process_comment( obj.comment || "" )
 
