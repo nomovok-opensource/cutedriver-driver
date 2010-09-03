@@ -541,6 +541,12 @@ module TDriverReportCreator
       begin
         #Calculate run time
         @test_case_run_time=Time.now-@test_case_start_time
+
+        #make sure that test case folder exists:
+        if File::directory?(@test_case_folder)==false
+          FileUtils.mkdir_p @test_case_folder
+        end
+
         write_page_start(@test_case_folder+'/index.html',@test_case_name)
         write_test_case_body(@test_case_folder+'/index.html',@test_case_name_full,@test_case_start_time,@test_case_end_time,@test_case_run_time,@test_case_status,@test_case_index,@test_case_folder,@capture_screen_error,@failed_dump_error,@test_case_reboots)
         write_page_end(@test_case_folder+'/index.html')
@@ -548,7 +554,8 @@ module TDriverReportCreator
         Kernel::raise e
       end
       return nil
-    end    
+    end
+    
     #This method makes a copy of the video recording of this test case
     def copy_video_capture()
 	
