@@ -59,6 +59,8 @@ module Generators
     def process_file( file )
 
       @module_path = []
+      
+      @current_file = file
   
       process_modules( file.modules )    
 
@@ -157,6 +159,16 @@ module Generators
 
     end
 
+    def has_method?( target, method_name )
+
+        target.method_list.select{ | method | 
+        
+          method.name == method_name 
+          
+        }.count > 0
+    
+    end
+
     def process_attributes( attributes )
 
       attributes.each{ | attribute | process_attribute( attribute ) }
@@ -174,10 +186,19 @@ module Generators
         case attribute.rw
       
           when 'RW'
-            scenarios = 2
+            # verify first that if attribute is overwritten as method 
+            scenarios += 1 unless has_method?( @current_module, attribute.name )
 
-          when 'W', 'R'
-            scenarios = 1
+            # verify first that if attribute is overwritten as method 
+            scenarios += 1 unless has_method?( @current_module, "%s=" % attribute.name )
+
+          when 'W'
+            # verify first that if attribute is overwritten as method 
+            scenarios += 1 unless has_method?( @current_module, "%s=" % attribute.name )
+          
+          when 'R'
+            # verify first that if attribute is overwritten as method 
+            scenarios += 1 unless has_method?( @current_module, attribute.name )
 
         else
 
@@ -205,10 +226,11 @@ module Generators
 
       @already_processed_files << _module.full_name
 
-      process_attributes( _module.attributes )
+      @current_module = _module
 
       process_methods( _module.method_list )
 
+      process_attributes( _module.attributes )
 
       # process if any child modules 
       process_modules( _module.modules ) unless _module.modules.empty?

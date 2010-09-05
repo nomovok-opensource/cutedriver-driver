@@ -44,12 +44,19 @@ module MobyBehaviour
     #
     module Gesture
 
-    include MobyBehaviour::QT::Behaviour
+    #include MobyBehaviour::QT::Behaviour
       
     attr_accessor :x
     attr_reader :y
     attr_writer :z
 
+    def y
+    
+    end
+
+    def x=(value)
+    end
+ 
     # == description
     # Cause a flick operation on the screen. 
     #
@@ -223,4 +230,4 @@ module MobyBehaviour
   end
 end
 
-MobyUtil::Logger.instance.hook_methods( MobyBehaviour::QT::Gesture )
+#MobyUtil::Logger.instance.hook_methods( MobyBehaviour::QT::Gesture )
