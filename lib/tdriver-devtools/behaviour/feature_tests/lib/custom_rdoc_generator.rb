@@ -37,6 +37,12 @@ module Generators
 
       @already_processed_files = []
 
+      @current_module_tests = []
+
+      @current_module = nil
+
+      @scenarios = []
+
       @output = { :files => [], :classes => [], :modules => [], :attributes => [], :methods => [], :aliases => [], :constants => [], :requires => [], :includes => []}
 
     end
@@ -92,20 +98,24 @@ module Generators
 
     def process_arguments( arguments )
 
+      # tokenize string
       tokenizer = RubyLex.new( arguments )
 
+      # get first token
       token = tokenizer.token
 
+      # set previous token to nil by default
       previous_token = nil
 
       args = []
 
+      # loop while tokens available
       while token
 
         # argument name
         if token.kind_of?( RubyToken::TkIDENTIFIER )
 
-          args << [ token.name, false ]
+          args << [ token.name, nil, false ]
 
           # &blocks and *arguments are handled as optional parameters
           args.last[ -1 ] = true if [ RubyToken::TkBITAND, RubyToken::TkMULT ].include?( previous_token.class )
@@ -113,17 +123,46 @@ module Generators
         # detect optional argument
         elsif token.kind_of?( RubyToken::TkASSIGN )
 
+          # mark arguments as optional
           args.last[ -1 ] = true
 
         end
 
+        # store previous token
         previous_token = token
 
+        # get next token
         token = tokenizer.token
 
       end
 
       args
+
+    end
+
+    def generate_scenarios( arguments_table )
+
+        # first scenario with all required arguments
+        required_arguments = arguments_table.select{ | argument | argument.last == false }.collect{ | scenario | scenario 
+
+          p "scenario: %s\n\n" % scenario
+
+          scenario
+
+        }
+
+        # scenarios with one of each optional argument.. and eventually with all arguments
+        arguments_table.select{ | argument | argument.last == true }.collect{ | scenario | scenario 
+
+          scenario = required_arguments << scenario
+
+          p "scenario: %s\n\n" % [ scenario.inspect ]
+
+          #p "scenario: %s\n\n" % [ opposite_scenario.inspect ]
+
+        }
+
+        required_arguments
 
     end
 
@@ -139,6 +178,11 @@ module Generators
 
         arguments_table = process_arguments( method.params )
 
+        scen = generate_scenarios( arguments_table )
+
+        p "minimum:"
+        p scen
+
         scenarios = 1
 
         scenarios += arguments_table.select{ | argument | argument.last == true }.count
@@ -146,6 +190,8 @@ module Generators
         $scenarios += scenarios
 
         p arguments_table
+
+        @current_module
 
         puts "scenarios: %s" % scenarios
 
@@ -159,6 +205,7 @@ module Generators
 
     end
 
+    # verify if 
     def has_method?( target, method_name )
 
         target.method_list.select{ | method | 
@@ -187,18 +234,18 @@ module Generators
       
           when 'RW'
             # verify first that if attribute is overwritten as method 
-            scenarios += 1 unless has_method?( @current_module, attribute.name )
+            scenarios += 1 unless has_method?( @current_module[ :object ], attribute.name )
 
             # verify first that if attribute is overwritten as method 
-            scenarios += 1 unless has_method?( @current_module, "%s=" % attribute.name )
+            scenarios += 1 unless has_method?( @current_module[ :object ], "%s=" % attribute.name )
 
           when 'W'
             # verify first that if attribute is overwritten as method 
-            scenarios += 1 unless has_method?( @current_module, "%s=" % attribute.name )
+            scenarios += 1 unless has_method?( @current_module[ :object ], "%s=" % attribute.name )
           
           when 'R'
             # verify first that if attribute is overwritten as method 
-            scenarios += 1 unless has_method?( @current_module, attribute.name )
+            scenarios += 1 unless has_method?( @current_module[ :object ], attribute.name )
 
         else
 
@@ -226,11 +273,15 @@ module Generators
 
       @already_processed_files << _module.full_name
 
-      @current_module = _module
+      @current_module = { :object => _module, :scenarios => [] }
 
+      # process methods
       process_methods( _module.method_list )
 
+      # process attributes
       process_attributes( _module.attributes )
+
+      @scenarios << @current_module
 
       # process if any child modules 
       process_modules( _module.modules ) unless _module.modules.empty?
@@ -240,4 +291,3 @@ module Generators
   end
 
 end
-
