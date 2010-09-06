@@ -40,6 +40,17 @@ module MobyBase
       @rvc_capture_screen = MobyUtil::Parameter[ :report_continuous_verification_capture_screen_on_error, 'true' ]
     end
 
+    # TODO: Document me (TestObjectFactory::restore_verify_always_reporting_settings)
+    def restore_global_verify_always_reporting_settings()
+      @reporter_attached = @global_reporter_attached
+
+      @rcv_raise_errors = @rcv_global_raise_errors
+
+      @rcv_fail_test_case = @rcv_global_fail_test_case
+
+      @rvc_capture_screen = @rvc_global_capture_screen
+    end
+
 		# TODO: Document me (TestObjectFactory::initialize)
 		def initialize
 
@@ -47,6 +58,14 @@ module MobyBase
 			# TODO: Remove from here, to be initialized by the environment.
 
 			reset_timeout
+
+      @global_reporter_attached = MobyUtil::Parameter[ :report_attach_continuous_verification_to_reporter, 'false' ]
+
+      @rcv_global_raise_errors = MobyUtil::Parameter[ :report_continuous_verification_raise_errors, 'true' ]
+
+      @rcv_global_fail_test_case = MobyUtil::Parameter[ :report_continuous_verification_fail_test_case_on_error, 'true' ]
+
+      @rvc_global_capture_screen = MobyUtil::Parameter[ :report_continuous_verification_capture_screen_on_error, 'true' ]
 
 			@test_object_cache = {}
 
@@ -165,7 +184,7 @@ module MobyBase
 				logging_enabled = MobyUtil::Logger.instance.enabled
 
 				sut.verify_blocks.each do | verify |
-          check_verify_always_reporting_settings
+          check_verify_always_reporting_settings()
 					begin
 
 						MobyUtil::Logger.instance.enabled = false
@@ -238,7 +257,7 @@ module MobyBase
 					end
 
 					# Do NOT report PASS cases, like other verify blocks do. This would clog the log with useless info.
-
+          restore_global_verify_always_reporting_settings()
 				end
 
 			ensure
