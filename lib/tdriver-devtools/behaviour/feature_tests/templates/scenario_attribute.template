@@ -1,4 +1,4 @@
-  Scenario: Testing attribute '%s' (Rename this to be more descriptive)
+  Scenario: Testing %s attribute (Rename this to be more descriptive)
     Given I launch application "[APPLICATION_NAME]" as "@app"
     When I execute "@app.[SOME_OBJECT].%s"
     Then [ADD_YOUR_VERIFICATION_HERE]

@@ -99,7 +99,7 @@ module Generators
 
         scenarios = process_method( method ) 
 
-        results << { :header => $templates[:feature_method] % [ method.name, method.name, @module_path.join("::") ], :scenarios => scenarios, :file => generate_name( "method__" + method.name ), :module_path => @module_path, :name => method.name } if scenarios.count > 0
+        results << { :header => $templates[:feature_method] % [ method.name, method.name, @module_path.join("::") ], :scenarios => scenarios, :file => generate_name( method.name ), :module_path => @module_path, :name => method.name } if scenarios.count > 0
 
       }
 
@@ -232,7 +232,7 @@ module Generators
 
          attr_name = attribute.name.gsub("=",'')
 
-         results << { :header => $templates[:feature_attribute] % [ attr_name, attr_name, @module_path.join("::") ], :scenarios => scenarios, :file => generate_name( "attribute__" + attr_name ), :module_path => @module_path, :name => attr_name } if scenarios.count > 0
+         results << { :header => $templates[:feature_attribute] % [ attr_name, attr_name, @module_path.join("::") ], :scenarios => scenarios, :file => generate_name( attr_name ), :module_path => @module_path, :name => attr_name } if scenarios.count > 0
 
       }
 
@@ -313,8 +313,7 @@ module Generators
 
     def generate_name( method )
 
-
-      name = @module_path[ 1 .. -1 ].join
+      name = @module_path[ 1 .. -1 ].join("_")
 
       begin
 
@@ -323,6 +322,13 @@ module Generators
         result = ""
 
         n.each_with_index{ | byte, index |
+
+          if byte == 95
+
+            result << byte.chr 
+            next
+
+          end
 
           unless index == 0
 
@@ -337,7 +343,13 @@ module Generators
                 next_byte = n[ index + 1 ]
 
                 # do not add underscore if next character is in uppercase or numeric
-                prefix = "" if (65..90).include?( next_byte ) or (48..57).include?( next_byte )
+                prefix = "" if (65..90).include?( next_byte ) or (48..57).include?( next_byte ) or next_byte == 95
+
+              else
+
+                prev_byte = n[ index - 1 ]
+
+                prefix = "" if ( 65..90 ).include?( prev_byte ) or ( 48..57 ).include?( prev_byte ) or prev_byte == 95
 
               end
 
@@ -354,7 +366,7 @@ module Generators
 
         }
 
-        name = result.downcase
+        name = result.gsub( /_+/, "_")
 
       rescue
 
@@ -362,16 +374,11 @@ module Generators
 
       end
 
-
-      name << "__" << method
-
-      #name.gsub!('?','_0x66')
-
-      #name.gsub!('!','_0x33')
+      name << "_" << method
 
       name.gsub!(/[?!=]/){ | char | char = "_0x%x" % char[0] }
 
-      name + ".feature"
+      ( name + ".feature" ).downcase
 
     end
 
@@ -427,11 +434,6 @@ module Generators
           puts method[:scenarios]
 
         }
-
-
-        #p methods.class #[:scenarios]
-
-        #p attributes.class #[:scenarios]
 
       end
 
