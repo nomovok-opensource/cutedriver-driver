@@ -19,6 +19,8 @@
 #!/usr/bin/env ruby
 require 'rdoc/rdoc'
 
+$templates = {}
+
 module RDoc
 
   class RDoc
@@ -31,6 +33,18 @@ module RDoc
     end
 
   end
+
+end
+
+def load_templates
+
+  Dir.glob( File.join( File.dirname( File.expand_path( __FILE__ ) ), 'templates', '*.template' ) ).each{ | file |
+
+    name = File.basename( file ).gsub( '.template', '' )
+
+    $templates[ name.to_sym ] = open( file, 'r' ).read
+
+  }
 
 end
 
@@ -48,6 +62,8 @@ else
 
   begin
 
+    load_templates
+
     RDoc::RDoc.new.tap{ | rdoc |
 
       rdoc.install_generator( 'TDriver', File.expand_path( File.join( File.dirname( __FILE__ ), 'lib/custom_rdoc_generator.rb' ) ) )
@@ -63,3 +79,4 @@ else
   end
 
 end
+
