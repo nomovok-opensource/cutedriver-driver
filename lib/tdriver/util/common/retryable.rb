@@ -17,82 +17,82 @@
 ## 
 ############################################################################
 
-
 module MobyUtil
 
-	class Retryable
+  class Retryable
 
-		# Function to retry code block for x times if exception raises
-		# == params
-		# options:: Hash of options 
-		#   :tries	Number of tries to perform. Default is 1
-		#   :interval	Timeout between retry. Default is 0
-		#   :exception	Retry if given type of exception occures. Default is Exception (any error)
-		# == returns
-		def self.while( options = {}, &block )
+    # Function to retry code block for x times if exception raises
+    # == params
+    # options:: Hash of options 
+    #   :tries  Number of tries to perform. Default is 1
+    #   :interval  Timeout between retry. Default is 0
+    #   :exception  Retry if given type of exception occures. Default is Exception (any error)
+    # == returns
+    def self.while( options = {}, &block )
 
-			options = { :tries => 1, :interval => 0, :exception => Exception }.merge( options )
+      options = { :tries => 1, :interval => 0, :exception => Exception }.merge( options )
 
-			attempt = 1
+      attempt = 1
 
-			begin
+      begin
 
-				# yield given block and pass attempt number as parameter
-				return yield( attempt )
+        # yield given block and pass attempt number as parameter
+        return yield( attempt )
 
-			rescue *options[ :exception ]
-	
-				#if ( options[ :tries ] -= 1) > 0 && ![ *options[ :unless ] ].include?( $!.class )
+      rescue *options[ :exception ]
+  
+        #if ( options[ :tries ] -= 1) > 0 && ![ *options[ :unless ] ].include?( $!.class )
 
-				if ( attempt < options[ :tries ] ) && ![ *options[ :unless ] ].include?( $!.class )
+        if ( attempt < options[ :tries ] ) && ![ *options[ :unless ] ].include?( $!.class )
 
-					sleep( options[ :interval ] ) if options[ :interval ] > 0
+          sleep( options[ :interval ] ) if options[ :interval ] > 0
 
-					attempt += 1
+          attempt += 1
 
-					retry
+          retry
 
-				end
+        end
 
-				# raise exception with correct exception backtrace
-				Kernel::raise $!
+        # raise exception with correct exception backtrace
+        Kernel::raise $!
 
-			end
+      end
 
-			nil
-		end
+      nil
+    end
 
-		# Function to retry code block until timeout expires if exception raises 
-		# == params
-		# options:: Hash of options 
-		#   :timeout	Timeout until fail. Default is 0
-		#   :interval	Timeout between retry. Default is 0
-		#   :exception	Retry if given type of exception occures. Default is Exception (any error)
-		# == returns
-		def self.until( options = {}, &block )
+    # Function to retry code block until timeout expires if exception raises 
+    # == params
+    # options:: Hash of options 
+    #   :timeout  Timeout until fail. Default is 0
+    #   :interval  Timeout between retry. Default is 0
+    #   :exception  Retry if given type of exception occures. Default is Exception (any error)
+    # == returns
+    def self.until( options = {}, &block )
 
-			options = { :timeout => 0, :interval => 0, :exception => Exception }.merge( options )      
-			start_time = Time.now
+      options = { :timeout => 0, :interval => 0, :exception => Exception }.merge( options )      
+      start_time = Time.now
 
-			begin
-				return yield
+      begin
 
-			rescue *options[ :exception ]
+        return yield
 
-				if (Time.now - start_time) <= options[ :timeout ] && ![ *options[ :unless ] ].include?( $!.class )
-					sleep( options[ :interval ] ) if options[ :interval ] > 0
-					retry
-				end
+      rescue *options[ :exception ]
 
-				# raise exception with correct exception backtrace
-				Kernel::raise $!
+        if (Time.now - start_time) <= options[ :timeout ] && ![ *options[ :unless ] ].include?( $!.class )
+          sleep( options[ :interval ] ) if options[ :interval ] > 0
+          retry
+        end
 
-			end      
-		end
+        # raise exception with correct exception backtrace
+        Kernel::raise $!
 
-		# enable hooking for performance measurement & debug logging
-		MobyUtil::Hooking.instance.hook_methods( self ) if defined?( MobyUtil::Hooking )
+      end      
+    end
 
-	end # Retryable
+    # enable hooking for performance measurement & debug logging
+    MobyUtil::Hooking.instance.hook_methods( self ) if defined?( MobyUtil::Hooking )
+
+  end # Retryable
 
 end # MobyUtil
