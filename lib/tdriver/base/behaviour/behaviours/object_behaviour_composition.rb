@@ -17,12 +17,21 @@
 ## 
 ############################################################################
 
-
-
-
 module MobyBehaviour
 
 	module ObjectBehaviourComposition
+
+  public
+
+		def apply_behaviour!( rules )
+
+			sut = ( sut = self ).kind_of?( MobyBase::SUT ) ? sut : sut.sut 
+
+			MobyBase::BehaviourFactory.instance.apply_behaviour!( { :sut_type => [ '*', sut.ui_type ], :version => [ '*', sut.ui_version ] }.merge( rules ).merge( { :object => self } ) )
+
+		end
+
+  private
 
 		# behaviour specific initialization
 		def self.extended( target )
@@ -35,15 +44,6 @@ module MobyBehaviour
 			}
 
 		end
-
-		def apply_behaviour!( rules )
-
-			sut = ( sut = self ).kind_of?( MobyBase::SUT ) ? sut : sut.sut 
-
-			MobyBase::BehaviourFactory.instance.apply_behaviour!( { :sut_type => [ '*', sut.ui_type ], :version => [ '*', sut.ui_version ] }.merge( rules ).merge( { :object => self } ) )
-
-		end
-
 		# enable hooking for performance measurement & debug logging
 		MobyUtil::Hooking.instance.hook_methods( self ) if defined?( MobyUtil::Hooking )
 	

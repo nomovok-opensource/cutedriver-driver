@@ -221,7 +221,7 @@ module MobyUtil
 
 			if [ Class, Module ].include?( _base.class )        
 
-				{ :public => _base.public_instance_methods( false ), :private => _base.private_instance_methods( false ) }.each { | method_type, methods |
+				{ :public => _base.public_instance_methods( false ), :private => _base.private_instance_methods( false ), :protected => _base.protected_instance_methods( false ) }.each { | method_type, methods |
 
 					methods.each { | method_name | hook_method( _base, method_name, method_type.to_s ) unless /__wrappee_\d+/i.match( method_name ) }
 
@@ -359,6 +359,7 @@ module MobyUtil
 
 								end
 
+							private :#{ original_method_name }
 
 							#{ 
 

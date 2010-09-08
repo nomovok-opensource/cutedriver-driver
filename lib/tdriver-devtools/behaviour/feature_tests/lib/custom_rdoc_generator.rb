@@ -18,6 +18,9 @@
 ############################################################################
 
 $scenarios = 0
+$templates = {} unless defined?( $templates )
+
+$scenario_files = {}
 
 module Generators
 
@@ -37,6 +40,10 @@ module Generators
 
       @already_processed_files = []
 
+      @current_module_tests = []
+
+      @current_module = nil
+
       @output = { :files => [], :classes => [], :modules => [], :attributes => [], :methods => [], :aliases => [], :constants => [], :requires => [], :includes => []}
 
     end
@@ -50,9 +57,9 @@ module Generators
 
       }
 
-      p "scenarios: %s" % $scenarios
+      p "total scenarios: %s" % $scenarios
 
-      p @already_processed_files
+      #p @already_processed_files
 
     end
 
@@ -86,26 +93,40 @@ module Generators
 
     def process_methods( methods )
 
-      methods.each{ | method | process_method( method ) }
+      results = []
+
+      methods.each{ | method | 
+
+        scenarios = process_method( method ) 
+
+        results << { :header => $templates[:feature_method] % [ method.name, method.name, @module_path.join("::") ], :scenarios => scenarios, :file => generate_name( method.name ), :module_path => @module_path, :name => method.name } if scenarios.count > 0
+
+      }
+
+      results
 
     end
 
     def process_arguments( arguments )
 
+      # tokenize string
       tokenizer = RubyLex.new( arguments )
 
+      # get first token
       token = tokenizer.token
 
+      # set previous token to nil by default
       previous_token = nil
 
       args = []
 
+      # loop while tokens available
       while token
 
         # argument name
         if token.kind_of?( RubyToken::TkIDENTIFIER )
 
-          args << [ token.name, false ]
+          args << [ token.name, nil, false ]
 
           # &blocks and *arguments are handled as optional parameters
           args.last[ -1 ] = true if [ RubyToken::TkBITAND, RubyToken::TkMULT ].include?( previous_token.class )
@@ -113,12 +134,15 @@ module Generators
         # detect optional argument
         elsif token.kind_of?( RubyToken::TkASSIGN )
 
+          # mark arguments as optional
           args.last[ -1 ] = true
 
         end
 
+        # store previous token
         previous_token = token
 
+        # get next token
         token = tokenizer.token
 
       end
@@ -127,38 +151,67 @@ module Generators
 
     end
 
-    def process_method( method )
+    def generate_scenarios( mode, arguments_table = nil )
 
-      if ( method.visibility == :public && @module_path.first =~ /MobyBehaviour/ )
+        results = []
 
-        p @module_path
+        # first scenario with all required arguments
+        if mode.to_s =~ /method/
 
-        p method.name
+          required_arguments = arguments_table.select{ | argument | argument.last == false }.collect{ | scenario | scenario.first }
 
-        p method.params
+          results << $templates[ mode ] % [ @current_method.name, "required", "(s)", @current_method.name, required_arguments.join(", ") ]
 
-        arguments_table = process_arguments( method.params )
+        elsif mode.to_s =~ /attribute/
 
-        scenarios = 1
+          name = @current_attribute.first.name
 
-        scenarios += arguments_table.select{ | argument | argument.last == true }.count
+          name << "=" if @current_attribute.count > 1
 
-        $scenarios += scenarios
+          results << $templates[ mode ] % [ name, name ]
 
-        p arguments_table
+        end
 
-        puts "scenarios: %s" % scenarios
+        unless arguments_table.nil?
 
-        puts ""
+          # scenarios with one of each optional argument.. and eventually with all arguments
+          arguments_table.select{ | argument | argument.last == true }.collect{ | scenario | scenario 
 
-      else
+            scenario = required_arguments << scenario.first
 
-       #puts "%s method: %s" % [ method.visibility.to_s, method.name ]
+            results << $templates[ mode ] % [ @current_method.name, "optional", " '%s'" % scenario.last.first, @current_method.name, scenario.join(", ") ]
 
-      end
+          }
+
+        end
+
+        results
 
     end
 
+    def process_method( method )
+
+      scenarios = []
+
+      if ( method.visibility == :public && @module_path.first =~ /MobyBehaviour/ )
+
+        arguments_table = process_arguments( method.params )
+
+        @current_method = method
+
+        scenarios = generate_scenarios( :scenario_method, arguments_table )
+          
+        $scenarios += scenarios.count
+
+      else
+
+      end
+
+      scenarios
+
+    end
+
+    # verify if 
     def has_method?( target, method_name )
 
         target.method_list.select{ | method | 
@@ -171,34 +224,65 @@ module Generators
 
     def process_attributes( attributes )
 
-      attributes.each{ | attribute | process_attribute( attribute ) }
+      results = []
+
+      attributes.each{ | attribute | 
+
+         scenarios = process_attribute( attribute ) 
+
+         attr_name = attribute.name.gsub("=",'')
+
+         results << { :header => $templates[:feature_attribute] % [ attr_name, attr_name, @module_path.join("::") ], :scenarios => scenarios, :file => generate_name( attr_name ), :module_path => @module_path, :name => attr_name } if scenarios.count > 0
+
+      }
+
+      results
 
     end
 
     def process_attribute( attribute )
 
+      result = []
+
       if ( @module_path.first =~ /MobyBehaviour/ )
 
-        p @module_path
+        @current_attribute = [ attribute ]
 
-        scenarios = 0
+        #p @module_path
+
+        scenarios = []
 
         case attribute.rw
       
           when 'RW'
             # verify first that if attribute is overwritten as method 
-            scenarios += 1 unless has_method?( @current_module, attribute.name )
+            unless has_method?( @current_module[ :object ], attribute.name )
+              scenarios << generate_scenarios( :scenario_attribute )
+              scenarios.pop if scenarios.last == []
+            end
 
             # verify first that if attribute is overwritten as method 
-            scenarios += 1 unless has_method?( @current_module, "%s=" % attribute.name )
+            unless has_method?( @current_module[ :object ], "%s=" % attribute.name )
+              @current_attribute << "W"
+              scenarios << generate_scenarios( :scenario_attribute )
+              scenarios.pop if scenarios.last == []
+            end
 
           when 'W'
             # verify first that if attribute is overwritten as method 
-            scenarios += 1 unless has_method?( @current_module, "%s=" % attribute.name )
+            unless has_method?( @current_module[ :object ], "%s=" % attribute.name )
+              @current_attribute << "W"
+              scenarios << generate_scenarios( :scenario_attribute )
+              scenarios.pop if scenarios.last == []
+            end
           
           when 'R'
+
             # verify first that if attribute is overwritten as method 
-            scenarios += 1 unless has_method?( @current_module, attribute.name )
+            unless has_method?( @current_module[ :object ], attribute.name )
+              scenarios << generate_scenarios( :scenario_attribute )
+              scenarios.pop if scenarios.last == []
+            end
 
         else
 
@@ -206,19 +290,109 @@ module Generators
 
         end
 
-        $scenarios += scenarios
+        if scenarios.count > 0
 
-        p attribute.name
+          #puts $templates[:feature]
+          result << scenarios 
+          #puts scenarios
 
-        puts "scenarios: %s" % scenarios
+          $scenarios += scenarios.count
 
-        puts ""
+        end
+
 
       else
 
        #puts "%s method: %s" % [ method.visibility.to_s, method.name ]
 
       end
+  
+      result
+
+    end
+
+    def generate_name( method )
+
+      name = @module_path[ 1 .. -1 ].join("_")
+
+      begin
+
+        n = name.bytes.to_a
+
+        result = ""
+
+        n.each_with_index{ | byte, index |
+
+          if byte == 95
+
+            result << byte.chr 
+            next
+
+          end
+
+          unless index == 0
+
+            prefix = ""
+
+            if (65..90).include?( byte ) or (48..57).include?( byte )
+          
+              prefix = "_"
+
+              unless ( index + 1) > ( n.count - 1 )
+
+                next_byte = n[ index + 1 ]
+
+                # do not add underscore if next character is in uppercase or numeric
+                prefix = "" if (65..90).include?( next_byte ) or (48..57).include?( next_byte ) or next_byte == 95
+
+              else
+
+                prev_byte = n[ index - 1 ]
+
+                prefix = "" if ( 65..90 ).include?( prev_byte ) or ( 48..57 ).include?( prev_byte ) or prev_byte == 95
+
+              end
+
+            end
+
+            result << prefix + byte.chr.downcase
+
+          else
+
+            # first char, don't care if uppercase
+            result << byte.chr
+
+          end
+
+        }
+
+        name = result.gsub( /_+/, "_")
+
+      rescue
+
+        name = name.downcase
+
+      end
+
+      name << "_" << method
+
+      name.gsub!(/[?!=]/){ | char | char = "_0x%x" % char[0] }
+
+      ( name + ".feature" ).downcase
+
+    end
+
+    def generate_feature( data )
+
+      path = File.join( data[:file] )
+
+      open( path, 'w' ){ | file | 
+
+        file << data[:header]
+
+        file << data[:scenarios]
+
+      }
 
     end
 
@@ -226,11 +400,42 @@ module Generators
 
       @already_processed_files << _module.full_name
 
-      @current_module = _module
+      @current_module = { :object => _module, :scenarios => [] }
 
-      process_methods( _module.method_list )
+      # process methods
+      methods = process_methods( _module.method_list )
 
-      process_attributes( _module.attributes )
+      # process attributes
+      attributes = process_attributes( _module.attributes )
+
+      unless ( methods.empty? && attributes.empty? )
+
+        methods.each{ | method |
+
+          generate_feature( method )
+
+          puts method[:file]
+
+          puts method[:header]
+
+          puts method[:scenarios]
+
+        }
+
+        
+        attributes.each{ | method |
+
+          generate_feature( method )
+
+          puts method[:file]
+
+          puts method[:header]
+
+          puts method[:scenarios]
+
+        }
+
+      end
 
       # process if any child modules 
       process_modules( _module.modules ) unless _module.modules.empty?
@@ -240,4 +445,3 @@ module Generators
   end
 
 end
-

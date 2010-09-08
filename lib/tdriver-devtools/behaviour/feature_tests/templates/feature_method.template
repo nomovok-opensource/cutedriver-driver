@@ -1,0 +1,5 @@
+Feature: TestObject::%s (Rename this to be more descriptive)
+  As a test scripter writer
+  I want to use %s method to [DO_SOMETHING] in [TARGET_APPLICATION]
+  so that I can test the %s behaviour
+
