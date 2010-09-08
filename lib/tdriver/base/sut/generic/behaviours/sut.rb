@@ -938,7 +938,7 @@ module MobyBehaviour
     # someException:: If Dump does not conform to the tasMessage schema error is raised
     def get_ui_dump( refresh_args = {} )
    
-      $stderr.puts "warning: SUT#get_ui_dump is deprecated, please use SUT#refresh_ui_dump instead."
+      #$stderr.puts "warning: SUT#get_ui_dump is deprecated, please use SUT#refresh_ui_dump instead."
 
       refresh_ui_dump refresh_args
 
