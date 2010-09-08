@@ -24,34 +24,6 @@ module MobyBehaviour
 		# Hash containing the identification attributes that were used when the test object was created.
 		attr_accessor :creation_attributes
 
-		# Tries to use the missing method id as a child object type and find an object based on it
-		def method_missing( method_id, *method_arguments )
-
-			# method mapping/aliases - this should be configured in xml file
-			#case method_id
-			#	when :Button;	method_id = [ :Button, :QToolButton, :DuiButton, :HbPushButton, :softkey ]
-			#	when :List;	method_id = [ :QList, :HbListWidgetView, :DuiList ]
-			#end
-
-			hash_rule = ( method_arguments.first.kind_of?( Hash ) ? method_arguments.first : {} ).merge( :type => method_id )
-
-			begin
-
-				child( hash_rule )
-
-			rescue MobyBase::TestObjectNotFoundError, MobyBase::TestObjectNotVisibleError
-
-				#hash_rule.delete( :type )
-
-				Kernel::raise MobyBase::TestObjectNotFoundError.new(
-					'The test object (id: "%s", type: "%s", name: "%s") has no child object with type or behaviour method with name "%s" (%s) on sut "%s".' % 
-					[ @id, @type, @name, method_id.inspect, ( hash_rule.empty? ? "" : "attributes: #{ hash_rule.inspect }" ), @sut.id ]
-				)
-
-			end
-
-		end
-
 		# Determine is current test object a application
 		# === returns
 		# TrueClass:: 
@@ -383,6 +355,34 @@ module MobyBehaviour
 		end
 
 	private
+
+		# Tries to use the missing method id as a child object type and find an object based on it
+		def method_missing( method_id, *method_arguments )
+
+			# method mapping/aliases - this should be configured in xml file
+			#case method_id
+			#	when :Button;	method_id = [ :Button, :QToolButton, :DuiButton, :HbPushButton, :softkey ]
+			#	when :List;	method_id = [ :QList, :HbListWidgetView, :DuiList ]
+			#end
+
+			hash_rule = ( method_arguments.first.kind_of?( Hash ) ? method_arguments.first : {} ).merge( :type => method_id )
+
+			begin
+
+				child( hash_rule )
+
+			rescue MobyBase::TestObjectNotFoundError, MobyBase::TestObjectNotVisibleError
+
+				#hash_rule.delete( :type )
+
+				Kernel::raise MobyBase::TestObjectNotFoundError.new(
+					'The test object (id: "%s", type: "%s", name: "%s") has no child object with type or behaviour method with name "%s" (%s) on sut "%s".' % 
+					[ @id, @type, @name, method_id.inspect, ( hash_rule.empty? ? "" : "attributes: #{ hash_rule.inspect }" ), @sut.id ]
+				)
+
+			end
+
+		end
 
 		# TODO: refactor logging_enabled 
 		# try to reactivate test object if currently not active
