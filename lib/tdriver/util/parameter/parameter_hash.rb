@@ -17,86 +17,85 @@
 ## 
 ############################################################################
 
-
 module MobyUtil
 
-	class ParameterHash < Hash
+  class ParameterHash < Hash
 
-		def initialize( hash = {} )
+    def initialize( hash = {} )
 
-			Kernel::raise ArgumentError.new( "Unexpected argument type %s, expecting Hash or ParameterHash" % [ hash.class ] ) unless [ Hash, ParameterHash ].include?( hash.class )
+      Kernel::raise ArgumentError.new( "Unexpected argument type %s, expecting Hash or ParameterHash" % [ hash.class ] ) unless [ Hash, ParameterHash ].include?( hash.class )
 
-			merge!( 
+      merge!( 
 
-				hash.empty? ? hash : convert_hash( hash )
+        hash.empty? ? hash : convert_hash( hash )
 
-			)
+      )
 
-		end
+    end
 
-		def convert_hash( hash )
+    def convert_hash( hash )
 
-			hash.kind_of?( ParameterHash ) ? hash : ParameterHash[ hash.collect{ | key, value | [ key, value.kind_of?( Hash ) ? convert_hash( value ) : value ] } ]
+      hash.kind_of?( ParameterHash ) ? hash : ParameterHash[ hash.collect{ | key, value | [ key, value.kind_of?( Hash ) ? convert_hash( value ) : value ] } ]
 
-		end
+    end
 
-		def []( key, *default, &block )
+    def []( key, *default, &block )
 
-			fetch( key ){ 
+      fetch( key ){ 
 
-				if default.empty?
+        if default.empty?
 
-					Kernel::raise ParameterNotFoundError.new( "Parameter %s not found." % [ key ] ) unless block_given?
+          Kernel::raise ParameterNotFoundError.new( "Parameter %s not found." % [ key ] ) unless block_given?
 
-					# yield with key if block given
-					result = yield( key )
+          # yield with key if block given
+          result = yield( key )
 
-				else
-					Kernel::raise ArgumentError.new( "Only one default value allowed for parameter (%s)" % [ default.join(", ") ] ) unless default.size == 1
+        else
+          Kernel::raise ArgumentError.new( "Only one default value allowed for parameter (%s)" % [ default.join(", ") ] ) unless default.size == 1
 
-					result = default[ 0 ]
+          result = default[ 0 ]
 
-				end
+        end
 
-				result.kind_of?( Hash ) ? convert_hash( result ) : result
+        result.kind_of?( Hash ) ? convert_hash( result ) : result
 
-			}
+      }
 
-		end
+    end
 
-		def []=( key, value )
+    def []=( key, value )
 
-			Kernel::raise ParameterNotFoundError.new( "Parameter key nil is not valid." ) unless key
+      Kernel::raise ParameterNotFoundError.new( "Parameter key nil is not valid." ) unless key
 
-			store( key, ( value.kind_of?( Hash ) ? convert_hash( value ) : value ) )
+      store( key, ( value.kind_of?( Hash ) ? convert_hash( value ) : value ) )
 
-		end
+    end
 
-		# Merge this Hash with another, primary Hash. Any values found in the other hash will overwrite local values and any Hash values will be recursively merged.
-		def merge_with_hash!( primary_hash )
+    # Merge this Hash with another, primary Hash. Any values found in the other hash will overwrite local values and any Hash values will be recursively merged.
+    def merge_with_hash!( primary_hash )
 
-			raise ArgumentError.new( "Unable to merge, the other Hash was not a Hash, it was of type \"" + primary_hash.class.to_s + "\"." ) unless primary_hash.kind_of?( Hash )
+      raise ArgumentError.new( "Unable to merge, the other Hash was not a Hash, it was of type \"" + primary_hash.class.to_s + "\"." ) unless primary_hash.kind_of?( Hash )
 
-			primary_hash.each_pair do | key, value |
+      primary_hash.each_pair do | key, value |
 
-				if ( self.has_key?( key ) && self[ key ].kind_of?( Hash ) ) and primary_hash[ key ].kind_of?( Hash )
+        if ( self.has_key?( key ) && self[ key ].kind_of?( Hash ) ) and primary_hash[ key ].kind_of?( Hash )
 
-					self[ key ].merge_with_hash!( value )
+          self[ key ].merge_with_hash!( value )
 
-				else
+        else
 
-					self[ key ] = value
+          self[ key ] = value
 
-				end
+        end
 
-			end
+      end
 
-			self
-		  
-	        end
+      self
+      
+    end
 
-		MobyUtil::Hooking.instance.hook_methods( self ) if defined?( MobyUtil::Hooking )
+    MobyUtil::Hooking.instance.hook_methods( self ) if defined?( MobyUtil::Hooking )
 
-	end # ParameterHash
+  end # ParameterHash
 
 end # MobyUtil
