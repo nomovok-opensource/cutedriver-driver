@@ -58,7 +58,7 @@ module MobyBase
 
 			@dynamic_attributes = Hash[ hash_rules.select{ | key, value | key.to_s =~ /^__/ } ]
 
-			@insignificant_attributes = @@required_attributes + [ :__index ] + [ :__xy_sorting ]
+			@insignificant_attributes = @@required_attributes + [ :__index ] + [ :__xy_sorting ] + [ :__fname ] + [ :__plurality ] + [ :__numerus ] + [ :__lengthvariant ]
 
 		end
 
