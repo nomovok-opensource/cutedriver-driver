@@ -17,233 +17,231 @@
 ## 
 ############################################################################
 
-
 module MobyUtil
 
-	class ParameterXml
+  class ParameterXml
 
-		include Singleton
+    include Singleton
 
-		@@initialized = false
+    @@initialized = false
 
-		# initialize class with default values
-		def initialize
+    # initialize class with default values
+    def initialize
 
-			reset
+      reset
 
-			@@initialized = true
+      @@initialized = true
 
-		end
+    end
 
-		def reset
+    def reset
 
-			@@sut_list = []
+      @@sut_list = []
 
-		end
+    end
 
-		# return list of configured suts
-		def sut_list
+    # return list of configured suts
+    def sut_list
 
-			@@sut_list
+      @@sut_list
 
-		end
+    end
 
-		# Recursive function to process xml. Requires input to be either a valid xml fragment (as string) or a xml fragment as object. 
-		# Note: validity of the xml-fragment is not checked: please use appropriate methods for that
-		# === params
-		# root_element:: document or string containing xml
-		# === returns
-		# Hash:: Hash containing any attributes, parameters and id:s
-		# === raises
-		# SyntaxError:: if parameter-element does not have a name
-		# ParameterError:: if loading subfile fails, see get_xmldocument_from_file function
-		def parse( xml )
+    # Recursive function to process xml. Requires input to be either a valid xml fragment (as string) or a xml fragment as object. 
+    # Note: validity of the xml-fragment is not checked: please use appropriate methods for that
+    # === params
+    # root_element:: document or string containing xml
+    # === returns
+    # Hash:: Hash containing any attributes, parameters and id:s
+    # === raises
+    # SyntaxError:: if parameter-element does not have a name
+    # ParameterError:: if loading subfile fails, see get_xmldocument_from_file function
+    def parse( xml )
 
-			# default results 
-			results = ParameterHash.new()
+      # default results 
+      results = ParameterHash.new()
 
-			begin
-				# create new xml document
-				document = MobyUtil::XML::parse_string( xml )
+      begin
+        # create new xml document
+        document = MobyUtil::XML::parse_string( xml )
 
-			rescue Exception => exception
+      rescue Exception => exception
 
-				Kernel::raise ParameterFileParseError.new( "Error occured while parsing XML. Reason %s (%s)" % [ exception.message, exception.class ] )
+        Kernel::raise ParameterFileParseError.new( "Error occured while parsing XML. Reason %s (%s)" % [ exception.message, exception.class ] )
 
-			end
+      end
 
-			# go through each element in xml
-			document.xpath( "/#{ document.root.name }/*" ).each{ | element |
+      # go through each element in xml
+      document.xpath( "/#{ document.root.name }/*" ).each{ | element |
 
-				attribute = element.attributes.to_hash
+        attribute = element.attributes.to_hash
 
-				name = attribute[ "name" ].to_s
-				value = attribute[ "value" ].to_s
+        name = attribute[ "name" ].to_s
+        value = attribute[ "value" ].to_s
 
-				case element.name
-						
-					when 'fixture'
+        case element.name
+            
+          when 'fixture'
 
-						plugin = attribute[ "plugin" ].to_s
+            plugin = attribute[ "plugin" ].to_s
 
-						Kernel::raise SyntaxError.new( "No name defined for fixture with value %s" % name ) if name.empty?
-						Kernel::raise SyntaxError.new( "No plugin defined for fixture with name %s" % name ) if plugin.empty?
+            Kernel::raise SyntaxError.new( "No name defined for fixture with value %s" % name ) if name.empty?
+            Kernel::raise SyntaxError.new( "No plugin defined for fixture with name %s" % name ) if plugin.empty?
 
-						value = plugin
+            value = plugin
 
-					when 'parameter'
+          when 'parameter'
 
-						Kernel::raise SyntaxError.new( 
+            Kernel::raise SyntaxError.new( 
 
-							"No name defined for parameter with value %s" % attribute[ 'value' ]
+              "No name defined for parameter with value %s" % attribute[ 'value' ]
 
-						) unless attribute[ "name" ]
+            ) unless attribute[ "name" ]
 
-				else
+        else
 
-					if element.name == 'sut'
+          if element.name == 'sut'
 
-						id = attribute[ 'id' ].to_s
+            id = attribute[ 'id' ].to_s
 
-						# store sut id to array if element is type of sut
-						@@sut_list << id unless @@sut_list.include?( id ) 
+            # store sut id to array if element is type of sut
+            @@sut_list << id unless @@sut_list.include?( id ) 
 
-					end
+          end
 
-					# get template name(s) if given
-					templates = attribute[ "template" ].to_s
+          # get template name(s) if given
+          templates = attribute[ "template" ].to_s
 
-					# empty value by default - content will be retrieved above
-					value = ParameterHash.new()
+          # empty value by default - content will be retrieved above
+          value = ParameterHash.new()
 
-					# use template if defined
-					value = MobyUtil::ParameterTemplates.instance.get_template_from_xml( templates.to_s ) unless templates.empty?
+          # use template if defined
+          value = MobyUtil::ParameterTemplates.instance.get_template_from_xml( templates.to_s ) unless templates.empty?
 
-					# read xml file from given location if defined - otherwise pass content as is
-					if element.attribute( "xml_file" )
+          # read xml file from given location if defined - otherwise pass content as is
+          if element.attribute( "xml_file" )
 
-						content = parse( MobyUtil::FileHelper.get_file( element.attribute( "xml_file" ).to_s ) )
+            content = parse( MobyUtil::FileHelper.get_file( element.attribute( "xml_file" ).to_s ) )
 
-					else
+          else
 
-						content = parse( "<xml>#{ element.inner_xml }</xml>" )
+            content = parse( "<xml>#{ element.inner_xml }</xml>" )
 
-					end
+          end
 
-					value.merge_with_hash!( content )
+          value.merge_with_hash!( content )
 
-					name = ( element.attribute( "id" ) || element.name ).to_s
+          name = ( element.attribute( "id" ) || element.name ).to_s
 
-				end
+        end
 
-				# store values to parameters
-				results[ name.to_sym ] = value
+        # store values to parameters
+        results[ name.to_sym ] = value
 
-			}
+      }
 
-			# dispose xml document
-			document = nil
+      # dispose xml document
+      document = nil
 
-			# return results hash
-			results
+      # return results hash
+      results
 
-		end
+    end
 
-		def load_file( filename )
+    def load_file( filename )
 
-			filename = MobyUtil::FileHelper.expand_path( filename )
+      filename = MobyUtil::FileHelper.expand_path( filename )
 
-			begin
+      begin
 
-				file_content = MobyUtil::FileHelper.get_file( filename )
+        file_content = MobyUtil::FileHelper.get_file( filename )
 
-			rescue EmptyFilenameError
+      rescue EmptyFilenameError
 
-				Kernel::raise EmptyFilenameError.new( "Unable to load parameters xml file due to filename is empty or nil" )
+        Kernel::raise EmptyFilenameError.new( "Unable to load parameters xml file due to filename is empty or nil" )
 
-			rescue FileNotFoundError => exception
+      rescue FileNotFoundError => exception
 
-				Kernel::raise exception
+        Kernel::raise exception
 
-			rescue IOError => exception
+      rescue IOError => exception
 
-				Kernel::raise IOError.new( "Error occured while loading xml file. Reason: %s (%s)"  % [ exception.message, exception.class ] )
+        Kernel::raise IOError.new( "Error occured while loading xml file. Reason: %s (%s)"  % [ exception.message, exception.class ] )
 
-			rescue => exception
+      rescue => exception
 
-				Kernel::raise ParameterFileParseError.new("Error occured while parsing parameters xml file %s\nDescription: %s" % [ filename, exception.message ] )
+        Kernel::raise ParameterFileParseError.new("Error occured while parsing parameters xml file %s\nDescription: %s" % [ filename, exception.message ] )
 
-			end
+      end
 
-		end
+    end
 
-		def parse_file( filename )
+    def parse_file( filename )
 
-			begin
-			
-				parse( 
+      begin
+      
+        parse( 
 
-					load_file( filename ) 
+          load_file( filename ) 
 
-				)
+        )
 
-			rescue Exception => exception
+      rescue Exception => exception
 
-				Kernel::raise ParameterFileParseError.new( 
+        Kernel::raise ParameterFileParseError.new( 
 
-					"Error occured while parsing parameters xml file %s. Reason: %s (%s)" % [ filename, exception.message, exception.class ] 
+          "Error occured while parsing parameters xml file %s. Reason: %s (%s)" % [ filename, exception.message, exception.class ] 
 
-				)
+        )
 
-			end
+      end
 
-		end
+    end
 
-		def merge_files( path, root_element_name, xpath_to_element = '/*', &block )
+    def merge_files( path, root_element_name, xpath_to_element = '/*', &block )
 
-			@filename = ""
+      @filename = ""
 
-			xml = ""
+      xml = ""
 
-			begin
-	
-				# merge all xml files
-				Dir.glob( File.join( MobyUtil::FileHelper.expand_path( path ), '/*.xml' ) ).each { | filename | 
+      begin
+  
+        # merge all xml files
+        Dir.glob( File.join( MobyUtil::FileHelper.expand_path( path ), '/*.xml' ) ).each { | filename | 
 
-					@file_name = filename
+          @file_name = filename
 
-					content = MobyUtil::FileHelper.get_file( filename )
+          content = MobyUtil::FileHelper.get_file( filename )
 
-					xml << MobyUtil::XML::parse_string( content ).root.xpath( xpath_to_element ).to_s
+          xml << MobyUtil::XML::parse_string( content ).root.xpath( xpath_to_element ).to_s
 
-					# pass the filename to block if one given
-					yield( filename ) if block_given?
+          # pass the filename to block if one given
+          yield( filename ) if block_given?
 
-				}
+        }
 
-				xml = "<%s>%s</%s>" % [ root_element_name, xml.to_s, root_element_name ]
+        xml = "<%s>%s</%s>" % [ root_element_name, xml.to_s, root_element_name ]
 
-			rescue MobyUtil::EmptyFilenameError
+      rescue MobyUtil::EmptyFilenameError
 
-				Kernel::raise EmptyFilenameError.new( "Unable to load xml file due to filename is empty or nil" )
+        Kernel::raise EmptyFilenameError.new( "Unable to load xml file due to filename is empty or nil" )
 
-			rescue MobyUtil::FileNotFoundError => exception
+      rescue MobyUtil::FileNotFoundError => exception
 
-				Kernel::raise exception
+        Kernel::raise exception
 
-			rescue Exception => exception
+      rescue Exception => exception
 
-				Kernel::raise RuntimeError.new( "Error occured while parsing xml file %s. Reason: %s (%s)" % [ @filename, exception.message, exception.class ] )
+        Kernel::raise RuntimeError.new( "Error occured while parsing xml file %s. Reason: %s (%s)" % [ @filename, exception.message, exception.class ] )
 
-			end
+      end
 
-			xml
+      xml
 
-		end
+    end
 
-		MobyUtil::Hooking.instance.hook_methods( self ) if defined?( MobyUtil::Hooking )
+    MobyUtil::Hooking.instance.hook_methods( self ) if defined?( MobyUtil::Hooking )
 
-	end
+  end # ParameterXml
 
-end
-
+end # MobyUtil

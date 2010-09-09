@@ -17,10 +17,9 @@
 ## 
 ############################################################################
 
-
 module MobyUtil
 
-	# plugin service related errors
-	class PluginError < MobyUtil::CustomError; end;
+  # plugin service related errors
+  class PluginError < MobyUtil::CustomError; end;
 
-end
+end # MobyUtil

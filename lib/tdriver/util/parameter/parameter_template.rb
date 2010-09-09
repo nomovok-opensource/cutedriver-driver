@@ -17,104 +17,104 @@
 ## 
 ############################################################################
 
-
 module MobyUtil
 
-	class ParameterTemplates
+  class ParameterTemplates
 
-		include Singleton
+    include Singleton
 
-		def initialize
+    def initialize
 
-			@@templates = nil
+      @@templates = nil
 
-		end
+    end
 
-		def load_templates()
+    def load_templates()
 
-			content = MobyUtil::ParameterXml.instance.merge_files( 'templates/', 'templates', '/templates/*' )
+      content = MobyUtil::ParameterXml.instance.merge_files( 'templates/', 'templates', '/templates/*' )
 
-			@@templates = MobyUtil::XML::parse_string( content )
+      @@templates = MobyUtil::XML::parse_string( content )
 
-		end
+    end
 
-		# Helper method for 'get_template_from_xml' to retrieve all requested inherited parameters.
-		# === params
-		# list_of_inherited_templates:: String representation of template names, separated with ";"
-		# === returns
-		# Hash:: Hash containing parameters
-		# === raises
-		# === example
-		# result_hash = get_inherited_parameters( "template1;template2;template3" )
-		def get_inherited_parameters( list_of_inherited_templates )
+    # Helper method for 'get_template_from_xml' to retrieve all requested inherited parameters.
+    # === params
+    # list_of_inherited_templates:: String representation of template names, separated with ";"
+    # === returns
+    # Hash:: Hash containing parameters
+    # === raises
+    # === example
+    # result_hash = get_inherited_parameters( "template1;template2;template3" )
+    def get_inherited_parameters( list_of_inherited_templates )
 
-			result = ParameterHash.new
-			
-			if list_of_inherited_templates.kind_of?( String )
+      result = ParameterHash.new
+      
+      if list_of_inherited_templates.kind_of?( String )
 
-				list_of_inherited_templates.split( ";" ).each{ | inherits_from | 
-					
-					result.merge_with_hash!( 
+        list_of_inherited_templates.split( ";" ).each{ | inherits_from | 
+          
+          result.merge_with_hash!( 
 
-						get_template_from_xml( inherits_from ) 
-					
-					) 
+            get_template_from_xml( inherits_from ) 
+          
+          ) 
 
-				}
+        }
 
-			end
+      end
 
-			result
+      result
 
-		end
+    end
 
-		def get_template_from_xml( template_name )
+    def get_template_from_xml( template_name )
 
-			result = ParameterHash.new 
+      result = ParameterHash.new 
 
-			# return empty template hash if no templates loaded
-			return result unless @@templates
+      # return empty template hash if no templates loaded
+      return result unless @@templates
 
-			begin
+      begin
 
-				template_nodeset = @@templates.xpath( "/templates/template[@name='%s']" % [ template_name ] )
+        template_nodeset = @@templates.xpath( "/templates/template[@name='%s']" % [ template_name ] )
 
-				if template_nodeset.size > 0
+        if template_nodeset.size > 0
 
-					template_nodeset.each{ | template_node | 
+          template_nodeset.each{ | template_node | 
 
-						# merge and overwrite inherited template parameters 
-						result.merge!( 
+            # merge and overwrite inherited template parameters 
+            result.merge!( 
 
-							get_inherited_parameters( 
+              get_inherited_parameters( 
 
-								template_node.attribute( 'inherits' ).to_s
+                template_node.attribute( 'inherits' ).to_s
 
-							) 
+              ) 
 
-						).merge!( 
+            ).merge!( 
 
-							# merge template to hash
-							MobyUtil::ParameterXml.instance.parse( template_node.to_s ) 
+              # merge template to hash
+              MobyUtil::ParameterXml.instance.parse( template_node.to_s ) 
 
-						)
-					}
+            )
+          }
 
-				end
+        end
 
-			rescue Exception => exception
+      rescue Exception => exception
 
-				Kernel::raise RuntimeError.new( 
-					"Error retrieving template %s from xml. Reason: %s (%s)" % [ template_name, exception.message, exception.class ] 
-				) 
+        Kernel::raise RuntimeError.new( 
+          "Error retrieving template %s from xml. Reason: %s (%s)" % [ template_name, exception.message, exception.class ] 
+        ) 
 
-			end
+      end
 
-			result
-		end
+      result
 
-		MobyUtil::Hooking.instance.hook_methods( self ) if defined?( MobyUtil::Hooking )
+    end
 
-	end # ParameterTemplates
+    MobyUtil::Hooking.instance.hook_methods( self ) if defined?( MobyUtil::Hooking )
+
+  end # ParameterTemplates
 
 end # MobyUtil

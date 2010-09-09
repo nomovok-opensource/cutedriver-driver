@@ -17,45 +17,44 @@
 ## 
 ############################################################################
 
-
 module MobyUtil
 
-	# TDriver plugin abstraction class
-	class Plugin
+  # TDriver plugin abstraction class
+  class Plugin
 
-		## plugin configuration, constructor and deconstructor methods
-		def self.plugin_name
+    ## plugin configuration, constructor and deconstructor methods
+    def self.plugin_name
 
-			Kernel::raise PluginError.new( "Plugin name not defined in implementation (%s)" % [ self.name ] ) 
-		end
+      Kernel::raise PluginError.new( "Plugin name not defined in implementation (%s)" % [ self.name ] ) 
+    end
 
-		def self.plugin_type
+    def self.plugin_type
 
-			Kernel::raise PluginError.new( "Plugin type not defined in implementation (%s)" % [ self.name ] ) 
+      Kernel::raise PluginError.new( "Plugin type not defined in implementation (%s)" % [ self.name ] ) 
 
-		end
+    end
 
-		def self.plugin_required_tdriver_version
+    def self.plugin_required_tdriver_version
 
-			Kernel::raise PluginError.new( "Required TDriver version not defined in plugin implementation (%s)" % [ self.name ] ) 
+      Kernel::raise PluginError.new( "Required TDriver version not defined in plugin implementation (%s)" % [ self.name ] ) 
 
-		end
+    end
 
-		def self.register_plugin
+    def self.register_plugin
 
-			# this method will be called when plugin is registered
+      # this method will be called when plugin is registered
 
-		end
+    end
 
-		def self.unregister_plugin
+    def self.unregister_plugin
 
-			# this method will be called when plugin is unregistered
+      # this method will be called when plugin is unregistered
 
-		end
+    end
 
-		# enable hooking for performance measurement & debug logging
-		MobyUtil::Hooking.instance.hook_methods( self ) if defined?( MobyUtil::Hooking )
+    # enable hooking for performance measurement & debug logging
+    MobyUtil::Hooking.instance.hook_methods( self ) if defined?( MobyUtil::Hooking )
 
-	end # Plugin
+  end # Plugin
 
 end # MobyUtil

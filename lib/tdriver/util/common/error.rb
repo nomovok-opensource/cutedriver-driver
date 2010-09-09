@@ -17,24 +17,23 @@
 ## 
 ############################################################################
 
-
 module MobyUtil
 
-	# template for custom error classes
-	class CustomError < StandardError
-		
-		def initialize ( msg = nil )
+  # template for custom error classes
+  class CustomError < StandardError
+    
+    def initialize ( msg = nil )
 
-			super( msg )
+      super( msg )
 
-		end
+    end
 
-	end
+  end
 
-	class EmptyFilenameError < MobyUtil::CustomError; end
+  class EmptyFilenameError < MobyUtil::CustomError; end
 
-	class FileNotFoundError < MobyUtil::CustomError; end
+  class FileNotFoundError < MobyUtil::CustomError; end
 
-	class UnexpectedVariableTypeError < MobyUtil::CustomError; end
-	
+  class UnexpectedVariableTypeError < MobyUtil::CustomError; end
+  
 end # MobyUtil

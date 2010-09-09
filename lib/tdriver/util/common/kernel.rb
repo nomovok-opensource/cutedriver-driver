@@ -17,95 +17,94 @@
 ## 
 ############################################################################
 
-
 module MobyUtil
 
-	# Helper class to store verifyblock for 
-	# constant verifications for sut state
-	class VerifyBlock 
+  # Helper class to store verifyblock for 
+  # constant verifications for sut state
+  class VerifyBlock 
 
-		attr_accessor :block,:expected, :message,:source, :timeout
+    attr_accessor :block,:expected, :message,:source, :timeout
 
-		def initialize(block, expected, message = nil, timeout = nil, source = "")
+    def initialize(block, expected, message = nil, timeout = nil, source = "")
 
-			@block = block
-			@expected = expected
-			@message = message
-			@timeout = timeout
-			@source = source
+      @block = block
+      @expected = expected
+      @message = message
+      @timeout = timeout
+      @source = source
 
-		end
+    end
 
-	end
+  end
 
-	class KernelHelper
+  class KernelHelper
 
-		# Function to determine if given value is boolean
-		# == params
-		# value:: String containing boolean
-		# == returns
-		# TrueClass::
-		# FalseClass::
-		def self.boolean?( value )
+    # Function to determine if given value is boolean
+    # == params
+    # value:: String containing boolean
+    # == returns
+    # TrueClass::
+    # FalseClass::
+    def self.boolean?( value )
 
-			/^(true|false)$/i.match( value.to_s ).kind_of?( MatchData ) rescue false
+      /^(true|false)$/i.match( value.to_s ).kind_of?( MatchData ) rescue false
 
-		end
+    end
 
-		# Function to return boolean of given value
-		# == params
-		# value:: String containing boolean
-		# == returns
-		# TrueClass::
-		# FalseClass::
-		def self.to_boolean( value, default = nil )
+    # Function to return boolean of given value
+    # == params
+    # value:: String containing boolean
+    # == returns
+    # TrueClass::
+    # FalseClass::
+    def self.to_boolean( value, default = nil )
 
-			/^(true|false)$/i.match( value.to_s ) ? $1.downcase == 'true' : default
+      /^(true|false)$/i.match( value.to_s ) ? $1.downcase == 'true' : default
 
-		end
+    end
 
-		# Function to return class constant from a string
-		# == params
-		# constant_name:: String containing path
-		# == returns
-		# Class
-		def self.get_constant( constant_name )
+    # Function to return class constant from a string
+    # == params
+    # constant_name:: String containing path
+    # == returns
+    # Class
+    def self.get_constant( constant_name )
 
-			begin
+      begin
 
-				constant_name.split("::").inject( Kernel ){ | scope, const_name | scope.const_get( const_name ) }
+        constant_name.split("::").inject( Kernel ){ | scope, const_name | scope.const_get( const_name ) }
 
-			rescue 
+      rescue 
 
-				Kernel::raise NameError.new( "Invalid constant %s" % constant_name )
+        Kernel::raise NameError.new( "Invalid constant %s" % constant_name )
 
-			end
+      end
 
-		end
+    end
 
-		def self.parse_caller( at )
+    def self.parse_caller( at )
 
-			if /^(.+?):(\d+)(?::in `(.*)')?/ =~ at
+      if /^(.+?):(\d+)(?::in `(.*)')?/ =~ at
 
-				file = Regexp.last_match[ 1 ]
-				line = Regexp.last_match[ 2 ].to_i
-				method = Regexp.last_match[ 3 ]
+        file = Regexp.last_match[ 1 ]
+        line = Regexp.last_match[ 2 ].to_i
+        method = Regexp.last_match[ 3 ]
 
-				[ file, line, method ]
+        [ file, line, method ]
 
-			end
+      end
 
-		end
+    end
 
-		def self.deprecated( deprecated_name, new_name = "" )
+    def self.deprecated( deprecated_name, new_name = "" )
 
-			output = "warning: #{ deprecated_name } is deprecated"
+      output = "warning: #{ deprecated_name } is deprecated"
 
-			output += "; use #{ new_name } instead" unless new_name.empty?
+      output += "; use #{ new_name } instead" unless new_name.empty?
 
-			$stderr.puts output
+      $stderr.puts output
 
-		end
+    end
 
     # Searches for the given source file for a line
     #
@@ -116,7 +115,7 @@ module MobyUtil
     # String:: Contents of the line
     # === throws
     # RuntimeError:: from_file is not correctly formed, the file cannot be loaded or the line cannot be found.
-    def self.find_source(backtrace)
+    def self.find_source( backtrace )
 
       ret_str = "\n"
 
@@ -182,11 +181,9 @@ module MobyUtil
 
     end
 
+    # enable hooking for performance measurement & debug logging
+    MobyUtil::Hooking.instance.hook_methods( self ) if defined?( MobyUtil::Hooking )
 
-
-		# enable hooking for performance measurement & debug logging
-		MobyUtil::Hooking.instance.hook_methods( self ) if defined?( MobyUtil::Hooking )
-
-	end # KernelHelper
+  end # KernelHelper
 
 end # MobyUtil

@@ -17,67 +17,68 @@
 ## 
 ############################################################################
 
-
 module MobyUtil
 
-	class ParameterUserAPI
+  class ParameterUserAPI
 
-		include Singleton
+    include Singleton
 
-		def []=( key, value )
+    def []=( key, value )
 
-			MobyUtil::Parameter[ key ] = value
+      MobyUtil::Parameter[ key ] = value
 
-		end
+    end
 
-		def []( *args )
+    def []( *args )
 
-			MobyUtil::Parameter[ *args ]
-		end
+      MobyUtil::Parameter[ *args ]
 
-		def fetch( *args, &block )
+    end
 
-			MobyUtil::Parameter.fetch( *args, &block )
+    def fetch( *args, &block )
 
-		end
+      MobyUtil::Parameter.fetch( *args, &block )
 
-		def files
+    end
 
-			MobyUtil::Parameter.files
+    def files
 
-		end
+      MobyUtil::Parameter.files
 
-		def clear
+    end
 
-			MobyUtil::Parameter.instance.clear
-		end
+    def clear
 
-		def load_xml( filename )
+      MobyUtil::Parameter.instance.clear
 
-			MobyUtil::Parameter.instance.load_parameters_xml( filename )
+    end
 
-		end
+    def load_xml( filename )
 
-		def reset( *keys )
+      MobyUtil::Parameter.instance.load_parameters_xml( filename )
 
-			MobyUtil::Parameter.instance.reset_parameters
+    end
 
-		end
+    def reset( *keys )
 
-		def inspect
+      MobyUtil::Parameter.instance.reset_parameters
 
-			MobyUtil::Parameter.inspect
+    end
 
-		end
+    def inspect
 
-		def to_s
+      MobyUtil::Parameter.inspect
 
-			MobyUtil::Parameter.to_s
+    end
 
-		end
+    def to_s
 
-		MobyUtil::Hooking.instance.hook_methods( self ) if defined?( MobyUtil::Hooking )
+      MobyUtil::Parameter.to_s
 
-	end # ParameterUserAPI
+    end
+
+    MobyUtil::Hooking.instance.hook_methods( self ) if defined?( MobyUtil::Hooking )
+
+  end # ParameterUserAPI
 
 end # MobyUtil
