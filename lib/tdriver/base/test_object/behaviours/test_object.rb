@@ -281,22 +281,22 @@ module MobyBehaviour
 
     end
 
-    # Function for translating all symbol values into strings using sut's translate method
-    # Goes through all items in a hash and if a value is symbol then uses that symbol as a logical
-    # name and tries to find a translation for that.
-    # === params
-    # hash:: Hash containing key, value pairs. The parameter will get modified if symbols are found from values
-    # === raises
-    # LanguageNotFoundError:: In case of language is not found
-    # LogicalNameNotFoundError:: In case of logical name is not found for current language
-    # MySqlConnectError:: In case problems with the db connectivity
-    def translate!( hash )
+	# Function for translating all symbol values into strings using sut's translate method
+	# Goes through all items in a hash and if a value is symbol then uses that symbol as a logical
+	# name and tries to find a translation for that.
+	# === params
+	# hash:: Hash containing key, value pairs. The parameter will get modified if symbols are found from values
+	# === raises
+	# LanguageNotFoundError:: In case of language is not found
+	# LogicalNameNotFoundError:: In case of logical name is not found for current language
+	# MySqlConnectError:: In case problems with the db connectivity
+	def translate!( hash, file_name = nil, plurality = nil, numerus = nil, lengthvariant = nil )
 
       hash.each_pair do | _key, _value |
 
         next if [ :name, :type, :id ].include?( _key )
 
-        hash[ _key ] = sut.translate( _value ) if _value.kind_of?( Symbol ) 
+        hash[ _key ] = sut.translate( _value, file_name, plurality, numerus, lengthvariant ) if _value.kind_of?( Symbol )  
 
       end if !hash.nil?
 
@@ -458,8 +458,12 @@ module MobyBehaviour
 
       find_all_children = MobyUtil::KernelHelper.to_boolean( dynamic_attributes[ :__find_all_children ], true )
 
-      # check if the hash contains symbols as values and translate those into strings
-      translate!( creation_data )
+	  # check if the hash contains symbols as values and translate those into strings
+	  file_name = dynamic_attributes[ :__fname ]
+	  plurality = dynamic_attributes[ :__plurality ]
+	  numerus = dynamic_attributes[ :__numerus ]
+	  lengthvariant = dynamic_attributes[ :__lengthvariant ]
+	  translate!( creation_data, file_name, plurality, numerus, lengthvariant )
 
       # use custom timeout if defined
       timeout = ( dynamic_attributes[ :__timeout ] || @test_object_factory.timeout ).to_i

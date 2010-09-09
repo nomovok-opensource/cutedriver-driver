@@ -60,7 +60,7 @@ module MobyUtil
 			if db_type == DB_TYPE_MYSQL
 				Kernel::raise ArgumentError.new("Host must be provided as a non empty string.") if host.nil? or host.class != String or host.empty?
 				Kernel::raise ArgumentError.new("Username must be provided as a non empty string.") if username.nil? or username.class != String or username.empty?
-				Kernel::raise ArgumentError.new("Password must be provided as a non empty string.") if password.nil? or password.class != String or password.empty?
+				Kernel::raise ArgumentError.new("Password must be provided as a string.") if password.nil? or password.class != String
 			end
 			Kernel::raise ArgumentError.new("The database name must be provided as a non empty string.") if database_name.nil? or database_name.class != String or database_name.empty?
 			Kernel::raise ArgumentError.new("The query qtring must be provided as a non empty string.") if query_string.nil? or query_string.class != String or query_string.empty?

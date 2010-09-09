@@ -36,7 +36,7 @@ module MobyUtil
 		# LanguageNotFoundError:: in case the language not found
 		# TableNotFoundError:: in case the table name not found
 		# SqlError:: in case of the other problem with the query
-		def self.translation( logical_name, language, table_name, file_name = nil )
+		def self.translation( logical_name, language, table_name, file_name = nil , plurality = nil, lengthvariant = nil )
 
 			Kernel::raise LogicalNameNotFoundError.new( "Logical name cannot be nil" ) if logical_name == nil
 			Kernel::raise LanguageNotFoundError.new( "Language cannot be nil" ) if language == nil
@@ -81,7 +81,9 @@ module MobyUtil
 			  database_name = MobyUtil::Parameter[ :localisation_server_database_name ]
 
         query_string = "select `#{ language }` from #{ table_name } where lname = '#{ logical_name }'"
-			  query_string += " and fname = '#{ file_name }'" unless file_name.nil?
+			  query_string += " and `FNAME` = '#{ file_name }'" unless file_name.nil?
+			  query_string += " and `PLURALITY` = '#{ plurality }'" unless plurality.nil?
+			  query_string += " and `LENGTHVAR` = '#{ lengthvariant }'" unless lengthvariant.nil?
 			  query_string += " and `#{ language }` <> \'#MISSING\'"
 
       when "user_data"
@@ -119,7 +121,7 @@ module MobyUtil
 			end
 
 			# Return only the first column of the row or and array of the values of the first column if multiple rows have been found
-			Kernel::raise LogicalNameNotFoundError.new( "No logical name '#{ logical_name }' found for language '#{ language }'" ) if ( result.empty?)
+			Kernel::raise LogicalNameNotFoundError.new( "No translation found for logical name '#{ logical_name }' in language '#{ language }' with given plurality and lengthvariant." ) if ( result.empty?)
 			if result.length > 1
 				result_array = Array.new
 				result.each do |row|
