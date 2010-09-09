@@ -29,6 +29,28 @@ module MobyBase
 
 		attr_reader :timeout
 
+    # TODO: Document me (TestObjectFactory::check_verify_always_reporting_settings)
+    def check_verify_always_reporting_settings()
+      @reporter_attached = MobyUtil::Parameter[ :report_attach_continuous_verification_to_reporter, 'false' ]
+
+      @rcv_raise_errors = MobyUtil::Parameter[ :report_continuous_verification_raise_errors, 'true' ]
+
+      @rcv_fail_test_case = MobyUtil::Parameter[ :report_continuous_verification_fail_test_case_on_error, 'true' ]
+
+      @rvc_capture_screen = MobyUtil::Parameter[ :report_continuous_verification_capture_screen_on_error, 'true' ]
+    end
+
+    # TODO: Document me (TestObjectFactory::restore_verify_always_reporting_settings)
+    def restore_global_verify_always_reporting_settings()
+      @reporter_attached = @global_reporter_attached
+
+      @rcv_raise_errors = @rcv_global_raise_errors
+
+      @rcv_fail_test_case = @rcv_global_fail_test_case
+
+      @rvc_capture_screen = @rvc_global_capture_screen
+    end
+
 		# TODO: Document me (TestObjectFactory::initialize)
 		def initialize
 
@@ -37,9 +59,17 @@ module MobyBase
 
 			reset_timeout
 
+      @global_reporter_attached = MobyUtil::Parameter[ :report_attach_continuous_verification_to_reporter, 'false' ]
+
+      @rcv_global_raise_errors = MobyUtil::Parameter[ :report_continuous_verification_raise_errors, 'true' ]
+
+      @rcv_global_fail_test_case = MobyUtil::Parameter[ :report_continuous_verification_fail_test_case_on_error, 'true' ]
+
+      @rvc_global_capture_screen = MobyUtil::Parameter[ :report_continuous_verification_capture_screen_on_error, 'true' ]
+
 			@test_object_cache = {}
 
-			@inside_verify = false
+			@inside_verify = false      
 
 		end
 
@@ -154,7 +184,7 @@ module MobyBase
 				logging_enabled = MobyUtil::Logger.instance.enabled
 
 				sut.verify_blocks.each do | verify |
-
+          check_verify_always_reporting_settings()
 					begin
 
 						MobyUtil::Logger.instance.enabled = false
@@ -164,21 +194,53 @@ module MobyBase
 
 						rescue Exception => e
 
-							raise MobyBase::ContinuousVerificationError.new(
+              if @rcv_raise_errors=='true' || @reporter_attached=='false'
+                raise MobyBase::ContinuousVerificationError.new(
 
-								"Verification failed as an exception was thrown when the verification block was executed. %s\nDetails: %s\nNested exception:\n%s" % [ verify.source, ( verify.message || "none" ), e.inspect ]
+                  "Verification failed as an exception was thrown when the verification block was executed. %s\nDetails: %s\nNested exception:\n%s" % [ verify.source, ( verify.message || "none" ), e.inspect ]
 
-							)
+                )
+              elsif @reporter_attached=='true' && @rcv_raise_errors=='false'
+                TDriverReportAPI::tdriver_report_set_test_case_status('failed') if @rcv_fail_test_case=='true'
+                if @rvc_capture_screen=='true'
+                  TDriverReportAPI::tdriver_capture_state
+                else
+                  TDriverReportAPI::tdriver_capture_state(false)
+                end
+                TDriverReportAPI::tdriver_report_log("Verification failed as an exception was thrown when the verification block was executed. %s\nDetails: %s\nNested exception:\n%s" % [ verify.source, ( verify.message || "none" ), e.inspect ])
+                TDriverReportAPI::tdriver_report_log("<hr />")
+                
+                MobyUtil::Logger.instance.enabled = logging_enabled
+
+						    MobyUtil::Logger.instance.log "behaviour" , "FAIL;Verification #{verify.message.nil? ? '' : '\"' << verify.message << '\" '}failed:#{e.to_s}.\n#{verify.timeout.nil? ? '' : ' using timeout ' + verify.timeout.to_s}.;#{sut.id.to_s+';sut'};{};verify_always;" << verify.expected.to_s
+
+              end
 
 						end
 
 						unless result == verify.expected
+              if @rcv_raise_errors=='true' || @reporter_attached=='false'
+                raise MobyBase::ContinuousVerificationError.new(
 
-							raise MobyBase::ContinuousVerificationError.new(
+                  "Verification failed. %s\nDetails: %s\nThe block did not return %s. It returned: %s" % [ verify.source, ( verify.message || "none" ), verify.expected.inspect, result.inspect ]
 
-								"Verification failed. %s\nDetails: %s\nThe block did not return %s. It returned: %s" % [ verify.source, ( verify.message || "none" ), verify.expected.inspect, result.inspect ]
+                )
+              elsif @reporter_attached=='true' && @rcv_raise_errors=='false'
+                TDriverReportAPI::tdriver_report_set_test_case_status('failed') if @rcv_fail_test_case=='true'
+                if @rvc_capture_screen=='true'
+                  TDriverReportAPI::tdriver_capture_state
+                else
+                  TDriverReportAPI::tdriver_capture_state(false)
+                end
+                
+                TDriverReportAPI::tdriver_report_log("Verification failed. %s\nDetails: %s\nThe block did not return %s. It returned: %s " % [ verify.source, ( verify.message || "none" ), verify.expected.inspect, result.inspect])
+                TDriverReportAPI::tdriver_report_log("<hr />")
 
-							) 
+                MobyUtil::Logger.instance.enabled = logging_enabled
+
+						    MobyUtil::Logger.instance.log "behaviour" , "FAIL;Verification #{verify.message.nil? ? '' : '\"' << verify.message << '\" '}failed:#{e.to_s}.\n#{verify.timeout.nil? ? '' : ' using timeout ' + verify.timeout.to_s}.;#{sut.id.to_s+';sut'};{};verify_always;" << verify.expected.to_s
+
+              end
 
 						end
 
@@ -195,11 +257,11 @@ module MobyBase
 					end
 
 					# Do NOT report PASS cases, like other verify blocks do. This would clog the log with useless info.
-
+          restore_global_verify_always_reporting_settings()
 				end
 
 			ensure
-
+        MobyUtil::Logger.instance.enabled = logging_enabled
 				@inside_verify = false      
 
 			end
@@ -237,7 +299,7 @@ module MobyBase
 
 		end
 
-	private
+    private
 
 		# TODO: This method should be in application test object
 		def get_layout_direction( sut )
@@ -294,23 +356,23 @@ module MobyBase
 				# following exceptions are allowed; Retry until timeout exceeds or other exception type is raised
 				:exception => [ MobyBase::TestObjectNotFoundError, MobyBase::MultipleTestObjectsIdentifiedError ] ) {
 
-					# refresh sut ui state				
-					sut.refresh( refresh_arguments )
+        # refresh sut ui state
+        sut.refresh( refresh_arguments )
 
-					# identify test objects from xml
-					matches, rule = test_object_identificator.find_objects( parent.xml_data, find_all_children )
+        # identify test objects from xml
+        matches, rule = test_object_identificator.find_objects( parent.xml_data, find_all_children )
 
-					# raise exception if multiple objects flag is false and more than one match found
-					raise MobyBase::MultipleTestObjectsIdentifiedError.new( "Multiple test objects found with rule:\n%s" % creation_attributes.merge( dynamic_attributes ).inspect ) if ( !multiple_objects ) && ( matches.count > 1 && !index_given )
+        # raise exception if multiple objects flag is false and more than one match found
+        raise MobyBase::MultipleTestObjectsIdentifiedError.new( "Multiple test objects found with rule:\n%s" % creation_attributes.merge( dynamic_attributes ).inspect ) if ( !multiple_objects ) && ( matches.count > 1 && !index_given )
 
-					# raise exception if no matching object(s) found
-					raise MobyBase::TestObjectNotFoundError.new( "Cannot find object with rule:\n%s" % creation_attributes.merge( dynamic_attributes ).inspect ) if matches.empty?
+        # raise exception if no matching object(s) found
+        raise MobyBase::TestObjectNotFoundError.new( "Cannot find object with rule:\n%s" % creation_attributes.merge( dynamic_attributes ).inspect ) if matches.empty?
 
-					# sort elements 
-					test_object_identificator.sort_elements_by_xy_layout!( matches, get_layout_direction( sut ) ) if sorting
+        # sort elements
+        test_object_identificator.sort_elements_by_xy_layout!( matches, get_layout_direction( sut ) ) if sorting
 
-					# return result
-					multiple_objects && !index_given ? matches.to_a : [ matches[ index ] ]
+        # return result
+        multiple_objects && !index_given ? matches.to_a : [ matches[ index ] ]
 
 
 			}
@@ -340,20 +402,20 @@ module MobyBase
 			# retrieve test object type from xml
 			object_type = xml_object.kind_of?( MobyUtil::XML::Element ) ? xml_object.attribute( 'type' ) : nil
       
-#			if !@test_object_cache.has_key?( object_type )
+      #			if !@test_object_cache.has_key?( object_type )
 
-				test_object = MobyBase::TestObject.new( test_object_factory, sut, parent, xml_object )
+      test_object = MobyBase::TestObject.new( test_object_factory, sut, parent, xml_object )
 
-				# apply behaviours to test object
-				test_object.extend( MobyBehaviour::ObjectBehaviourComposition )
+      # apply behaviours to test object
+      test_object.extend( MobyBehaviour::ObjectBehaviourComposition )
 
-				# apply behaviours to test object
-				test_object.apply_behaviour!( 
-					:object_type => [ '*', object_type ], 
-					:sut_type => [ '*', sut.ui_type ], 
-					:input_type => [ '*', sut.input.to_s ], 
-					:version => [ '*', sut.ui_version ] 
-				)
+      # apply behaviours to test object
+      test_object.apply_behaviour!(
+        :object_type => [ '*', object_type ],
+        :sut_type => [ '*', sut.ui_type ],
+        :input_type => [ '*', sut.input.to_s ],
+        :version => [ '*', sut.ui_version ]
+      )
 =begin
 Removed object cache usage
 				# now test object has all required behaviours, store it to cache
@@ -388,7 +450,7 @@ Removed object cache usage
 
 		end
 
-	public # deprecated methods
+    public # deprecated methods
 
 		# Function for making a child test object (a test object that is not directly a accessible from the sut) 
 		# Creates accessors for children of the new object, applies any behaviours applicable for its type. 
@@ -492,16 +554,16 @@ Removed object cache usage
 
 				}
 
-				rescue MobyBase::TestObjectNotFoundError
+      rescue MobyBase::TestObjectNotFoundError
 
-					Kernel::raise MobyBase::TestObjectNotFoundError.new(
-						"The parent test object was no available on the SUT.\n" <<
+        Kernel::raise MobyBase::TestObjectNotFoundError.new(
+          "The parent test object was no available on the SUT.\n" <<
 						"Expected object type: '#{ parent_test_object.type }' id: '#{ parent_test_object.id }'" 
-					)
+        )
 
-				end
+      end
 
-				identified_object_xml.each do |child_xml|
+      identified_object_xml.each do |child_xml|
 
 				ret_array << make_test_object( self, parent_test_object.sut, parent_test_object, child_xml )
 
