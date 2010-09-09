@@ -17,7 +17,6 @@
 ## 
 ############################################################################
 
-
 require 'rbconfig'  # ??
 
 # common modules - should be generic and runnable as standalone
@@ -38,4 +37,3 @@ require File.expand_path( File.join( File.dirname( __FILE__ ), 'kernel.rb' ) )
 require File.expand_path( File.join( File.dirname( __FILE__ ), 'retryable.rb' ) )
 
 require File.expand_path( File.join( File.dirname( __FILE__ ), 'string.rb' ) )
-

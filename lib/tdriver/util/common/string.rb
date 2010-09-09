@@ -17,49 +17,61 @@
 ## 
 ############################################################################
 
-
 module MobyUtil
 
-	class StringHelper    
+  class StringHelper    
 
-		# Function determines if string is "true" or "false"
-		# == params
-		# string:: String
-		# == returns
-		# TrueClass/FalseClass 
-		def self.boolean?( string )
-			# raise exception if argument type other than String
-			Kernel::raise ArgumentError.new("Invalid argument format %s (Expected: %s)" % [ string.class, "String" ]) unless string.kind_of?( String )
-			/^(true|false)$/i.match( string ).kind_of?( MatchData )
-		end    
+    # Function determines if string is "true" or "false"
+    # == params
+    # string:: String
+    # == returns
+    # TrueClass/FalseClass 
+    def self.boolean?( string )
 
-		# Function determines if string is numeric
-		# == params
-		# string:: Numeric string
-		# == returns
-		# TrueClass/FalseClass 
-		def self.numeric?( string )
-			# raise exception if argument type other than String
-			Kernel::raise ArgumentError.new("Invalid argument format %s (Expected: %s)" % [ string.class, "String" ]) unless string.kind_of?( String )
-			/[0-9]+/.match( string ).kind_of?( MatchData )
-		end  
+      # raise exception if argument type other than String
+      Kernel::raise ArgumentError.new("Invalid argument format %s (Expected: %s)" % [ string.class, "String" ]) unless string.kind_of?( String )
 
-		# Function converts "true" or "false" to boolean 
-		# == params
-		# string:: String
-		# == returns
-		# TrueClass/FalseClass 
-		def self.to_boolean( string )          
-			if MobyUtil::StringHelper::boolean?( string )
-				/true/i.match( string ).kind_of?( MatchData )
-			else
-				Kernel::raise ArgumentError.new("Invalid value '%s' for boolean (Expected: %s)" % [ string, "'true', 'false'" ] )
-			end      
-		end    
+      /^(true|false)$/i.match( string ).kind_of?( MatchData )
 
-		# enable hooking for performance measurement & debug logging
-		MobyUtil::Hooking.instance.hook_methods( self ) if defined?( MobyUtil::Hooking )
+    end    
 
-	end # StringHelper
+    # Function determines if string is numeric
+    # == params
+    # string:: Numeric string
+    # == returns
+    # TrueClass/FalseClass 
+    def self.numeric?( string )
+
+      # raise exception if argument type other than String
+
+      Kernel::raise ArgumentError.new("Invalid argument format %s (Expected: %s)" % [ string.class, "String" ]) unless string.kind_of?( String )
+
+      /[0-9]+/.match( string ).kind_of?( MatchData )
+
+    end  
+
+    # Function converts "true" or "false" to boolean 
+    # == params
+    # string:: String
+    # == returns
+    # TrueClass/FalseClass 
+    def self.to_boolean( string )          
+
+      if MobyUtil::StringHelper::boolean?( string )
+
+        /true/i.match( string ).kind_of?( MatchData )
+
+      else
+
+        Kernel::raise ArgumentError.new("Invalid value '%s' for boolean (Expected: %s)" % [ string, "'true', 'false'" ] )
+
+      end      
+
+    end    
+
+    # enable hooking for performance measurement & debug logging
+    MobyUtil::Hooking.instance.hook_methods( self ) if defined?( MobyUtil::Hooking )
+
+  end # StringHelper
 
 end # MobyUtil

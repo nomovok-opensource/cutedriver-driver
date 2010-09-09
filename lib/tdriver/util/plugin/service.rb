@@ -17,208 +17,207 @@
 ## 
 ############################################################################
 
-
 module MobyUtil
 
-	# Plugin service implementation
-	class PluginService
+  # Plugin service implementation
+  class PluginService
 
-		include Singleton
+    include Singleton
 
-		# intialize plugin service
-		def initialize
+    # intialize plugin service
+    def initialize
 
-			reset_plugins_list
+      reset_plugins_list
 
-		end
+    end
 
-		# return all or plugins of given type
-		def registered_plugins( type = nil )
+    # return all or plugins of given type
+    def registered_plugins( type = nil )
 
-			plugins( :type, type )
+      plugins( :type, type )
 
-		end
+    end
 
-		# returns true if plugin is registered, plugin type can be given as optional parameter
-		def plugin_registered?( plugin_name, type = nil )
+    # returns true if plugin is registered, plugin type can be given as optional parameter
+    def plugin_registered?( plugin_name, type = nil )
 
-			# check if given plugin is registered
-			result = is_plugin_registered?( plugin_name )
-		
-			# if plugin type defined, compare plugin type with given 
-			result = ( plugin_value( plugin_name, :type ) == type ) if !type.nil? && result
-			
-			# return result
-			result
+      # check if given plugin is registered
+      result = is_plugin_registered?( plugin_name )
+    
+      # if plugin type defined, compare plugin type with given 
+      result = ( plugin_value( plugin_name, :type ) == type ) if !type.nil? && result
+      
+      # return result
+      result
 
-		end
+    end
 
-		def enable_plugin( plugin_name )
+    def enable_plugin( plugin_name )
 
-			Kernel::raise ArgumentError.new( "No such plugin registered %s" % [ plugin_name ] ) unless is_plugin_registered?( plugin_name )
+      Kernel::raise ArgumentError.new( "No such plugin registered %s" % [ plugin_name ] ) unless is_plugin_registered?( plugin_name )
 
-			set_plugin_value( plugin_name, :enabled, true )
+      set_plugin_value( plugin_name, :enabled, true )
 
-		end
+    end
 
-		def disable_plugin( plugin_name )
+    def disable_plugin( plugin_name )
 
-			Kernel::raise ArgumentError.new( "No such plugin registered %s" % [ plugin_name ] ) unless is_plugin_registered?( plugin_name )
+      Kernel::raise ArgumentError.new( "No such plugin registered %s" % [ plugin_name ] ) unless is_plugin_registered?( plugin_name )
 
-			set_plugin_value( plugin_name, :enabled, false )
-		end
+      set_plugin_value( plugin_name, :enabled, false )
+    end
 
-		def plugin_enabled?( plugin_name )
+    def plugin_enabled?( plugin_name )
 
-			Kernel::raise ArgumentError.new( "No such plugin registered %s" % [ plugin_name ] ) unless is_plugin_registered?( plugin_name )
+      Kernel::raise ArgumentError.new( "No such plugin registered %s" % [ plugin_name ] ) unless is_plugin_registered?( plugin_name )
 
-			plugin_value( plugin_name, :enabled )
+      plugin_value( plugin_name, :enabled )
 
-		end
+    end
 
-		def register_plugin( plugin_module )
+    def register_plugin( plugin_module )
 
-			# retrieve plugin name
-			plugin_name = plugin_data_value( plugin_module, :plugin_name )
+      # retrieve plugin name
+      plugin_name = plugin_data_value( plugin_module, :plugin_name )
 
-			# throw exception if plugin is already registered
-			Kernel::raise ArgumentError.new( "Plugin %s is already registered" % [ plugin_name ] ) if is_plugin_registered?( plugin_name )
+      # throw exception if plugin is already registered
+      Kernel::raise ArgumentError.new( "Plugin %s is already registered" % [ plugin_name ] ) if is_plugin_registered?( plugin_name )
 
-			# plugin configuration
-			set_plugin_values( 
-				plugin_name, 
-				{ 
-					:type => plugin_data_value( plugin_module, :plugin_type ), 
-					:plugin_module => plugin_module, 
-					:enabled => true 
-				} 
-			)
+      # plugin configuration
+      set_plugin_values( 
+        plugin_name, 
+        { 
+          :type => plugin_data_value( plugin_module, :plugin_type ), 
+          :plugin_module => plugin_module, 
+          :enabled => true 
+        } 
+      )
 
-			# register plugin
-			plugin_module.register_plugin
+      # register plugin
+      plugin_module.register_plugin
 
-		end
+    end
 
-		def unregister_plugin( plugin_name )
+    def unregister_plugin( plugin_name )
 
-			Kernel::raise ArgumentError.new( "Unregister failed due to plugin %s is not registered" % [ plugin_name ] ) unless plugin_registered?( plugin_name )
+      Kernel::raise ArgumentError.new( "Unregister failed due to plugin %s is not registered" % [ plugin_name ] ) unless plugin_registered?( plugin_name )
 
-			# remove from the plugins list
-			delete_plugin( plugin_name )
+      # remove from the plugins list
+      delete_plugin( plugin_name )
 
-			# unregister plugin
-			plugin_module.unregister_plugin
+      # unregister plugin
+      plugin_module.unregister_plugin
 
-		end
+    end
 
-		def load_plugin( plugin_name )
+    def load_plugin( plugin_name )
 
-			begin
+      begin
 
-				# load plugin implementation
-				require plugin_name 
+        # load plugin implementation
+        require plugin_name 
 
-			rescue LoadError => exception
+      rescue LoadError => exception
 
-				Kernel::raise RuntimeError.new( 
+        Kernel::raise RuntimeError.new( 
 
-					"Error while loading plugin %s. Please verify that the plugin is installed properly (%s: %s)" % [ plugin_name, exception.class, exception.message ]
+          "Error while loading plugin %s. Please verify that the plugin is installed properly (%s: %s)" % [ plugin_name, exception.class, exception.message ]
 
-				)
+        )
 
-			end
+      end
 
-		end
+    end
 
-		def call_plugin_method( plugin_name, method_name, *args )
+    def call_plugin_method( plugin_name, method_name, *args )
 
-			begin
+      begin
 
-				plugin_value( plugin_name, :plugin_module ).method( method_name.to_sym ).call( *args )
+        plugin_value( plugin_name, :plugin_module ).method( method_name.to_sym ).call( *args )
 
-			rescue Exception => exception
+      rescue Exception => exception
 
-				raise PluginError.new( "Error occured during calling %s method for %s (%s: %s)" % [ method_name, plugin_name, exception.class, exception.message ] )
+        raise PluginError.new( "Error occured during calling %s method for %s (%s: %s)" % [ method_name, plugin_name, exception.class, exception.message ] )
 
-			end
+      end
 
-		end
+    end
 
-	private
+  private
 
-		def is_plugin_registered?( plugin_name )
+    def is_plugin_registered?( plugin_name )
 
-			@@registered_plugins.has_key?( plugin_name )
+      @@registered_plugins.has_key?( plugin_name )
 
-		end
+    end
 
-		def reset_plugins_list
+    def reset_plugins_list
 
-			@@registered_plugins = {}
+      @@registered_plugins = {}
 
-		end
+    end
 
-		def get_plugin( plugin_name )
+    def get_plugin( plugin_name )
 
-			@@registered_plugins[ plugin_name ]
+      @@registered_plugins[ plugin_name ]
 
-		end
+    end
 
-		def plugins( expected_key = nil, expected_value = nil )
+    def plugins( expected_key = nil, expected_value = nil )
 
-			# return all or plugins of given type
-			Hash[ @@registered_plugins.select{ | key, value | expected_key.nil? || expected_value.nil? || value[ expected_key ] == expected_value } ]
+      # return all or plugins of given type
+      Hash[ @@registered_plugins.select{ | key, value | expected_key.nil? || expected_value.nil? || value[ expected_key ] == expected_value } ]
 
-		end
+    end
 
-		def set_plugin_value( plugin_name, name, value )
+    def set_plugin_value( plugin_name, name, value )
 
-			@@registered_plugins[ plugin_name ][ name.to_sym ] = value
+      @@registered_plugins[ plugin_name ][ name.to_sym ] = value
 
-		end
+    end
 
-		def set_plugin_values( plugin_name, hash = {} )
+    def set_plugin_values( plugin_name, hash = {} )
 
-			@@registered_plugins[ plugin_name ] = ( @@registered_plugins[ plugin_name ] ||= {} ).merge!( hash )
+      @@registered_plugins[ plugin_name ] = ( @@registered_plugins[ plugin_name ] ||= {} ).merge!( hash )
 
-		end
+    end
 
-		def plugin_value( plugin_name, name )
+    def plugin_value( plugin_name, name )
 
-			@@registered_plugins[ plugin_name ][ name.to_sym ]
+      @@registered_plugins[ plugin_name ][ name.to_sym ]
 
-		end
+    end
 
-		def delete_plugin( plugin_name )
+    def delete_plugin( plugin_name )
 
-			# remove from the plugins hash
-			@@registered_plugins.delete( plugin_name )
+      # remove from the plugins hash
+      @@registered_plugins.delete( plugin_name )
 
-		end
+    end
 
-		def plugin_data_value( plugin_module, value_name, optional = false )
+    def plugin_data_value( plugin_module, value_name, optional = false )
 
-			begin
+      begin
 
-				result = plugin_module.method( value_name.to_sym ).call
+        result = plugin_module.method( value_name.to_sym ).call
 
-			rescue NameError
+      rescue NameError
 
-				Kernel::raise RuntimeError.new( "Plugin must have %s value defined" % [ value_name.to_s ] ) if !optional
+        Kernel::raise RuntimeError.new( "Plugin must have %s value defined" % [ value_name.to_s ] ) if !optional
 
-			rescue => exception
+      rescue => exception
 
-				Kernel::raise exception
+        Kernel::raise exception
 
-			end
+      end
 
-			result
+      result
 
-		end
+    end
 
-		# enable hooking for performance measurement & debug logging
-		MobyUtil::Hooking.instance.hook_methods( self ) if defined?( MobyUtil::Hooking )
+    # enable hooking for performance measurement & debug logging
+    MobyUtil::Hooking.instance.hook_methods( self ) if defined?( MobyUtil::Hooking )
 
-	end # PluginService
+  end # PluginService
 
 end # MobyUtil

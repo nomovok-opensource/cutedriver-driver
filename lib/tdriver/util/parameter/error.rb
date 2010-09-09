@@ -17,7 +17,6 @@
 ## 
 ############################################################################
 
-
 module MobyUtil
 
 	# This is template for tdriver custom errors
@@ -43,4 +42,4 @@ module MobyUtil
 	# This error should be raised when desired template was not found
 	class TemplatesFileNotLoaded < CustomError; end
 
-end
+end # MobyUtil

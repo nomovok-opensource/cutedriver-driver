@@ -19,13 +19,13 @@
 
 module MobyUtil
 
-	class GemHelper
+  class GemHelper
 
-		def self.create_build_files
+    def self.create_build_files
 
-			# Create build files. These are required, as RubyGems expects that external dependencies 
-			# are built during the gem installation process and will not complete the installation 
-			# if these files are missing.
+      # Create build files. These are required, as RubyGems expects that external dependencies 
+      # are built during the gem installation process and will not complete the installation 
+      # if these files are missing.
 
       begin
 
@@ -48,67 +48,66 @@ module MobyUtil
         create_makefile( extension_name )
 
         # create nmake.bat in windows env.
-			  if MobyUtil::EnvironmentHelper.windows? 
+        if MobyUtil::EnvironmentHelper.windows? 
 
-				  File.open( 'nmake.bat', 'w') { |f| f.write "SET ERRORLEVEL=0" }
+          File.open( 'nmake.bat', 'w') { |f| f.write "SET ERRORLEVEL=0" }
 
-			  end
+        end
 
       rescue Exception
 
         # create dummy makefile if building native extension fails or is not supported
-			  File.open( 'Makefile', 'w' ) { | f | f.write "all:\n\ninstall:\n\n" }
+        File.open( 'Makefile', 'w' ) { | f | f.write "all:\n\ninstall:\n\n" }
 
-			  if MobyUtil::EnvironmentHelper.windows? 
+        if MobyUtil::EnvironmentHelper.windows? 
 
-				  File.open( 'nmake.bat', 'w') { |f| f.write "SET ERRORLEVEL=0" }
-				  File.open( 'extconf.dll', 'w' ) {}
+          File.open( 'nmake.bat', 'w') { |f| f.write "SET ERRORLEVEL=0" }
+          File.open( 'extconf.dll', 'w' ) {}
 
-			  else
+        else
 
-				  File.open( 'make', 'w' ){ | f | f.write '#!/bin/sh'; f.chmod f.stat.mode | 0111; }
-				  File.open( 'extconf.so', 'w' ) {}
+          File.open( 'make', 'w' ){ | f | f.write '#!/bin/sh'; f.chmod f.stat.mode | 0111; }
+          File.open( 'extconf.so', 'w' ) {}
 
-			  end
+        end
 
       end
 
-		end
+    end
+
+    def self.grant_file_access_rights( folder, user_name = nil, user_group = nil )
+
+      if MobyUtil::EnvironmentHelper.posix? #ruby_platform !~ /mswin/
+
+        # change folder ownership to user and add writing access to each file
+        user_name = MobyUtil::EnvironmentHelper.user_name if user_name.nil?
+        user_group = MobyUtil::EnvironmentHelper.user_group( user_name ) if user_group.nil?
+
+        MobyUtil::EnvironmentHelper.change_file_ownership!( folder, user_name, user_group, true )
+
+        `chmod -R u+w #{ folder }`
+
+      end
+
+    end
+
+    # TODO: document
+    def self.install( *parameters, &block )
+
+      Kernel::raise ArgumentError.new( "Target folder required as first argument" ) unless parameters.count > 0
+
+      yield( *parameters )
+
+      MobyUtil::GemHelper.create_build_files
+
+      MobyUtil::GemHelper.grant_file_access_rights( parameters.first )
 
 
-		def self.grant_file_access_rights( folder, user_name = nil, user_group = nil )
+    end
 
-			if MobyUtil::EnvironmentHelper.posix? #ruby_platform !~ /mswin/
+    # enable hooking for performance measurement & debug logging
+    MobyUtil::Hooking.instance.hook_methods( self ) if defined?( MobyUtil::Hooking )
 
-				# change folder ownership to user and add writing access to each file
-				user_name = MobyUtil::EnvironmentHelper.user_name if user_name.nil?
-				user_group = MobyUtil::EnvironmentHelper.user_group( user_name ) if user_group.nil?
-
-				MobyUtil::EnvironmentHelper.change_file_ownership!( folder, user_name, user_group, true )
-
-				`chmod -R u+w #{ folder }`
-
-			end
-
-		end
-
-		# TODO: document
-		def self.install( *parameters, &block )
-
-			Kernel::raise ArgumentError.new( "Target folder required as first argument" ) unless parameters.count > 0
-
-			yield( *parameters )
-
-			MobyUtil::GemHelper.create_build_files
-
-			MobyUtil::GemHelper.grant_file_access_rights( parameters.first )
-
-
-		end
-
-		# enable hooking for performance measurement & debug logging
-		MobyUtil::Hooking.instance.hook_methods( self ) if defined?( MobyUtil::Hooking )
-
-	end # GemHelper
+  end # GemHelper
 
 end # MobyUtil
