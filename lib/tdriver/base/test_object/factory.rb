@@ -184,7 +184,7 @@ module MobyBase
 				logging_enabled = MobyUtil::Logger.instance.enabled
 
 				sut.verify_blocks.each do | verify |
-          check_verify_always_reporting_settings()
+				check_verify_always_reporting_settings()
 					begin
 
 						MobyUtil::Logger.instance.enabled = false
@@ -194,54 +194,42 @@ module MobyBase
 
 						rescue Exception => e
 
-              if @rcv_raise_errors=='true' || @reporter_attached=='false'
-                raise MobyBase::ContinuousVerificationError.new(
-
-                  "Verification failed as an exception was thrown when the verification block was executed. %s\nDetails: %s\nNested exception:\n%s" % [ verify.source, ( verify.message || "none" ), e.inspect ]
-
-                )
-              elsif @reporter_attached=='true' && @rcv_raise_errors=='false'
-                TDriverReportAPI::tdriver_report_set_test_case_status('failed') if @rcv_fail_test_case=='true'
-                if @rvc_capture_screen=='true'
-                  TDriverReportAPI::tdriver_capture_state
-                else
-                  TDriverReportAPI::tdriver_capture_state(false)
-                end
-                TDriverReportAPI::tdriver_report_log("Verification failed as an exception was thrown when the verification block was executed. %s\nDetails: %s\nNested exception:\n%s" % [ verify.source, ( verify.message || "none" ), e.inspect ])
-                TDriverReportAPI::tdriver_report_log("<hr />")
-                
-                MobyUtil::Logger.instance.enabled = logging_enabled
-
-						    MobyUtil::Logger.instance.log "behaviour" , "FAIL;Verification #{verify.message.nil? ? '' : '\"' << verify.message << '\" '}failed:#{e.to_s}.\n#{verify.timeout.nil? ? '' : ' using timeout ' + verify.timeout.to_s}.;#{sut.id.to_s+';sut'};{};verify_always;" << verify.expected.to_s
-
-              end
-
+							if @rcv_raise_errors=='true' || @reporter_attached=='false'
+								raise MobyBase::ContinuousVerificationError.new(
+									"Verification failed as an exception was thrown when the verification block was executed. %s\nDetails: %s\nNested exception:\n%s" % [ verify.source, ( verify.message || "none" ), e.inspect ]
+								)
+							elsif @reporter_attached=='true' && @rcv_raise_errors=='false'
+								TDriverReportAPI::tdriver_report_set_test_case_status('failed') if @rcv_fail_test_case=='true'
+								if @rvc_capture_screen=='true'
+								  TDriverReportAPI::tdriver_capture_state
+								else
+								  TDriverReportAPI::tdriver_capture_state(false)
+								end
+								TDriverReportAPI::tdriver_report_log("Verification failed as an exception was thrown when the verification block was executed. %s\nDetails: %s\nNested exception:\n%s" % [ verify.source, ( verify.message || "none" ), e.inspect ])
+								TDriverReportAPI::tdriver_report_log("<hr />")
+								MobyUtil::Logger.instance.enabled = logging_enabled
+								MobyUtil::Logger.instance.log "behaviour" , "FAIL;Verification #{verify.message.nil? ? '' : '\"' << verify.message << '\" '}failed:#{e.to_s}.\n#{verify.timeout.nil? ? '' : ' using timeout ' + verify.timeout.to_s}.;#{sut.id.to_s+';sut'};{};verify_always;" << verify.expected.to_s
+							end
 						end
-
+						
 						unless result == verify.expected
-              if @rcv_raise_errors=='true' || @reporter_attached=='false'
-                raise MobyBase::ContinuousVerificationError.new(
 
-                  "Verification failed. %s\nDetails: %s\nThe block did not return %s. It returned: %s" % [ verify.source, ( verify.message || "none" ), verify.expected.inspect, result.inspect ]
-
-                )
-              elsif @reporter_attached=='true' && @rcv_raise_errors=='false'
-                TDriverReportAPI::tdriver_report_set_test_case_status('failed') if @rcv_fail_test_case=='true'
-                if @rvc_capture_screen=='true'
-                  TDriverReportAPI::tdriver_capture_state
-                else
-                  TDriverReportAPI::tdriver_capture_state(false)
-                end
-                
-                TDriverReportAPI::tdriver_report_log("Verification failed. %s\nDetails: %s\nThe block did not return %s. It returned: %s " % [ verify.source, ( verify.message || "none" ), verify.expected.inspect, result.inspect])
-                TDriverReportAPI::tdriver_report_log("<hr />")
-
-                MobyUtil::Logger.instance.enabled = logging_enabled
-
-						    MobyUtil::Logger.instance.log "behaviour" , "FAIL;Verification #{verify.message.nil? ? '' : '\"' << verify.message << '\" '}failed:#{e.to_s}.\n#{verify.timeout.nil? ? '' : ' using timeout ' + verify.timeout.to_s}.;#{sut.id.to_s+';sut'};{};verify_always;" << verify.expected.to_s
-
-              end
-
+							if @rcv_raise_errors=='true' || @reporter_attached=='false'
+								raise MobyBase::ContinuousVerificationError.new(
+									"Verification failed. %s\nDetails: %s\nThe block did not return %s. It returned: %s" % [ verify.source, ( verify.message || "none" ), verify.expected.inspect, result.inspect ]
+								)
+							elsif @reporter_attached=='true' && @rcv_raise_errors=='false'
+								TDriverReportAPI::tdriver_report_set_test_case_status('failed') if @rcv_fail_test_case=='true'
+								if @rvc_capture_screen=='true'
+									TDriverReportAPI::tdriver_capture_state
+								else
+									TDriverReportAPI::tdriver_capture_state(false)
+								end
+								TDriverReportAPI::tdriver_report_log("Verification failed. %s\nDetails: %s\nThe block did not return %s. It returned: %s " % [ verify.source, ( verify.message || "none" ), verify.expected.inspect, result.inspect])
+								TDriverReportAPI::tdriver_report_log("<hr />")
+								MobyUtil::Logger.instance.enabled = logging_enabled
+								MobyUtil::Logger.instance.log "behaviour" , "FAIL;Verification #{verify.message.nil? ? '' : '\"' << verify.message << '\" '}failed:#{e.to_s}.\n#{verify.timeout.nil? ? '' : ' using timeout ' + verify.timeout.to_s}.;#{sut.id.to_s+';sut'};{};verify_always;" << verify.expected.to_s
+							end
 						end
 
 
