@@ -81,7 +81,7 @@ begin
     rdoc.install_generator( 'TDriver', File.expand_path( File.join( File.dirname( __FILE__ ), 'lib/tdriver_generator.rb' ) ) )
 
     #rdoc.document( ['--inline-source', '--quiet', '--fmt', 'tdriver'] + ARGV )
-    rdoc.document( ['--inline-source', '--fmt', 'tdriver'] + ARGV )
+    rdoc.document( ['--inline-source', '--op', 'output', '--fmt', 'tdriver'] + ARGV )
 
   }
 
