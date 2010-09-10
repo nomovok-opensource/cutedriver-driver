@@ -1,0 +1,3 @@
+#!/usr/bin/env sh
+rm -rf output
+ruby generate.rb example/flick-example.rb
