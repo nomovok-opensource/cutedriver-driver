@@ -17,11 +17,6 @@
 ## 
 ############################################################################
 
-$scenarios = 0
-$templates = {} unless defined?( $templates )
-
-$scenario_files = {}
-
 module Generators
 
   abort("") unless defined?( RDoc )
@@ -34,7 +29,23 @@ module Generators
 
     end
 
+    def load_templates
+
+      Dir.glob( File.join( File.dirname( File.expand_path( __FILE__ ) ), '..', 'templates', '*.template' ) ).each{ | file |
+
+        name = File.basename( file ).gsub( '.template', '' )
+
+        @templates[ name.to_sym ] = open( file, 'r' ).read
+
+      }
+
+    end
+
     def initialize( options )
+
+      @templates = {}
+
+      load_templates
 
       @options = options
 
