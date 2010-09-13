@@ -82,7 +82,7 @@ module MobyUtil
 		    elsif db_type == DB_TYPE_SQLITE
 				
 				while ( row = query_result.next ) 
-					result << row
+					result << row[0]
 				end
 		    end
 			return result

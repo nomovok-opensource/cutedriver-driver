@@ -662,7 +662,13 @@ module MobyBehaviour
 			plurality,
 			lengthvariant
 		)
-		translation.gsub!(/%Ln/){|s| numerus} unless numerus.nil?
+		if translation.kind_of? String and !numerus.nil?
+			translation.gsub!(/%Ln/){|s| numerus} 
+		elsif translation.kind_of? Array and !numerus.nil?
+			translation.each do |trans|
+				trans.gsub!(/%Ln/){|s| numerus}
+			end
+		end
 		return translation
 	end
 
