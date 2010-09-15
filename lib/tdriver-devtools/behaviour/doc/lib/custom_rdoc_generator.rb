@@ -104,11 +104,11 @@ module Generators
 
       methods.each{ | method | 
 
-        scenarios = process_method( method ) 
+        results << process_method( method ) 
 
       }
 
-      results
+      Hash[ results ]
 
     end
 
@@ -317,9 +317,13 @@ module Generators
 
       results = []
 
+      method_header = nil
+
       if ( method.visibility == :public && @module_path.first =~ /MobyBehaviour/ )
 
         @current_method = method
+
+        p method.name
 
         method_header = process_comment( method.comment )
 
@@ -362,12 +366,13 @@ module Generators
 
 
         # do something
+        [ method.name, method_header ]
 
       else
 
+        nil
+    
       end
-
-      results
 
     end
 
@@ -387,6 +392,10 @@ module Generators
       results = []
 
       attributes.each{ | attribute | 
+
+        p attribute.comment
+
+        #p attribute.methods.sort
 
          # keksi tapa miten saadaan attribuuttien getteri ja setteri dokumentoitua implemenaatioon
 
@@ -468,6 +477,13 @@ module Generators
 
     end
 
+    def xx( header, *features )
+    
+      p header
+      p features
+    
+    end
+
     def process_module( _module )
 
       @already_processed_files << _module.full_name
@@ -487,12 +503,12 @@ module Generators
         # process attributes
         attributes = process_attributes( _module.attributes )
 
+        xx( module_header, methods, attributes )
+
       end
 
       # process if any child modules 
       process_modules( _module.modules ) unless _module.modules.empty?
-
-      
 
     end
 
