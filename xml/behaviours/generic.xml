@@ -100,6 +100,11 @@
 				<example>get_application_id</example>
 			</method>
 
+                        <method name="get_application">
+				<description>Function for finding out the application for this test ojbect</description>
+				<example>get_application</example>
+			</method>
+
 			<method name="set_application_id">
 				<description>Test object set_application_id</description>
 				<example>set_application_id</example>
