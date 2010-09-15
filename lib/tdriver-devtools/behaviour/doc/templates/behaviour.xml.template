@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<behaviours plugin="$REQUIRED_PLUGIN">
+
+  <behaviour name="$BEHAVIOUR_NAME" object_type="$OBJECT_TYPE" sut_type="$SUT_TYPE" input_type="$INPUT_TYPE" version="$VERSION">
+
+    <module name="$MODULE_NAME" />
+
+    <methods>
+    $BEHAVIOUR_METHODS
+    </methods>
+
+  </behaviour>
+
+</behaviours>
