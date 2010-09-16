@@ -1,7 +1,9 @@
 
           <argument name="$ARGUMENT_NAME">
-            <types>
-              $METHOD_ARGUMENT_TYPES
-            </types>
-          </argument>
 
+            <types>
+              $ARGUMENT_TYPES
+            </types>
+
+            $METHOD_DEFAULT_VALUE
+          </argument>

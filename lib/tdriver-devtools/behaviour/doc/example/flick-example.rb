@@ -47,20 +47,20 @@ module MobyBehaviour
     #include MobyBehaviour::QT::Behaviour
       
     # comment for :x
-    attr_accessor :x
+    #attr_accessor :x
 
     # comment for :y
-    attr_reader :y
+    #attr_reader :y
 
     # comment for :z
-    attr_writer :z
+    #attr_writer :z
 
-    def y
+    #def y
     
-    end
+    #end
 
-    def x=(value)
-    end
+    #def x=(value)
+    #end
  
     # == description
     # Cause a flick operation on the screen. 
@@ -125,6 +125,18 @@ module MobyBehaviour
         nil
       end
 
+    # == description
+    # Cause a flick operation on the screen. 
+    #
+    # == returns
+    # String
+    #  description: result string
+    #  example: "result"
+    #def example2
+
+    #  "result"
+    
+    #end
 
     private
 

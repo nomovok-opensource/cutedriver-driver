@@ -35,7 +35,7 @@ module Generators
 
         name = File.basename( file ).gsub( '.template', '' )
 
-        @templates[ name.to_sym ] = open( file, 'r' ).read
+        @templates[ name ] = open( file, 'r' ).read
 
       }
 
@@ -397,7 +397,7 @@ module Generators
 
         #p attribute.methods.sort
 
-         # keksi tapa miten saadaan attribuuttien getteri ja setteri dokumentoitua implemenaatioon
+         # TODO: keksi tapa miten saadaan attribuuttien getteri ja setteri dokumentoitua implemenaatioon
 
       }
 
@@ -477,10 +477,193 @@ module Generators
 
     end
 
-    def xx( header, *features )
+    def apply_macros!( source, macros )
+        
+      macros.each_pair{ | key, value |
+                  
+        source.gsub!( /(\$#{ key })\b/, value || "" )
+      
+      }
+      
+      source
     
-      p header
-      p features
+    end
+
+    def xx( header, *features )
+
+      puts "", "", ""
+
+      
+
+
+      # collect method and attribute templates
+      methods = features.collect{ | feature_set |
+      
+        feature_set.collect{ | feature |
+        
+          #method = @templates["behaviour.xml.method"].clone
+          
+          #argument = @templates["behaviour.xml.argument"].clone
+          
+          exceptions = ""
+
+          #p feature.last[:arguments] || {}
+          # TODO: tarkista että onko argument optional vai ei, ja jos optional, niin mikä on default arvo
+          # TODO: tarkista että onko kaikki argumentit dokumentoitu
+          
+          # generate arguments xml
+          arguments = ( feature.last[:arguments] || {} ).collect{ | arg |
+                                     
+            # generate argument types template
+            arg.collect{ | argument |
+                        
+             types_xml = argument.last.collect{ | type |
+
+               apply_macros!( @templates["behaviour.xml.argument_type"].clone, {
+                
+                  "ARGUMENT_TYPE" => type.first,
+                  "ARGUMENT_DESCRIPTION" => type.last["description"],
+                  "ARGUMENT_EXAMPLE" => type.last["example"],
+               
+                }
+               )
+             
+             }.join
+             
+             # apply types to arguments template
+             apply_macros!( @templates["behaviour.xml.argument"].clone, {
+                "ARGUMENT_NAME" => argument.first,
+                "ARGUMENT_TYPES" => types_xml               
+              }
+             )
+            
+            }.join
+          
+          }.join
+                               
+          # generate return value types template
+          returns = feature.last[ :returns ].collect{ | return_types |
+          
+            return_types.collect{ | returns |
+            
+               # apply types to arguments template
+               apply_macros!( @templates["behaviour.xml.returns"].clone, {
+                  "RETURN_VALUE_TYPE" => returns.first,
+                  "RETURN_VALUE_DESCRIPTION" => returns.last["description"],
+                  "RETURN_VALUE_EXAMPLE" => returns.last["example"],
+                }
+               )
+              
+            }.join
+         
+          }.join
+          
+          # generate exceptions template
+          exceptions = feature.last[ :exceptions ].collect{ | exceptions |
+          
+            exceptions.collect{ | exception |
+            
+               # apply types to arguments template
+               apply_macros!( @templates["behaviour.xml.exception"].clone, {
+                  "EXCEPTION_NAME" => exception.first,
+                  "EXCEPTION_DESCRIPTION" => exception.last["description"]
+                }
+               )
+              
+            }.join
+         
+          }.join
+                                        
+          # generate method template            
+          apply_macros!( @templates["behaviour.xml.method"].clone, { 
+            "METHOD_NAME" => feature.first,
+            "METHOD_DESCRIPTION" => feature.last[:description],
+            "METHOD_ARGUMENTS" => arguments,
+            "METHOD_RETURNS" => returns,
+            "METHOD_EXCEPTIONS" => exceptions,
+            "METHOD_INFO" => "FOOTER"
+           } 
+          )
+          
+=begin
+
+          <argument name="$ARGUMENT_NAME">
+            <types>
+              $METHOD_ARGUMENT_TYPES
+            </types>
+          </argument>
+
+
+=end
+          
+                 
+          #p feature
+        
+        }.join
+      
+      }.join
+
+      # apply header
+      puts apply_macros!( @templates["behaviour.xml"].clone, { 
+        "REQUIRED_PLUGIN" => header[:requires],
+        "BEHAVIOUR_NAME" => header[:behaviour],
+        "BEHAVIOUR_METHODS" => methods,
+        "OBJECT_TYPE" => header[:objects],
+        "SUT_TYPE" => header[:sut_type],
+        "INPUT_TYPE" => header[:input_type],
+        "VERSION" => header[:sut_version],
+        "MODULE_NAME" => @module_path.join("::")
+        } 
+      ) #.keys
+
+
+=begin
+
+      <method name="$METHOD_NAME">
+
+        <description>$METHOD_DESCRIPTION</description>
+        <example>$METHOD_EXAMPLE</example>
+        
+        <arguments>
+        $METHOD_ARGUMENTS
+        </arguments>
+
+        <exceptions>
+        $METHOD_EXCEPTIONS
+        </exceptions>
+                
+        <footer>
+        $METHOD_INFO
+        </footer>
+
+      </method>
+
+["flick", {:arguments=>[{"direction"=>{"Integer"=>{"example"=>"10", "description"=>"Example argument1"}, "Hash"=>{"example"=>"{ :optional_1 => \"value_1\", :optional_2 => \"value_2\" }", "description"=>"Example argument 1 type 2"}}}, {"button"=>{"String"=>{"example"=>"\"Hello\"", "description"=>"which button to use"}}}, {"optional_params"=>{"String"=>{"example"=>"{:a => 1, :b => 2}", "description"=>"optinal parameters for blaa blaa blaa"}}}], :description=>"Cause a flick operation on the screen.", :returns=>[{"String"=>{"example"=>"\"World\"", "description"=>"Return value type"}}], :exceptions=>[{"RuntimeError"=>{"description"=>"example exception"}}, {"ArgumentError"=>{"description"=>"example exception"}}], :footer=>"See method X, table at Y"}]
+
+
+<?xml version="1.0" encoding="UTF-8"?>
+<behaviours plugin="$REQUIRED_PLUGIN">
+
+  <behaviour name="$BEHAVIOUR_NAME" object_type="$OBJECT_TYPE" sut_type="$SUT_TYPE" input_type="$INPUT_TYPE" version="$VERSION">
+
+    <module name="$MODULE_NAME" />
+
+    <methods>
+    $BEHAVIOUR_METHODS
+    </methods>
+
+  </behaviour>
+
+</behaviours>
+
+{:behaviour=>"QtExampleGestureBehaviour", :input_type=>"touch", :requires=>"testability-driver-sut-qt-plugin", :description=>"This module contains demonstration implementation containing tags for documentation generation using gesture as an example", :objects=>"*;sut", :sut_type=>"qt", :sut_version=>"*"}
+
+=end
+
+
+      #p features
+    
+      exit
     
     end
 

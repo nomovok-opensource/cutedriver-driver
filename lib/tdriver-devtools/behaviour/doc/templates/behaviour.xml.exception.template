@@ -2,4 +2,3 @@
           <exception name="$EXCEPTION_NAME">
             <description>$EXCEPTION_DESCRIPTION</description>
           </exception>
-

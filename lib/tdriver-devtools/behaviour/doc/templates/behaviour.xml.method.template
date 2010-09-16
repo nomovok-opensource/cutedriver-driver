@@ -2,11 +2,14 @@
       <method name="$METHOD_NAME">
 
         <description>$METHOD_DESCRIPTION</description>
-        <example>$METHOD_EXAMPLE</example>
         
         <arguments>
         $METHOD_ARGUMENTS
         </arguments>
+
+        <returns>
+        $METHOD_RETURNS
+        </returns>
 
         <exceptions>
         $METHOD_EXCEPTIONS
