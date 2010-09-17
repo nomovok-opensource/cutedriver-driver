@@ -58,7 +58,7 @@ module MobyUtil
 
 			# Return always the first column of the row
 			Kernel::raise OperatorDataNotFoundError.new("No matches found for search string '#{ operator_data_lname }' in search column 'LogicalName' for opreator #{ operator }" ) if ( result.empty?)
-			return result[0][0] # array of rows! We want the first column of the first row
+			return result[0] # array of rows! We want the first column of the first row
 			
 		end
 
