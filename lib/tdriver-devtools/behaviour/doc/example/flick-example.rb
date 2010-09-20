@@ -70,20 +70,24 @@ module MobyBehaviour
     #  Integer
     #   description: Example argument1
     #   example: 10
+    #   default: 41849
     #  Hash
     #   description:
     #    Example argument 1 type 2
     #   example: { :optional_1 => "value_1", :optional_2 => "value_2" }
+    #   default: xsaxsa
     #
     # button
     #  String
     #   description: which button to use
     #   example: "Hello"
+    #   default: :Left
     #
     # optional_params
     #  String
     #   description: optinal parameters for blaa blaa blaa
     #   example: {:a => 1, :b => 2}
+    #   default: {}
     #
     # == returns
     # String

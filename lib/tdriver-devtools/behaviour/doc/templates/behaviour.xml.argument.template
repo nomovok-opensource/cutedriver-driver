@@ -1,9 +1,9 @@
 
-          <argument name="$ARGUMENT_NAME">
+          <argument name="$ARGUMENT_NAME" optional="$ARGUMENT_OPTIONAL">
 
             <types>
               $ARGUMENT_TYPES
             </types>
 
-            $METHOD_DEFAULT_VALUE
+            <default>$ARGUMENT_DEFAULT_VALUE</default>
           </argument>

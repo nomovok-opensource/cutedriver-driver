@@ -513,11 +513,25 @@ module Generators
           
           # generate arguments xml
           arguments = ( feature.last[:arguments] || {} ).collect{ | arg |
-                                     
+                        
+            
             # generate argument types template
             arg.collect{ | argument |
+
+             default_value_set = false 
+             default_value = nil
                         
              types_xml = argument.last.collect{ | type |
+
+               unless type.last["default"].nil?
+
+                 # show warning if default value for optional argument is already set
+                 warn( "Error: Default value for optional argument '%s' (%s) is already set! ('%s' --> '%s')" % [ argument.first, @module_path.join("::"), default_value, type.last["default"] ] ) if default_value_set == true
+
+                 default_value = type.last["default"]
+                 default_value_set = true
+
+               end
 
                apply_macros!( @templates["behaviour.xml.argument_type"].clone, {
                 
@@ -533,7 +547,9 @@ module Generators
              # apply types to arguments template
              apply_macros!( @templates["behaviour.xml.argument"].clone, {
                 "ARGUMENT_NAME" => argument.first,
-                "ARGUMENT_TYPES" => types_xml               
+                "ARGUMENT_TYPES" => types_xml,
+                "ARGUMENT_DEFAULT_VALUE" => default_value || "",
+                "ARGUMENT_OPTIONAL" => default_value_set.to_s
               }
              )
             
