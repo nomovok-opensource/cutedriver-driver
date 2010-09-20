@@ -70,12 +70,10 @@ module MobyBehaviour
     #  Integer
     #   description: Example argument1
     #   example: 10
-    #   default: 41849
     #  Hash
     #   description:
     #    Example argument 1 type 2
     #   example: { :optional_1 => "value_1", :optional_2 => "value_2" }
-    #   default: xsaxsa
     #
     # button
     #  String
@@ -101,7 +99,7 @@ module MobyBehaviour
     # ArgumentError
     #  description:  example exception
     #    
-    # == footer
+    # == info
     # See method X, table at Y
     #
     def flick( direction, button = :Left, optional_params = {} )

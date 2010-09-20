@@ -323,18 +323,12 @@ module Generators
 
         @current_method = method
 
-        p method.name
-
         method_header = process_comment( method.comment )
-
-        #p method_header      
 
         ## TODO: remember to verify that there are documentation for each argument!
         ## TODO: verify that there is a tag for visualizer example
 
         method_header = Hash[ method_header.collect{ | key, value |
-
-          p key
 
           if key == :arguments
 
@@ -358,11 +352,6 @@ module Generators
           [ key, value ]
 
         }]
-
-        p method_header
-
-
-        #p method.methods.sort
 
 
         # do something
@@ -393,11 +382,9 @@ module Generators
 
       attributes.each{ | attribute | 
 
-        p attribute.comment
+        p attibute.comment
 
-        #p attribute.methods.sort
-
-         # TODO: keksi tapa miten saadaan attribuuttien getteri ja setteri dokumentoitua implemenaatioon
+        # TODO: tapa miten saadaan attribuuttien getteri ja setteri dokumentoitua implemenaatioon
 
       }
 
@@ -410,8 +397,6 @@ module Generators
       header = {}
 
       current_section = nil
-
-      #p comment
 
       comment.each_line{ | line |
 
@@ -491,24 +476,14 @@ module Generators
 
     def xx( header, *features )
 
-      puts "", "", ""
-
-      
-
-
       # collect method and attribute templates
       methods = features.collect{ | feature_set |
       
         feature_set.collect{ | feature |
-        
-          #method = @templates["behaviour.xml.method"].clone
-          
-          #argument = @templates["behaviour.xml.argument"].clone
-          
+                  
           exceptions = ""
 
-          #p feature.last[:arguments] || {}
-          # TODO: tarkista että onko argument optional vai ei, ja jos optional, niin mikä on default arvo
+          # TODO: tarkista lähdekoodista että onko argument optional vai ei
           # TODO: tarkista että onko kaikki argumentit dokumentoitu
           
           # generate arguments xml
@@ -597,23 +572,9 @@ module Generators
             "METHOD_ARGUMENTS" => arguments,
             "METHOD_RETURNS" => returns,
             "METHOD_EXCEPTIONS" => exceptions,
-            "METHOD_INFO" => "FOOTER"
+            "METHOD_INFO" => feature.last[:info]
            } 
           )
-          
-=begin
-
-          <argument name="$ARGUMENT_NAME">
-            <types>
-              $METHOD_ARGUMENT_TYPES
-            </types>
-          </argument>
-
-
-=end
-          
-                 
-          #p feature
         
         }.join
       
@@ -630,56 +591,7 @@ module Generators
         "VERSION" => header[:sut_version],
         "MODULE_NAME" => @module_path.join("::")
         } 
-      ) #.keys
-
-
-=begin
-
-      <method name="$METHOD_NAME">
-
-        <description>$METHOD_DESCRIPTION</description>
-        <example>$METHOD_EXAMPLE</example>
-        
-        <arguments>
-        $METHOD_ARGUMENTS
-        </arguments>
-
-        <exceptions>
-        $METHOD_EXCEPTIONS
-        </exceptions>
-                
-        <footer>
-        $METHOD_INFO
-        </footer>
-
-      </method>
-
-["flick", {:arguments=>[{"direction"=>{"Integer"=>{"example"=>"10", "description"=>"Example argument1"}, "Hash"=>{"example"=>"{ :optional_1 => \"value_1\", :optional_2 => \"value_2\" }", "description"=>"Example argument 1 type 2"}}}, {"button"=>{"String"=>{"example"=>"\"Hello\"", "description"=>"which button to use"}}}, {"optional_params"=>{"String"=>{"example"=>"{:a => 1, :b => 2}", "description"=>"optinal parameters for blaa blaa blaa"}}}], :description=>"Cause a flick operation on the screen.", :returns=>[{"String"=>{"example"=>"\"World\"", "description"=>"Return value type"}}], :exceptions=>[{"RuntimeError"=>{"description"=>"example exception"}}, {"ArgumentError"=>{"description"=>"example exception"}}], :footer=>"See method X, table at Y"}]
-
-
-<?xml version="1.0" encoding="UTF-8"?>
-<behaviours plugin="$REQUIRED_PLUGIN">
-
-  <behaviour name="$BEHAVIOUR_NAME" object_type="$OBJECT_TYPE" sut_type="$SUT_TYPE" input_type="$INPUT_TYPE" version="$VERSION">
-
-    <module name="$MODULE_NAME" />
-
-    <methods>
-    $BEHAVIOUR_METHODS
-    </methods>
-
-  </behaviour>
-
-</behaviours>
-
-{:behaviour=>"QtExampleGestureBehaviour", :input_type=>"touch", :requires=>"testability-driver-sut-qt-plugin", :description=>"This module contains demonstration implementation containing tags for documentation generation using gesture as an example", :objects=>"*;sut", :sut_type=>"qt", :sut_version=>"*"}
-
-=end
-
-
-      #p features
-    
-      exit
+      )    
     
     end
 
@@ -687,14 +599,9 @@ module Generators
 
       @already_processed_files << _module.full_name
 
-      #@current_module = { :object => _module, :scenarios => [] }
-      #p _module.methods.sort
-
       module_header = process_comment( _module.comment )
 
       unless module_header.empty?
-
-        p module_header
 
         # process methods
         methods = process_methods( _module.method_list )

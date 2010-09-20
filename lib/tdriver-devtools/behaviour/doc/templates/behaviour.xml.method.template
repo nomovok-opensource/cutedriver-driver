@@ -15,8 +15,8 @@
         $METHOD_EXCEPTIONS
         </exceptions>
                 
-        <footer>
+        <info>
         $METHOD_INFO
-        </footer>
+        </info>
 
       </method>

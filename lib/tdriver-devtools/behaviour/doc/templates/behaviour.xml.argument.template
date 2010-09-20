@@ -6,4 +6,5 @@
             </types>
 
             <default>$ARGUMENT_DEFAULT_VALUE</default>
+
           </argument>
