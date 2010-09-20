@@ -89,11 +89,190 @@ EXAMPLE
 #
 # ArgumentError
 #  description:  example exception #2
+def my_method
+  # ...
+end
 EXAMPLE
+
+        when 'behaviour_description'
+<<-EXAMPLE
+# == description
+# This module contains demonstration implementation containing tags for documentation generation using gesture as an example
+module MyBehaviour
+
+end
+EXAMPLE
+
+        when 'behaviour_name'
+<<-EXAMPLE
+# == behaviour
+# MyPlatformSpecificBehaviour
+module MyBehaviour
+EXAMPLE
+
+        when 'behaviour_object_types'
+<<-EXAMPLE
+# == objects
+# *
+module MyBehaviour
+
+  # apply behaviour to any test object, except SUT
+
+end    
+
+or
+
+# == objects
+# sut
+module MyBehaviour
+
+  # apply behaviour only to SUT object
+
+end    
+
+# == objects
+# *;sut
+module MyBehaviour
+
+  # apply behaviour to any test object, including SUT
+
+end    
+
+or
+
+# == objects
+# MyObject
+module MyBehaviour
+
+  # apply behaviour only to objects which type is 'MyObject'
+
+end    
+
+or 
+
+# == objects
+# MyObject;OtherObject
+module MyBehaviour
+
+  # apply behaviour only to objects which type is 'MyObject' or 'OtherObject'
+  # if more object types needed use ';' as separator.
+
+end
+
+
+EXAMPLE
+
+        when 'behaviour_version'
+<<-EXAMPLE
+# == sut_version
+# *
+module MyBehaviour
+
+  # any sut version 
+
+end
+
+or 
+
+# == sut_version
+# 1.0
+module MyBehaviour
+
+  # apply behaviour only to sut with version 1.0
+
+end
+EXAMPLE
+
+        when 'behaviour_input_type'
+<<-EXAMPLE
+# == input_type
+# *
+module MyBehaviour
+
+  # any input type 
+
+end
+
+or 
+
+# == input_type
+# touch
+module MyBehaviour
+
+  # apply behaviour only to sut which input type is 'touch'
+
+end
+
+or
+
+# == input_type
+# touch;key
+module MyBehaviour
+
+  # apply behaviour only to sut which input type is 'touch' or 'key'
+  # if more types needed use ';' as separator.
+
+end
+
+EXAMPLE
+
+        when 'behaviour_sut_type'
+<<-EXAMPLE
+# == sut_type
+# *
+module MyBehaviour
+
+  # any input type 
+
+end
+
+or 
+
+# == sut_type
+# XX
+module MyBehaviour
+
+  # apply behaviour only to sut which sut type is 'XX'
+
+end
+
+or
+
+# == sut_type
+# XX;YY
+module MyBehaviour
+
+  # apply behaviour only to sut which sut type is 'XX' or 'YY'
+  # if more types needed use ';' as separator.
+
+end
+EXAMPLE
+
+        when 'behaviour_requires'
+<<-EXAMPLE
+# == requires
+# *
+module MyBehaviour
+
+  # when no plugins required (TDriver internal/generic SUT behaviour)
+
+end
+
+or
+
+# == requires
+# testability-driver-my-plugin
+module MyBehaviour
+
+  # when plugin 'testability-driver-my-plugin' is required 
+
+end
+EXAMPLE
+
 
       else
 
-        'unknown help topic'
+        'Unknown help topic "%s"' % topic
 
       end
 
@@ -158,7 +337,7 @@ EXAMPLE
 
     def process_methods( methods )
 
-      @processing = :methods
+      @processing = "method"
 
       results = []
 
@@ -361,8 +540,6 @@ EXAMPLE
             # store section_content to current_section
             result[ argument_index ][ current_argument_type ][ current_section ] << section_content
 
-            #puts "%s#%s: %s" % [ current_argument_type, current_section, section_content ]
-
         end
 
 
@@ -436,7 +613,7 @@ EXAMPLE
               method_name << "="
             when "RW"
               type = "accessor"
-              method_name << ",#{ method_name }="
+              method_name << ";#{ method_name }="
 
           else
 
@@ -578,18 +755,18 @@ EXAMPLE
 
     def raise_error( text, topic = nil )
 
-      type = ( @processing == :methods ) ? "method" : "attribute"
+      type = ( @processing == "method" ) ? "method" : "attribute"
 
       text.gsub!( '$TYPE', type )
 
       text.gsub!( '$MODULE', @current_module.full_name )
 
       text = "=========================================================================================================\n" <<
-        "File: #{ @current_file.file_absolute_name }\n" << text << "\nExample:\n"
+        "File: #{ @current_file.file_absolute_name }\n" << text << "\n\nExample:\n\n"
 
       text << help( topic ) unless topic.nil?
 
-      abort( text << "\n" )
+      warn( text << "\n" )
 
     end
 
@@ -602,6 +779,7 @@ EXAMPLE
         raise_error("Error: $TYPE '#{ feature.first }' ($MODULE) doesn't have return value type(s) defined", 'returns' )
 
       end
+
 
       # generate return value types template
       returns = feature.last[ :returns ].collect{ | return_types |
@@ -749,17 +927,17 @@ EXAMPLE
       
       }.join
 
-      #apply_macros!( @templates["behaviour.xml.method.arguments"].clone, {
+      apply_macros!( @templates["behaviour.xml.method.arguments"].clone, {
 
-      #    "METHOD_ARGUMENTS" => arguments
+          "METHOD_ARGUMENTS" => arguments
 
-      #  }
-      #)
+        }
+      )
 
 
     end
 
-    def generate_behaviour( header, *features )
+    def generate_methods_element( header, features )
 
       # collect method and attribute templates
       methods = features.collect{ | feature_set |
@@ -767,9 +945,7 @@ EXAMPLE
         feature_set.collect{ | feature |
                   
           @processing = feature.last[:__type]
-
-          exceptions = ""
-
+            
           # TODO: tarkista lähdekoodista että onko argument optional vai ei
           # TODO: tarkista että onko kaikki argumentit dokumentoitu
           
@@ -781,7 +957,7 @@ EXAMPLE
                     
           if feature.last[:description].nil?
 
-           raise_error("Warning: Argument description for '%s' ($MODULE) is empty." % [ feature.first ])
+           raise_error("Warning: $TYPE description for '%s' ($MODULE) is empty." % [ feature.first ])
 
           end
                               
@@ -796,10 +972,64 @@ EXAMPLE
             "METHOD_INFO" => feature.last[:info]
            } 
           )
-        
+
         }.join
       
       }.join
+
+
+    end
+
+    def generate_behaviour_element( header, methods )
+
+      # verify that behaviour description is defined
+      unless header.has_key?(:description)
+
+         raise_error("Warning: Behaviour description for $MODULE is empty.", 'behaviour_description' )
+
+      end
+
+      # verify that behaviour name is defined
+      unless header.has_key?(:behaviour)
+
+         raise_error("Warning: Behaviour name for $MODULE is not defined.", 'behaviour_name' )
+
+      end
+
+      # verify that behaviour object type(s) is defined
+      unless header.has_key?(:objects)
+
+         raise_error("Warning: Behaviour object type(s) for $MODULE is not defined.", 'behaviour_object_types' )
+
+      end
+
+      # verify that behaviour sut type(s) is defined
+      unless header.has_key?(:sut_type)
+
+         raise_error("Warning: Behaviour SUT type for $MODULE is not defined.", 'behaviour_sut_type' )
+
+      end
+
+      # verify that behaviour input type(s) is defined
+      unless header.has_key?(:input_type)
+
+         raise_error("Warning: Behaviour input type for $MODULE is not defined.", 'behaviour_input_type' )
+
+      end
+
+      # verify that behaviour sut version(s) is defined
+      unless header.has_key?(:sut_version)
+
+         raise_error("Warning: Behaviour SUT version for $MODULE is not defined.", 'behaviour_version' )
+
+      end
+
+      # verify that behaviour sut version(s) is defined
+      unless header.has_key?(:requires)
+
+         raise_error("Warning: required plugin name is not defined for $MODULE.", 'behaviour_requires' )
+
+      end
 
       # apply header
       text = apply_macros!( @templates["behaviour.xml"].clone, { 
@@ -820,6 +1050,14 @@ EXAMPLE
       text.gsub!( /^(\s)*$/, "" )
 
       text
+
+    end
+
+    def generate_behaviour( header, *features )
+
+      methods = generate_methods_element( header, features )
+
+      generate_behaviour_element( header, methods )
 
     end
 

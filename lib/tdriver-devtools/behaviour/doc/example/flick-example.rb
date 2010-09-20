@@ -28,8 +28,7 @@ module MobyBehaviour
     # QtExampleGestureBehaviour
     #
     # == requires
-    # testability-driver-sut-qt-plugin
-    #
+    # *
     # == input_type
     # touch
     #
