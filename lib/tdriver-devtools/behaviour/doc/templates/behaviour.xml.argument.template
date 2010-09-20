@@ -1,10 +1,7 @@
 
-          <argument name="$ARGUMENT_NAME" optional="$ARGUMENT_OPTIONAL">
+        <argument name="$ARGUMENT_NAME" optional="$ARGUMENT_OPTIONAL">
 
-            <types>
-              $ARGUMENT_TYPES
-            </types>
+$ARGUMENT_TYPES
 
-            <default>$ARGUMENT_DEFAULT_VALUE</default>
-
-          </argument>
+$ARGUMENT_DEFAULT_VALUE
+        </argument>

@@ -1,22 +1,10 @@
 
-      <method name="$METHOD_NAME">
+      <method name="$METHOD_NAME" type="$METHOD_TYPE">
 
         <description>$METHOD_DESCRIPTION</description>
-        
-        <arguments>
-        $METHOD_ARGUMENTS
-        </arguments>
-
-        <returns>
-        $METHOD_RETURNS
-        </returns>
-
-        <exceptions>
-        $METHOD_EXCEPTIONS
-        </exceptions>
-                
-        <info>
-        $METHOD_INFO
-        </info>
+$METHOD_ARGUMENTS
+$METHOD_RETURNS
+$METHOD_EXCEPTIONS
+        <info>$METHOD_INFO</info>
 
       </method>

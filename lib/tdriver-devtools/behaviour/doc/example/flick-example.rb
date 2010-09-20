@@ -53,7 +53,20 @@ module MobyBehaviour
     #attr_reader :y
 
     # comment for :z
-    #attr_writer :z
+
+    # == description
+    # example desc
+    #
+    # == returns
+    # String
+    #  description: Return value type
+    #  example: "World"
+    # == arguments
+    # value
+    #  Integer
+    #   description: Example argument1
+    #   example: 10
+    attr_accessor :z
 
     #def y
     

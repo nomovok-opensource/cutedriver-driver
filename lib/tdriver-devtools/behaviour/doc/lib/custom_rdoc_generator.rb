@@ -23,24 +23,6 @@ module Generators
 
 	class TDriverFeatureTestGenerator
 
-    def self.for( options )
-
-      new( options )
-
-    end
-
-    def load_templates
-
-      Dir.glob( File.join( File.dirname( File.expand_path( __FILE__ ) ), '..', 'templates', '*.template' ) ).each{ | file |
-
-        name = File.basename( file ).gsub( '.template', '' )
-
-        @templates[ name ] = open( file, 'r' ).read
-
-      }
-
-    end
-
     def initialize( options )
 
       @templates = {}
@@ -56,6 +38,82 @@ module Generators
       @current_module = nil
 
       @output = { :files => [], :classes => [], :modules => [], :attributes => [], :methods => [], :aliases => [], :constants => [], :requires => [], :includes => []}
+
+      @errors = []
+
+    end
+   
+    def help( topic )
+
+      case topic
+
+        when 'returns'
+<<-EXAMPLE
+# == returns
+# String
+#  description: example description
+#  example: "string"
+# 
+def my_method( arguments )
+ return "string"
+end
+EXAMPLE
+
+        when 'arguments'
+<<-EXAMPLE
+# == arguments
+# arg1
+#  Integer
+#   description: first argument can integer
+#   example: 10
+#  String
+#   description: ... or string
+#   example: "Hello"
+#
+# arg2
+#  Array
+#   description: MyArray
+#   example: [1,2,3]
+#   default: []
+#
+def my_method( arg1, arg2 )
+  # ...
+end
+EXAMPLE
+
+        when 'exceptions'
+<<-EXAMPLE
+# == exceptions
+# RuntimeError
+#  description:  example exception #1
+#
+# ArgumentError
+#  description:  example exception #2
+EXAMPLE
+
+      else
+
+        'unknown help topic'
+
+      end
+
+    end
+
+    def self.for( options )
+
+      new( options )
+
+    end
+
+    def load_templates
+
+      Dir.glob( File.join( File.dirname( File.expand_path( __FILE__ ) ), '..', 'templates', '*.template' ) ).each{ | file |
+
+        name = File.basename( file ).gsub( '.template', '' )
+
+        @templates[ name ] = open( file, 'r' ).read
+
+      }
 
     end
 
@@ -100,11 +158,13 @@ module Generators
 
     def process_methods( methods )
 
+      @processing = :methods
+
       results = []
 
       methods.each{ | method | 
 
-        results << process_method( method ) 
+        results << process_method( method )
 
       }
 
@@ -323,6 +383,16 @@ module Generators
 
         @current_method = method
 
+ #       p method.methods.sort
+
+        #p method.name
+
+        #p method.section
+
+        #p method.param_seq unless method.class == RDoc::Attr
+
+#exit
+
         method_header = process_comment( method.comment )
 
         ## TODO: remember to verify that there are documentation for each argument!
@@ -353,9 +423,37 @@ module Generators
 
         }]
 
+        method_name = method.name
+
+        if method.kind_of?( RDoc::Attr )
+
+          case method.rw
+
+            when "R"
+              type = "reader"
+            when "W"
+              type = "writer"
+              method_name << "="
+            when "RW"
+              type = "accessor"
+              method_name << ",#{ method_name }="
+
+          else
+
+            raise_error( "Unknown attribute format for '#{ method.name }' ($MODULE). Expected 'R' (attr_reader), 'W' (attr_writer) or 'RW' (attr_accessor), got: '#{ method.rw }'" )
+
+          end
+
+          method_header.merge!( :__type => type )
+
+        else
+
+          method_header.merge!( :__type => "method" )
+
+        end
 
         # do something
-        [ method.name, method_header ]
+        [ method_name, method_header ]
 
       else
 
@@ -378,17 +476,21 @@ module Generators
 
     def process_attributes( attributes )
 
+      @processing = :attributes
+
       results = []
 
       attributes.each{ | attribute | 
 
-        p attibute.comment
+        #p attribute.comment
+
+        results << process_method( attribute )
 
         # TODO: tapa miten saadaan attribuuttien getteri ja setteri dokumentoitua implemenaatioon
 
       }
 
-      results
+      Hash[ results ]
 
     end
 
@@ -474,100 +576,219 @@ module Generators
     
     end
 
-    def xx( header, *features )
+    def raise_error( text, topic = nil )
+
+      type = ( @processing == :methods ) ? "method" : "attribute"
+
+      text.gsub!( '$TYPE', type )
+
+      text.gsub!( '$MODULE', @current_module.full_name )
+
+      text = "=========================================================================================================\n" <<
+        "File: #{ @current_file.file_absolute_name }\n" << text << "\nExample:\n"
+
+      text << help( topic ) unless topic.nil?
+
+      abort( text << "\n" )
+
+    end
+
+    def generate_return_values_element( header, feature )
+
+      return "" if ( [ 'writer' ].include?( feature.last[ :__type ] ) )
+
+      if feature.last[ :returns ].nil?
+
+        raise_error("Error: $TYPE '#{ feature.first }' ($MODULE) doesn't have return value type(s) defined", 'returns' )
+
+      end
+
+      # generate return value types template
+      returns = feature.last[ :returns ].collect{ | return_types |
+      
+        return_types.collect{ | returns |
+        
+           # apply types to arguments template
+           apply_macros!( @templates["behaviour.xml.returns"].clone, {
+              "RETURN_VALUE_TYPE" => returns.first,
+              "RETURN_VALUE_DESCRIPTION" => returns.last["description"],
+              "RETURN_VALUE_EXAMPLE" => returns.last["example"],
+            }
+           )
+          
+        }.join
+     
+      }.join
+
+      apply_macros!( @templates["behaviour.xml.method.returns"].clone, {
+
+          "METHOD_RETURNS" => returns
+
+        }
+      )
+      
+    end
+
+    def generate_exceptions_element( header, feature )
+
+      return "" if ( feature.last[:__type] != 'method' )
+
+      if feature.last[ :exceptions ].nil?
+
+        raise_error("Error: $TYPE '#{ feature.first }' ($MODULE) doesn't have exceptions(s) defined", 'exceptions' )
+
+      end
+
+      # generate exceptions template
+      exceptions = feature.last[ :exceptions ].collect{ | exceptions |
+      
+        exceptions.collect{ | exception |
+        
+           # apply types to exception template
+           apply_macros!( @templates["behaviour.xml.exception"].clone, {
+              "EXCEPTION_NAME" => exception.first,
+              "EXCEPTION_DESCRIPTION" => exception.last["description"]
+            }
+           )
+          
+        }.join
+     
+      }.join
+
+      apply_macros!( @templates["behaviour.xml.method.exceptions"].clone, {
+
+          "METHOD_EXCEPTIONS" => exceptions
+
+        }
+      )
+
+    end
+
+    def generate_arguments_element( header, feature )
+
+      return "" if ( feature.last[:__type] == 'reader' )
+
+      #return "" if ( @processing == :attributes && feature.last[:__type] == 'R' )
+
+      if feature.last[ :arguments ].nil?
+
+        note = ". Note that attribute writer/accessor also excepts variable as argument." if @processing == :attributes
+
+        raise_error("Error: $TYPE '#{ feature.first }' ($MODULE) doesn't have arguments(s) defined#{ note }", 'arguments' )
+
+      end
+
+      # generate arguments xml
+      arguments = ( feature.last[:arguments] || {} ).collect{ | arg |
+        
+        # generate argument types template
+        arg.collect{ | argument |
+
+         default_value_set = false 
+         default_value = nil
+                    
+         types_xml = argument.last.collect{ | type |
+
+           unless type.last["default"].nil?
+
+             # show warning if default value for optional argument is already set
+             raise_error( "Error: Default value for optional argument '%s' ($MODULE) is already set! ('%s' --> '%s')" % [ argument.first, default_value, type.last["default"] ] ) if default_value_set == true
+
+             default_value = type.last["default"]
+             default_value_set = true
+
+           end
+
+           if type.last["description"].nil?
+
+            raise_error("Warning: Argument description for '%s' ($MODULE) is empty." % [ argument.first ])
+
+           end
+
+           if type.last["example"].nil?
+
+            raise_error("Warning: Argument '%s' ($MODULE) example is empty." % [ argument.first ])
+
+           end
+
+           apply_macros!( @templates["behaviour.xml.argument_type"].clone, {
+            
+              "ARGUMENT_TYPE" => type.first,
+              "ARGUMENT_DESCRIPTION" => type.last["description"],
+              "ARGUMENT_EXAMPLE" => type.last["example"],
+           
+            }
+           )
+         
+         }.join
+         
+        if default_value_set
+
+          default_value = apply_macros!( @templates["behaviour.xml.argument.default"].clone, { 
+            "ARGUMENT_DEFAULT_VALUE" => default_value || ""
+            }
+          )
+
+        else
+
+          default_value = ""
+
+        end
+
+
+         # apply types to arguments template
+         apply_macros!( @templates["behaviour.xml.argument"].clone, {
+            "ARGUMENT_NAME" => argument.first,
+            "ARGUMENT_TYPES" => types_xml,
+            "ARGUMENT_DEFAULT_VALUE" => default_value,
+            "ARGUMENT_OPTIONAL" => default_value_set.to_s
+          }
+         )
+        
+        }.join
+      
+      }.join
+
+      #apply_macros!( @templates["behaviour.xml.method.arguments"].clone, {
+
+      #    "METHOD_ARGUMENTS" => arguments
+
+      #  }
+      #)
+
+
+    end
+
+    def generate_behaviour( header, *features )
 
       # collect method and attribute templates
       methods = features.collect{ | feature_set |
       
         feature_set.collect{ | feature |
                   
+          @processing = feature.last[:__type]
+
           exceptions = ""
 
           # TODO: tarkista lähdekoodista että onko argument optional vai ei
           # TODO: tarkista että onko kaikki argumentit dokumentoitu
           
-          # generate arguments xml
-          arguments = ( feature.last[:arguments] || {} ).collect{ | arg |
-                        
-            
-            # generate argument types template
-            arg.collect{ | argument |
+          arguments = generate_arguments_element( header, feature )
 
-             default_value_set = false 
-             default_value = nil
-                        
-             types_xml = argument.last.collect{ | type |
+          returns = generate_return_values_element( header, feature )
 
-               unless type.last["default"].nil?
+          exceptions = generate_exceptions_element( header, feature )
+                    
+          if feature.last[:description].nil?
 
-                 # show warning if default value for optional argument is already set
-                 warn( "Error: Default value for optional argument '%s' (%s) is already set! ('%s' --> '%s')" % [ argument.first, @module_path.join("::"), default_value, type.last["default"] ] ) if default_value_set == true
+           raise_error("Warning: Argument description for '%s' ($MODULE) is empty." % [ feature.first ])
 
-                 default_value = type.last["default"]
-                 default_value_set = true
-
-               end
-
-               apply_macros!( @templates["behaviour.xml.argument_type"].clone, {
-                
-                  "ARGUMENT_TYPE" => type.first,
-                  "ARGUMENT_DESCRIPTION" => type.last["description"],
-                  "ARGUMENT_EXAMPLE" => type.last["example"],
-               
-                }
-               )
-             
-             }.join
-             
-             # apply types to arguments template
-             apply_macros!( @templates["behaviour.xml.argument"].clone, {
-                "ARGUMENT_NAME" => argument.first,
-                "ARGUMENT_TYPES" => types_xml,
-                "ARGUMENT_DEFAULT_VALUE" => default_value || "",
-                "ARGUMENT_OPTIONAL" => default_value_set.to_s
-              }
-             )
-            
-            }.join
-          
-          }.join
-                               
-          # generate return value types template
-          returns = feature.last[ :returns ].collect{ | return_types |
-          
-            return_types.collect{ | returns |
-            
-               # apply types to arguments template
-               apply_macros!( @templates["behaviour.xml.returns"].clone, {
-                  "RETURN_VALUE_TYPE" => returns.first,
-                  "RETURN_VALUE_DESCRIPTION" => returns.last["description"],
-                  "RETURN_VALUE_EXAMPLE" => returns.last["example"],
-                }
-               )
-              
-            }.join
-         
-          }.join
-          
-          # generate exceptions template
-          exceptions = feature.last[ :exceptions ].collect{ | exceptions |
-          
-            exceptions.collect{ | exception |
-            
-               # apply types to arguments template
-               apply_macros!( @templates["behaviour.xml.exception"].clone, {
-                  "EXCEPTION_NAME" => exception.first,
-                  "EXCEPTION_DESCRIPTION" => exception.last["description"]
-                }
-               )
-              
-            }.join
-         
-          }.join
-                                        
+          end
+                              
           # generate method template            
           apply_macros!( @templates["behaviour.xml.method"].clone, { 
             "METHOD_NAME" => feature.first,
+            "METHOD_TYPE" => feature.last[:__type] || "unknown",
             "METHOD_DESCRIPTION" => feature.last[:description],
             "METHOD_ARGUMENTS" => arguments,
             "METHOD_RETURNS" => returns,
@@ -581,7 +802,7 @@ module Generators
       }.join
 
       # apply header
-      puts apply_macros!( @templates["behaviour.xml"].clone, { 
+      text = apply_macros!( @templates["behaviour.xml"].clone, { 
         "REQUIRED_PLUGIN" => header[:requires],
         "BEHAVIOUR_NAME" => header[:behaviour],
         "BEHAVIOUR_METHODS" => methods,
@@ -593,6 +814,13 @@ module Generators
         } 
       )    
     
+      # remove extra linefeeds
+      text.gsub!( /^[\n]+/, "\n" )
+
+      text.gsub!( /^(\s)*$/, "" )
+
+      text
+
     end
 
     def process_module( _module )
@@ -603,13 +831,31 @@ module Generators
 
       unless module_header.empty?
 
+        @current_module = _module
+
         # process methods
         methods = process_methods( _module.method_list )
 
         # process attributes
         attributes = process_attributes( _module.attributes )
 
-        xx( module_header, methods, attributes )
+        print "  ... %s" % module_header[:behaviour]
+
+        xml = generate_behaviour( module_header, methods, attributes ) 
+
+        xml_file_name = '%s.%s' % [ module_header[:behaviour], 'xml' ]
+
+        begin
+
+          open( xml_file_name, 'w'){ | file | file << xml }
+
+          puts ".xml"
+
+        rescue Exception => exception
+
+          warn("Warning: Error writing file %s (%s: %s)" % [ xml_file_name, exception.class, exception.message ] )
+
+        end
 
       end
 
@@ -621,3 +867,4 @@ module Generators
   end
 
 end
+
