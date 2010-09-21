@@ -43,6 +43,14 @@ module MobyBehaviour
     #
     module Gesture
 
+    attr_accessor(
+
+      :read,
+      :write,
+      :something
+
+    )
+
     #include MobyBehaviour::QT::Behaviour
       
     # comment for :x

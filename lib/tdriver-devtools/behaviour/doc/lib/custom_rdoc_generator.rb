@@ -47,6 +47,15 @@ module Generators
 
       case topic
 
+        when 'description'
+<<-EXAMPLE
+# == description
+# This method returns "String" as return value
+def my_method( arguments )
+ return "string"
+end
+EXAMPLE
+
         when 'returns'
 <<-EXAMPLE
 # == returns
@@ -81,6 +90,29 @@ def my_method( arg1, arg2 )
 end
 EXAMPLE
 
+        when 'attr_argument'
+<<-EXAMPLE
+# == arguments
+# value
+#  Integer
+#   description: first argument can integer
+#   example: 10
+attr_writer :my_attribute
+
+or
+
+# == arguments
+# value
+#  Integer
+#   description: first argument can integer
+#   example: 10
+#  String
+#   description: ... or string
+#   example: "Hello"
+attr_writer :my_attribute # ... when input value can be either Integer or String
+EXAMPLE
+
+
         when 'exceptions'
 <<-EXAMPLE
 # == exceptions
@@ -90,7 +122,9 @@ EXAMPLE
 # ArgumentError
 #  description:  example exception #2
 def my_method
+
   # ...
+
 end
 EXAMPLE
 
@@ -100,6 +134,8 @@ EXAMPLE
 # This module contains demonstration implementation containing tags for documentation generation using gesture as an example
 module MyBehaviour
 
+  # ...
+
 end
 EXAMPLE
 
@@ -108,6 +144,10 @@ EXAMPLE
 # == behaviour
 # MyPlatformSpecificBehaviour
 module MyBehaviour
+
+  # ...
+
+end
 EXAMPLE
 
         when 'behaviour_object_types'
@@ -677,6 +717,8 @@ EXAMPLE
 
       current_section = nil
 
+      return header if comment.nil? || comment.empty?
+
       comment.each_line{ | line |
 
         # remove '#' char from beginning of line
@@ -762,7 +804,7 @@ EXAMPLE
       text.gsub!( '$MODULE', @current_module.full_name )
 
       text = "=========================================================================================================\n" <<
-        "File: #{ @current_file.file_absolute_name }\n" << text << "\n\nExample:\n\n"
+        "File: #{ @module_in_files.join(", ") }\n" << text << "\n\nExample:\n\n"
 
       text << help( topic ) unless topic.nil?
 
@@ -774,12 +816,13 @@ EXAMPLE
 
       return "" if ( [ 'writer' ].include?( feature.last[ :__type ] ) )
 
+      return if feature.last[ :returns ].nil? || feature.last[ :returns ].empty?
+
       if feature.last[ :returns ].nil?
 
         raise_error("Error: $TYPE '#{ feature.first }' ($MODULE) doesn't have return value type(s) defined", 'returns' )
 
       end
-
 
       # generate return value types template
       returns = feature.last[ :returns ].collect{ | return_types |
@@ -817,6 +860,8 @@ EXAMPLE
 
       end
 
+      return "" if feature.last[ :exceptions ].nil? || feature.last[ :exceptions ].empty?
+
       # generate exceptions template
       exceptions = feature.last[ :exceptions ].collect{ | exceptions |
       
@@ -850,9 +895,9 @@ EXAMPLE
 
       if feature.last[ :arguments ].nil?
 
-        note = ". Note that attribute writer/accessor also excepts variable as argument." if @processing == :attributes
+        note = ". Note that also attribute writer requires input value defined as argument." if [ 'writer', 'accessor' ].include?( @processing )
 
-        raise_error("Error: $TYPE '#{ feature.first }' ($MODULE) doesn't have arguments(s) defined#{ note }", 'arguments' )
+        raise_error("Error: $TYPE '#{ feature.first }' ($MODULE) doesn't have arguments(s) defined#{ note }", [ 'writer', 'accessor' ].include?( @processing ) ? 'attr_argument' : 'arguments' )
 
       end
 
@@ -879,7 +924,8 @@ EXAMPLE
 
            if type.last["description"].nil?
 
-            raise_error("Warning: Argument description for '%s' ($MODULE) is empty." % [ argument.first ])
+
+            raise_error("Warning: Argument description for '%s' ($MODULE) is empty." % [ argument.first ], 'argument_description' )
 
            end
 
@@ -957,7 +1003,7 @@ EXAMPLE
                     
           if feature.last[:description].nil?
 
-           raise_error("Warning: $TYPE description for '%s' ($MODULE) is empty." % [ feature.first ])
+           raise_error("Warning: $TYPE description for '#{ feature.first }' ($MODULE) is empty.", 'description')
 
           end
                               
@@ -1027,7 +1073,7 @@ EXAMPLE
       # verify that behaviour sut version(s) is defined
       unless header.has_key?(:requires)
 
-         raise_error("Warning: required plugin name is not defined for $MODULE.", 'behaviour_requires' )
+         raise_error("Warning: Required plugin name is not defined for $MODULE.", 'behaviour_requires' )
 
       end
 
@@ -1067,7 +1113,10 @@ EXAMPLE
 
       module_header = process_comment( _module.comment )
 
-      unless module_header.empty?
+      # store information where module is stored
+      @module_in_files = _module.in_files.collect{ | file | file.file_absolute_name }
+
+      #unless module_header.empty?
 
         @current_module = _module
 
@@ -1085,9 +1134,17 @@ EXAMPLE
 
         begin
 
-          open( xml_file_name, 'w'){ | file | file << xml }
+          if xml_file_name != '.xml' 
 
-          puts ".xml"
+            open( xml_file_name, 'w'){ | file | file << xml }
+
+            puts ".xml"
+
+          else
+
+            warn("Skip: output XML not saved due to module #{ @module_path.join("::") } does not have proper behaviour name/description in #{ @module_in_files.join(", ") }")
+
+          end
 
         rescue Exception => exception
 
@@ -1095,7 +1152,7 @@ EXAMPLE
 
         end
 
-      end
+      #end
 
       # process if any child modules 
       process_modules( _module.modules ) unless _module.modules.empty?
