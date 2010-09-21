@@ -47,7 +47,7 @@ module MobyUtil
 		@_owcc_startex = nil
 		@_owcc_stop = nil
 		STARTUP_TIMEOUT = 60
-		DEFAULT_OPTIONS = { :width => 640, :height => 480, :fps => 30 }
+		DEFAULT_OPTIONS = { :device => nil, :width => 640, :height => 480, :fps => 30 }
 		
 		# Creates a new recroding object witdh the given recording options		
 		# === params
@@ -63,6 +63,10 @@ module MobyUtil
               @_owcc_stop = Win32API.new( 'OscarWebCamControl', 'OscarWebCamControlStop', [ 'L' ], 'V' )
             rescue Exception => e
               raise RuntimeError.new( "Failed to connect to video recording DLL file (OscarWebCamControl.dll). Details:\n" + e.message )
+            end
+		    
+            if user_options.has_key? :device
+              puts "WARNING: TDriverWinCam does not support the :device option. This setting is ignored."
             end
 			
 		    @_control_id = nil
@@ -157,7 +161,7 @@ module MobyUtil
 		@_owcc_startex = nil
 		@_owcc_stop = nil
 		STARTUP_TIMEOUT = 60
-		DEFAULT_OPTIONS = { :width => 320, :height => 240, :fps => 5 }
+		DEFAULT_OPTIONS = { :device => '/dev/video0', :width => 320, :height => 240, :fps => 5 }
 		
 		# Creates a new recroding object witdh the given recording options		
 		# === params
@@ -186,7 +190,7 @@ module MobyUtil
 		    end
 		  end	
 
-          rec_command = 'streamer -q -c /dev/video0 -f rgb24 -r ' + @_rec_options[ :fps ].to_s + ' -t 99:00:00 -o ' +  @_video_file.to_s + ' -s ' + @_rec_options[ :width ].to_s + 'x' + @_rec_options[ :height ].to_s
+          rec_command = 'streamer -q -c ' + @_rec_options[ :device ].to_s + ' -f rgb24 -r ' + @_rec_options[ :fps ].to_s + ' -t 99:00:00 -o ' +  @_video_file.to_s + ' -s ' + @_rec_options[ :width ].to_s + 'x' + @_rec_options[ :height ].to_s
           
           @_streamer_pid = fork do
             begin
