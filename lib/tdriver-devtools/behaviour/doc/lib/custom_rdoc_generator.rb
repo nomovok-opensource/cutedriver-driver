@@ -27,6 +27,8 @@ module Generators
 
       @templates = {}
 
+      @found_modules_and_methods = {}
+
       load_templates
 
       @options = options
@@ -345,6 +347,9 @@ EXAMPLE
 
       }
 
+      # TODO: some other format for writing the hash to file...
+      open("#{ $output_results_name }.hash", "w" ){ | file | file << @found_modules_and_methods.inspect }
+
     end
 
     def process_file( file )
@@ -589,6 +594,18 @@ EXAMPLE
 
     end
 
+    def store_to_results( module_name, name )
+
+      unless @found_modules_and_methods.has_key?( module_name )
+
+        @found_modules_and_methods[ module_name ] = []
+
+      end
+
+      @found_modules_and_methods[ module_name ] << name
+
+    end
+
 
     def process_method( method )
 
@@ -597,6 +614,7 @@ EXAMPLE
       method_header = nil
 
       if ( method.visibility == :public && @module_path.first =~ /MobyBehaviour/ )
+
 
         @current_method = method
 
@@ -640,7 +658,7 @@ EXAMPLE
 
         }]
 
-        method_name = method.name
+        method_name = method.name.clone
 
         if method.kind_of?( RDoc::Attr )
 
@@ -651,9 +669,11 @@ EXAMPLE
             when "W"
               type = "writer"
               method_name << "="
+              store_to_results( @module_path.join("::"), method.name + "=" )
             when "RW"
               type = "accessor"
               method_name << ";#{ method_name }="
+              store_to_results( @module_path.join("::"), method.name + "=" )
 
           else
 
@@ -668,6 +688,8 @@ EXAMPLE
           method_header.merge!( :__type => "method" )
 
         end
+
+        store_to_results( @module_path.join("::"), method.name )
 
         # do something
         [ method_name, method_header ]

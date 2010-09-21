@@ -34,11 +34,13 @@ module RDoc
 
 end
 
-if ARGV.count == 0
+if ARGV.count < 2
   
-  abort "\nUsage: #{ File.basename( $0 ) } filename.rb\n\n"
+  abort "\nUsage: #{ File.basename( $0 ) } plugin_or_gem_name filename.rb \n\n"
 
 else
+
+  $output_results_name = ARGV.slice!(0)
 
   ARGV.each{ | filename | 
 
