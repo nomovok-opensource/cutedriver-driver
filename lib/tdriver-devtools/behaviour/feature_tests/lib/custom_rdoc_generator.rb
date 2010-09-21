@@ -99,7 +99,7 @@ module Generators
 
         scenarios = process_method( method ) 
 
-        results << { :header => $templates[:feature_method] % [ method.name, method.name, @module_path.join("::") ], :scenarios => scenarios, :file => generate_name( method.name ), :module_path => @module_path, :name => method.name } if scenarios.count > 0
+        results << { :header => $templates[:feature_method] % [ "%s#%s" % [ @module_path.join("::"), method.name ], method.name, @module_path.join("::") ], :scenarios => scenarios, :file => generate_name( method.name ), :module_path => @module_path, :name => method.name } if scenarios.count > 0
 
       }
 
@@ -232,7 +232,7 @@ module Generators
 
          attr_name = attribute.name.gsub("=",'')
 
-         results << { :header => $templates[:feature_attribute] % [ attr_name, attr_name, @module_path.join("::") ], :scenarios => scenarios, :file => generate_name( attr_name ), :module_path => @module_path, :name => attr_name } if scenarios.count > 0
+         results << { :header => $templates[:feature_attribute] % [ "%s#%s" % [ @module_path.join("::"), attribute.name ], attr_name, @module_path.join("::") ], :scenarios => scenarios, :file => generate_name( attr_name ), :module_path => @module_path, :name => attr_name } if scenarios.count > 0
 
       }
 

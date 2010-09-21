@@ -1,4 +1,4 @@
-Feature: TestObject::%s (Rename this to be more descriptive)
+Feature: %s
   As a test scripter writer
   I want to use %s attribute to [DO_SOMETHING] in [TARGET_APPLICATION]
   so that I can test the %s behaviour
