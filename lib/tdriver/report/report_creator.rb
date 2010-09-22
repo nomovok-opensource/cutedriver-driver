@@ -241,7 +241,7 @@ module TDriverReportCreator
     logging_enabled = MobyUtil::Logger.instance.enabled
     begin
 		  
-      if MobyUtil::Parameter[:report_video, nil] != nil
+      if MobyUtil::Parameter[:report_video, "false"] != "false"
         # copy previous recording
         MobyUtil::Logger.instance.enabled=false
 
