@@ -299,8 +299,8 @@ module TDriverReportCreator
 	    each_video_device do | video_device, device_index |
 	  	    
 	      rec_options = { :width => tc_video_width, :height => tc_video_height, :fps => tc_video_fps }
-		  rec_options[ :device ] = video_device unless video_device == "true" # use default device if "true"
-		  video_recorder = MobyUtil::TDriverWinCam.new( "cam_" + device_index + "_" + @tc_video_filename, rec_options )
+		  rec_options[ :device ] = video_device unless video_device == "true" # use default device if "true"		 
+		  video_recorder = MobyUtil::TDriverCam.new_cam( "cam_" + device_index + "_" + @tc_video_filename, rec_options )
           video_recorder.start_recording
 		  @tc_video_recorders << video_recorder
           @tc_video_recording = true
