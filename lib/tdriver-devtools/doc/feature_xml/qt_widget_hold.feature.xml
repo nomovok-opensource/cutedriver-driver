@@ -1,0 +1,9 @@
+<?xml version="1.0"?>
+<feature>
+  <description>MobyBehaviour::QT::Widget#hold</description>
+  <description>
+  As a test scripter writer
+  I want to use hold method to [DO_SOMETHING] in [TARGET_APPLICATION]
+  so that I can test the MobyBehaviour::QT::Widget behaviour</description>
+  <scenarios><scenario><description>Testing hold method with required argument(s) (Rename this to be more descriptive)</description><step>I launch application [APPLICATION_NAME] as @app NOT RUN</step><example_step>I execute "@app.[SOME_OBJECT].hold()" SKIPPED</example_step><step>[ADD_YOUR_VERIFICATION_HERE] NOT RUN</step></scenario><scenario><description>Testing hold method with optional argument 'button' (Rename this to be more descriptive)</description><step>I launch application [APPLICATION_NAME] as @app NOT RUN</step><example_step>I execute "@app.[SOME_OBJECT].hold(button)" SKIPPED</example_step><step>[ADD_YOUR_VERIFICATION_HERE] NOT RUN</step></scenario><scenario><description>Testing hold method with optional argument 'refresh' (Rename this to be more descriptive)</description><step>I launch application [APPLICATION_NAME] as @app NOT RUN</step><example_step>I execute "@app.[SOME_OBJECT].hold(button, refresh)" SKIPPED</example_step><step>[ADD_YOUR_VERIFICATION_HERE] NOT RUN</step></scenario></scenarios>
+</feature>

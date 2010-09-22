@@ -1,0 +1,9 @@
+<?xml version="1.0"?>
+<feature>
+  <description>MobyBehaviour::QT::Widget#tap</description>
+  <description>
+  As a test script writer
+  I want to use tap method to simulate user tapping or clicking an object,
+  so that I can test the MobyBehaviour::QT::Widget behaviour</description>
+  <scenarios><scenario><description>Testing tap method without arguments</description><step>I launch application "calculator" PASSED</step><example_step>I execute "@app.Button(:name =&gt; 'oneButton').tap" PASSED</example_step><step>The calculator display says "1" PASSED</step></scenario><scenario><description>Testing tap method with optional argument 'tap_params' (Rename this to be more descriptive)</description><step>I launch application [APPLICATION_NAME] as @app NOT RUN</step><example_step>I execute "@app.[SOME_OBJECT].tap(tap_params)" SKIPPED</example_step><step>[ADD_YOUR_VERIFICATION_HERE] NOT RUN</step></scenario><scenario><description>Testing tap method with optional argument 'interval' (Rename this to be more descriptive)</description><step>I launch application [APPLICATION_NAME] as @app NOT RUN</step><example_step>I execute "@app.[SOME_OBJECT].tap(tap_params, interval)" SKIPPED</example_step><step>[ADD_YOUR_VERIFICATION_HERE] NOT RUN</step></scenario><scenario><description>Testing tap method with optional argument 'button' (Rename this to be more descriptive)</description><step>I launch application [APPLICATION_NAME] as @app NOT RUN</step><example_step>I execute "@app.[SOME_OBJECT].tap(tap_params, interval, button)" SKIPPED</example_step><step>[ADD_YOUR_VERIFICATION_HERE] NOT RUN</step></scenario></scenarios>
+</feature>

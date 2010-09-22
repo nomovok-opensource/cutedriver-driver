@@ -1,0 +1,148 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<behaviours plugin="*">
+
+  <behaviour name="QtExampleGestureBehaviour" object_type="*;sut" sut_type="qt" input_type="touch" version="*">
+
+    <module name="MobyBehaviour::QT::Gesture" />
+    <methods>
+
+      <method name="flick" type="method">
+
+        <description>Cause a flick operation on the screen.</description>
+
+        <arguments>
+
+          <argument name="direction" optional="false">
+
+            <type name="Integer">
+              <description>Example argument1</description>
+              <example>10</example>
+            </type>
+
+            <type name="Hash">
+              <description>Example argument 1 type 2</description>
+              <example>{ :optional_1 => "value_1", :optional_2 => "value_2" }</example>
+            </type>
+
+          </argument>
+
+            <argument name="button" optional="true">
+
+            <type name="String">
+              <description>which button to use</description>
+              <example>"Hello"</example>
+            </type>
+
+            <default>:Left</default>
+
+          </argument>
+
+          <argument name="optional_params" optional="true">
+
+            <type name="String">
+              <description>optinal parameters for blaa blaa blaa</description>
+              <example>{:a => 1, :b => 2}</example>
+            </type>
+
+            <default>{}</default>
+
+          </argument>
+
+        </arguments>
+
+        <returns>
+
+          <type name="String">
+            <description>Return value type</description>
+            <example>"World"</example>
+          </type>
+
+        </returns>
+
+        <exceptions>
+
+          <exception name="RuntimeError">
+            <description>example exception</description>
+          </exception>
+
+          <exception name="ArgumentError">
+            <description>example exception</description>
+          </exception>
+
+        </exceptions>
+
+        <info>See method X, table at Y</info>
+
+      </method>
+
+      <method name="read;read=" type="accessor">
+
+        <description></description>
+
+        <arguments>
+
+        </arguments>
+
+        <info></info>
+
+      </method>
+
+      <method name="z;z=" type="accessor">
+
+        <description>example desc</description>
+
+        <arguments>
+
+          <argument name="value" optional="false">
+
+            <type name="Integer">
+              <description>Example argument1</description>
+              <example>10</example>
+            </type>
+
+          </argument>
+
+        </arguments>
+
+        <returns>
+
+          <type name="String">
+            <description>Return value type</description>
+            <example>"World"</example>
+          </type>
+
+        </returns>
+
+        <info></info>
+
+      </method>
+
+      <method name="something;something=" type="accessor">
+
+        <description></description>
+
+        <arguments>
+
+        </arguments>
+
+        <info></info>
+
+      </method>
+
+      <method name="write;write=" type="accessor">
+
+        <description></description>
+
+        <arguments>
+
+        </arguments>
+
+        <info></info>
+
+      </method>
+
+    </methods>
+
+  </behaviour>
+
+</behaviours>
