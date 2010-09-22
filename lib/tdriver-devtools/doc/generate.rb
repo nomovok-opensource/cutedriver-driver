@@ -1,6 +1,6 @@
 require 'nokogiri'
 
-@feature_tests = []
+@feature_tests = {}
 @behaviour_hashes = {}
 @behaviours = []
 
@@ -63,7 +63,27 @@ def process_result_file( content )
 
   }
 
-  result
+  p "--"
+
+  # collect only important data to result
+  #{ result["description"].first => result }
+
+  { result["description"].first => 
+
+    result["scenarios"].collect{ | scenario |
+
+      scenario["example_step"].collect{ | example |
+
+        code = /\"(.*)\"/.match( example ).captures.first
+
+        status = /^.*\s{1}(\w+)$/.match( example ).captures.first      
+
+        { :example => code, :status => status.to_s.downcase }
+
+      }
+
+    }.flatten
+  }
 
 end
 
@@ -261,7 +281,7 @@ def read_test_result_files
 
     @current_file = file
 
-    @feature_tests << { :filename => file, :results => process_result_file( open( file, 'r' ).read ) }
+    @feature_tests.merge!( process_result_file( open( file, 'r' ).read ) ) #{ :filename => file, :results => process_result_file( open( file, 'r' ).read ) }
 
   }
 
@@ -302,9 +322,29 @@ read_test_result_files # ok
 read_behaviour_xml_files # ok
 read_behaviour_hash_files # ok
 
-@behaviour_hashes.each_pair{ | name, methods |
+# ran tests 
+p @feature_tests.keys
 
-#  p name, methods
+p @feature_tests
+
+=begin
+  result["scenarios"].each{ | scenario |
+
+    p scenario["example_step"]
+
+  }
+=end
+
+  #p result["description"].first#.first #.keys
+
+
+@behaviour_hashes.each_pair{ | module_name, methods |
+
+  methods.each{ | method |
+
+   puts "%s#%s" % [ module_name, method ]
+
+  }
 
 }
 
