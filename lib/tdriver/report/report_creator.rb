@@ -240,16 +240,19 @@ module TDriverReportCreator
     end
     logging_enabled = MobyUtil::Logger.instance.enabled
     begin
-      if MobyUtil::Parameter[:report_video] == "true"
+		  
+      if MobyUtil::Parameter[:report_video, nil] != nil
         # copy previous recording
         MobyUtil::Logger.instance.enabled=false
 
-        begin
-          File.copy( @_video_file_name, @_previous_video_file_name )
-        rescue
-          # do nothing..
-        end
+		each_video_device do | video_device, device_index | 		  
+          begin
+            File.copy( "cam_" + device_index + "_" + @_video_file_name, "cam_" + device_index + "_" + @_previous_video_file_name )
+          rescue
+            # do nothing..
+          end
 
+        end
         $new_test_case.start_video_recording( @_video_file_name, @_previous_video_file_name )
 
         MobyUtil::Logger.instance.enabled=logging_enabled
@@ -447,16 +450,35 @@ module TDriverReportCreator
   # Cleans any temporary files created by recording video
   def clean_video_files
     [ @_video_file_name, @_previous_video_file_name ].each do | file_name |
-      begin
-        if File.exists?( file_name )
-          File.delete( file_name )
+      
+	  each_video_device do | video_device, device_index |
+	    begin
+		  delete_file = "cam_" + device_index + "_" + file_name
+          if File.exists?( delete_file )
+            File.delete( delete_file )
+          end
+        rescue
+          # delete failed, do nothing
         end
-      rescue
-        # delete failed, do nothing
-      end
+	  end
     end
   end
+  
+  def each_video_device
 
+    if MobyUtil::Parameter[:report_video, nil] != nil
+      
+	  device_index = 0	  
+      MobyUtil::Parameter[:report_video].split("|").each do | video_device |	    	    
+        if !video_device.strip.empty?
+	      yield video_device.strip, device_index.to_s
+		  device_index += 1
+	    end
+      end
+	  
+	end  
+     
+  end
 
 end #TDriverReportCreator
 

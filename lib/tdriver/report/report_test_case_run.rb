@@ -49,7 +49,7 @@ module TDriverReportCreator
       @tc_video_recording=false
       @tc_video_filename=nil
       @tc_previous_video_filename=nil
-      @tc_video_recorder=nil
+      @tc_video_recorders=[]
       @tc_memory_amount_start=nil
       @tc_memory_amount_end=nil
       @tc_memory_amount_start='-'
@@ -270,8 +270,7 @@ module TDriverReportCreator
     # === returns
     # nil
     def start_video_recording( rec_name, previous_name )
-				
-      require File.expand_path( File.join( File.dirname( __FILE__ ), '..', 'util', 'video_rec' ) )
+		
       @tc_video_filename = rec_name
       @tc_previous_video_filename = previous_name
       tc_video_width = 640
@@ -294,21 +293,36 @@ module TDriverReportCreator
         # parameter not loaded, do nothing
       end
 		
-      #begin
-      @tc_video_recorder=MobyUtil::TDriverWinCam.new( @tc_video_filename, { :width => tc_video_width, :height => tc_video_height, :fps => tc_video_fps } )
-      @tc_video_recorder.start_recording
-      @tc_video_recording = true
-      #rescue
+	  @tc_video_recorders = []
+      	  
+	  begin
+	    each_video_device do | video_device, device_index |
+	  	    
+	      rec_options = { :width => tc_video_width, :height => tc_video_height, :fps => tc_video_fps }
+		  rec_options[ :device ] = video_device unless video_device == "true" # use default device if "true"
+		  video_recorder = MobyUtil::TDriverWinCam.new( "cam_" + device_index + "_" + @tc_video_filename, rec_options )
+          video_recorder.start_recording
+		  @tc_video_recorders << video_recorder
+          @tc_video_recording = true
 		  
-      #end
+	    end
+      rescue Exception => e
+	    # make sure to stop any started cams if startup fails
+        stop_video_recording
+		raise e		
+      end
 	  
       nil
 		
     end
 	  
     def stop_video_recording()
-      @tc_video_recorder.stop_recording
+	
+	  @tc_video_recorders.each do | video_recorder |
+        video_recorder.stop_recording
+	  end
       @tc_video_recording = false
+	  
     end
     #This method sets the tdriver test case memory at start
     #
@@ -570,11 +584,16 @@ module TDriverReportCreator
           FileUtils.mkdir_p video_folder
         end        
 		
-        File.copy(@tc_video_filename, video_folder)		
-        File.copy(@tc_previous_video_filename, video_folder)
+		each_video_device do | video_device, device_index |
+		
+		  File.copy("cam_" + device_index + "_" + @tc_video_filename, video_folder)		
+          File.copy("cam_" + device_index + "_" + @tc_previous_video_filename, video_folder)
+		
+		end
+       
 		
       rescue Exception => e
-        @test_case_execution_log=@test_case_execution_log.to_s + '<br />' + "Unable to store video file(#{@tc_video_filename}): " + e.message
+        @test_case_execution_log=@test_case_execution_log.to_s + '<br />' + "Unable to store video file: " + e.message
       end
 	  
       MobyUtil::Logger.instance.enabled=logging_enabled
