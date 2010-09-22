@@ -1,3 +1,0 @@
-#!/usr/bin/env sh
-rm -rf doc
-ruby generate_behaviour_xml.rb example/
