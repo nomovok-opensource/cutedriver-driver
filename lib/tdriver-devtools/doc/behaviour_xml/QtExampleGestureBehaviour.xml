@@ -57,6 +57,11 @@
             <example>"World"</example>
           </type>
 
+          <type name="Integer">
+            <description>Return value type</description>
+            <example>1</example>
+          </type>
+
         </returns>
 
         <exceptions>

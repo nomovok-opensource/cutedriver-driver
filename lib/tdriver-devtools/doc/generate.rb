@@ -317,7 +317,7 @@ def read_behaviour_hash_files
 
 end
 
-def collect_all_methods
+def collect_all_features
 
   @behaviour_hashes.collect{ | module_name, methods |
 
@@ -331,7 +331,7 @@ def collect_all_methods
 
 end
 
-def collect_all_behaviours
+def collect_documented_features
 
   behaviours = {}
 
@@ -400,15 +400,182 @@ read_behaviour_xml_files # ok
 read_behaviour_hash_files # ok
 
 puts "", "----", ""
+#puts "all executed feature tests:"
+@executed_tests = collect_feature_tests
 
-p collect_feature_tests.keys
+#puts ""
+#puts "all available features:"
+@all_features = collect_all_features
 
-puts ""
+#puts ""
+#puts "all documented features:"
+@documented_features = collect_documented_features
 
-p collect_all_methods
+accessors = []
+
+doc = Nokogiri::XML::Builder.new{ | xml |
+
+  #p doc.to_xml
+  #p doc.to_xml
+  #exit
+
+  xml.documentation{
+
+    # TODO: behaviour.hash should have feature type (method/attribute) mentioned  
+    # TODO: behaviour.hash should have number of arguments incl. optional + blocks
+
+    collect_all_features.each{ | feature |
+    
+      xml.feature{ 
+
+        documented = @documented_features.keys.include?( feature )
+        tested = @executed_tests.keys.include?( feature )
+        module_name, method_name = feature.to_s.split("#")
+
+        xml.name!( method_name.to_s )
+        xml.module( module_name.to_s )
+        xml.full_name( feature.to_s ) 
+
+        xml.documented( documented.to_s )
+        xml.tested( tested.to_s )
+        
+        if documented
+                
+          xml.feature_documentation!{ 
+                
+            feature_documentation = @documented_features[ feature.to_s ]
+
+            # TODO: get this information from .hash file        
+            xml.type!( feature_documentation["type"] )
+
+            xml.title_names{
+
+              feature_documentation["name"].each{ | feature_name |
+              
+              xml.name( feature_name )
+
+              }
+
+            }
+            
+            accessors << feature.to_s
+
+            xml.description( feature_documentation[ "description" ] )
+
+            xml.info( feature_documentation[ "info" ] )
+            
+            xml.arguments{ 
+            
+              ( feature_documentation[ "arguments" ] || [] ).each{ | argument |
+              
+                xml.argument{
+                
+                  xml.name!( ( argument[ "name" ] || ["NoMethodName"] ).first ) 
+                  
+                  xml.optional( ( argument[ "optional" ] || [] ).first == "true" )
+     
+                  xml.types{ 
+                  
+                    argument[ "types" ].each{ | type |
+                    
+                      type.each_pair{ | key, value |
+
+                          xml.type!{ 
+
+                            xml.name!( key.to_s )
+
+                            # store each key & value as is                        
+                            value.each_pair{ | key, value | 
+                              
+                              xml.send( key.to_sym, value.to_s )
+
+                            } # type.value.each_pair
+                          
+                          } # type
+                          
+                      } # type.each_pair
+                      
+                    } # types.each
+                  
+                  } # xml.types
+                  
+                } # xml.argument
+                            
+              } # xml.arguments.each
+                          
+            } # xml.arguments
+            
+
+            xml.returns{
+            
+              ( feature_documentation[ "returns" ] || [] ).each{ | returns |
+
+                returns.each_pair{ | key, value |
+
+                    xml.type!{ 
+
+                      xml.name!( key.to_s )
+
+                      # store each key & value as is                        
+                      value.each_pair{ | key, value | 
+                        
+                        xml.send( key.to_sym, value.to_s )
+
+                      } # type.value.each_pair
+                    
+                    } # type
+                    
+                } # type.each_pair
+
+              } # returns.each
+            
+            } # xml.returns
+
+            xml.exceptions{
+            
+              ( feature_documentation[ "exceptions" ] || [] ).each{ | returns |
+
+                returns.each_pair{ | key, value |
+
+                    xml.type!{ 
+
+                      xml.name!( key.to_s )
+
+                      # store each key & value as is                        
+                      value.each_pair{ | key, value | 
+                        
+                        xml.send( key.to_sym, value.to_s )
+
+                      } # type.value.each_pair
+                    
+                    } # type
+                    
+                } # type.each_pair
+
+              } # returns.each
+            
+            } # xml.exceptions
+                  
+          }
+                
+        end
+        
+        if tested
+        
+        end
+        
+        #p feature
+        #puts "\tdocumented: %s" % [ @documented_features.keys.include?( feature ) ] 
+        #puts "\ttested: %s" % [ @executed_tests.keys.include?( feature ) ] 
+
+      }
+
+    }
+
+  }
+}
+
+puts doc.to_xml
+p accessors
 
 
-puts ""
-p collect_all_behaviours.keys
-
-#p $feature_tests
