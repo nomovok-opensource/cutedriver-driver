@@ -1,6 +1,6 @@
 require 'nokogiri'
 
-@feature_tests = {}
+@feature_tests = []
 @behaviour_hashes = {}
 @behaviours = []
 
@@ -63,11 +63,6 @@ def process_result_file( content )
 
   }
 
-  p "--"
-
-  # collect only important data to result
-  #{ result["description"].first => result }
-
   { result["description"].first => 
 
     result["scenarios"].collect{ | scenario |
@@ -84,6 +79,8 @@ def process_result_file( content )
 
     }.flatten
   }
+
+  result
 
 end
 
@@ -281,7 +278,9 @@ def read_test_result_files
 
     @current_file = file
 
-    @feature_tests.merge!( process_result_file( open( file, 'r' ).read ) ) #{ :filename => file, :results => process_result_file( open( file, 'r' ).read ) }
+    @feature_tests << process_result_file( open( file, 'r' ).read )
+
+    #@feature_tests.merge!( process_result_file( open( file, 'r' ).read ) ) #{ :filename => file, :results => process_result_file( open( file, 'r' ).read ) }
 
   }
 
@@ -318,34 +317,98 @@ def read_behaviour_hash_files
 
 end
 
+def collect_all_methods
+
+  @behaviour_hashes.collect{ | module_name, methods |
+
+    methods.collect{ | method |
+
+     "%s#%s" % [ module_name, method ]
+
+    }
+
+  }.flatten
+
+end
+
+def collect_all_behaviours
+
+  behaviours = {}
+
+  @behaviours.each{ | behaviour |
+  
+    file_name = behaviour[ :filename ]
+  
+    behaviour[:behaviours]["behaviours"].each{ | behaviour |
+
+      config = Hash[ behaviour.select{ | key, value | key != "methods" } ]
+            
+      # get module name
+      module_name = behaviour["module"].first
+      
+      # list methods
+      behaviour["methods"].each{ | method |
+        
+        method["name"].each{ | method_name |
+        
+          behaviours[ "%s#%s" % [ module_name, method_name ] ] = method.merge( "__file" => file_name, "__behaviour" => config )
+          
+        }
+        
+      }
+
+    }
+  
+  }.flatten
+
+  behaviours
+
+end
+
+def collect_feature_tests
+
+  result = {}
+  
+  @feature_tests.collect{ | feature |
+
+    result[ feature["description"].first ] = 
+
+      feature["scenarios"].collect{ | scenario |
+
+        scenario["example_step"].collect{ | example |
+
+          code = /\"(.*)\"/.match( example ).captures.first
+
+          status = /^.*\s{1}(\w+)$/.match( example ).captures.first      
+
+          [ :example => code, :status => status.to_s.downcase ]
+
+        }.flatten
+
+      }
+    
+
+  }.flatten
+  
+  result
+
+end
+
+
 read_test_result_files # ok
 read_behaviour_xml_files # ok
 read_behaviour_hash_files # ok
 
-# ran tests 
-p @feature_tests.keys
+puts "", "----", ""
 
-p @feature_tests
+p collect_feature_tests.keys
 
-=begin
-  result["scenarios"].each{ | scenario |
+puts ""
 
-    p scenario["example_step"]
-
-  }
-=end
-
-  #p result["description"].first#.first #.keys
+p collect_all_methods
 
 
-@behaviour_hashes.each_pair{ | module_name, methods |
-
-  methods.each{ | method |
-
-   puts "%s#%s" % [ module_name, method ]
-
-  }
-
-}
+puts ""
+p collect_all_behaviours.keys
 
 #p $feature_tests
