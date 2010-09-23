@@ -1,20 +1,20 @@
 ############################################################################
-## 
-## Copyright (C) 2010 Nokia Corporation and/or its subsidiary(-ies). 
-## All rights reserved. 
-## Contact: Nokia Corporation (testabilitydriver@nokia.com) 
-## 
-## This file is part of Testability Driver. 
-## 
-## If you have questions regarding the use of this file, please contact 
-## Nokia at testabilitydriver@nokia.com . 
-## 
-## This library is free software; you can redistribute it and/or 
-## modify it under the terms of the GNU Lesser General Public 
-## License version 2.1 as published by the Free Software Foundation 
-## and appearing in the file LICENSE.LGPL included in the packaging 
-## of this file. 
-## 
+##
+## Copyright (C) 2010 Nokia Corporation and/or its subsidiary(-ies).
+## All rights reserved.
+## Contact: Nokia Corporation (testabilitydriver@nokia.com)
+##
+## This file is part of Testability Driver.
+##
+## If you have questions regarding the use of this file, please contact
+## Nokia at testabilitydriver@nokia.com .
+##
+## This library is free software; you can redistribute it and/or
+## modify it under the terms of the GNU Lesser General Public
+## License version 2.1 as published by the Free Software Foundation
+## and appearing in the file LICENSE.LGPL included in the packaging
+## of this file.
+##
 ############################################################################
 
 module MobyBehaviour
@@ -102,7 +102,14 @@ module MobyBehaviour
           initialize_prommer
 
           initialize_device
-
+          Thread.new do
+            #this intializes the commands that are executed during flash
+            wait_timeout=0
+            wait_timeout=parameter(:timeout_before_executing_commands_during_flash,10) if parameter(:timeout_before_executing_commands_during_flash)
+            sleep wait_timeout.to_i
+            #commands executed during flash
+            execute_command_sequence(:switchbox_commands_during_flash) if parameter(:switchbox_commands_during_flash)
+          end
           flash_result=system(flash_command)
           if flash_result.to_s=='true'
             current_flash_attempt==flaxi_flash_attempts
