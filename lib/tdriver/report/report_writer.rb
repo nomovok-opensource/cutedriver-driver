@@ -73,6 +73,24 @@ module TDriverReportWriter
     margin-right: auto;
 
 }
+.summary_crash
+{
+	background-color:White;
+	width:800px;
+	height:100%;
+	margin-left : auto;
+    margin-right: auto;
+
+}
+.summary_reboot
+{
+	background-color:White;
+	width:800px;
+	height:100%;
+	margin-left : auto;
+    margin-right: auto;
+
+}
 .statistics
 {
 	background-color:White;
@@ -389,20 +407,8 @@ display: none;
     case title
     when "TDriver test results"
       stylesheet='<link rel="stylesheet" title="TDriverReportStyle" href="tdriver_report_style.css"/>'
-    when "TDriver test environment"
-      stylesheet='<link rel="stylesheet" title="TDriverReportStyle" href="../tdriver_report_style.css"/>'
-    when "Total run"
-      stylesheet='<link rel="stylesheet" title="TDriverReportStyle" href="../tdriver_report_style.css"/>'
-    when "Statistics"
-      stylesheet='<link rel="stylesheet" title="TDriverReportStyle" href="../tdriver_report_style.css"/>'
-    when "Passed"
-      stylesheet='<link rel="stylesheet" title="TDriverReportStyle" href="../tdriver_report_style.css"/>'
-    when "Failed"
-      stylesheet='<link rel="stylesheet" title="TDriverReportStyle" href="../tdriver_report_style.css"/>'
-    when "Not run"
-      stylesheet='<link rel="stylesheet" title="TDriverReportStyle" href="../tdriver_report_style.css"/>'
-    when "TDriver log"
-      stylesheet='<link rel="stylesheet" title="TDriverReportStyle" href="../tdriver_report_style.css"/>'
+    when "TDriver test environment","Total run","Statistics","Passed","Failed","Not run","Crash","Reboot","TDriver log"
+      stylesheet='<link rel="stylesheet" title="TDriverReportStyle" href="../tdriver_report_style.css"/>'    
     else
       stylesheet='<link rel="stylesheet" title="TDriverReportStyle" href="../../tdriver_report_style.css"/>'
     end
@@ -615,21 +621,21 @@ display: none;
   end  
   def write_duration_graph(page, folder, graph_file_name, tc_arr)
   
-	tdriver_group=ReportingStatistics.new(tc_arr)
-	tdriver_group.generate_duration_graph(folder + '/cases/' + graph_file_name)
+    tdriver_group=ReportingStatistics.new(tc_arr)
+    tdriver_group.generate_duration_graph(folder + '/cases/' + graph_file_name)
 	
-	html_body=Array.new
-	html_body << '<div>'
-	html_body << '<H1 ALIGN=center><img border="0" src="./'+graph_file_name+'"/></H1>'
-	html_body << '<center>This graph displays the duration for each test case during the run.</center>'
-	html_body << '<center>If a test case has been executed several time, this duration is the sum of all the durations for this specific test case.</center>'
-	html_body << '</div>'
-	File.open(page, 'a') do |f2|
-	f2.puts html_body
-	end
-	tdriver_group = nil
-	html_body=nil
-	GC.start
+    html_body=Array.new
+    html_body << '<div>'
+    html_body << '<H1 ALIGN=center><img border="0" src="./'+graph_file_name+'"/></H1>'
+    html_body << '<center>This graph displays the duration for each test case during the run.</center>'
+    html_body << '<center>If a test case has been executed several time, this duration is the sum of all the durations for this specific test case.</center>'
+    html_body << '</div>'
+    File.open(page, 'a') do |f2|
+      f2.puts html_body
+    end
+    tdriver_group = nil
+    html_body=nil
+    GC.start
   end
   def write_test_case_summary_body(page,status,tc_arr,chronological_page=nil,report_page=nil)
     html_body=Array.new
@@ -662,13 +668,41 @@ display: none;
       html_body << '<form action="save_results_to" ><input type="submit" name="save_results_to" value="Download report" /></form>' if @report_editable=='true'
       tdriver_group=nil
       html_result=nil
-    when 'not run'
+    when 'not_run'
       title='<div class="page_title"><center><h1>Not run</h1></center></div>'<<
         '<div class="summary_not_run">' <<
         '<form action="save_total_run_results" >'
       tdriver_group=ReportingGroups.new(@reporting_groups,tc_arr)
       tdriver_group.parse_groups()
       html_result=tdriver_group.generate_report(@not_run_statuses.first)
+      html_body << title
+      html_body << html_result
+      html_body << "<input type=\"submit\" name=\"save_changes\" value=\"Save changes\" />" if @report_editable=='true'
+      html_body << "</form>"
+      html_body << '<form action="save_results_to" ><input type="submit" name="save_results_to" value="Download report" /></form>' if @report_editable=='true'
+      tdriver_group=nil
+      html_result=nil
+    when 'crash'
+      title='<div class="page_title"><center><h1>Crash</h1></center></div>'<<
+        '<div class="summary_crash">' <<
+        '<form action="save_total_run_results" >'
+      tdriver_group=ReportingGroups.new(@reporting_groups,tc_arr,false)
+      tdriver_group.parse_groups()
+      html_result=tdriver_group.generate_report('all')
+      html_body << title
+      html_body << html_result
+      html_body << "<input type=\"submit\" name=\"save_changes\" value=\"Save changes\" />" if @report_editable=='true'
+      html_body << "</form>"
+      html_body << '<form action="save_results_to" ><input type="submit" name="save_results_to" value="Download report" /></form>' if @report_editable=='true'
+      tdriver_group=nil
+      html_result=nil
+    when 'reboot'
+      title='<div class="page_title"><center><h1>Reboot</h1></center></div>'<<
+        '<div class="summary_reboot">' <<
+        '<form action="save_total_run_results" >'
+      tdriver_group=ReportingGroups.new(@reporting_groups,tc_arr,false)
+      tdriver_group.parse_groups()
+      html_result=tdriver_group.generate_report('all')
       html_body << title
       html_body << html_result
       html_body << "<input type=\"submit\" name=\"save_changes\" value=\"Save changes\" />" if @report_editable=='true'
@@ -955,7 +989,7 @@ display: none;
       passed_link="#{report_page}_passed_index.html\" class=\"current\""
       failed_link="1_failed_index.html\""
       not_run_link="1_not_run_index.html\""
-    when "Failed"
+    when "Failed","Crash","Reboot"
       tdriver_test_results_link='../index.html"'
       tdriver_test_environment_link='../environment/index.html"'
       tdriver_log_link='tdriver_log_index.html"'
