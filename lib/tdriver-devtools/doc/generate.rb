@@ -442,18 +442,10 @@ doc = Nokogiri::XML::Builder.new{ | xml |
     collect_all_features.sort.each{ | feature |
     
       module_name, method_name, feature_type, feature_parameters = feature.split("#")
+
+      feature_parameters = feature_parameters.split(";")
       
       feature = "%s#%s" % [ module_name, method_name ]
-
-      #feature_type = feature_data
-
-      #p feature_data
-      #sleep 0.3
-      
-      #exit
-      #p accessors
-      
-      #sleep 0.2
     
       xml.feature{ 
 
@@ -464,12 +456,13 @@ doc = Nokogiri::XML::Builder.new{ | xml |
         xml.full_name( feature.to_s ) 
 
         xml.type!( feature_type )
-
-        #xml.documented( documented.to_s )
-
-        #xml.tested( tested.to_s )
-            
-        #feature_type = "unknown"
+                        
+        xml.arguments{
+        
+          xml.count( feature_parameters[0] )
+          xml.optional( feature_parameters[1] )
+        
+        }
                         
         xml.feature_documentation!{ 
               
@@ -628,37 +621,30 @@ doc = Nokogiri::XML::Builder.new{ | xml |
           
         }
                 
-
-        #puts ""
-        #p @executed_tests
         
         xml.feature_tests!{
-        
-          # TODO: verify that getter and setter is tested when attr_accessor 
+    
+          case feature_type
           
-          #tested = @executed_tests.keys.include?( feature )
-          
-          p feature
-          
-          p @executed_tests.keys.select{ | key |
-           
-#            if 
-            p feature_type
-            key == feature 
-            
-            
-            
-          } #include?( feature )
+            when /accessor/i
+              tests = [ feature, "%s=" % feature ]
 
+            when /writer/i
+              tests = [ "%s=" % feature ]
+            
+            when /method/i, /reader/i            
+              tests = [ feature ]
           
-          #if 1 == 2 #tested
+          end
           
-          ["MobyBehaviour::QT::Widget#tap"].each{ | test |
-        
-            ( @executed_tests[test] || [] ).each{ | test |
+          tests.each{ | test_feature |
+                
+            ( @executed_tests[ test_feature ] || [] ).each{ | test |
             
               xml.scenario{ 
 
+                xml.type!( feature_type == "accessor" ? ( ( test_feature[-1] == ?= ) ? "writer" : "reader" ) : feature_type )
+                    
                 xml.status( test[ "status" ] )
                 xml.description( test[ "description" ] )
                 xml.example( test[ "example" ] )
@@ -669,7 +655,6 @@ doc = Nokogiri::XML::Builder.new{ | xml |
                   
           }        
                     
-          #end
         } # xml.feature_tests
         
       }
