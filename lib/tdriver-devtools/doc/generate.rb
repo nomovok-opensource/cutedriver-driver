@@ -63,6 +63,7 @@ def process_result_file( content )
 
   }
 
+=begin
   { result["description"].first => 
 
     result["scenarios"].collect{ | scenario |
@@ -79,6 +80,7 @@ def process_result_file( content )
 
     }.flatten
   }
+=end
 
   result
 
@@ -274,7 +276,9 @@ end
 
 def read_test_result_files
 
-  Dir.glob( 'feature_xml/*.xml' ).each{ | file |
+  feature_xml_folder = ARGV.first.to_s
+
+  Dir.glob( File.join( feature_xml_folder, '*.xml' ) ).each{ | file |
 
     @current_file = file
 
@@ -300,7 +304,9 @@ end
 
 def read_behaviour_hash_files
 
-  Dir.glob( 'behaviour_xml/*.hash' ).each{ | file |
+  file = ARGV[1] || 'behaviour_xml/'
+
+  Dir.glob( File.join( file, '*.hash' ) ).each{ | file |
 
     @current_file = file
 
@@ -314,6 +320,8 @@ def read_behaviour_hash_files
     }
 
   }
+
+  abort "No behaviour XML files found from folder '#{ file }'" if @behaviour_hashes.empty?
 
 end
 
@@ -338,6 +346,8 @@ def collect_documented_features
   @behaviours.each{ | behaviour |
   
     file_name = behaviour[ :filename ]
+
+    behaviour_config = behaviour[:behaviours]["__config"] || {}
   
     behaviour[:behaviours]["behaviours"].each{ | behaviour |
 
@@ -350,8 +360,8 @@ def collect_documented_features
       behaviour["methods"].each{ | method |
         
         method["name"].each{ | method_name |
-        
-          behaviours[ "%s#%s" % [ module_name, method_name ] ] = method.merge( "__file" => file_name, "__behaviour" => config )
+                
+          behaviours[ "%s#%s" % [ module_name, method_name ] ] = method.merge( "__file" => file_name, "__behaviour" => config.merge( behaviour_config ) )
           
         }
         
@@ -381,11 +391,11 @@ def collect_feature_tests
 
           status = /^.*\s{1}(\w+)$/.match( example ).captures.first      
 
-          [ :example => code, :status => status.to_s.downcase ]
+          [ "example" => code, "status" => status.to_s.downcase ]
 
         }.flatten
 
-      }
+      }.flatten
     
 
   }.flatten
@@ -394,6 +404,11 @@ def collect_feature_tests
 
 end
 
+if ARGV.count < 1
+  
+  abort "\nUsage: #{ File.basename( $0 ) } feature_xml_folder [behaviour_xml_folder]\n\n"
+
+end
 
 read_test_result_files # ok
 read_behaviour_xml_files # ok
@@ -424,31 +439,45 @@ doc = Nokogiri::XML::Builder.new{ | xml |
     # TODO: behaviour.hash should have feature type (method/attribute) mentioned  
     # TODO: behaviour.hash should have number of arguments incl. optional + blocks
 
-    collect_all_features.each{ | feature |
+    collect_all_features.sort.each{ | feature |
+    
+      module_name, method_name, feature_type, feature_parameters = feature.split("#")
+      
+      feature = "%s#%s" % [ module_name, method_name ]
+
+      #feature_type = feature_data
+
+      #p feature_data
+      #sleep 0.3
+      
+      #exit
+      #p accessors
+      
+      #sleep 0.2
     
       xml.feature{ 
 
         documented = @documented_features.keys.include?( feature )
-        tested = @executed_tests.keys.include?( feature )
-        module_name, method_name = feature.to_s.split("#")
 
         xml.name!( method_name.to_s )
         xml.module( module_name.to_s )
         xml.full_name( feature.to_s ) 
 
-        xml.documented( documented.to_s )
-        xml.tested( tested.to_s )
-        
-        if documented
-                
-          xml.feature_documentation!{ 
-                
+        xml.type!( feature_type )
+
+        #xml.documented( documented.to_s )
+
+        #xml.tested( tested.to_s )
+            
+        #feature_type = "unknown"
+                        
+        xml.feature_documentation!{ 
+              
+          if documented
+
             feature_documentation = @documented_features[ feature.to_s ]
-
-            # TODO: get this information from .hash file        
-            xml.type!( feature_documentation["type"] )
-
-            xml.title_names{
+                        
+            xml.describes{
 
               feature_documentation["name"].each{ | feature_name |
               
@@ -458,11 +487,50 @@ doc = Nokogiri::XML::Builder.new{ | xml |
 
             }
             
-            accessors << feature.to_s
-
             xml.description( feature_documentation[ "description" ] )
 
             xml.info( feature_documentation[ "info" ] )
+
+            xml.behaviour_name( feature_documentation[ "__behaviour" ][ "name" ] )
+
+            xml.required_plugin( feature_documentation[ "__behaviour" ][ "plugin" ] )
+
+            xml.sut_types{
+            
+              feature_documentation["__behaviour"][ "sut_type" ].each{ | sut_type |
+              
+                xml.type!( sut_type )
+              
+              }
+            }
+
+            xml.sut_versions{
+            
+              feature_documentation["__behaviour"][ "version" ].each{ | sut_version |
+              
+                xml.version!( sut_version )
+              
+              }
+            }
+
+            xml.object_types{
+            
+              feature_documentation["__behaviour"][ "object_type" ].each{ | object_type |
+              
+                xml.version!( object_type )
+              
+              }
+            }
+
+
+            xml.input_types{
+            
+              feature_documentation["__behaviour"][ "input_type" ].each{ | input_type |
+              
+                xml.type!( input_type )
+              
+              }
+            }
             
             xml.arguments{ 
             
@@ -555,19 +623,55 @@ doc = Nokogiri::XML::Builder.new{ | xml |
               } # returns.each
             
             } # xml.exceptions
-                  
-          }
                 
-        end
-        
-        if tested
-        
-        end
-        
-        #p feature
-        #puts "\tdocumented: %s" % [ @documented_features.keys.include?( feature ) ] 
-        #puts "\ttested: %s" % [ @executed_tests.keys.include?( feature ) ] 
+          end
+          
+        }
+                
 
+        #puts ""
+        #p @executed_tests
+        
+        xml.feature_tests!{
+        
+          # TODO: verify that getter and setter is tested when attr_accessor 
+          
+          #tested = @executed_tests.keys.include?( feature )
+          
+          p feature
+          
+          p @executed_tests.keys.select{ | key |
+           
+#            if 
+            p feature_type
+            key == feature 
+            
+            
+            
+          } #include?( feature )
+
+          
+          #if 1 == 2 #tested
+          
+          ["MobyBehaviour::QT::Widget#tap"].each{ | test |
+        
+            ( @executed_tests[test] || [] ).each{ | test |
+            
+              xml.scenario{ 
+
+                xml.status( test[ "status" ] )
+                xml.description( test[ "description" ] )
+                xml.example( test[ "example" ] )
+              
+              } # xml.scenario
+                          
+            } # executed_tests.each
+                  
+          }        
+                    
+          #end
+        } # xml.feature_tests
+        
       }
 
     }
