@@ -22,6 +22,23 @@ module MobyUtil
 
 	# Base class and interface for camera recorders in TDriver
 	class TDriverCam
+	
+	    # Automatically select the right kind of camera implementation for the detected platform.
+	    def self.new_cam( *args )
+		
+		  if EnvironmentHelper.windows?
+		  
+		    return TDriverWinCam.new( *args )
+		  
+		  elsif EnvironmentHelper.linux?
+		  
+		    return TDriverLinuxCam.new( *args )
+			
+		  else
+		    raise RuntimeError.new("Unidentified platform type, unable to select platform specific camera. Supported platform types: Linux, Windows.")
+		  end
+		
+		end
 
 		def initialize
 		  raise RuntimeError.new("TDriverCam abstract class")

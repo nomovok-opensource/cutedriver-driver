@@ -21,13 +21,13 @@ module MobyUtil
 
   class EnvironmentHelper
 
-    UNKNOWN = 0
+    UNKNOWN = :unknown
     
-    LINUX = 1
-    SOLARIS = 2
-    WINDOWS = 4
-    OSX = 8
-    CYGWIN = 16
+    LINUX = :linux
+    SOLARIS = :solaris
+    WINDOWS = :windows
+    OSX = :osx
+    CYGWIN = :cygwin
     
     def self.java?
     

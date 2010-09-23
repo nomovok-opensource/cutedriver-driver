@@ -54,7 +54,7 @@ else
 
       rdoc.install_generator( 'TDriver', File.expand_path( File.join( File.dirname( __FILE__ ), 'lib/custom_rdoc_generator.rb' ) ) )
 
-      rdoc.document( ['--inline-source', '--op', 'output', '--fmt', 'tdriver'] + ARGV )
+      rdoc.document( ['--inline-source', '--op', 'behaviour_xml', '--fmt', 'tdriver'] + ARGV )
 
     }
 
