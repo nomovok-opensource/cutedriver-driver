@@ -31,6 +31,9 @@ static const CRC_16[ 16 ] = {
 };
 
 static VALUE crc16_ibm( VALUE self, VALUE string ) {
+
+  // verify argument type
+  Check_Type( string, T_STRING );
   
   const char* data = RSTRING_PTR( string );
   
