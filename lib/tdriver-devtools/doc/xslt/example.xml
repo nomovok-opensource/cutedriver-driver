@@ -1,17 +1,15 @@
 <?xml version="1.0" encoding="ISO-8859-1"?>
 <features>
 
- <feature type="accessor" name="z;z=">
+ <feature type="accessor" name="z;z=" types="qt" versions="*" input_types="touch" object_types="*;sut" requires_plugin="x">
 
-    <behaviour name="QtGestureBehaviour" module="MobyBehaviour::QT::GestureBehaviour" required_plugin="*" />
-
-    <sut types="qt" versions="*" input_types="touch" />
+    <behaviour name="QtGestureBehaviour" module="MobyBehaviour::QT::GestureBehaviour" />
 
     <description>example desc\nwith example description\nnew line</description>
 
     <info>See method x, y</info>
 
-    <arguments count="1" optional="0">
+    <arguments count="1" optional="0" documented="1">
 
       <argument name="value" optional="false" default="11">
 
@@ -24,7 +22,7 @@
 
     </arguments>
 
-    <returns>
+    <returns documented="1">
 
       <type name="String">
         <description>Return value type\nabba\ndadada</description>

@@ -615,17 +615,46 @@ def generate_document_xml
       
         module_name, method_name, feature_type, feature_parameters = feature.split("#")
 
-        feature_parameters = feature_parameters.split(";")
+        arguments_count, optional_arguments_count = feature_parameters.split(";")
         
         feature = "%s#%s" % [ module_name, method_name ]
+      
+        # make name for feature
+        feature_name = case feature_type
+      
+          when "accessor"
+            [ method_name, method_name + "=" ]
+
+          when "writer"
+            [ method_name + "=" ]
+          
+          when "reader", "method"
+            [ method_name ]
+          
+        else
+        
+          warn("Unknown feature type %s for %s" % [ feature_type, feature_name ] )
+        
+          [ method_name ]
+        
+        end
       
         # get document
 
         documented = @documented_features.keys.include?( feature )
 
+        feature_documentation = {}
+        feature_documentation.default = ""
+
         if documented 
 
+=begin
+          #feature_name = "
+
           feature_documentation = @documented_features[ feature.to_s ]
+            
+         p feature_documentation["name"]
+         sleep 0.5
                       
           xml.describes{
 
@@ -636,44 +665,12 @@ def generate_document_xml
             }
 
           }
+=end
 
-        else
-
+          feature_documentation.merge!( @documented_features[ feature.to_s ] )
           
 
-        end
-        
-        xml.feature(){ 
-
-          xml.name!( method_name.to_s )
-          xml.module( module_name.to_s )
-          xml.full_name( feature.to_s ) 
-
-          xml.type!( feature_type )
-                          
-          xml.arguments{
-          
-            xml.count( feature_parameters[ 0 ] )
-            xml.optional( feature_parameters[ 1 ] )
-          
-          }
-                          
-          xml.feature_documentation!{ 
-                
-            if documented
-
-              feature_documentation = @documented_features[ feature.to_s ]
-                          
-              xml.describes{
-
-                feature_documentation["name"].each{ | feature_name |
-                
-                xml.name( feature_name )
-
-                }
-
-              }
-              
+=begin              
               xml.description( feature_documentation[ "description" ] )
 
               xml.info( feature_documentation[ "info" ] )
@@ -681,43 +678,147 @@ def generate_document_xml
               xml.behaviour_name( feature_documentation[ "__behaviour" ][ "name" ] )
 
               xml.required_plugin( feature_documentation[ "__behaviour" ][ "plugin" ] )
+=end
 
-              xml.sut_types{
+        else
+
+          
+
+        end
+       
+        # <feature type="accessor" name="z;z=" types="qt" versions="*" input_types="touch" object_types="*;sut" requires_plugin="x">
+        xml.feature( 
+          :type => feature_type, 
+          :name => feature_name.join(";"),           
+          :required_plugin => feature_documentation[ "__behaviour" ][ "plugin" ],
+          :sut_type => feature_documentation["__behaviour"][ "sut_type" ].join(";"), 
+          :sut_version => feature_documentation["__behaviour"][ "version" ].join(";"), 
+          :input_type => feature_documentation["__behaviour"][ "input_type" ].join(";"),
+          :object_type => feature_documentation["__behaviour"][ "object_type" ].join(";")
+        ){ 
+
+          # <behaviour name="QtGestureBehaviour" module="MobyBehaviour::QT::GestureBehaviour" />
+          xml.behaviour( 
+            :name => feature_documentation[ "__behaviour" ][ "name" ], 
+            :module => module_name
+          )
+
+          # <description>example</description>
+          xml.description( feature_documentation[ "description" ] )
+
+          # <info>example</info>
+          xml.info( feature_documentation[ "info" ] )
+
+          # <arguments count="1" optional="0" documented="1">
+          xml.arguments( :count => arguments_count, :optional => optional_arguments_count, :documented => feature_documentation[ "arguments" ].count ){
+
+            ( feature_documentation[ "arguments" ] || [] ).each do | argument |
+                                    
+              # <argument name="value" optional="false" default="11">
+              xml.argument( :name => argument[ "name" ].first, :optional => argument[ "optional" ].first, :default => ( argument[ "default" ] || [] ).first ){
+
+                # iterate each argument                            
+                ( argument[ "types" ] || [{}] ).first.each_pair do | argument_type, value |  
+  
+                  # <type name="Integer">
+                  xml.type_( :name => argument_type ){
+
+                    # <description>Example argument</description>
+                    xml.description( value[ "description" ] )
+
+                    # <example>12</example>
+                    xml.example( value[ "example" ] )
+
+                  } # </type>
+
+                end # arguments_types.each
               
-                feature_documentation["__behaviour"][ "sut_type" ].each{ | sut_type |
-                
-                  xml.type!( sut_type )
-                
-                }
-              }
+              } # </argument>
+            
+            end
 
-              xml.sut_versions{
+          } # </arguments>
+
+          # <returns>
+          xml.returns( :documented => feature_documentation[ "returns" ].size ){
+            
+            ( feature_documentation[ "returns" ] || [{}] ).each do | return_value |
+
+              # each return value type
+              return_value.each_pair do | variable_type, value |  
+                                    
+                # <type name="Integer">
+                xml.type_( :name => variable_type ){
+
+                  # <description>Example return value</description>
+                  xml.description( value[ "description" ] || "" )
+
+                  # <example>12</example>
+                  xml.example( value[ "example" ] || "" )
+
+                } # </type>
+
+              end # types.each
+
+            end # returns.each
+            
+          } # </returns>
+
+          # <exceptions>
+          xml.exceptions( :documented => feature_documentation[ "exceptions" ].size ){
+
+            ( feature_documentation[ "exceptions" ] || [{}] ).each do | exception |
+
+              # each exception type
+              exception.each_pair do | exception_type, value |  
+                                    
+                # <type name="Integer">
+                xml.type_( :name => exception_type ){
+
+                  # <description>Example exception</description>
+                  xml.description( value[ "description" ] )
+
+                } # </type>
+
+              end
+
+            end
+            
+          } # </exceptions>
+
+          # collect feature tests for method (1), attr_reader (1), attr_writer (1) and attr_accessor (2)          
+          tests = ["MobyBehaviour::QT::Widget#tap"].collect{ | feature_test | @executed_tests[ feature_test ] }.flatten
+
+          # <tests count="1" passed="0" skipped="0" failed="0">
+          xml.tests( 
+            :count => tests.count, 
+            :passed => tests.select{ | scenario | scenario[ "status" ] == "passed" }.count, 
+            :skipped => tests.select{ | scenario | scenario[ "status" ] == "skipped" }.count, 
+            :failed => tests.select{ | scenario | scenario[ "status" ] == "failed" }.count 
+          ){
+            
+            tests.each do | scenario |
+                                                                   
+              # <scenario type="reader" status="passed">
+              xml.scenario( 
+                :type => ( feature_type == "accessor" ? ( ( scenario[-1] == ?= ) ? "writer" : "reader" ) : feature_type ), 
+                :status => scenario[ "status" ] 
+              ){
               
-                feature_documentation["__behaviour"][ "version" ].each{ | sut_version |
-                
-                  xml.version!( sut_version )
-                
-                }
-              }
+                # <description>Example scenario</description>
+                xml.description( "" )
 
-              xml.object_types{
+                # <example>code</example>
+                xml.example( scenario[ "example" ] )
               
-                feature_documentation["__behaviour"][ "object_type" ].each{ | object_type |
-                
-                  xml.version!( object_type )
-                
-                }
-              }
+              } # </scenario>
 
+            end
 
-              xml.input_types{
-              
-                feature_documentation["__behaviour"][ "input_type" ].each{ | input_type |
-                
-                  xml.type!( input_type )
-                
-                }
-              }
+          } # </tests>
+          
+=begin                          
+
               
               xml.arguments{ 
               
@@ -814,8 +915,9 @@ def generate_document_xml
             end
             
           }
+=end
                   
-          
+=begin          
           xml.feature_tests!{
       
             case feature_type
@@ -852,6 +954,8 @@ def generate_document_xml
             }        
                       
           } # xml.feature_tests
+
+=end
           
         }
 
