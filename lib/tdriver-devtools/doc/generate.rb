@@ -63,6 +63,7 @@ def process_result_file( content )
 
   }
 
+=begin
   { result["description"].first => 
 
     result["scenarios"].collect{ | scenario |
@@ -79,6 +80,7 @@ def process_result_file( content )
 
     }.flatten
   }
+=end
 
   result
 
@@ -274,7 +276,9 @@ end
 
 def read_test_result_files
 
-  Dir.glob( 'feature_xml/*.xml' ).each{ | file |
+  feature_xml_folder = ARGV.first.to_s
+
+  Dir.glob( File.join( feature_xml_folder, '*.xml' ) ).each{ | file |
 
     @current_file = file
 
@@ -300,7 +304,9 @@ end
 
 def read_behaviour_hash_files
 
-  Dir.glob( 'behaviour_xml/*.hash' ).each{ | file |
+  file = ARGV[1] || 'behaviour_xml/'
+
+  Dir.glob( File.join( file, '*.hash' ) ).each{ | file |
 
     @current_file = file
 
@@ -315,9 +321,11 @@ def read_behaviour_hash_files
 
   }
 
+  abort "No behaviour XML files found from folder '#{ file }'" if @behaviour_hashes.empty?
+
 end
 
-def collect_all_methods
+def collect_all_features
 
   @behaviour_hashes.collect{ | module_name, methods |
 
@@ -331,13 +339,15 @@ def collect_all_methods
 
 end
 
-def collect_all_behaviours
+def collect_documented_features
 
   behaviours = {}
 
   @behaviours.each{ | behaviour |
   
     file_name = behaviour[ :filename ]
+
+    behaviour_config = behaviour[:behaviours]["__config"] || {}
   
     behaviour[:behaviours]["behaviours"].each{ | behaviour |
 
@@ -350,8 +360,8 @@ def collect_all_behaviours
       behaviour["methods"].each{ | method |
         
         method["name"].each{ | method_name |
-        
-          behaviours[ "%s#%s" % [ module_name, method_name ] ] = method.merge( "__file" => file_name, "__behaviour" => config )
+                
+          behaviours[ "%s#%s" % [ module_name, method_name ] ] = method.merge( "__file" => file_name, "__behaviour" => config.merge( behaviour_config ) )
           
         }
         
@@ -381,11 +391,11 @@ def collect_feature_tests
 
           status = /^.*\s{1}(\w+)$/.match( example ).captures.first      
 
-          [ :example => code, :status => status.to_s.downcase ]
+          [ "example" => code, "status" => status.to_s.downcase ]
 
         }.flatten
 
-      }
+      }.flatten
     
 
   }.flatten
@@ -394,21 +404,267 @@ def collect_feature_tests
 
 end
 
+if ARGV.count < 1
+  
+  abort "\nUsage: #{ File.basename( $0 ) } feature_xml_folder [behaviour_xml_folder]\n\n"
+
+end
 
 read_test_result_files # ok
 read_behaviour_xml_files # ok
 read_behaviour_hash_files # ok
 
 puts "", "----", ""
+#puts "all executed feature tests:"
+@executed_tests = collect_feature_tests
 
-p collect_feature_tests.keys
+#puts ""
+#puts "all available features:"
+@all_features = collect_all_features
 
-puts ""
+#puts ""
+#puts "all documented features:"
+@documented_features = collect_documented_features
 
-p collect_all_methods
+accessors = []
+
+doc = Nokogiri::XML::Builder.new{ | xml |
+
+  #p doc.to_xml
+  #p doc.to_xml
+  #exit
+
+  xml.documentation{
+
+    # TODO: behaviour.hash should have feature type (method/attribute) mentioned  
+    # TODO: behaviour.hash should have number of arguments incl. optional + blocks
+
+    collect_all_features.sort.each{ | feature |
+    
+      module_name, method_name, feature_type, feature_parameters = feature.split("#")
+
+      feature_parameters = feature_parameters.split(";")
+      
+      feature = "%s#%s" % [ module_name, method_name ]
+    
+      xml.feature{ 
+
+        documented = @documented_features.keys.include?( feature )
+
+        xml.name!( method_name.to_s )
+        xml.module( module_name.to_s )
+        xml.full_name( feature.to_s ) 
+
+        xml.type!( feature_type )
+                        
+        xml.arguments{
+        
+          xml.count( feature_parameters[0] )
+          xml.optional( feature_parameters[1] )
+        
+        }
+                        
+        xml.feature_documentation!{ 
+              
+          if documented
+
+            feature_documentation = @documented_features[ feature.to_s ]
+                        
+            xml.describes{
+
+              feature_documentation["name"].each{ | feature_name |
+              
+              xml.name( feature_name )
+
+              }
+
+            }
+            
+            xml.description( feature_documentation[ "description" ] )
+
+            xml.info( feature_documentation[ "info" ] )
+
+            xml.behaviour_name( feature_documentation[ "__behaviour" ][ "name" ] )
+
+            xml.required_plugin( feature_documentation[ "__behaviour" ][ "plugin" ] )
+
+            xml.sut_types{
+            
+              feature_documentation["__behaviour"][ "sut_type" ].each{ | sut_type |
+              
+                xml.type!( sut_type )
+              
+              }
+            }
+
+            xml.sut_versions{
+            
+              feature_documentation["__behaviour"][ "version" ].each{ | sut_version |
+              
+                xml.version!( sut_version )
+              
+              }
+            }
+
+            xml.object_types{
+            
+              feature_documentation["__behaviour"][ "object_type" ].each{ | object_type |
+              
+                xml.version!( object_type )
+              
+              }
+            }
 
 
-puts ""
-p collect_all_behaviours.keys
+            xml.input_types{
+            
+              feature_documentation["__behaviour"][ "input_type" ].each{ | input_type |
+              
+                xml.type!( input_type )
+              
+              }
+            }
+            
+            xml.arguments{ 
+            
+              ( feature_documentation[ "arguments" ] || [] ).each{ | argument |
+              
+                xml.argument{
+                
+                  xml.name!( ( argument[ "name" ] || ["NoMethodName"] ).first ) 
+                  
+                  xml.optional( ( argument[ "optional" ] || [] ).first == "true" )
+     
+                  xml.types{ 
+                  
+                    argument[ "types" ].each{ | type |
+                    
+                      type.each_pair{ | key, value |
 
-#p $feature_tests
+                          xml.type!{ 
+
+                            xml.name!( key.to_s )
+
+                            # store each key & value as is                        
+                            value.each_pair{ | key, value | 
+                              
+                              xml.send( key.to_sym, value.to_s )
+
+                            } # type.value.each_pair
+                          
+                          } # type
+                          
+                      } # type.each_pair
+                      
+                    } # types.each
+                  
+                  } # xml.types
+                  
+                } # xml.argument
+                            
+              } # xml.arguments.each
+                          
+            } # xml.arguments
+            
+
+            xml.returns{
+            
+              ( feature_documentation[ "returns" ] || [] ).each{ | returns |
+
+                returns.each_pair{ | key, value |
+
+                    xml.type!{ 
+
+                      xml.name!( key.to_s )
+
+                      # store each key & value as is                        
+                      value.each_pair{ | key, value | 
+                        
+                        xml.send( key.to_sym, value.to_s )
+
+                      } # type.value.each_pair
+                    
+                    } # type
+                    
+                } # type.each_pair
+
+              } # returns.each
+            
+            } # xml.returns
+
+            xml.exceptions{
+            
+              ( feature_documentation[ "exceptions" ] || [] ).each{ | returns |
+
+                returns.each_pair{ | key, value |
+
+                    xml.type!{ 
+
+                      xml.name!( key.to_s )
+
+                      # store each key & value as is                        
+                      value.each_pair{ | key, value | 
+                        
+                        xml.send( key.to_sym, value.to_s )
+
+                      } # type.value.each_pair
+                    
+                    } # type
+                    
+                } # type.each_pair
+
+              } # returns.each
+            
+            } # xml.exceptions
+                
+          end
+          
+        }
+                
+        
+        xml.feature_tests!{
+    
+          case feature_type
+          
+            when /accessor/i
+              tests = [ feature, "%s=" % feature ]
+
+            when /writer/i
+              tests = [ "%s=" % feature ]
+            
+            when /method/i, /reader/i            
+              tests = [ feature ]
+          
+          end
+          
+          tests.each{ | test_feature |
+                
+            ( @executed_tests[ test_feature ] || [] ).each{ | test |
+            
+              xml.scenario{ 
+
+                xml.type!( feature_type == "accessor" ? ( ( test_feature[-1] == ?= ) ? "writer" : "reader" ) : feature_type )
+                    
+                xml.status( test[ "status" ] )
+                xml.description( test[ "description" ] )
+                xml.example( test[ "example" ] )
+              
+              } # xml.scenario
+                          
+            } # executed_tests.each
+                  
+          }        
+                    
+        } # xml.feature_tests
+        
+      }
+
+    }
+
+  }
+}
+
+puts doc.to_xml
+p accessors
+
+

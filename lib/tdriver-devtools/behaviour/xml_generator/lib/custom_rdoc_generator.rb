@@ -594,18 +594,68 @@ EXAMPLE
 
     end
 
-    def store_to_results( module_name, name )
+    def store_to_results( module_name, name, type, params )
 
       unless @found_modules_and_methods.has_key?( module_name )
 
         @found_modules_and_methods[ module_name ] = []
 
       end
+      
+      #p params.select{ | param | param.last == false }
+      #p params.select{ | param | param.last == true }
 
-      @found_modules_and_methods[ module_name ] << name
+      #exit
+
+      count = "%s;%s" % [ params.count, params.select{ | param | param.last == true }.count ]
+
+      @found_modules_and_methods[ module_name ] << "%s#%s#%s" % [ name, type, count ] #{ :name => name, :type => type }
 
     end
 
+    def process_arguments( arguments )
+
+      # tokenize string
+      tokenizer = RubyLex.new( arguments )
+
+      # get first token
+      token = tokenizer.token
+
+      # set previous token to nil by default
+      previous_token = nil
+
+      args = []
+
+      # loop while tokens available
+      while token
+
+        # argument name
+        if token.kind_of?( RubyToken::TkIDENTIFIER )
+
+          args << [ token.name, false ]
+
+          # &blocks and *arguments are handled as optional parameters
+          args.last[ -1 ] = true if [ RubyToken::TkBITAND, RubyToken::TkMULT ].include?( previous_token.class )
+
+        # detect optional argument
+        elsif token.kind_of?( RubyToken::TkASSIGN )
+
+          # mark arguments as optional
+          args.last[ -1 ] = true
+
+        end
+
+        # store previous token
+        previous_token = token
+
+        # get next token
+        token = tokenizer.token
+
+      end
+
+      args
+
+    end
 
     def process_method( method )
 
@@ -615,18 +665,9 @@ EXAMPLE
 
       if ( method.visibility == :public && @module_path.first =~ /MobyBehaviour/ )
 
+        params = method.kind_of?( RDoc::Attr ) ? [] : process_arguments( method.params )
 
         @current_method = method
-
- #       p method.methods.sort
-
-        #p method.name
-
-        #p method.section
-
-        #p method.param_seq unless method.class == RDoc::Attr
-
-#exit
 
         method_header = process_comment( method.comment )
 
@@ -660,20 +701,23 @@ EXAMPLE
 
         method_name = method.name.clone
 
+        type = "method"
+
         if method.kind_of?( RDoc::Attr )
 
           case method.rw
 
             when "R"
               type = "reader"
+              #store_to_results( @module_path.join("::"), method.name, type )
             when "W"
               type = "writer"
               method_name << "="
-              store_to_results( @module_path.join("::"), method.name + "=" )
+              #store_to_results( @module_path.join("::"), method.name + "=", type )
             when "RW"
               type = "accessor"
               method_name << ";#{ method_name }="
-              store_to_results( @module_path.join("::"), method.name + "=" )
+              #store_to_results( @module_path.join("::"), method.name + "=", type )
 
           else
 
@@ -681,15 +725,18 @@ EXAMPLE
 
           end
 
+          #store_to_results( @module_path.join("::"), method.name, type )
+
           method_header.merge!( :__type => type )
 
         else
 
           method_header.merge!( :__type => "method" )
 
+          
         end
 
-        store_to_results( @module_path.join("::"), method.name )
+        store_to_results( @module_path.join("::"), method.name, type, params )
 
         # do something
         [ method_name, method_header ]
