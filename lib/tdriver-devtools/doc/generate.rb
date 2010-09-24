@@ -709,8 +709,8 @@ def generate_document_xml
           # <info>example</info>
           xml.info( feature_documentation[ "info" ] )
 
-          # <arguments count="1" optional="0" documented="1">
-          xml.arguments( :count => arguments_count, :optional => optional_arguments_count, :documented => feature_documentation[ "arguments" ].count ){
+          # <arguments count="1" optional="0" described="1">
+          xml.arguments( :count => arguments_count, :optional => optional_arguments_count, :described => feature_documentation[ "arguments" ].count ){
 
             ( feature_documentation[ "arguments" ] || [] ).each do | argument |
                                     
@@ -740,7 +740,7 @@ def generate_document_xml
           } # </arguments>
 
           # <returns>
-          xml.returns( :documented => feature_documentation[ "returns" ].size ){
+          xml.returns( :described => feature_documentation[ "returns" ].size ){
             
             ( feature_documentation[ "returns" ] || [{}] ).each do | return_value |
 
@@ -765,7 +765,7 @@ def generate_document_xml
           } # </returns>
 
           # <exceptions>
-          xml.exceptions( :documented => feature_documentation[ "exceptions" ].size ){
+          xml.exceptions( :described => feature_documentation[ "exceptions" ].size ){
 
             ( feature_documentation[ "exceptions" ] || [{}] ).each do | exception |
 

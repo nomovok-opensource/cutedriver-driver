@@ -33,20 +33,20 @@
           module_name: <xsl:value-of select="behaviour/@module" />
 
           <!-- required plugin -->
-          required_plugin: <xsl:value-of select="behaviour/@required_plugin" />
+          required_plugin: <xsl:value-of select="@required_plugin" />
 
           <!-- feature is applied to following sut types, remember to use xsl:for-each -->
-          sut_types: <xsl:for-each select="str:split(sut/@types,';')">
+          sut_types: <xsl:for-each select="str:split(@sut_type,';')">
              <xsl:value-of select="." /><xsl:text>&nbsp;</xsl:text>
           </xsl:for-each>
 
           <!-- feature is applied to following sut versions, remember to use xsl:for-each -->
-          sut_versions: <xsl:for-each select="str:split(sut/@versions,';')">
+          sut_versions: <xsl:for-each select="str:split(@sut_version,';')">
              <xsl:value-of select="." /><xsl:text>&nbsp;</xsl:text>
           </xsl:for-each>
 
           <!-- feature is applied to suts with following input type, remember to use xsl:for-each -->
-          input_types:<xsl:for-each select="str:split(sut/@input_types,';')">
+          input_types: <xsl:for-each select="str:split(@input_type,';')">
              <xsl:value-of select="." /><xsl:text>&nbsp;</xsl:text>
           </xsl:for-each>
 
@@ -57,10 +57,11 @@
           optional_arguments_count:<xsl:value-of select="arguments/@optional" />
 
           <!-- arguments-documented -->
-          documented_arguments_count: <xsl:value-of select="count(arguments/argument)" />
+          documented_arguments_count: <xsl:value-of select="arguments/@described"/>
 
           <!-- arguments element -->
           arguments: <xsl:for-each select="arguments/argument">
+
             name: <xsl:value-of select="@name"/>
             optional: <xsl:value-of select="@optional"/>
             default_value: <xsl:value-of select="@default"/>
@@ -74,8 +75,11 @@
 
           </xsl:for-each>
 
+            returns_described: <xsl:value-of select="returns/@described"/>
+
           <!-- returns element -->
           <xsl:for-each select="returns/type">
+
             returns_name: <xsl:value-of select="@name"/>
             returns_example: <xsl:value-of select="example"/>
             <!-- return value description (splitted with '\n') -->
@@ -85,19 +89,30 @@
 
           </xsl:for-each>
 
+            exceptions_described: <xsl:value-of select="exceptions/@described"/>
+
           <!-- exceptions element -->
           <xsl:for-each select="exceptions/type">
+
             exception_type: <xsl:value-of select="@name"/>
             <!-- description (splitted with '\n') -->
-            exception_description: <xsl:for-each select="str:split(@description,'\n')">
+            exception_description: <xsl:for-each select="str:split(description,'\n')">
               <xsl:value-of select="text()" /><br />
             </xsl:for-each>
           </xsl:for-each>
 
+            tests_count: <xsl:value-of select="tests/@count"/>
+            tests_passed: <xsl:value-of select="tests/@passed"/>
+            tests_failed: <xsl:value-of select="tests/@failed"/>
+            tests_skipped: <xsl:value-of select="tests/@skipped"/>
+
           <!-- tests element -->
           <xsl:for-each select="tests/scenario">
+
             type: <xsl:value-of select="@type"/>
             status: <xsl:value-of select="@status"/>
+
+
             <!-- description (splitted with '\n') -->
             scenario_description: <xsl:for-each select="str:split(description,'\n')">
               <xsl:value-of select="text()" /><br />

@@ -1,72 +1,66 @@
 <?xml version="1.0" encoding="ISO-8859-1"?>
 <features>
 
- <feature type="accessor" name="z;z=" types="qt" versions="*" input_types="touch" object_types="*;sut" requires_plugin="x">
-
-    <behaviour name="QtGestureBehaviour" module="MobyBehaviour::QT::GestureBehaviour" />
-
-    <description>example desc\nwith example description\nnew line</description>
-
-    <info>See method x, y</info>
-
-    <arguments count="1" optional="0" documented="1">
-
-      <argument name="value" optional="false" default="11">
-
+  <feature type="method" object_type="*;sut" required_plugin="*" sut_type="qt" sut_version="*" name="flick" input_type="touch">
+    <behaviour module="MobyBehaviour::QT::Gesture" name="QtExampleGestureBehaviour"/>
+    <description>Cause a flick operation on the screen.</description>
+    <info>See method X, table at Y</info>
+    <arguments count="3" optional="2" described="3">
+      <argument optional="false" name="direction" default="">
         <type name="Integer">
-          <description>Example argument1\ndada\ndodo</description>
-          <example>12</example>
+          <description>Example argument1</description>
+          <example>10</example>
         </type>
-
       </argument>
-
+      <argument optional="true" name="button" default=":Left">
+        <type name="String">
+          <description>which button to use</description>
+          <example>"Hello"</example>
+        </type>
+      </argument>
+      <argument optional="true" name="optional_params" default="{}">
+        <type name="String">
+          <description>optinal parameters for blaa blaa blaa</description>
+          <example>{:a =&gt; 1, :b =&gt; 2}</example>
+        </type>
+      </argument>
     </arguments>
-
-    <returns documented="1">
-
+    <returns described="2">
       <type name="String">
-        <description>Return value type\nabba\ndadada</description>
-        <example>&quot;World&quot;</example>
+        <description>Return value type</description>
+        <example>"World"</example>
       </type>
-
+      <type name="Integer">
+        <description>Return value type</description>
+        <example>1</example>
+      </type>
     </returns>
-      
-    <exceptions>
-
+    <exceptions described="2">
       <type name="RuntimeError">
         <description>example exception</description>
       </type>
-  
       <type name="ArgumentError">
-        <description>example exception2</description>
+        <description>example exception</description>
       </type>
-
     </exceptions>
-
-    <tests>
-
-      <scenario type="reader" status="passed">
+    <tests count="4" passed="1" skipped="3" failed="0">
+      <scenario status="passed" type="method">
         <description></description>
         <example>@app.Button(:name =&gt; 'oneButton').tap</example>
       </scenario>
-
-      <scenario type="reader" status="skipped">
+      <scenario status="skipped" type="method">
         <description></description>
         <example>@app.[SOME_OBJECT].tap(tap_params)</example>
       </scenario>
-
-      <scenario type="reader" status="skipped">
+      <scenario status="skipped" type="method">
         <description></description>
         <example>@app.[SOME_OBJECT].tap(tap_params, interval)</example>
       </scenario>
-
-      <scenario type="reader" status="skipped">
+      <scenario status="skipped" type="method">
         <description></description>
         <example>@app.[SOME_OBJECT].tap(tap_params, interval, button)</example>
       </scenario>
-
-    <tests>
-
+    </tests>
   </feature>
 
 </features>
