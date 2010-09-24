@@ -1,0 +1,74 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+<features>
+
+ <feature type="accessor" name="z;z=">
+
+    <behaviour name="QtGestureBehaviour" module="MobyBehaviour::QT::GestureBehaviour" required_plugin="*" />
+
+    <sut types="qt" versions="*" input_types="touch" />
+
+    <description>example desc\nwith example description\nnew line</description>
+
+    <info>See method x, y</info>
+
+    <arguments count="1" optional="0">
+
+      <argument name="value" optional="false" default="11">
+
+        <type name="Integer">
+          <description>Example argument1\ndada\ndodo</description>
+          <example>12</example>
+        </type>
+
+      </argument>
+
+    </arguments>
+
+    <returns>
+
+      <type name="String">
+        <description>Return value type\nabba\ndadada</description>
+        <example>&quot;World&quot;</example>
+      </type>
+
+    </returns>
+      
+    <exceptions>
+
+      <type name="RuntimeError">
+        <description>example exception</description>
+      </type>
+  
+      <type name="ArgumentError">
+        <description>example exception2</description>
+      </type>
+
+    </exceptions>
+
+    <tests>
+
+      <scenario type="reader" status="passed">
+        <description></description>
+        <example>@app.Button(:name =&gt; 'oneButton').tap</example>
+      </scenario>
+
+      <scenario type="reader" status="skipped">
+        <description></description>
+        <example>@app.[SOME_OBJECT].tap(tap_params)</example>
+      </scenario>
+
+      <scenario type="reader" status="skipped">
+        <description></description>
+        <example>@app.[SOME_OBJECT].tap(tap_params, interval)</example>
+      </scenario>
+
+      <scenario type="reader" status="skipped">
+        <description></description>
+        <example>@app.[SOME_OBJECT].tap(tap_params, interval, button)</example>
+      </scenario>
+
+    <tests>
+
+  </feature>
+
+</features>
