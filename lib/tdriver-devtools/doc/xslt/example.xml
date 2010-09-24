@@ -11,15 +11,20 @@
           <description>Example argument1</description>
           <example>10</example>
         </type>
+        <type name="String">
+          <description>Example argument1.2</description>
+          <example>"Hello"</example>
+          <default>fdfd</default>
+        </type>
       </argument>
       <argument optional="true" name="button" default=":Left">
-        <type name="String">
+        <type name="Symbol">
           <description>which button to use</description>
-          <example>"Hello"</example>
+          <example>:Left</example>
         </type>
       </argument>
       <argument optional="true" name="optional_params" default="{}">
-        <type name="String">
+        <type name="Hash">
           <description>optinal parameters for blaa blaa blaa</description>
           <example>{:a =&gt; 1, :b =&gt; 2}</example>
         </type>
