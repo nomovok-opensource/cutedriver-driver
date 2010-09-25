@@ -180,6 +180,7 @@
               <xsl:attribute name="class">
                 <xsl:value-of select="@status"/>
               </xsl:attribute>
+              <xsl:text># scenario </xsl:text><xsl:value-of select="@status" /><br />
               <xsl:for-each select="str:split(example,'\n')">
                 <xsl:value-of select="text()" /><br />
               </xsl:for-each><br />

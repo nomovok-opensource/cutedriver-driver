@@ -1,0 +1,3 @@
+ruby html.rb > output.html
+cat output.html
+
