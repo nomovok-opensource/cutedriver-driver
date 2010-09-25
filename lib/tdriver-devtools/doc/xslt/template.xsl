@@ -67,6 +67,59 @@
             <b><xsl:value-of select="."/></b><br />
           </xsl:for-each>
           <br />
+
+          <small>
+                      
+            <!-- method: call example using parameters -->
+            <xsl:if test="@type='method'">
+            
+              object.<xsl:value-of select="@name" />
+
+              <xsl:choose>
+
+                <xsl:when test="count(arguments/argument)=0">()</xsl:when>
+                
+                <xsl:when test="count(arguments/argument)>0">
+                  (      
+                    <!-- collect arguments for example -->
+                    <xsl:for-each select="arguments/argument">
+
+                      <xsl:if test="@optional='true'"><xsl:text>[</xsl:text></xsl:if>                     
+                      <xsl:value-of select="@name"/>
+                      <xsl:if test="@optional='true'"><xsl:text>]</xsl:text></xsl:if> 
+
+                      <xsl:if test="position()!=last()">
+                      <xsl:text>, </xsl:text>
+                      </xls:if>
+                    </xsl:for-each>
+                  )
+                </xsl:when>
+                          
+              </xsl:choose>
+
+              <!-- describe block usage --> 
+              <xsl:if test="count(arguments/block)>0">
+                <xsl:text>{ </xsl:text>
+                <!-- TODO: block arguments -->
+                <xsl:value-of select="arguments/block/@name" />
+                <xsl:text> }</xsl:text>
+              </xsl:if>
+              <br />
+            </xsl:if>
+
+            <!-- attr_reader/attr_accessor: call example -->
+            <xsl:if test="@type='reader' or @type='accessor'">
+              return_value = object.<xsl:value-of select="@name" /><br />
+            </xsl:if>
+
+            <!-- attr_writer/attr_accessor: call example -->
+            <xsl:if test="@type='writer' or @type='accessor'">
+              <!-- TODO: argument name from arguments array -->
+              object.<xsl:value-of select="@name" /> = ( value )<br />
+            </xsl:if>
+
+          </small>
+          <br />
           
           <!-- display feature description (split lines with '\n') -->
           <xsl:for-each select="str:split(description,'\n')" name="value">
