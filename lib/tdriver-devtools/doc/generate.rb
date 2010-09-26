@@ -787,7 +787,17 @@ def generate_document_xml
           } # </exceptions>
 
           # collect feature tests for method (1), attr_reader (1), attr_writer (1) and attr_accessor (2)          
-          tests = ["MobyBehaviour::QT::Widget#tap"].collect{ | feature_test | @executed_tests[ feature_test ] }.flatten
+          names = feature_name.collect{ | name | 
+          
+            feature.split("#").first + "#" + name 
+            
+          }
+          
+          tests = names.collect{ | feature_test |
+          
+            { feature_test => @executed_tests[ feature_test ] || {} }  
+            
+          }.flatten
 
           # <tests count="1" passed="0" skipped="0" failed="0">
           xml.tests( 
@@ -798,164 +808,34 @@ def generate_document_xml
           ){
             
             tests.each do | scenario |
-                                                                   
-              # <scenario type="reader" status="passed">
-              xml.scenario( 
-                :type => ( feature_type == "accessor" ? ( ( scenario[-1] == ?= ) ? "writer" : "reader" ) : feature_type ), 
-                :status => scenario[ "status" ] 
-              ){
+          
+              scenario.each_pair do | scenario_name, scenarios |
               
-                # <description>Example scenario</description>
-                xml.description( "" )
+                scenarios.each do | scenario_value | 
 
-                # <example>code</example>
-                xml.example( scenario[ "example" ] )
+                  # <scenario type="reader" status="passed">
+                  xml.scenario( 
+                  
+                    :type => ( feature_type == "accessor" ? ( ( scenario_name[-1] == ?= ) ? "writer" : "reader" ) : feature_type ), 
+                    :status => scenario_value[ "status" ] 
+
+                  ){
+                  
+                    # <description>Example scenario</description>
+                    xml.description( "" )
+
+                    # <example>code</example>
+                    xml.example( scenario_value[ "example" ] )
+                  
+                  } # </scenario>
+                  
+                end
               
-              } # </scenario>
+              end
 
             end
 
           } # </tests>
-          
-=begin                          
-
-              
-              xml.arguments{ 
-              
-                ( feature_documentation[ "arguments" ] || [] ).each{ | argument |
-                
-                  xml.argument{
-                  
-                    xml.name!( ( argument[ "name" ] || ["NoMethodName"] ).first ) 
-                    
-                    xml.optional( ( argument[ "optional" ] || [] ).first == "true" )
-       
-                    xml.types{ 
-                    
-                      argument[ "types" ].each{ | type |
-                      
-                        type.each_pair{ | key, value |
-
-                            xml.type!{ 
-
-                              xml.name!( key.to_s )
-
-                              # store each key & value as is                        
-                              value.each_pair{ | key, value | 
-                                
-                                xml.send( key.to_sym, value.to_s )
-
-                              } # type.value.each_pair
-                            
-                            } # type
-                            
-                        } # type.each_pair
-                        
-                      } # types.each
-                    
-                    } # xml.types
-                    
-                  } # xml.argument
-                              
-                } # xml.arguments.each
-                            
-              } # xml.arguments
-              
-
-              xml.returns{
-              
-                ( feature_documentation[ "returns" ] || [] ).each{ | returns |
-
-                  returns.each_pair{ | key, value |
-
-                      xml.type!{ 
-
-                        xml.name!( key.to_s )
-
-                        # store each key & value as is                        
-                        value.each_pair{ | key, value | 
-                          
-                          xml.send( key.to_sym, value.to_s )
-
-                        } # type.value.each_pair
-                      
-                      } # type
-                      
-                  } # type.each_pair
-
-                } # returns.each
-              
-              } # xml.returns
-
-              xml.exceptions{
-              
-                ( feature_documentation[ "exceptions" ] || [] ).each{ | returns |
-
-                  returns.each_pair{ | key, value |
-
-                      xml.type!{ 
-
-                        xml.name!( key.to_s )
-
-                        # store each key & value as is                        
-                        value.each_pair{ | key, value | 
-                          
-                          xml.send( key.to_sym, value.to_s )
-
-                        } # type.value.each_pair
-                      
-                      } # type
-                      
-                  } # type.each_pair
-
-                } # returns.each
-              
-              } # xml.exceptions
-                  
-            end
-            
-          }
-=end
-                  
-=begin          
-          xml.feature_tests!{
-      
-            case feature_type
-            
-              when /accessor/i
-                tests = [ feature, "%s=" % feature ]
-
-              when /writer/i
-                tests = [ "%s=" % feature ]
-              
-              when /method/i, /reader/i            
-                tests = [ feature ]
-            
-            end
-
-            #tests = ["MobyBehaviour::QT::Widget#tap"]
-            
-            tests.each{ | test_feature |
-                  
-              ( @executed_tests[ test_feature ] || [] ).each{ | test |
-              
-                xml.scenario{ 
-
-                  xml.type!( feature_type == "accessor" ? ( ( test_feature[-1] == ?= ) ? "writer" : "reader" ) : feature_type )
-                      
-                  xml.status( test[ "status" ] )
-                  xml.description( test[ "description" ] )
-                  xml.example( test[ "example" ] )
-                
-                } # xml.scenario
-                            
-              } # executed_tests.each
-                    
-            }        
-                      
-          } # xml.feature_tests
-
-=end
           
         }
 
