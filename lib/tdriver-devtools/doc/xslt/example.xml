@@ -5,23 +5,29 @@
     <behaviour module="MobyBehaviour::QT::Gesture" name="QtExampleGestureBehaviour"/>
     <description>Cause a flick operation on the screen.</description>
     <info>See method X, table at Y</info>
-    <arguments count="3" optional="2" described="3">
-      <argument optional="false" name="direction" default="">
+    <arguments count="3" optional="2" described="3" block="true">
+      <argument type="argument" optional="false" name="direction" default="">
         <type name="Integer">
           <description>Example argument1</description>
           <example>10</example>
         </type>
       </argument>
-      <argument optional="true" name="button" default=":Left">
+      <argument type="argument" optional="true" name="button" default=":Left">
         <type name="String">
           <description>which button to use</description>
           <example>"Hello"</example>
         </type>
       </argument>
-      <argument optional="true" name="optional_params" default="{}">
+      <argument type="argument" optional="true" name="optional_params" default="{}">
         <type name="String">
           <description>optinal parameters for blaa blaa blaa</description>
           <example>{:a =&gt; 1, :b =&gt; 2}</example>
+        </type>
+      </argument>
+      <argument type="block" optional="true" name="block" default="">
+        <type name="Proc">
+          <description>Block block block</description>
+          <example></example>
         </type>
       </argument>
     </arguments>

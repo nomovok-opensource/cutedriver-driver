@@ -102,15 +102,33 @@
             <!-- collect arguments for example -->
             <xsl:for-each select="arguments/argument">
 
-              <xsl:if test="@optional='true'"><xsl:text>[</xsl:text></xsl:if>                     
-              <xsl:value-of select="@name"/>
-              <xsl:if test="@optional='true'"><xsl:text>]</xsl:text></xsl:if> 
+              <xsl:if test="@type='argument'">
+              
+                <xsl:if test="@optional='true'">[</xsl:if>                     
+                <xsl:value-of select="@name"/>
+                <xsl:if test="@optional='true'">]</xsl:if> 
 
-              <xsl:if test="position()!=last()">
-                <xsl:text>, </xsl:text>
+                <!-- separate arguments with comma if next argument defintion is not type of block --> 
+                <xsl:if test="position()!=last() and following-sibling::argument/@type!='block'">
+                  <xsl:text>, </xsl:text>
+                </xsl:if>
+                
               </xsl:if>
+              
             </xsl:for-each>
           )
+          
+          <!-- collect arguments for example -->
+          <xsl:for-each select="arguments/argument">
+
+                <xsl:if test="./@type='block'">
+                
+                  <xsl:text>{ </xsl:text><xsl:value-of select="@name"/><xsl:text> }</xsl:text>
+                
+                </xsl:if>
+                
+          </xsl:for-each>
+
         </xsl:when>
                   
       </xsl:choose>
@@ -332,7 +350,7 @@
   <xsl:apply-templates select="argument" />
   
   <!-- show error message if argument are not described -->
-  <xsl:if test="count(argument)!=@count">
+  <xsl:if test="count(argument)&lt;@count">
     <tr>
     <td colspan="5" class="missing">
       Incomplete documentation: only <xsl:value-of select="count(argument)" />  of <xsl:value-of select="@count" /> arguments documented
@@ -409,7 +427,6 @@
 
 </xsl:template>
 
-
 <xsl:template match="description">
 
   <xsl:if test="string-length(text())>0">
@@ -421,7 +438,6 @@
   </xsl:if>
 
   <xsl:if test="string-length(text())=0">
-    <!-- display feature description (split lines with '\n') -->
     <div class="missing">Incomplete documentation: No feature description defined</div>
     <br />
   </xsl:if>
