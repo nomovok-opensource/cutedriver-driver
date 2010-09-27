@@ -1,6 +1,6 @@
-<?xml version="1.0" encoding="ISO-8859-1"?>
-<features>
-
+<?xml version="1.0"?>
+<?xml-stylesheet type="text/xsl" href="template.xsl"?>
+<documentation>
   <feature type="method" object_type="*;sut" required_plugin="*" sut_type="qt" sut_version="*" name="flick" input_type="touch">
     <behaviour module="MobyBehaviour::QT::Gesture" name="QtExampleGestureBehaviour"/>
     <description>Cause a flick operation on the screen.</description>
@@ -10,21 +10,21 @@
         <type name="Integer">
           <description>Example argument1</description>
           <example>10</example>
+          <default>def</default>
         </type>
         <type name="String">
-          <description>Example argument1.2</description>
-          <example>"Hello"</example>
-          <default>fdfd</default>
+          <description>Example argument type2</description>
+          <example>Hello</example>
         </type>
       </argument>
       <argument optional="true" name="button" default=":Left">
-        <type name="Symbol">
+        <type name="String">
           <description>which button to use</description>
-          <example>:Left</example>
+          <example>"Hello"</example>
         </type>
       </argument>
       <argument optional="true" name="optional_params" default="{}">
-        <type name="Hash">
+        <type name="String">
           <description>optinal parameters for blaa blaa blaa</description>
           <example>{:a =&gt; 1, :b =&gt; 2}</example>
         </type>
@@ -48,24 +48,24 @@
         <description>example exception</description>
       </type>
     </exceptions>
-    <tests count="4" passed="1" skipped="3" failed="0">
-      <scenario status="passed" type="method">
+    <tests count="1" passed="0" skipped="0" failed="0"/>
+  </feature>
+  <feature type="accessor" object_type="*;sut" required_plugin="*" sut_type="qt" sut_version="*" name="read;read=" input_type="touch">
+    <behaviour module="MobyBehaviour::QT::Gesture" name="QtExampleGestureBehaviour"/>
+    <description></description>
+    <info></info>
+    <arguments count="0" optional="0" described="0"/>
+    <returns described="0"/>
+    <exceptions described="0"/>
+    <tests count="2" passed="0" skipped="0" failed="0">
+      <scenario status="passed" type="reader">
         <description></description>
-        <example>@app.Button(:name =&gt; 'oneButton').tap</example>
+        <example>@app.read</example>
       </scenario>
-      <scenario status="skipped" type="method">
+      <scenario status="passed" type="writer">
         <description></description>
-        <example>@app.[SOME_OBJECT].tap(tap_params)</example>
-      </scenario>
-      <scenario status="skipped" type="method">
-        <description></description>
-        <example>@app.[SOME_OBJECT].tap(tap_params, interval)</example>
-      </scenario>
-      <scenario status="skipped" type="method">
-        <description></description>
-        <example>@app.[SOME_OBJECT].tap(tap_params, interval, button)</example>
+        <example>@app.read=10</example>
       </scenario>
     </tests>
   </feature>
-
-</features>
+</documentation>
