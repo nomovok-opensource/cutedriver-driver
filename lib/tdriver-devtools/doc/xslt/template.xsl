@@ -21,6 +21,11 @@
         background: #dedede;
       }
 
+      td.tablebg_disabled
+      {
+        background: #c5c5c5;
+      }
+
       body
       {
         padding: 10px;
@@ -58,11 +63,12 @@
         color: #818181;
       }
 
-      td.missing
+      td.missing,div.missing
       {
         background: #a11010;
         color: #ffffff;
       }
+
     </style>
   </head>
   <body>
@@ -137,40 +143,81 @@
 
   <xsl:apply-templates select="arguments" />
 
-  <xsl:apply-templates select="returns" />
+  <xsl:call-template name="returns">
+    <xsl:with-param name="type" select="returns/type" />
+    <xsl:with-param name="feature_type" select="@type" />
+  </xsl:call-template>
 
-  <xsl:apply-templates select="exceptions" />
+  <xsl:call-template name="exceptions">
+    <xsl:with-param name="type" select="returns/type" />
+    <xsl:with-param name="feature_type" select="@type" />
+  </xsl:call-template>
+
+  <!--<xsl:apply-templates select="exceptions" />-->
   
   <xsl:apply-templates select="info" />
   
+</xsl:template>
+
+<xsl:template name="exceptions">
+
+  <xsl:param name="type" />
+  <xsl:param name="feature_type" />
+
+  <xsl:if test="count($type)>0">
+  
+    <!-- exceptions -->
+    <b>Exceptions</b>
+
+    <table width="100%" align="center" cellpadding="2" cellspacing="1" border="0">
+    <tr class="header">
+      <td>Type</td>
+      <td>Description</td>
+    </tr>
+
+    <xsl:for-each select="$type">
+
+      <xsl:if test="(position() mod 2)=0" >
+        <xsl:call-template name="exception_type">
+          <xsl:with-param name="type" select="." />
+          <xsl:with-param name="class">tablebg_odd</xsl:with-param>                        
+        </xsl:call-template>
+      </xsl:if>
+
+      <xsl:if test="(position() mod 2)=1" >
+        <xsl:call-template name="exception_type">
+          <xsl:with-param name="type" select="." />
+          <xsl:with-param name="class">tablebg_even</xsl:with-param>                        
+        </xsl:call-template>
+      </xsl:if>
+
+
+
+    </xsl:for-each>
+
+    </table>
+    <br />
+
+  </xsl:if>
 
 </xsl:template>
 
-<xsl:template match="exceptions">
+<xsl:template name="exception_type">
 
-  <!-- exceptions -->
-  <b>Exceptions</b>
+  <xsl:param name="type" />
+  <xsl:param name="class" />
 
-  <table width="100%" align="center" cellpadding="2" cellspacing="1" border="0">
-  <tr class="header">
-    <td>Type</td>
-    <td>Description</td>
+  <tr valign="top" class="{ $class }">
+    <td class="{ $class }"><xsl:value-of select="$type/@name"/></td>
+    <td class="{ $class }"><xsl:for-each select="str:split($type/description,'\n')">
+      <xsl:value-of select="text()" /><br />
+    </xsl:for-each>
+    </td>
   </tr>
 
-  <xsl:for-each select="type">
-    <tr valign="top">
-      <td><xsl:value-of select="@name"/></td>
-      <td><xsl:for-each select="str:split(description,'\n')">
-        <xsl:value-of select="text()" /><br />
-      </xsl:for-each>
-      </td>
-    </tr>
-  </xsl:for-each>
-
-  </table>
-  <br />
-
 </xsl:template>
+
+
 
 <xsl:template match="tests">
 
@@ -205,6 +252,7 @@
 
   <xsl:param name="argument_name" />
   <xsl:param name="type" />
+  <xsl:param name="default" />
   <xsl:param name="class" />
 
   <xsl:variable name="argument_types" select="count(type)" />
@@ -227,7 +275,13 @@
 
       <td class="{ $class }"><xsl:value-of select="example"/></td>
       
-      <td class="{ $class }"><xsl:value-of select="default"/></td>
+      <xsl:if test="string-length($default)=0">
+      <td class="tablebg_disabled"><xsl:value-of select="$default"/></td>
+      </xsl:if>
+
+      <xsl:if test="string-length($default)>0">
+        <td class="{ $class }"><xsl:value-of select="$default"/></td>
+      </xsl:if>
 
     </tr>  
 
@@ -243,6 +297,7 @@
     <xsl:with-param name="argument_name" select="@name" />
     <xsl:with-param name="type" select="type" />
     <xsl:with-param name="class">tablebg_even</xsl:with-param>
+    <xsl:with-param name="default" select="@default" />
 
   </xsl:call-template>
 
@@ -256,6 +311,7 @@
     <xsl:with-param name="argument_name" select="@name" />
     <xsl:with-param name="type" select="type" />
     <xsl:with-param name="class">tablebg_odd</xsl:with-param>
+    <xsl:with-param name="default" select="@default" />
 
   </xsl:call-template>
 
@@ -305,76 +361,70 @@
 
 </xsl:template>
 
-<xsl:template match="returns">
+<xsl:template name="returns">
 
-    <!-- show return value types table if feature type is method, reader or accessor -->
-    <!--<xsl:if test="@type='reader' or @type='accessor' or @type='method'">
--->
-      <!-- return values -->
-      <b>Returns</b>
-      <table width="100%" align="center" cellpadding="2" cellspacing="1" border="0">
-      <tr class="header">
-        <td>Type</td>
-        <td>Description</td>
-        <td>Example</td>
-      </tr>
+  <xsl:param name="type" />
+  <xsl:param name="feature_type" />
 
-      <!-- show error message if no return values defined -->
-      <xsl:if test="count(type)=0">
-        <tr>
-        <td colspan="3" class="missing">Incomplete documentation: No return value type(s) defined for method, attribute reader or attribute accessor</td>
-        </tr>
-      </xsl:if>
+  <!-- show return value types table if feature type is method, reader or accessor -->
+  <!--<xsl:if test="@type='reader' or @type='accessor' or @type='method'"> -->
+  <!-- return values -->
+  <b>Returns</b>
+  <table width="100%" align="center" cellpadding="2" cellspacing="1" border="0">
+  <tr class="header">
+    <td>Type</td>
+    <td>Description</td>
+    <td>Example</td>
+  </tr>
 
-      <xsl:if test="count(type)>0">
-
-        <xsl:for-each select="type">
-
-          <xsl:if test="(position() mod 2)=0" >
-            <xsl:call-template name="returns_type" >
-              <xsl:with-param name="type" select="." />
-              <xsl:with-param name="class">tablebg_odd</xsl:with-param>                        
-            </xsl:call-template>
-          </xsl:if>
-
-          <xsl:if test="(position() mod 2)=1" >
-            <xsl:call-template name="returns_type" >
-              <xsl:with-param name="type" select="." />
-              <xsl:with-param name="class">tablebg_even</xsl:with-param>                        
-            </xsl:call-template>
-          </xsl:if>
-
-          
-
-        </xsl:for-each>
-
-  <!--
-        <xsl:for-each select="returns/type">
-          <tr valign="top">
-            <td><xsl:value-of select="@name"/></td>
-            <td><xsl:for-each select="str:split(description,'\n')" name="value">
-              <xsl:value-of select="text()" /><br />
-            </xsl:for-each>
-            </td>
-            <td><xsl:value-of select="example"/></td>
-          </tr>
-        </xsl:for-each>
-      </xsl:if>
-  -->
+  <!-- show error message if no return values defined -->
+  <xsl:if test="( count($type)=0 ) and (($feature_type='method') or ($feature_type='accessor') or ($feature_type='reader'))">
+    <tr><td colspan="3" class="missing">Incomplete documentation: No return value type(s) defined for method, attribute reader or attribute accessor</td></tr>
   </xsl:if>
-    </table>
-    <br />
+  
+  <xsl:if test="count($type)>0">
+
+    <xsl:for-each select="$type">
+
+      <xsl:if test="(position() mod 2)=0" >
+        <xsl:call-template name="returns_type" >
+          <xsl:with-param name="type" select="." />
+          <xsl:with-param name="class">tablebg_odd</xsl:with-param>                        
+        </xsl:call-template>
+      </xsl:if>
+
+      <xsl:if test="(position() mod 2)=1" >
+        <xsl:call-template name="returns_type" >
+          <xsl:with-param name="type" select="." />
+          <xsl:with-param name="class">tablebg_even</xsl:with-param>                        
+        </xsl:call-template>
+      </xsl:if>
+      
+    </xsl:for-each>
+
+  </xsl:if>
+
+  </table>
+  <br />
 
 </xsl:template>
 
 
 <xsl:template match="description">
 
-  <!-- display feature description (split lines with '\n') -->
-  <xsl:for-each select="str:split(text(),'\n')">
-      <xsl:value-of select="." /><br />
-  </xsl:for-each>
-  <br />
+  <xsl:if test="string-length(text())>0">
+    <!-- display feature description (split lines with '\n') -->
+    <xsl:for-each select="str:split(text(),'\n')">
+        <xsl:value-of select="." /><br />
+    </xsl:for-each>
+    <br />
+  </xsl:if>
+
+  <xsl:if test="string-length(text())=0">
+    <!-- display feature description (split lines with '\n') -->
+    <div class="missing">Incomplete documentation: No feature description defined</div>
+    <br />
+  </xsl:if>
 
 </xsl:template>
 

@@ -10,11 +10,6 @@
         <type name="Integer">
           <description>Example argument1</description>
           <example>10</example>
-          <default>def</default>
-        </type>
-        <type name="String">
-          <description>Example argument type2</description>
-          <example>Hello</example>
         </type>
       </argument>
       <argument optional="true" name="button" default=":Left">
