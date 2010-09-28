@@ -118,8 +118,6 @@ def process_behaviour_file( content )
         # retrieve module & method definitions
         child.children.select{ | node | node.kind_of?( Nokogiri::XML::Element ) }.each{ | child |
 
-          p# child.name
-
           case child.name.to_s
 
             when /^methods$/i
@@ -147,14 +145,18 @@ def process_behaviour_file( content )
                     when /^arguments$/i
 
                       arguments = []
-
+                      
                       child.children.select{ | node | node.kind_of?( Nokogiri::XML::Element ) }.each{ | child |
 
                         argument = { "types" => [] }
 
                         # get behaviour element attributes, e.g. behaviour name, input_type, sut_type etc
-                        child.attributes.each{ | attribute | argument[ attribute.first ] = attribute.last.value.split(";") }
+                        child.attributes.each{ | attribute |
 
+                          argument[ attribute.first ] = attribute.last.value.split(";") 
+
+                        }
+                        
                         # get each argument details, e.g. type(s), default value etc
                         child.children.select{ | node | node.kind_of?( Nokogiri::XML::Element ) }.each{ | child |
 
@@ -601,22 +603,18 @@ def generate_document_xml
 
 
   doc = Nokogiri::XML::Builder.new{ | xml |
-
-    #p doc.to_xml
-    #p doc.to_xml
-    #exit
-
+    
     xml.documentation{
 
       # TODO: behaviour.hash should have feature type (method/attribute) mentioned  
       # TODO: behaviour.hash should have number of arguments incl. optional + blocks
 
       collect_all_features.sort.each{ | feature |
-      
+            
         module_name, method_name, feature_type, feature_parameters = feature.split("#")
 
         arguments_count, optional_arguments_count = feature_parameters.split(";")
-        
+                
         feature = "%s#%s" % [ module_name, method_name ]
       
         # make name for feature
@@ -647,44 +645,12 @@ def generate_document_xml
         feature_documentation.default = ""
 
         if documented 
-
-=begin
-          #feature_name = "
-
-          feature_documentation = @documented_features[ feature.to_s ]
-            
-         p feature_documentation["name"]
-         sleep 0.5
-                      
-          xml.describes{
-
-            feature_documentation["name"].each{ | feature_name |
-            
-            xml.name( feature_name )
-
-            }
-
-          }
-=end
-
+          
           feature_documentation.merge!( @documented_features[ feature.to_s ] )
-          
-
-=begin              
-              xml.description( feature_documentation[ "description" ] )
-
-              xml.info( feature_documentation[ "info" ] )
-
-              xml.behaviour_name( feature_documentation[ "__behaviour" ][ "name" ] )
-
-              xml.required_plugin( feature_documentation[ "__behaviour" ][ "plugin" ] )
-=end
-
-        else
-
-          
 
         end
+       
+        next if feature_documentation.empty?
        
         # <feature type="accessor" name="z;z=" types="qt" versions="*" input_types="touch" object_types="*;sut" requires_plugin="x">
         xml.feature( 
@@ -709,13 +675,25 @@ def generate_document_xml
           # <info>example</info>
           xml.info( feature_documentation[ "info" ] )
 
-          # <arguments count="1" optional="0" described="1">
-          xml.arguments( :count => arguments_count, :optional => optional_arguments_count, :described => feature_documentation[ "arguments" ].count ){
+          # <arguments count="1" optional="0" described="1" block="true">
+          xml.arguments( 
+            :count => arguments_count, 
+            :optional => optional_arguments_count, 
+            :described => feature_documentation[ "arguments" ].count,
+            :block => feature_documentation[ "arguments" ].select{ | arg | arg[ "type" ].first == "block" }.count > 0 
+              
+          ){
 
             ( feature_documentation[ "arguments" ] || [] ).each do | argument |
                                     
               # <argument name="value" optional="false" default="11">
-              xml.argument( :name => argument[ "name" ].first, :optional => argument[ "optional" ].first, :default => ( argument[ "default" ] || [] ).first ){
+              xml.argument( 
+                :name => argument[ "name" ].first, 
+                :optional => argument[ "optional" ].first, 
+                :default => ( argument[ "default" ] || [] ).first, 
+                :type => argument[ "type" ].first
+                  
+              ){
 
                 # iterate each argument                            
                 ( argument[ "types" ] || [{}] ).first.each_pair do | argument_type, value |  
@@ -844,11 +822,13 @@ def generate_document_xml
     }
   }
 
-  doc.to_xml
+  doc.to_xml.to_s.gsub("<?xml version=\"1.0\"?>") do | head |
+    result = head
+    result << "\n"
+    result << "<?xml-stylesheet type=\"text/xsl\" href=\"template.xsl\"?>"
+  end
 
 end
-
-
 
 if ARGV.count < 1
   
@@ -856,13 +836,10 @@ if ARGV.count < 1
 
 end
 
-
-
 read_test_result_files # ok
 read_behaviour_xml_files # ok
 read_behaviour_hash_files # ok
 
-puts "", "----", ""
 #puts "all executed feature tests:"
 @executed_tests = collect_feature_tests
 

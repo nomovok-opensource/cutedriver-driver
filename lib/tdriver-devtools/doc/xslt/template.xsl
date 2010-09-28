@@ -131,6 +131,7 @@
         background: #ffffff;
         color: black;
         font-size: 13px;
+        cursor:default;
       }
 
       pre
@@ -169,6 +170,22 @@
         color: #818181;
       }
 
+      span.hover_text
+      {
+      
+        cursor: help; //pointer;
+        border-bottom: 1px dotted #b1b1b1;
+      
+      }
+
+      span.hover_text:hover
+      {
+      
+        cursor: help; //pointer;
+        border-bottom: 1px dotted #515151;
+      
+      }
+      
 
     </style>
   </head>
@@ -214,22 +231,35 @@
         
         <xsl:when test="count(arguments/argument)>0">
           <xsl:text>( </xsl:text>
+
             <!-- collect arguments for example -->
             <xsl:for-each select="arguments/argument">
 
-              <xsl:if test="@type='argument'">
-              
-                <xsl:if test="@optional='true'">
-                  <span class="optional_argument">
-                    <xsl:text>[</xsl:text>
-                    <xsl:value-of select="@name"/>
-                    <xsl:text>]</xsl:text>
-                  </span>
-                </xsl:if>
+              <xsl:if test="@type='normal' or @type='multi'">
 
-                <xsl:if test="@optional='false'">
-                  <xsl:value-of select="@name"/>
-                </xsl:if> 
+                <xsl:choose>
+
+                  <xsl:when test="@optional='true'">
+                    <span class="optional_argument" title="Optional argument">
+                     <xsl:if test="@type='multi'">
+                       <xsl:text></xsl:text>        
+                     </xsl:if>
+                      <xsl:text>[ </xsl:text>
+                      <span class="hover_text">
+                        <xsl:value-of select="@name"/>
+                         <xsl:if test="@type='multi'">
+                           <xsl:text>, ..., ...</xsl:text>        
+                         </xsl:if>
+                      </span>
+                      <xsl:text> ]</xsl:text>
+                    </span>
+                  </xsl:when>
+
+                  <xsl:otherwise>
+                    <span title="Mandatory argument" class="hover_text"><xsl:value-of select="@name"/></span>
+                  </xsl:otherwise>
+
+                </xsl:choose>
 
                 <!-- separate arguments with comma if next argument defintion is not type of block --> 
                 <xsl:if test="position()!=last() and following-sibling::argument/@type!='block'">
@@ -246,7 +276,9 @@
 
                 <xsl:if test="./@type='block'">
                 
-                  <xsl:text>{ </xsl:text><xsl:value-of select="@name"/><xsl:text> }</xsl:text>
+                  <xsl:text>{ </xsl:text>
+                  <span class="hover_text" title="Code block, mandatory or optional"><xsl:value-of select="@name"/></span>
+                  <xsl:text> }</xsl:text>
                 
                 </xsl:if>
                 
@@ -284,11 +316,11 @@
       <xsl:choose>
       
         <xsl:when test="count(arguments/argument)=0">
-          <xsl:text>new_value</xsl:text>
+          <span title="Mandatory value" class="hover_text"><xsl:text>new_value</xsl:text></span>
         </xsl:when>
         
         <xsl:otherwise>
-          <xsl:value-of select="arguments/argument[1]/@name" />        
+          <span title="Mandatory value" class="hover_text"><xsl:value-of select="arguments/argument[1]/@name" /></span>
         </xsl:otherwise>
 
       </xsl:choose>
@@ -486,7 +518,7 @@
   <xsl:if test="position()!=last()-1">
     <!-- feature separator? -->
    </xsl:if>
-    
+        
 </xsl:template>
 
 <xsl:template name="exceptions">
@@ -565,13 +597,27 @@
           <xsl:when test="../@optional='true' and ../@type!='block'">
             
               <td rowspan="{$argument_types}" class="{ $class }">
-              <span class="optional_argument"><xsl:value-of select="$argument_name" /></span>
+                <span class="optional_argument" title="Optional argument">
+                <span class="hover_text"><xsl:value-of select="$argument_name" /></span>
+                </span>
               </td>
             
           </xsl:when>
 
-          <xsl:otherwise>            
-            <td rowspan="{$argument_types}" class="{ $class }"><xsl:value-of select="$argument_name" /></td>
+          <xsl:when test="../@type='block'">
+            
+            <td rowspan="{$argument_types}" class="{ $class }">
+              <span title="Code block, mandatory or optional" class="hover_text"><xsl:value-of select="$argument_name" /></span>
+            </td>
+            
+          </xsl:when>
+
+          <xsl:otherwise>
+          
+            <td rowspan="{$argument_types}" class="{ $class }">
+              <span title="Mandatory argument" class="hover_text"><xsl:value-of select="$argument_name" /></span>
+            </td>
+
           </xsl:otherwise>
 
         </xsl:choose>
