@@ -119,23 +119,44 @@ module Generators
       previous_token = nil
 
       args = []
+      
+      capture = false
+      capture_depth = []
 
       # loop while tokens available
       while token
 
+        if [ RubyToken::TkLBRACE, RubyToken::TkLPAREN, RubyToken::TkLBRACK ].include?( token.class )
+        
+          capture_depth << token
+        
+          capture = true
+
+        elsif [ RubyToken::TkRBRACE, RubyToken::TkRPAREN, RubyToken::TkRBRACK ].include?( token.class )
+
+          capture_depth.pop
+          
+          capture = false if capture_depth.empty?
+
         # argument name
-        if token.kind_of?( RubyToken::TkIDENTIFIER )
+        elsif capture == false
+        
+          if token.kind_of?( RubyToken::TkIDENTIFIER )
 
           args << [ token.name, nil, false ]
 
           # &blocks and *arguments are handled as optional parameters
           args.last[ -1 ] = true if [ RubyToken::TkBITAND, RubyToken::TkMULT ].include?( previous_token.class )
+                  
+          # detect optional argument
+          elsif token.kind_of?( RubyToken::TkASSIGN )
 
-        # detect optional argument
-        elsif token.kind_of?( RubyToken::TkASSIGN )
+            # mark arguments as optional
+            args.last[ -1 ] = true
 
-          # mark arguments as optional
-          args.last[ -1 ] = true
+            opt = true
+
+          end
 
         end
 
