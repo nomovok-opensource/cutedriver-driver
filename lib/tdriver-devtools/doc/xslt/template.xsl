@@ -5,10 +5,83 @@
   <head>
     <style  TYPE="text/css">
       
+
+      div.feature_title
+      {
+
+        background: #f1f1f1;
+        border: 1px solid #d1d1d1;
+        padding: 8px; 
+
+        text-decoration: underline;    
+        font-size: 14px; 
+        font-weight: bold;
+      }
+
+      div.feature_section_title
+      {
+
+        font-family: arial;
+        font-size: 13px;
+        font-weight: bold;
+        color: #000000;
+      
+      }
+      
+      div.feature_description, div.feature_call_sequence
+      {
+
+        padding: 2px;
+        font-family: 'Times New Roman', Times, serif;
+        font-size: 13px;
+        font-weight: normal; 
+        
+      }
+      
+      div.feature_call_sequence
+      {
+            
+      }
+
+      table.default
+      {
+      
+        margin-top: 2px;
+      
+        width: 100%;
+              
+        text-align: left;
+      
+        <!-- cellspacing -->
+        border-spacing: 1px;
+            
+        border: 1px solid #c1c1c1;
+        border-top: 1px solid #e1e1e1;
+        border-left: 1px solid #e1e1e1;
+      
+      }
+
       tr.header
       {      
         background: #96E066;
         font-weight: bold;
+      }
+
+      <!-- table-style: cellpadding -->
+      td
+      {
+      
+        padding: 6px;
+        font-family: arial;
+        font-size: 11px;      
+      
+      }
+
+      td.header
+      {
+
+        font-size: 11px;      
+        
       }
 
       td.tablebg_even
@@ -26,6 +99,27 @@
         background: #c5c5c5;
       }
 
+      td.warning,div.warning
+      {
+        background: #a11010;
+        color: #ffff00;
+      }
+
+      div.warning
+      {
+        color: #ffff00;
+
+        font-family: arial;
+        font-size: 11px;      
+        padding: 6px;
+      
+      }
+
+      span.optional_argument
+      {
+        font-style: italic;
+      }
+
       body
       {
         padding: 10px;
@@ -35,7 +129,7 @@
         font-size: 13px;
       }
 
-      pre.passed,pre.failed,pre.skipped{
+      pre.passed, pre.failed, pre.skipped{
       
         margin: 5px 2px 9px 2px;
         padding: 10px 10px 10px 8px;
@@ -63,11 +157,6 @@
         color: #818181;
       }
 
-      td.missing,div.missing
-      {
-        background: #a11010;
-        color: #ffffff;
-      }
 
     </style>
   </head>
@@ -81,18 +170,27 @@
 <xsl:template name="feature_name">
 
   <!-- implements following features, e.g. method name, attribute reader, attribute writer or both when attribute accessor -->
+
+  <a name="{ @name }">
+  <div class="feature_title">
   <xsl:for-each select="str:split(@name,';')">
-    <b><u><xsl:value-of select="."/></u></b><br />
+    <xsl:value-of select="."/> 
+    <xsl:if test="position()!=last()">
+    <xsl:text>, </xsl:text>
+    </xsl:if>
   </xsl:for-each>
+  </div>
+  </a>
+
   <br />
 
 </xsl:template>
 
 <xsl:template name="call_sequence">
 
-  <b>Call sequence:</b><br />
-  <small>
+  <div class="feature_section_title">Call sequence:</div>
 
+  <div class="feature_call_sequence">
     <!-- method: call example using parameters -->
     <xsl:if test="@type='method'">
     
@@ -103,15 +201,23 @@
         <xsl:when test="count(arguments/argument)=0">()</xsl:when>
         
         <xsl:when test="count(arguments/argument)>0">
-          (      
+          <xsl:text>( </xsl:text>
             <!-- collect arguments for example -->
             <xsl:for-each select="arguments/argument">
 
               <xsl:if test="@type='argument'">
               
-                <xsl:if test="@optional='true'">[</xsl:if>                     
-                <xsl:value-of select="@name"/>
-                <xsl:if test="@optional='true'">]</xsl:if> 
+                <xsl:if test="@optional='true'">
+                  <span class="optional_argument">
+                    <xsl:text>[</xsl:text>
+                    <xsl:value-of select="@name"/>
+                    <xsl:text>]</xsl:text>
+                  </span>
+                </xsl:if>
+
+                <xsl:if test="@optional='false'">
+                  <xsl:value-of select="@name"/>
+                </xsl:if> 
 
                 <!-- separate arguments with comma if next argument defintion is not type of block --> 
                 <xsl:if test="position()!=last() and following-sibling::argument/@type!='block'">
@@ -121,7 +227,7 @@
               </xsl:if>
               
             </xsl:for-each>
-          )
+          <xsl:text> ) </xsl:text>
           
           <!-- collect arguments for example -->
           <xsl:for-each select="arguments/argument">
@@ -159,7 +265,8 @@
       object.<xsl:value-of select="str:split(@name,';')[1]" /> = ( value )<br />
     </xsl:if>
 
-  </small>
+  </div>
+
   <br />
 
 </xsl:template>
@@ -192,16 +299,16 @@
   <br />
 -->
   
-  <b>Feature and target details</b>
-  <table width="100%" align="center" cellpadding="2" cellspacing="1" border="0">
+  <div class="feature_section_title">Feature and target details:</div>
+  <table class="default">
     <tr class="header">
-      <td>Type</td>
-      <td>Target object(s)</td>
-      <td>SUT type(s)</td>
-      <td>SUT version(s)</td>
-      <td>SUT input type(s)</td>
-      <td>Behaviour module</td>
-      <td>Required plugin</td>
+      <td class="header">Type</td>
+      <td class="header">Target object(s)</td>
+      <td class="header">SUT type(s)</td>
+      <td class="header">SUT version(s)</td>
+      <td class="header">SUT input type(s)</td>
+      <td class="header">Behaviour module</td>
+      <td class="header">Required plugin</td>
     </tr>
     <tr>
       <td class="tablebg_even" valign="top">
@@ -337,7 +444,7 @@
 
   <xsl:call-template name="feature_name" />
   
-  <xsl:apply-templates select="description" />
+  <xsl:call-template name="description" />
 
   <xsl:call-template name="call_sequence" />
 
@@ -354,8 +461,6 @@
     <xsl:with-param name="type" select="returns/type" />
     <xsl:with-param name="feature_type" select="@type" />
   </xsl:call-template>
-
-  <!--<xsl:apply-templates select="exceptions" />-->
   
   <xsl:apply-templates select="info" />
   
@@ -369,9 +474,9 @@
   <xsl:if test="count($type)>0">
   
     <!-- exceptions -->
-    <b>Exceptions</b>
+    <div class="feature_section_title">Exceptions:</div>
 
-    <table width="100%" align="center" cellpadding="2" cellspacing="1" border="0">
+    <table class="default">
     <tr class="header">
       <td>Type</td>
       <td>Description</td>
@@ -489,8 +594,8 @@
 
 <xsl:template name="arguments">
 
-  <b>Arguments</b><br />
-  <table width="100%" align="center" cellpadding="2" cellspacing="1" border="0">
+  <div class="feature_section_title">Arguments:</div>
+  <table class="default">
   <tr class="header">
     <td>Name</td>
     <td>Type</td>
@@ -527,7 +632,7 @@
   <!-- show error message if argument are not described -->
   <xsl:if test="count(argument)&lt;@count">
     <tr>
-    <td colspan="5" class="missing">
+    <td colspan="5" class="warning">
       Incomplete documentation: only <xsl:value-of select="count(argument)" />  of <xsl:value-of select="@count" /> arguments documented
     </td>
     </tr>
@@ -554,6 +659,22 @@
 
 </xsl:template>
 
+<xsl:template name="row_warning">
+
+  <xsl:param name="text" />
+  <xsl:param name="colspan" />
+
+  <tr>
+   <td colspan="{ $colspan }" class="warning">[!!] <xsl:value-of select="$text" /></td>
+  </tr>
+  
+</xsl:template>
+
+<xsl:template name="div_warning">
+  <xsl:param name="text" />
+  <div class="warning">[!!] <xsl:value-of select="$text" /></div>  
+</xsl:template>
+
 <xsl:template name="returns">
 
   <xsl:param name="type" />
@@ -562,8 +683,8 @@
   <!-- show return value types table if feature type is method, reader or accessor -->
   <!--<xsl:if test="@type='reader' or @type='accessor' or @type='method'"> -->
   <!-- return values -->
-  <b>Returns</b>
-  <table width="100%" align="center" cellpadding="2" cellspacing="1" border="0">
+  <div class="feature_section_title">Returns:</div>
+  <table class="default">
   <tr class="header">
     <td>Type</td>
     <td>Description</td>
@@ -572,7 +693,10 @@
 
   <!-- show error message if no return values defined -->
   <xsl:if test="( count($type)=0 ) and (($feature_type='method') or ($feature_type='accessor') or ($feature_type='reader'))">
-    <tr><td colspan="3" class="missing">Incomplete documentation: No return value type(s) defined for method, attribute reader or attribute accessor</td></tr>
+    <xsl:call-template name="row_warning">
+      <xsl:with-param name="text">Incomplete documentation: No return value type(s) defined for method, attribute reader or attribute accessor</xsl:with-param>
+      <xsl:with-param name="colspan">3</xsl:with-param>
+    </xsl:call-template>
   </xsl:if>
   
   <xsl:if test="count($type)>0">
@@ -602,22 +726,26 @@
 
 </xsl:template>
 
-<xsl:template match="description">
+<xsl:template name="description">
 
-  <b>Description<br /></b>
+  <div class="feature_section_title">Description:</div>
 
-  <xsl:if test="string-length(text())>0">
+  <xsl:if test="string-length(description/text())>0">
     <!-- display feature description (split lines with '\n') -->
-    <xsl:for-each select="str:split(text(),'\n')">
-        <xsl:value-of select="." /><br />
-    </xsl:for-each>
-    <br />
+
+    <div class="feature_description">
+      <xsl:for-each select="str:split(description/text(),'\n')">
+          <xsl:value-of select="." /><br />
+      </xsl:for-each>
+    </div>
   </xsl:if>
 
-  <xsl:if test="string-length(text())=0">
-    <div class="missing">Incomplete documentation: No feature description defined</div>
-    <br />
+  <xsl:if test="string-length(description/text())=0">
+    <xsl:call-template name="div_warning">
+      <xsl:with-param name="text">Incomplete documentation: No feature description defined</xsl:with-param>
+    </xsl:call-template>
   </xsl:if>
+  <br />
 
 </xsl:template>
 
