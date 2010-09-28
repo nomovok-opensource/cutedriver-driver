@@ -1,5 +1,5 @@
 
-          <argument name="$ARGUMENT_NAME" optional="$ARGUMENT_OPTIONAL">
+          <argument name="$ARGUMENT_NAME" optional="$ARGUMENT_OPTIONAL" type="$ARGUMENT_TYPE">
 
 $ARGUMENT_TYPES
 

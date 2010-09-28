@@ -87,7 +87,18 @@ EXAMPLE
 #   example: [1,2,3]
 #   default: []
 #
-def my_method( arg1, arg2 )
+# *arg3
+#  Array
+#   description: MyMultipleArray
+#   example: ['a','b','c']
+#   default: []
+#
+# &block
+#  Proc
+#   description: MyMultipleArray
+#   example: ['a','b','c']
+#   default: []
+def my_method( arg1, arg2, *arg3, &block )
   # ...
 end
 EXAMPLE
@@ -396,7 +407,7 @@ EXAMPLE
 
     end
 
-    def process_method_arguments_section( source )
+    def process_method_arguments_section( source, params_array )
 
       result = []
 
@@ -426,7 +437,7 @@ EXAMPLE
 
         if nesting == 0
 
-          line =~ /^(\w+)$/i
+          line =~ /^([*|&]{0,1}\w+)$/i
 
           unless $1.nil?
 
@@ -501,7 +512,25 @@ EXAMPLE
 
       }
 
-      result
+      order = []
+      
+      params_array.collect{ | o | o.first }.each{ | param |
+            
+        if ( item = result.select{ | arg | arg.keys.include?( param ) }).empty?
+                
+          raise_error("Error: Argument '#{ param }' not documented in '#{ @current_method.name }' ($MODULE).\nNote that documented argument and variable name must be identical.", [ 'writer', 'accessor' ].include?( @processing ) ? 'attr_argument' : 'arguments' )
+
+          order << { param => {} }
+
+        else
+
+          order << item.first
+        
+        end
+      
+      }
+            
+      order
 
     end
 
@@ -626,22 +655,46 @@ EXAMPLE
 
       args = []
 
+      capture = false
+      capture_depth = []
+
       # loop while tokens available
       while token
 
+        if [ RubyToken::TkLBRACE, RubyToken::TkLPAREN, RubyToken::TkLBRACK ].include?( token.class )
+        
+          capture_depth << token
+        
+          capture = true
+
+        elsif [ RubyToken::TkRBRACE, RubyToken::TkRPAREN, RubyToken::TkRBRACK ].include?( token.class )
+
+          capture_depth.pop
+          
+          capture = false if capture_depth.empty?
+
         # argument name
-        if token.kind_of?( RubyToken::TkIDENTIFIER )
+        elsif capture == false
 
-          args << [ token.name, false ]
+          # argument name
+          if token.kind_of?( RubyToken::TkIDENTIFIER )
 
-          # &blocks and *arguments are handled as optional parameters
-          args.last[ -1 ] = true if [ RubyToken::TkBITAND, RubyToken::TkMULT ].include?( previous_token.class )
+            args << [ token.name, false ]
 
-        # detect optional argument
-        elsif token.kind_of?( RubyToken::TkASSIGN )
+            # &blocks and *arguments are handled as optional parameters
+            if [ RubyToken::TkBITAND, RubyToken::TkMULT ].include?( previous_token.class )
+             #args.last[ 1 ] = previous_token.text 
+             args.last[ 0 ] = previous_token.text + args.last[ 0 ] 
+             args.last[ -1 ] = true 
+            end
 
-          # mark arguments as optional
-          args.last[ -1 ] = true
+          # detect optional argument
+          elsif token.kind_of?( RubyToken::TkASSIGN )
+
+            # mark arguments as optional
+            args.last[ -1 ] = true
+
+          end
 
         end
 
@@ -656,6 +709,76 @@ EXAMPLE
       args
 
     end
+    
+=begin
+
+    def process_arguments( arguments )
+
+      # tokenize string
+      tokenizer = RubyLex.new( arguments )
+
+      # get first token
+      token = tokenizer.token
+
+      # set previous token to nil by default
+      previous_token = nil
+
+      args = []
+      
+      capture = false
+      capture_depth = []
+
+      # loop while tokens available
+      while token
+
+        if [ RubyToken::TkLBRACE, RubyToken::TkLPAREN, RubyToken::TkLBRACK ].include?( token.class )
+        
+          capture_depth << token
+        
+          capture = true
+
+        elsif [ RubyToken::TkRBRACE, RubyToken::TkRPAREN, RubyToken::TkRBRACK ].include?( token.class )
+
+          capture_depth.pop
+          
+          capture = false if capture_depth.empty?
+
+        # argument name
+        elsif capture == false
+        
+          if token.kind_of?( RubyToken::TkIDENTIFIER )
+
+          args << [ token.name, nil, false ]
+
+          # &blocks and *arguments are handled as optional parameters
+          args.last[ -1 ] = true if [ RubyToken::TkBITAND, RubyToken::TkMULT ].include?( previous_token.class )
+                  
+          # detect optional argument
+          elsif token.kind_of?( RubyToken::TkASSIGN )
+
+            # mark arguments as optional
+            args.last[ -1 ] = true
+
+            opt = true
+
+          end
+
+        end
+
+        # store previous token
+        previous_token = token
+
+        # get next token
+        token = tokenizer.token
+
+      end
+
+      args
+
+    end
+
+
+=end
 
     def process_method( method )
 
@@ -678,7 +801,7 @@ EXAMPLE
 
           if key == :arguments
 
-            value = process_method_arguments_section( value )
+            value = process_method_arguments_section( value, params )
 
           end
 
@@ -848,8 +971,6 @@ EXAMPLE
 
       header
 
-      #p _module.methods.sort
-
     end
 
     def apply_macros!( source, macros )
@@ -960,6 +1081,9 @@ EXAMPLE
 
       return "" if ( feature.last[:__type] == 'reader' )
 
+      argument_types = { "*" => "multi", "&" => "block" }
+      argument_types.default = "normal"
+
       #return "" if ( @processing == :attributes && feature.last[:__type] == 'R' )
 
       if feature.last[ :arguments ].nil?
@@ -975,6 +1099,10 @@ EXAMPLE
         
         # generate argument types template
         arg.collect{ | argument |
+
+         argument_type = argument_types[ argument.first[0].chr ]
+         argument_name = "%s" % argument.first          
+         argument_name[0]="" if argument_types.has_key?( argument_name[0].chr )
 
          default_value_set = false 
          default_value = nil
@@ -993,7 +1121,6 @@ EXAMPLE
 
            if type.last["description"].nil?
 
-
             raise_error("Warning: Argument description for '%s' ($MODULE) is empty." % [ argument.first ], 'argument_description' )
 
            end
@@ -1006,7 +1133,7 @@ EXAMPLE
 
            apply_macros!( @templates["behaviour.xml.argument_type"].clone, {
             
-              "ARGUMENT_TYPE" => type.first,
+              "ARGUMENT_TYPE" => argument_type == 'block' ? "Proc" : type.first,
               "ARGUMENT_DESCRIPTION" => type.last["description"],
               "ARGUMENT_EXAMPLE" => type.last["example"],
            
@@ -1014,6 +1141,13 @@ EXAMPLE
            )
          
          }.join
+
+        if argument_type == "multi"
+        
+          default_value = "[]"
+          default_value_set = true
+        
+        end
          
         if default_value_set
 
@@ -1028,13 +1162,13 @@ EXAMPLE
 
         end
 
-
          # apply types to arguments template
          apply_macros!( @templates["behaviour.xml.argument"].clone, {
-            "ARGUMENT_NAME" => argument.first,
+            "ARGUMENT_NAME" => argument_name,
+            "ARGUMENT_TYPE" => argument_type,
             "ARGUMENT_TYPES" => types_xml,
-            "ARGUMENT_DEFAULT_VALUE" => default_value,
-            "ARGUMENT_OPTIONAL" => default_value_set.to_s
+            "ARGUMENT_DEFAULT_VALUE" => default_value.to_s,
+            "ARGUMENT_OPTIONAL" => argument_type == "multi" ? "true" : default_value_set.to_s
           }
          )
         
@@ -1100,49 +1234,49 @@ EXAMPLE
       # verify that behaviour description is defined
       unless header.has_key?(:description)
 
-         raise_error("Warning: Behaviour description for $MODULE is empty.", 'behaviour_description' )
+         raise_error("Warning: Behaviour description for $MODULE is empty.", 'behaviour_description' ) unless methods.empty?
 
       end
 
       # verify that behaviour name is defined
       unless header.has_key?(:behaviour)
 
-         raise_error("Warning: Behaviour name for $MODULE is not defined.", 'behaviour_name' )
+         raise_error("Warning: Behaviour name for $MODULE is not defined.", 'behaviour_name' ) unless methods.empty?
 
       end
 
       # verify that behaviour object type(s) is defined
       unless header.has_key?(:objects)
 
-         raise_error("Warning: Behaviour object type(s) for $MODULE is not defined.", 'behaviour_object_types' )
+         raise_error("Warning: Behaviour object type(s) for $MODULE is not defined.", 'behaviour_object_types' ) unless methods.empty?
 
       end
 
       # verify that behaviour sut type(s) is defined
       unless header.has_key?(:sut_type)
 
-         raise_error("Warning: Behaviour SUT type for $MODULE is not defined.", 'behaviour_sut_type' )
+         raise_error("Warning: Behaviour SUT type for $MODULE is not defined.", 'behaviour_sut_type' ) unless methods.empty?
 
       end
 
       # verify that behaviour input type(s) is defined
       unless header.has_key?(:input_type)
 
-         raise_error("Warning: Behaviour input type for $MODULE is not defined.", 'behaviour_input_type' )
+         raise_error("Warning: Behaviour input type for $MODULE is not defined.", 'behaviour_input_type' ) unless methods.empty?
 
       end
 
       # verify that behaviour sut version(s) is defined
       unless header.has_key?(:sut_version)
 
-         raise_error("Warning: Behaviour SUT version for $MODULE is not defined.", 'behaviour_version' )
+         raise_error("Warning: Behaviour SUT version for $MODULE is not defined.", 'behaviour_version' ) unless methods.empty?
 
       end
 
       # verify that behaviour sut version(s) is defined
       unless header.has_key?(:requires)
 
-         raise_error("Warning: Required plugin name is not defined for $MODULE.", 'behaviour_requires' )
+         raise_error("Warning: Required plugin name is not defined for $MODULE.", 'behaviour_requires' ) unless methods.empty?
 
       end
 
@@ -1179,6 +1313,9 @@ EXAMPLE
     def process_module( _module )
 
       @already_processed_files << _module.full_name
+
+      # skip if not a behaviour module      
+      return if /^MobyBehaviour.*/ !~ _module.full_name.to_s
 
       module_header = process_comment( _module.comment )
 
