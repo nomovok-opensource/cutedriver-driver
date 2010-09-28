@@ -1,8 +1,14 @@
+libtestability-driver-ruby (0.9.1-2) unstable; urgency=low
+
+  * new release tag
+
+ -- Testability Driver Team <testabilitydriver@nokia.com>  Tue, 28 Sep 2010 15:31:55 +0300
+
 libtestability-driver-ruby (0.9.1-1) unstable; urgency=low
 
   * new release tag
 
- -- Testability Driver Team <testabilitydriver@nokia.com>  Tue, 10 Aug 2010 14:31:55 +0300
+ -- Testability Driver Team <testabilitydriver@nokia.com>  Mon, 27 Sep 2010 16:00:55 +0300
 
 libtestability-driver-ruby (0.9.0-2) unstable; urgency=low
 
