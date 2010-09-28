@@ -4,8 +4,7 @@
 <html>
   <head>
     <style  TYPE="text/css">
-      
-
+     
       div.feature_title
       {
 
@@ -28,7 +27,7 @@
       
       }
       
-      div.feature_description, div.feature_call_sequence
+      div.feature_description, div.feature_call_sequence, div.scenario_description
       {
 
         padding: 2px;
@@ -36,6 +35,11 @@
         font-size: 13px;
         font-weight: normal; 
         
+      }
+      
+      div.feature_description, div.scenario_description
+      {
+        font-style: italic;
       }
       
       div.feature_call_sequence
@@ -127,6 +131,14 @@
         background: #ffffff;
         color: black;
         font-size: 13px;
+      }
+
+      pre
+      {
+      
+        font-family: monospace;
+        font-size: 11px;
+      
       }
 
       pre.passed, pre.failed, pre.skipped{
@@ -256,13 +268,33 @@
 
     <!-- attr_reader/attr_accessor: call example -->
     <xsl:if test="@type='reader' or @type='accessor'">
-      return_value = object.<xsl:value-of select="str:split(@name,';')[1]" /><br />
+      <xsl:text>return_value = object.</xsl:text>
+      <xsl:value-of select="str:split(@name,';')[1]" />
+      <br />
     </xsl:if>
 
     <!-- attr_writer/attr_accessor: call example -->
     <xsl:if test="@type='writer' or @type='accessor'">
+    
       <!-- TODO: argument name from arguments array -->
-      object.<xsl:value-of select="str:split(@name,';')[1]" /> = ( value )<br />
+      <xsl:text>object.</xsl:text>
+      <xsl:value-of select="str:split(@name,';')[1]" />
+      <xsl:text> = ( </xsl:text>
+
+      <xsl:choose>
+      
+        <xsl:when test="count(arguments/argument)=0">
+          <xsl:text>new_value</xsl:text>
+        </xsl:when>
+        
+        <xsl:otherwise>
+          <xsl:value-of select="arguments/argument[1]/@name" />        
+        </xsl:otherwise>
+
+      </xsl:choose>
+
+      <xsl:text> )</xsl:text>
+      <br />
     </xsl:if>
 
   </div>
@@ -281,34 +313,17 @@
 </xsl:template>
 
 <xsl:template name="target_details">
-<!--
-
-  <feature type="method" object_type="*;sut" required_plugin="*" sut_type="qt" sut_version="*" name="flick" input_type="touch">
-    <behaviour module="MobyBehaviour::QT::Gesture" name="QtExampleGestureBehaviour"/>
-
-
-  Feature type: <b><xsl:value-of select="@type" /></b><br />
-  object type: <b><xsl:value-of select="@object_type" /></b><br />
-  required plugin: <b><xsl:value-of select="@required_plugin" /></b><br />
-  sut_type: <b><xsl:value-of select="@sut_type" /></b><br />
-  sut_version: <b><xsl:value-of select="@sut_version" /></b><br />
-  input_type: <b><xsl:value-of select="@input_type" /></b><br />
-  behaviour_name: <b><xsl:value-of select="behaviour/@name" /></b><br />
-  behaviour_module: <b><xsl:value-of select="behaviour/@module" /></b><br />
-
-  <br />
--->
   
   <div class="feature_section_title">Feature and target details:</div>
   <table class="default">
     <tr class="header">
-      <td class="header">Type</td>
-      <td class="header">Target object(s)</td>
-      <td class="header">SUT type(s)</td>
-      <td class="header">SUT version(s)</td>
-      <td class="header">SUT input type(s)</td>
-      <td class="header">Behaviour module</td>
-      <td class="header">Required plugin</td>
+      <td>Type</td>
+      <td>Target object(s)</td>
+      <td>SUT type(s)</td>
+      <td>SUT version(s)</td>
+      <td>SUT input type(s)</td>
+      <td>Behaviour module</td>
+      <td>Required plugin</td>
     </tr>
     <tr>
       <td class="tablebg_even" valign="top">
@@ -458,12 +473,20 @@
   </xsl:call-template>
 
   <xsl:call-template name="exceptions">
-    <xsl:with-param name="type" select="returns/type" />
+    <xsl:with-param name="type" select="exceptions/type" />
     <xsl:with-param name="feature_type" select="@type" />
   </xsl:call-template>
   
-  <xsl:apply-templates select="info" />
+  <xsl:call-template name="tests">
+    <xsl:with-param name="tests" select="tests" />
+  </xsl:call-template>
+    
+  <xsl:call-template name="info" />
   
+  <xsl:if test="position()!=last()-1">
+    <!-- feature separator? -->
+   </xsl:if>
+    
 </xsl:template>
 
 <xsl:template name="exceptions">
@@ -522,35 +545,6 @@
 
 </xsl:template>
 
-<xsl:template match="tests">
-
-  <!-- examples -->
-  <b>Examples</b>
-  <br />
-
-  <xsl:for-each select="scenario">
-
-    <!-- description (splitted with '\n') -->
-    <small>description:
-    <xsl:for-each select="str:split(description,'\n')">
-      <xsl:value-of select="text()" /><br />
-    </xsl:for-each>
-    </small>
-    <xsl:value-of select="@name"/>
-    <xsl:element name="pre">
-      <xsl:attribute name="class">
-        <xsl:value-of select="@status"/>
-      </xsl:attribute>
-      <xsl:text># scenario </xsl:text><xsl:value-of select="@status" /><br />
-      <xsl:for-each select="str:split(example,'\n')">
-        <xsl:value-of select="text()" /><br />
-      </xsl:for-each><br />
-    </xsl:element>                        
-
-  </xsl:for-each>
-
-</xsl:template>
-
 <xsl:template name="argument_details">
 
   <xsl:param name="argument_name" />
@@ -565,11 +559,27 @@
     <tr valign="top" class="{ $class }">
     
       <xsl:if test="position()=1">
-        <td rowspan="{$argument_types}" class="{ $class }"><xsl:value-of select="$argument_name" /></td>
+
+        <xsl:choose>
+
+          <xsl:when test="../@optional='true' and ../@type!='block'">
+            
+              <td rowspan="{$argument_types}" class="{ $class }">
+              <span class="optional_argument"><xsl:value-of select="$argument_name" /></span>
+              </td>
+            
+          </xsl:when>
+
+          <xsl:otherwise>            
+            <td rowspan="{$argument_types}" class="{ $class }"><xsl:value-of select="$argument_name" /></td>
+          </xsl:otherwise>
+
+        </xsl:choose>
+
       </xsl:if>
       
       <td class="{ $class }">
-        <xsl:value-of select="@name"/>
+        <xsl:value-of select="@name"/> 
       </td>
       
       <td class="{ $class }">
@@ -595,6 +605,7 @@
 <xsl:template name="arguments">
 
   <div class="feature_section_title">Arguments:</div>
+
   <table class="default">
   <tr class="header">
     <td>Name</td>
@@ -630,12 +641,19 @@
   </xsl:for-each>
   
   <!-- show error message if argument are not described -->
-  <xsl:if test="count(argument)&lt;@count">
-    <tr>
-    <td colspan="5" class="warning">
-      Incomplete documentation: only <xsl:value-of select="count(argument)" />  of <xsl:value-of select="@count" /> arguments documented
-    </td>
-    </tr>
+  <xsl:if test="@type='method' and (arguments/@described&lt;arguments/@count)">
+    <xsl:call-template name="row_warning" >
+      <xsl:with-param name="colspan">5</xsl:with-param>
+      <xsl:with-param name="text">Incomplete documentation: only <xsl:value-of select="arguments/@described" /> of <xsl:value-of select="arguments/@count" /> arguments documented. Please note that block is also counted as one argument.</xsl:with-param>
+    </xsl:call-template>
+  </xsl:if>
+
+  <!-- show error message if argument are not described -->
+  <xsl:if test="(@type='accessor' or @type='writer') and arguments/@described=0">
+    <xsl:call-template name="row_warning" >
+      <xsl:with-param name="colspan">5</xsl:with-param>
+      <xsl:with-param name="text">Incomplete documentation: Attribute writer/accessor input value needs to be documented.</xsl:with-param>
+    </xsl:call-template>
   </xsl:if>
 
   </table>
@@ -749,15 +767,55 @@
 
 </xsl:template>
 
-<xsl:template match="info">
+<xsl:template name="tests">
 
-  <!-- display feature description (split lines with '\n') 
-  -->
-  <xsl:for-each select="str:split(text(),'\n')">
-      <xsl:value-of select="." /><br />
+  <xsl:param name="tests" />
+
+  <!-- examples -->
+  <div class="feature_section_title">Examples:</div>
+
+  <xsl:for-each select="$tests/scenario">
+
+    <!-- description (splitted with '\n') -->
+    <div class="scenario_description">
+
+      scenario description
+      <xsl:for-each select="str:split(description,'\n')">
+        <xsl:value-of select="text()" /><br />
+      </xsl:for-each>
+
+    </div>
+
+    <xsl:value-of select="@name"/>
+
+    <pre class="{@status}">
+      <xsl:text># scenario </xsl:text><xsl:value-of select="@status" /><br />
+      <xsl:for-each select="str:split(example,'\n')">
+        <xsl:value-of select="text()" /><br />
+      </xsl:for-each>
+    </pre>
+
   </xsl:for-each>
+  
+  <xsl:if test="count($tests/scenario)=0">
+    <xsl:call-template name="div_warning">
+      <xsl:with-param name="text">Incomplete documentation: No examples/test scenarios</xsl:with-param>
+    </xsl:call-template>
+  </xsl:if>
+
   <br />
 
+</xsl:template>
+
+<xsl:template name="info">
+
+  <xsl:if test="string-length(info/text())>0">
+     <!-- display feature description (split lines with '\n') -->
+    <xsl:for-each select="str:split(info/text(),'\n')">
+        <xsl:value-of select="." /><br />
+    </xsl:for-each>
+    <br />
+  </xsl:if>
 </xsl:template>
 
 </xsl:stylesheet>

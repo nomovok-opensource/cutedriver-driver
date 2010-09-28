@@ -5,7 +5,7 @@
     <behaviour module="MobyBehaviour::QT::Gesture" name="QtExampleGestureBehaviour"/>
     <description>Cause a flick operation on the screen.</description>
     <info>See method X, table at Y</info>
-    <arguments count="3" optional="2" described="3" block="true">
+    <arguments count="3" optional="2" described="4" block="true">
       <argument type="argument" optional="false" name="direction" default="">
         <type name="Integer">
           <description>Example argument1</description>
@@ -55,7 +55,7 @@
     <behaviour module="MobyBehaviour::QT::Gesture" name="QtExampleGestureBehaviour"/>
     <description></description>
     <info></info>
-    <arguments count="0" optional="0" described="0"/>
+    <arguments count="0" optional="0" described="0" />
     <returns described="0"/>
     <exceptions described="0"/>
     <tests count="2" passed="0" skipped="0" failed="0">
