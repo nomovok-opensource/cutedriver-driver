@@ -78,14 +78,19 @@
 </html>
 </xsl:template>
 
-<xsl:template match="feature">
+<xsl:template name="feature_name">
 
   <!-- implements following features, e.g. method name, attribute reader, attribute writer or both when attribute accessor -->
   <xsl:for-each select="str:split(@name,';')">
-    <b><xsl:value-of select="."/></b><br />
+    <b><u><xsl:value-of select="."/></u></b><br />
   </xsl:for-each>
   <br />
 
+</xsl:template>
+
+<xsl:template name="call_sequence">
+
+  <b>Call sequence:</b><br />
   <small>
 
     <!-- method: call example using parameters -->
@@ -157,9 +162,188 @@
   </small>
   <br />
 
+</xsl:template>
+
+<!-- template to capitalize string -->
+<xsl:template name="capitalize">
+
+  <xsl:param name="text" />
+  
+  <xsl:value-of select="concat(translate(substring($text,1,1), 'abcdefghijklmnopqrstuvwxyz','ABCDEFGHIJKLMNOPQRSTUVWXYZ'), substring($text,2))"/>
+
+</xsl:template>
+
+<xsl:template name="target_details">
+<!--
+
+  <feature type="method" object_type="*;sut" required_plugin="*" sut_type="qt" sut_version="*" name="flick" input_type="touch">
+    <behaviour module="MobyBehaviour::QT::Gesture" name="QtExampleGestureBehaviour"/>
+
+
+  Feature type: <b><xsl:value-of select="@type" /></b><br />
+  object type: <b><xsl:value-of select="@object_type" /></b><br />
+  required plugin: <b><xsl:value-of select="@required_plugin" /></b><br />
+  sut_type: <b><xsl:value-of select="@sut_type" /></b><br />
+  sut_version: <b><xsl:value-of select="@sut_version" /></b><br />
+  input_type: <b><xsl:value-of select="@input_type" /></b><br />
+  behaviour_name: <b><xsl:value-of select="behaviour/@name" /></b><br />
+  behaviour_module: <b><xsl:value-of select="behaviour/@module" /></b><br />
+
+  <br />
+-->
+  
+  <b>Feature and target details</b>
+  <table width="100%" align="center" cellpadding="2" cellspacing="1" border="0">
+    <tr class="header">
+      <td>Type</td>
+      <td>Target object(s)</td>
+      <td>SUT type(s)</td>
+      <td>SUT version(s)</td>
+      <td>SUT input type(s)</td>
+      <td>Behaviour module</td>
+      <td>Required plugin</td>
+    </tr>
+    <tr>
+      <td class="tablebg_even" valign="top">
+
+        <!-- capitalize text() -->
+        <xsl:call-template name="capitalize">
+         <xsl:with-param name="text" select="@type" />
+        </xsl:call-template>    
+      
+      </td>
+                  
+      <!-- target object -->
+      <td class="tablebg_even" valign="top">
+
+        <xsl:for-each select="str:split(@object_type,';')">
+
+          <xsl:choose>
+            <xsl:when test="text()='*'">
+              <xsl:text>Any test object</xsl:text>
+            </xsl:when>
+            <xsl:when test="text()='sut'">
+              <xsl:text>SUT object</xsl:text>
+            </xsl:when>
+            <xsl:otherwise>
+              <xsl:value-of select="text()" />
+            </xsl:otherwise>
+          </xsl:choose>
+
+          <xsl:if test="position()!=last()">
+          <xsl:text>,</xsl:text> 
+          </xsl:if>
+          <br />
+
+        </xsl:for-each>
+
+      </td>
+
+      <!-- target sut -->
+      <td class="tablebg_even" valign="top">
+
+        <xsl:for-each select="str:split(@sut_type,';')">
+
+          <xsl:choose>
+            <xsl:when test="text()='*'">
+              <xsl:text>Any SUT type</xsl:text>
+            </xsl:when>
+            <xsl:otherwise>
+              <!-- capitalize text() -->
+              <xsl:call-template name="capitalize">
+               <xsl:with-param name="text" select="text()" />
+              </xsl:call-template>    
+            </xsl:otherwise>
+          </xsl:choose>
+
+          <xsl:if test="position()!=last()">
+            <xsl:text>,</xsl:text> 
+          </xsl:if>
+          <br />
+
+        </xsl:for-each>
+            
+      </td>
+
+      <!-- sut version -->
+      <td class="tablebg_even" valign="top">
+        <xsl:for-each select="str:split(@sut_version,';')">
+
+          <xsl:choose>
+            <xsl:when test="text()='*'">
+              <xsl:text>All</xsl:text>
+            </xsl:when>
+            <xsl:otherwise>
+              <!-- capitalize text() -->
+              <xsl:call-template name="capitalize">
+               <xsl:with-param name="text" select="text()" />
+              </xsl:call-template>    
+            </xsl:otherwise>
+          </xsl:choose>
+
+          <xsl:if test="position()!=last()">
+            <xsl:text>,</xsl:text> 
+          </xsl:if>
+          <br />
+
+        </xsl:for-each> 
+      </td>
+
+      <!-- input type -->
+      <td class="tablebg_even" valign="top">
+        <xsl:for-each select="str:split(@input_type,';')">
+
+          <xsl:choose>
+            <xsl:when test="text()='*'">
+              <xsl:text>All</xsl:text>
+            </xsl:when>
+            <xsl:otherwise>
+              <!-- capitalize text() -->
+              <xsl:call-template name="capitalize">
+               <xsl:with-param name="text" select="text()" />
+              </xsl:call-template>    
+            </xsl:otherwise>
+          </xsl:choose>
+
+          <xsl:if test="position()!=last()">
+            <xsl:text>,</xsl:text> 
+          </xsl:if>
+          <br />
+
+        </xsl:for-each> 
+      </td>
+
+      <!-- behaviour module -->
+      <td class="tablebg_even" valign="top"><xsl:value-of select="behaviour/@module" /></td>
+
+      <!-- required plugin -->
+      <xsl:if test="@required_plugin='*'">
+        <td class="tablebg_disabled" valign="top"></td>
+      </xsl:if>
+
+      <xsl:if test="@required_plugin!='*'">
+        <td class="tablebg_even" valign="top">
+          <xsl:value-of select="@required_plugin" />
+        </td>
+      </xsl:if>
+    </tr>
+
+  </table>
+  <br />
+
+</xsl:template>
+
+<xsl:template match="feature">
+
+  <xsl:call-template name="feature_name" />
+  
   <xsl:apply-templates select="description" />
 
-  <xsl:apply-templates select="arguments" />
+  <xsl:call-template name="call_sequence" />
+
+  <xsl:call-template name="target_details" />
+
+  <xsl:call-template name="arguments" />
 
   <xsl:call-template name="returns">
     <xsl:with-param name="type" select="returns/type" />
@@ -208,9 +392,7 @@
           <xsl:with-param name="class">tablebg_even</xsl:with-param>                        
         </xsl:call-template>
       </xsl:if>
-
-
-
+      
     </xsl:for-each>
 
     </table>
@@ -234,8 +416,6 @@
   </tr>
 
 </xsl:template>
-
-
 
 <xsl:template match="tests">
 
@@ -307,35 +487,7 @@
 
 </xsl:template>
 
-<xsl:template match="argument[position() mod 2 = 1]">
-
-  <!-- odd -->
-  <xsl:call-template name="argument_details">
-
-    <xsl:with-param name="argument_name" select="@name" />
-    <xsl:with-param name="type" select="type" />
-    <xsl:with-param name="class">tablebg_even</xsl:with-param>
-    <xsl:with-param name="default" select="@default" />
-
-  </xsl:call-template>
-
-</xsl:template>
-
-<xsl:template match="argument">
-
-  <!-- even -->
-  <xsl:call-template name="argument_details">
-
-    <xsl:with-param name="argument_name" select="@name" />
-    <xsl:with-param name="type" select="type" />
-    <xsl:with-param name="class">tablebg_odd</xsl:with-param>
-    <xsl:with-param name="default" select="@default" />
-
-  </xsl:call-template>
-
-</xsl:template>
-
-<xsl:template match="arguments">
+<xsl:template name="arguments">
 
   <b>Arguments</b><br />
   <table width="100%" align="center" cellpadding="2" cellspacing="1" border="0">
@@ -346,8 +498,31 @@
     <td>Example</td>
     <td>Default</td>
   </tr>
+
+  <xsl:for-each select="arguments/argument">
+
+    <!-- table stripes: position even -->
+    <xsl:if test="(position() mod 2)=1">
+      <xsl:call-template name="argument_details">
+        <xsl:with-param name="argument_name" select="@name" />
+        <xsl:with-param name="type" select="type" />
+        <xsl:with-param name="class">tablebg_even</xsl:with-param>
+        <xsl:with-param name="default" select="@default" />
+      </xsl:call-template>
+    </xsl:if>
+
+    <!-- table stripes: position odd -->
+    <xsl:if test="(position() mod 2)=0">
+      <xsl:call-template name="argument_details">
+        <xsl:with-param name="argument_name" select="@name" />
+        <xsl:with-param name="type" select="type" />
+        <xsl:with-param name="class">tablebg_odd</xsl:with-param>
+        <xsl:with-param name="default" select="@default" />
+      </xsl:call-template>
+      
+    </xsl:if>
   
-  <xsl:apply-templates select="argument" />
+  </xsl:for-each>
   
   <!-- show error message if argument are not described -->
   <xsl:if test="count(argument)&lt;@count">
@@ -428,6 +603,8 @@
 </xsl:template>
 
 <xsl:template match="description">
+
+  <b>Description<br /></b>
 
   <xsl:if test="string-length(text())>0">
     <!-- display feature description (split lines with '\n') -->
