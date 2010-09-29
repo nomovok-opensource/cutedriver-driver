@@ -1,44 +1,34 @@
 <?xml version="1.0"?>
 <?xml-stylesheet type="text/xsl" href="template.xsl"?>
 <documentation>
-  <feature type="method" object_type="*;sut" required_plugin="*" sut_type="qt" sut_version="*" name="flick" input_type="touch">
+  <feature type="method" object_type="*;sut" required_plugin="tdriver-sut-qt-plugin" sut_type="qt" sut_version="*" name="flick" input_type="touch">
     <behaviour module="MobyBehaviour::QT::Gesture" name="QtExampleGestureBehaviour"/>
     <description>Cause a flick operation on the screen.</description>
     <info>See method X, table at Y</info>
-    <arguments count="3" optional="2" described="4" block="true">
-      <argument type="argument" optional="false" name="direction" default="">
+    <arguments block="false" count="3" optional="2" described="3">
+      <argument type="normal" optional="false" name="direction" default="">
         <type name="Integer">
           <description>Example argument1</description>
           <example>10</example>
         </type>
       </argument>
-      <argument type="argument" optional="true" name="button" default=":Left">
+      <argument type="normal" optional="true" name="button" default=":Left">
         <type name="String">
           <description>which button to use</description>
           <example>"Hello"</example>
         </type>
       </argument>
-      <argument type="argument" optional="true" name="optional_params" default="{}">
+      <argument type="normal" optional="true" name="optional_params" default="{}">
         <type name="String">
           <description>optinal parameters for blaa blaa blaa</description>
           <example>{:a =&gt; 1, :b =&gt; 2}</example>
         </type>
       </argument>
-      <argument type="block" optional="true" name="block" default="">
-        <type name="Proc">
-          <description>Block block block</description>
-          <example></example>
-        </type>
-      </argument>
     </arguments>
-    <returns described="2">
+    <returns described="1">
       <type name="String">
         <description>Return value type</description>
         <example>"World"</example>
-      </type>
-      <type name="Integer">
-        <description>Return value type</description>
-        <example>1</example>
       </type>
     </returns>
     <exceptions described="2">
@@ -51,22 +41,130 @@
     </exceptions>
     <tests count="1" passed="0" skipped="0" failed="0"/>
   </feature>
-  <feature type="accessor" object_type="*;sut" required_plugin="*" sut_type="qt" sut_version="*" name="read;read=" input_type="touch">
+  <feature type="method" object_type="*;sut" required_plugin="tdriver-sut-qt-plugin" sut_type="qt" sut_version="*" name="group_behaviours" input_type="touch">
     <behaviour module="MobyBehaviour::QT::Gesture" name="QtExampleGestureBehaviour"/>
-    <description></description>
+    <description>Groups behaviours into a single message. Commands are executed in the target in sequence using the given interval as timeout between the commands.
+The interval is not quaranteed to be exactly the specified amount and will vary depending on the load in the target device.
+Therefore it is not recommended to use the interval as basis for the test results. The commands are all executed in the target device in a single
+roundtrip from MATTI to the target device so no verification will or can be done between the commands so do not group behaviours which change the ui
+in a way that the next command may fail. Best use cases for the grouping is static behaviours such as virtual keyboard button taps.
+Behaviours can only be qrouped for one application at a time and you need to provide the application object as parameter.
+Sut behaviours cannot be grouped.</description>
     <info></info>
-    <arguments count="0" optional="0" described="0" />
-    <returns described="0"/>
-    <exceptions described="0"/>
-    <tests count="2" passed="0" skipped="0" failed="0">
-      <scenario status="passed" type="reader">
+    <arguments block="true" count="3" optional="1" described="3">
+      <argument type="normal" optional="false" name="interval" default="">
+        <type name="Integer">
+          <description>Inteval time in seconds (0.1 is an acceptable value)</description>
+          <example>1</example>
+        </type>
+      </argument>
+      <argument type="normal" optional="false" name="app" default="">
+        <type name="TestObject">
+          <description>The target application for the grouped behaviours</description>
+          <example>@application</example>
+        </type>
+      </argument>
+      <argument type="block" optional="false" name="block" default="">
+        <type name="Proc">
+          <description>Code block containing the behaviours to group as one.</description>
+          <example>{ app.Object.tap; app.Object_two.tap }</example>
+        </type>
+      </argument>
+    </arguments>
+    <returns described="0">
+    
+      <type name="NilClass">
         <description></description>
-        <example>@app.read</example>
+        <example></example>
+      </type>
+    
+    </returns>
+    <exceptions described="1">
+      <type name="ArgumentError">
+        <description>If interval not a number or app nil</description>
+      </type>
+    </exceptions>
+    <tests count="1" passed="0" skipped="0" failed="0"/>
+  </feature>
+
+  <feature type="reader" object_type="*;sut" required_plugin="tdriver-sut-qt-plugin" sut_type="qt" sut_version="*" name="reader" input_type="touch">
+    <behaviour module="MobyBehaviour::QT::Gesture" name="QtExampleGestureBehaviour"/>
+    <description>attribute_reader</description>
+    <info></info>
+    <arguments block="false" count="0" optional="0" described="0" />
+    <returns described="1">
+      <type name="String">
+        <description>Return value type</description>
+        <example>"World"</example>
+      </type>
+    </returns>
+    <tests count="1" passed="0" skipped="0" failed="0"/>
+  </feature>
+
+  <feature type="writer" object_type="*;sut" required_plugin="tdriver-sut-qt-plugin" sut_type="qt" sut_version="*" name="writer" input_type="touch">
+    <behaviour module="MobyBehaviour::QT::Gesture" name="QtExampleGestureBehaviour"/>
+    <description>attribute_reader</description>
+    <info></info>
+    <arguments block="false" count="1" optional="0" described="1">
+      <argument type="normal" optional="false" name="value" default="">
+        <type name="Integer">
+          <description>Input value</description>
+          <example>10</example>
+        </type>
+      </argument>
+    </arguments>
+    <returns described="1">
+      <type name="String">
+        <description>Return value type</description>
+        <example>"World"</example>
+      </type>
+    </returns>
+    <tests count="1" passed="0" skipped="0" failed="0"/>
+  </feature>
+
+  <feature type="method" object_type="*;sut" required_plugin="tdriver-sut-qt-plugin" sut_type="qt" sut_version="*" name="method_no_args" input_type="touch">
+    <behaviour module="MobyBehaviour::QT::Gesture" name="QtExampleGestureBehaviour"/>
+    <description>Method with no required arguments</description>
+    <info></info>
+    <arguments block="false" count="0" optional="0" described="0" />
+    <returns described="1">
+      <type name="String">
+        <description>Return value type</description>
+        <example>"World"</example>
+      </type>
+    </returns>
+    <tests count="1" passed="0" skipped="0" failed="0"/>
+  </feature>
+
+  <feature type="accessor" object_type="*;sut" required_plugin="tdriver-sut-qt-plugin" sut_type="qt" sut_version="*" name="accessor" input_type="touch">
+    <behaviour module="MobyBehaviour::QT::Gesture" name="QtExampleGestureBehaviour"/>
+    <description>attribute_reader</description>
+    <info></info>
+    <arguments block="false" count="1" optional="0" described="1">
+      <argument type="normal" optional="false" name="value" default="">
+        <type name="Integer">
+          <description>Input value</description>
+          <example>10</example>
+        </type>
+      </argument>
+    </arguments>
+    <returns described="1">
+      <type name="String">
+        <description>Return value type</description>
+        <example>"World"</example>
+      </type>
+    </returns>
+    <tests count="1" passed="0" skipped="0" failed="0">
+      <scenario status="passed">
+        <description>Basic scenario, should pass</description>
+        <example>10</example>        
       </scenario>
-      <scenario status="passed" type="writer">
-        <description></description>
-        <example>@app.read=10</example>
+      <scenario status="skipped">
+        <description>Another scenario</description>
+        <example>10</example>        
       </scenario>
+
     </tests>
   </feature>
+
 </documentation>

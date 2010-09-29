@@ -203,16 +203,14 @@
       {
       
         padding: 5px;
-        width: 50%;
-        //word-wrap: break-word;
+        width: 100%;
         word-spacing: normal;
-        //white-space: pre-line;
       }
 
       span.toc_block
       {
       
-        padding: 8px;
+        padding: 7px;
       }
       
       a.toc_item
@@ -236,8 +234,11 @@
     </style>
   </head>
   <body>
-    <h2>Documentation</h2>
 
+    <a name="top">
+      <h2>Documentation</h2>
+    </a>
+    
     <xsl:apply-templates/>
 
   </body>
@@ -266,12 +267,16 @@
     </xsl:for-each>
     
   </div>
-  
-  <br />
   <br />
 
   <!-- content -->
-  <xsl:apply-templates/>
+
+  <xsl:for-each select="feature">
+    <xsl:sort select="@name" />
+    <xsl:call-template name="feature">
+    </xsl:call-template>
+  
+  </xsl:for-each>
 
 </xsl:template>
 
@@ -619,7 +624,7 @@
 
 </xsl:template>
 
-<xsl:template match="feature">
+<xsl:template name="feature">
 
   <xsl:call-template name="feature_name" />
   
@@ -651,6 +656,9 @@
     <!-- feature separator? -->
    </xsl:if>
         
+  <a href="#top" class="toc_item">Jump to top of page</a><br />
+  <br />
+          
 </xsl:template>
 
 <xsl:template name="exceptions">
@@ -782,60 +790,64 @@
 
 <xsl:template name="arguments">
 
-  <div class="feature_section_title">Arguments:</div>
+  <xsl:if test="@type='writer' or @type='accessor' or (@type='method' and number(arguments/@count)>0)">
 
-  <table class="default">
-  <tr class="header">
-    <td>Name</td>
-    <td>Type</td>
-    <td>Description</td>
-    <td>Example</td>
-    <td>Default</td>
-  </tr>
+    <div class="feature_section_title">Arguments:</div>
 
-  <xsl:for-each select="arguments/argument">
+    <table class="default">
+    <tr class="header">
+      <td>Name</td>
+      <td>Type</td>
+      <td>Description</td>
+      <td>Example</td>
+      <td>Default</td>
+    </tr>
 
-    <!-- table stripes: position even -->
-    <xsl:if test="(position() mod 2)=1">
-      <xsl:call-template name="argument_details">
-        <xsl:with-param name="argument_name" select="@name" />
-        <xsl:with-param name="type" select="type" />
-        <xsl:with-param name="class">tablebg_even</xsl:with-param>
-        <xsl:with-param name="default" select="@default" />
+    <xsl:for-each select="arguments/argument">
+
+      <!-- table stripes: position even -->
+      <xsl:if test="(position() mod 2)=1">
+        <xsl:call-template name="argument_details">
+          <xsl:with-param name="argument_name" select="@name" />
+          <xsl:with-param name="type" select="type" />
+          <xsl:with-param name="class">tablebg_even</xsl:with-param>
+          <xsl:with-param name="default" select="@default" />
+        </xsl:call-template>
+      </xsl:if>
+
+      <!-- table stripes: position odd -->
+      <xsl:if test="(position() mod 2)=0">
+        <xsl:call-template name="argument_details">
+          <xsl:with-param name="argument_name" select="@name" />
+          <xsl:with-param name="type" select="type" />
+          <xsl:with-param name="class">tablebg_odd</xsl:with-param>
+          <xsl:with-param name="default" select="@default" />
+        </xsl:call-template>
+        
+      </xsl:if>
+    
+    </xsl:for-each>
+    
+    <!-- show error message if argument is not described -->
+    <xsl:if test="@type='method' and (arguments/@described&lt;arguments/@count)">
+      <xsl:call-template name="row_warning" >
+        <xsl:with-param name="colspan">5</xsl:with-param>
+        <xsl:with-param name="text">Incomplete documentation: only <xsl:value-of select="arguments/@described" /> of <xsl:value-of select="arguments/@count" /> arguments documented. Please note that block is also counted as one argument.</xsl:with-param>
       </xsl:call-template>
     </xsl:if>
 
-    <!-- table stripes: position odd -->
-    <xsl:if test="(position() mod 2)=0">
-      <xsl:call-template name="argument_details">
-        <xsl:with-param name="argument_name" select="@name" />
-        <xsl:with-param name="type" select="type" />
-        <xsl:with-param name="class">tablebg_odd</xsl:with-param>
-        <xsl:with-param name="default" select="@default" />
+    <!-- show error message if argument is not described -->
+    <xsl:if test="(@type='accessor' or @type='writer') and arguments/@described=0">
+      <xsl:call-template name="row_warning" >
+        <xsl:with-param name="colspan">5</xsl:with-param>
+        <xsl:with-param name="text">Incomplete documentation: Attribute writer/accessor input value needs to be documented.</xsl:with-param>
       </xsl:call-template>
-      
     </xsl:if>
-  
-  </xsl:for-each>
-  
-  <!-- show error message if argument are not described -->
-  <xsl:if test="@type='method' and (arguments/@described&lt;arguments/@count)">
-    <xsl:call-template name="row_warning" >
-      <xsl:with-param name="colspan">5</xsl:with-param>
-      <xsl:with-param name="text">Incomplete documentation: only <xsl:value-of select="arguments/@described" /> of <xsl:value-of select="arguments/@count" /> arguments documented. Please note that block is also counted as one argument.</xsl:with-param>
-    </xsl:call-template>
-  </xsl:if>
 
-  <!-- show error message if argument are not described -->
-  <xsl:if test="(@type='accessor' or @type='writer') and arguments/@described=0">
-    <xsl:call-template name="row_warning" >
-      <xsl:with-param name="colspan">5</xsl:with-param>
-      <xsl:with-param name="text">Incomplete documentation: Attribute writer/accessor input value needs to be documented.</xsl:with-param>
-    </xsl:call-template>
-  </xsl:if>
+    </table>
+    <br />
 
-  </table>
-  <br />
+  </xsl:if>
 
 </xsl:template>
 
@@ -878,47 +890,52 @@
 
   <!-- show return value types table if feature type is method, reader or accessor -->
   <!--<xsl:if test="@type='reader' or @type='accessor' or @type='method'"> -->
-  <!-- return values -->
-  <div class="feature_section_title">Returns:</div>
-  <table class="default">
-  <tr class="header">
-    <td>Type</td>
-    <td>Description</td>
-    <td>Example</td>
-  </tr>
 
-  <!-- show error message if no return values defined -->
-  <xsl:if test="( count($type)=0 ) and (($feature_type='method') or ($feature_type='accessor') or ($feature_type='reader'))">
-    <xsl:call-template name="row_warning">
-      <xsl:with-param name="text">Incomplete documentation: No return value type(s) defined for method, attribute reader or attribute accessor</xsl:with-param>
-      <xsl:with-param name="colspan">3</xsl:with-param>
-    </xsl:call-template>
+  <xsl:if test="@type='reader' or @type='accessor' or @type='method'">
+
+    <!-- return values -->
+    <div class="feature_section_title">Returns:</div>
+    <table class="default">
+    <tr class="header">
+      <td>Type</td>
+      <td>Description</td>
+      <td>Example</td>
+    </tr>
+
+    <!-- show error message if no return values defined -->
+    <xsl:if test="(( count($type)=0 ) or ( count( arguments )=0 ) ) and ((@type='method') or (@type='accessor') or (@type='reader'))">
+      <xsl:call-template name="row_warning">
+        <xsl:with-param name="text">Incomplete documentation: No return value type(s) defined for method, attribute reader or attribute accessor</xsl:with-param>
+        <xsl:with-param name="colspan">3</xsl:with-param>
+      </xsl:call-template>
+    </xsl:if>
+    
+    <xsl:if test="count($type)>0">
+
+      <xsl:for-each select="$type">
+
+        <xsl:if test="(position() mod 2)=0" >
+          <xsl:call-template name="returns_type" >
+            <xsl:with-param name="type" select="." />
+            <xsl:with-param name="class">tablebg_odd</xsl:with-param>                        
+          </xsl:call-template>
+        </xsl:if>
+
+        <xsl:if test="(position() mod 2)=1" >
+          <xsl:call-template name="returns_type" >
+            <xsl:with-param name="type" select="." />
+            <xsl:with-param name="class">tablebg_even</xsl:with-param>                        
+          </xsl:call-template>
+        </xsl:if>
+        
+      </xsl:for-each>
+
+    </xsl:if>
+
+    </table>
+    <br />
+
   </xsl:if>
-  
-  <xsl:if test="count($type)>0">
-
-    <xsl:for-each select="$type">
-
-      <xsl:if test="(position() mod 2)=0" >
-        <xsl:call-template name="returns_type" >
-          <xsl:with-param name="type" select="." />
-          <xsl:with-param name="class">tablebg_odd</xsl:with-param>                        
-        </xsl:call-template>
-      </xsl:if>
-
-      <xsl:if test="(position() mod 2)=1" >
-        <xsl:call-template name="returns_type" >
-          <xsl:with-param name="type" select="." />
-          <xsl:with-param name="class">tablebg_even</xsl:with-param>                        
-        </xsl:call-template>
-      </xsl:if>
-      
-    </xsl:for-each>
-
-  </xsl:if>
-
-  </table>
-  <br />
 
 </xsl:template>
 
@@ -957,7 +974,6 @@
     <!-- description (splitted with '\n') -->
     <div class="scenario_description">
 
-      scenario description
       <xsl:for-each select="str:split(description,'\n')">
         <xsl:value-of select="text()" /><br />
       </xsl:for-each>
