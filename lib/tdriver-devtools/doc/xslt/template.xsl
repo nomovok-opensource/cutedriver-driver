@@ -98,6 +98,11 @@
         background: #dedede;
       }
 
+      td.tablebg_warning
+      {
+        background: #a11010;
+      }
+
       td.tablebg_disabled
       {
         background: #c5c5c5;
@@ -186,14 +191,88 @@
       
       }
       
+      span.toc_title
+      {
+      
+        font-size: 14px;
+        font-weight: bold;
+      
+      }
+      
+      div.toc
+      {
+      
+        padding: 5px;
+        width: 50%;
+        //word-wrap: break-word;
+        word-spacing: normal;
+        //white-space: pre-line;
+      }
 
+      span.toc_block
+      {
+      
+        padding: 8px;
+      }
+      
+      a.toc_item
+      {
+      
+        font-size: 11px;
+        text-decoration: none;
+        color: #313131;
+
+      }
+
+      a.toc_item:hover
+      {
+      
+        //text-decoration: underline;
+        border-bottom: 1px dotted #515151;
+
+      }
+
+      
     </style>
   </head>
   <body>
     <h2>Documentation</h2>
+
     <xsl:apply-templates/>
+
   </body>
 </html>
+</xsl:template>
+
+<xsl:template match="documentation">
+
+  <!-- table of contents -->
+  <span class="toc_title">Table of contents:</span>
+  <br />
+  
+  <div class="toc">
+    <xsl:for-each select="feature/@name">
+      <xsl:sort select="." />
+
+      <span class="toc_block">
+        <a href="#{ ../@name }" class="toc_item">
+          <xsl:for-each select="str:split(.,';')">
+            <xsl:value-of select="." /> 
+          </xsl:for-each>
+        </a>
+      </span>
+      <xsl:text> </xsl:text>
+    
+    </xsl:for-each>
+    
+  </div>
+  
+  <br />
+  <br />
+
+  <!-- content -->
+  <xsl:apply-templates/>
+
 </xsl:template>
 
 <xsl:template name="feature_name">
@@ -358,128 +437,181 @@
       <td>Required plugin</td>
     </tr>
     <tr>
+    
+      <!-- feature type -->
       <td class="tablebg_even" valign="top">
-
         <!-- capitalize text() -->
         <xsl:call-template name="capitalize">
          <xsl:with-param name="text" select="@type" />
         </xsl:call-template>    
+      </td>
       
-      </td>
-                  
       <!-- target object -->
-      <td class="tablebg_even" valign="top">
+      <xsl:choose>
+        <xsl:when test="string-length(@object_type)>0">
+          <td class="tablebg_even" valign="top">
+            <xsl:for-each select="str:split(@object_type,';')">
+              <xsl:choose>
+                <xsl:when test="text()='*'">
+                  <xsl:text>Any test object</xsl:text>
+                </xsl:when>
+                <xsl:when test="text()='sut'">
+                  <xsl:text>SUT object</xsl:text>
+                </xsl:when>
+                <xsl:otherwise>
+                  <xsl:value-of select="text()" />
+                </xsl:otherwise>
+              </xsl:choose>
+              <xsl:if test="position()!=last()">
+              <xsl:text>,</xsl:text> 
+              </xsl:if>
+              <br />
+            </xsl:for-each>
+          </td>
+        </xsl:when>
+        <xsl:otherwise>
+          <td class="tablebg_warning" valign="top">
+            <xsl:call-template name="div_warning">
+            <xsl:with-param name="text">Not defined</xsl:with-param>
+            </xsl:call-template>
+          </td>
+        </xsl:otherwise>
+      </xsl:choose>
 
-        <xsl:for-each select="str:split(@object_type,';')">
-
-          <xsl:choose>
-            <xsl:when test="text()='*'">
-              <xsl:text>Any test object</xsl:text>
-            </xsl:when>
-            <xsl:when test="text()='sut'">
-              <xsl:text>SUT object</xsl:text>
-            </xsl:when>
-            <xsl:otherwise>
-              <xsl:value-of select="text()" />
-            </xsl:otherwise>
-          </xsl:choose>
-
-          <xsl:if test="position()!=last()">
-          <xsl:text>,</xsl:text> 
-          </xsl:if>
-          <br />
-
-        </xsl:for-each>
-
-      </td>
+                  
 
       <!-- target sut -->
-      <td class="tablebg_even" valign="top">
-
-        <xsl:for-each select="str:split(@sut_type,';')">
-
-          <xsl:choose>
-            <xsl:when test="text()='*'">
-              <xsl:text>Any SUT type</xsl:text>
-            </xsl:when>
-            <xsl:otherwise>
-              <!-- capitalize text() -->
-              <xsl:call-template name="capitalize">
-               <xsl:with-param name="text" select="text()" />
-              </xsl:call-template>    
-            </xsl:otherwise>
-          </xsl:choose>
-
-          <xsl:if test="position()!=last()">
-            <xsl:text>,</xsl:text> 
-          </xsl:if>
-          <br />
-
-        </xsl:for-each>
-            
-      </td>
+      <xsl:choose>
+        <xsl:when test="string-length(@sut_type)>0">
+          <td class="tablebg_even" valign="top">
+            <xsl:for-each select="str:split(@sut_type,';')">
+              <xsl:choose>
+                <xsl:when test="text()='*'">
+                  <xsl:text>Any SUT type</xsl:text>
+                </xsl:when>
+                <xsl:otherwise>
+                  <!-- capitalize text() -->
+                  <xsl:call-template name="capitalize">
+                   <xsl:with-param name="text" select="text()" />
+                  </xsl:call-template>    
+                </xsl:otherwise>
+              </xsl:choose>
+              <xsl:if test="position()!=last()">
+                <xsl:text>,</xsl:text> 
+              </xsl:if>
+              <br />
+            </xsl:for-each>                
+          </td>
+        </xsl:when>
+        <xsl:otherwise>
+          <td class="tablebg_warning" valign="top">
+            <xsl:call-template name="div_warning">
+            <xsl:with-param name="text">Not defined</xsl:with-param>
+            </xsl:call-template>
+          </td>
+        </xsl:otherwise>
+      </xsl:choose>
 
       <!-- sut version -->
-      <td class="tablebg_even" valign="top">
-        <xsl:for-each select="str:split(@sut_version,';')">
+      <xsl:choose>      
+        <xsl:when test="string-length(@sut_version)>0">
+          <td class="tablebg_even" valign="top">
+            <xsl:for-each select="str:split(@sut_version,';')">
 
-          <xsl:choose>
-            <xsl:when test="text()='*'">
-              <xsl:text>All</xsl:text>
-            </xsl:when>
-            <xsl:otherwise>
-              <!-- capitalize text() -->
-              <xsl:call-template name="capitalize">
-               <xsl:with-param name="text" select="text()" />
-              </xsl:call-template>    
-            </xsl:otherwise>
-          </xsl:choose>
-
-          <xsl:if test="position()!=last()">
-            <xsl:text>,</xsl:text> 
-          </xsl:if>
-          <br />
-
-        </xsl:for-each> 
-      </td>
+              <xsl:choose>
+                <xsl:when test="text()='*'">
+                  <xsl:text>All</xsl:text>
+                </xsl:when>
+                <xsl:otherwise>
+                  <!-- capitalize text() -->
+                  <xsl:call-template name="capitalize">
+                   <xsl:with-param name="text" select="text()" />
+                  </xsl:call-template>    
+                </xsl:otherwise>
+              </xsl:choose>
+              <xsl:if test="position()!=last()">
+                <xsl:text>,</xsl:text> 
+              </xsl:if>
+              <br />
+            </xsl:for-each> 
+          </td>
+        </xsl:when>
+        <xsl:otherwise>
+          <td class="tablebg_warning" valign="top">
+            <xsl:call-template name="div_warning">
+            <xsl:with-param name="text">Not defined</xsl:with-param>
+            </xsl:call-template>
+          </td>
+        </xsl:otherwise>
+      </xsl:choose>
 
       <!-- input type -->
-      <td class="tablebg_even" valign="top">
-        <xsl:for-each select="str:split(@input_type,';')">
-
-          <xsl:choose>
-            <xsl:when test="text()='*'">
-              <xsl:text>All</xsl:text>
-            </xsl:when>
-            <xsl:otherwise>
-              <!-- capitalize text() -->
-              <xsl:call-template name="capitalize">
-               <xsl:with-param name="text" select="text()" />
-              </xsl:call-template>    
-            </xsl:otherwise>
-          </xsl:choose>
-
-          <xsl:if test="position()!=last()">
-            <xsl:text>,</xsl:text> 
-          </xsl:if>
-          <br />
-
-        </xsl:for-each> 
-      </td>
+      <xsl:choose>
+        <xsl:when test="string-length(@input_type)=0">
+          <td class="tablebg_warning" valign="top">
+            <xsl:call-template name="div_warning">
+            <xsl:with-param name="text">Not defined</xsl:with-param>
+            </xsl:call-template>
+          </td> 
+        </xsl:when>
+        <xsl:otherwise>
+          <td class="tablebg_even" valign="top">
+            <xsl:for-each select="str:split(@input_type,';')">
+              <xsl:choose>
+                <xsl:when test="text()='*'">
+                  <xsl:text>All</xsl:text>
+                </xsl:when>
+                <xsl:otherwise>
+                  <!-- capitalize text() -->
+                  <xsl:call-template name="capitalize">
+                   <xsl:with-param name="text" select="text()" />
+                  </xsl:call-template>    
+                </xsl:otherwise>
+              </xsl:choose>
+              <xsl:if test="position()!=last()">
+                <xsl:text>,</xsl:text> 
+              </xsl:if>
+              <br />
+            </xsl:for-each> 
+          </td>
+        </xsl:otherwise>
+      </xsl:choose>
 
       <!-- behaviour module -->
-      <td class="tablebg_even" valign="top"><xsl:value-of select="behaviour/@module" /></td>
+      <xsl:choose>
+        <xsl:when test="string-length(behaviour/@module)>0">
+          <td class="tablebg_even" valign="top">
+            <xsl:value-of select="behaviour/@module" />
+          </td>
+        </xsl:when>
+        <xsl:otherwise>
+          <td class="tablebg_warning" valign="top">
+            <xsl:call-template name="div_warning">
+            <xsl:with-param name="text">Not defined</xsl:with-param>
+            </xsl:call-template>
+          </td>
+        </xsl:otherwise>
+      </xsl:choose>
 
       <!-- required plugin -->
-      <xsl:if test="@required_plugin='*'">
-        <td class="tablebg_disabled" valign="top"></td>
-      </xsl:if>
+      <xsl:choose>
+        <xsl:when test="string-length(@required_plugin)=0">
+          <td class="tablebg_warning" valign="top">
+            <xsl:call-template name="div_warning">
+            <xsl:with-param name="text">Not defined</xsl:with-param>
+            </xsl:call-template>
+          </td>
+        </xsl:when>
+        <xsl:when test="@required_plugin!='*'">
+          <td class="tablebg_even" valign="top">
+            <xsl:value-of select="@required_plugin" />
+          </td>
+        </xsl:when>
+        <xsl:otherwise>
+          <td class="tablebg_disabled" valign="top"></td>
+        </xsl:otherwise>
+      </xsl:choose>
 
-      <xsl:if test="@required_plugin!='*'">
-        <td class="tablebg_even" valign="top">
-          <xsl:value-of select="@required_plugin" />
-        </td>
-      </xsl:if>
     </tr>
 
   </table>
