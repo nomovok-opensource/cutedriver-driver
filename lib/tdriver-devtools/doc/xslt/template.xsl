@@ -12,6 +12,10 @@
         border: 1px solid #d1d1d1;
         padding: 8px; 
 
+      }
+
+      span.feature_title_text
+      {
         text-decoration: underline;    
         font-size: 14px; 
         font-weight: bold;
@@ -85,17 +89,33 @@
       {
 
         font-size: 11px;      
-        
+        border-top: 1px solid #a6f076;
+        border-left: 1px solid #a6f076;
+
+        border-bottom: 1px solid #7fc94f;
+        border-right: 1px solid #7fc94f;
+
       }
 
       td.tablebg_even
       {
         background: #ededed;
+        border-top: 1px solid #f5f5f5;
+        border-left: 1px solid #f5f5f5;
+
+        border-bottom: 1px solid #d6d6d6;
+        border-right: 1px solid #d6d6d6;
+
       }
 
       td.tablebg_odd
       {
         background: #dedede;
+        border-top: 1px solid #e6e6e6;
+        border-left: 1px solid #e6e6e6;
+        border-bottom: 1px solid #c7c7c7;
+        border-right: 1px solid #c7c7c7;
+
       }
 
       td.tablebg_warning
@@ -258,13 +278,16 @@
     <xsl:for-each select="feature/@name">
       <xsl:sort select="." />
 
-      <span class="toc_block">
-        <a href="#{ ../@name }" class="toc_item">
-          <xsl:for-each select="str:split(.,';')">
-            <xsl:value-of select="." /> 
-          </xsl:for-each>
-        </a>
-      </span>
+      <xsl:variable name="name"><xsl:value-of select="../@name"/></xsl:variable>
+
+      <xsl:for-each select="str:split(.,';')">
+        <span class="toc_block">
+          <a href="#{ $name }" class="toc_item">
+            <xsl:value-of select="." />
+          </a>
+        </span>
+      </xsl:for-each>
+
       <xsl:text> </xsl:text>
     
     </xsl:for-each>
@@ -290,7 +313,9 @@
   <a name="{ @name }">
   <div class="feature_title">
   <xsl:for-each select="str:split(@name,';')">
-    <xsl:value-of select="."/> 
+    <span class="feature_title_text">
+      <xsl:value-of select="."/> 
+    </span>
     <xsl:if test="position()!=last()">
     <xsl:text>, </xsl:text>
     </xsl:if>
@@ -436,13 +461,13 @@
   <div class="feature_section_title">Feature and target details:</div>
   <table class="default">
     <tr class="header">
-      <td>Type</td>
-      <td>Target object(s)</td>
-      <td>SUT type(s)</td>
-      <td>SUT version(s)</td>
-      <td>SUT input type(s)</td>
-      <td>Behaviour module</td>
-      <td>Required plugin</td>
+      <td class="header">Type</td>
+      <td class="header">Target object(s)</td>
+      <td class="header">SUT type(s)</td>
+      <td class="header">SUT version(s)</td>
+      <td class="header">SUT input type(s)</td>
+      <td class="header">Behaviour module</td>
+      <td class="header">Required plugin</td>
     </tr>
     <tr>
     
@@ -676,8 +701,8 @@
 
     <table class="default">
     <tr class="header">
-      <td>Type</td>
-      <td>Description</td>
+      <td class="header">Type</td>
+      <td class="header">Description</td>
     </tr>
 
     <xsl:for-each select="$type">
@@ -799,11 +824,11 @@
 
     <table class="default">
     <tr class="header">
-      <td>Name</td>
-      <td>Type</td>
-      <td>Description</td>
-      <td>Example</td>
-      <td>Default</td>
+      <td class="header">Name</td>
+      <td class="header">Type</td>
+      <td class="header">Description</td>
+      <td class="header">Example</td>
+      <td class="header">Default</td>
     </tr>
 
     <xsl:for-each select="arguments/argument">
@@ -900,9 +925,9 @@
     <div class="feature_section_title">Returns:</div>
     <table class="default">
     <tr class="header">
-      <td>Type</td>
-      <td>Description</td>
-      <td>Example</td>
+      <td class="header">Type</td>
+      <td class="header">Description</td>
+      <td class="header">Example</td>
     </tr>
 
     <!-- show error message if no return values defined -->
