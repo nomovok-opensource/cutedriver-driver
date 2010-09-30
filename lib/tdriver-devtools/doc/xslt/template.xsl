@@ -171,8 +171,11 @@
       pre.skipped
       {
         border: #b7b7b7 1px solid;
-        background: #c1c1c1;
-        color: #818181;
+        //background: #c1c1c1;
+        background: #a11010;
+
+        //color: #818181;
+        color: #ffff00;
       }
 
       span.hover_text
