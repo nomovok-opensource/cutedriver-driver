@@ -80,13 +80,14 @@ module MobyUtil
 					result << query_result.fetch_row
 				end				
 		    elsif db_type == DB_TYPE_SQLITE
-				
-				while ( row = query_result.next ) 
-					result << row[0]
+				# Create Array<SQLite3::ResultSet::ArrayWithTypesAndFields<String>> type result
+				# it effectively behaves the same as with Array<Array<String>> but the inner Arrays have .fields and .types properties 
+				# which return the column name and type for each value on the row (Array) returned.
+				while ( row = query_result.next )
+					result << row
 				end
 		    end
 			return result
-			
 		end
 	
 		
