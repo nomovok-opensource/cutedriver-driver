@@ -9,7 +9,32 @@
       {
 
         background: #f1f1f1;
-        border: 1px solid #d1d1d1;
+
+        border-top: 1px solid #f9f9f9;
+        border-left: 1px solid #f9f9f9;
+
+        border-bottom: 1px solid #dadada;
+        border-right: 1px solid #dadada;
+
+
+        background: #d1d1d1;
+
+        border-top: 1px solid #d9d9d9;
+        border-left: 1px solid #d9d9d9;
+
+        border-bottom: 1px solid #bababa;
+        border-right: 1px solid #bababa;
+
+        background: #c1c1c1;
+
+        border-top: 1px solid #c9c9c9;
+        border-left: 1px solid #c9c9c9;
+
+        border-bottom: 1px solid #aaaaaa;
+        border-right: 1px solid #aaaaaa;
+
+        color: #404040;
+
         padding: 8px; 
 
       }
@@ -118,20 +143,34 @@
 
       }
 
-      td.tablebg_warning
+      td.warning,div.warning, td.tablebg_warning, pre.failed, pre.skipped
       {
+
         background: #a11010;
+        color: #ffff00;
+
+      }
+
+      td.tablebg_warning, td.warning, pre.failed, pre.skipped
+      {
+
+        border-top: 1px solid #a91818;
+        border-left: 1px solid #a91818;
+
+        border-bottom: 1px solid #8a0000;
+        border-right: 1px solid #8a0000;
+
       }
 
       td.tablebg_disabled
       {
         background: #c5c5c5;
-      }
 
-      td.warning,div.warning
-      {
-        background: #a11010;
-        color: #ffff00;
+        border-top: 1px solid #cdcdcd;
+        border-left: 1px solid #cdcdcd;
+        border-bottom: 1px solid #aeaeae;
+        border-right: 1px solid #aeaeae;
+
       }
 
       div.warning
@@ -176,28 +215,24 @@
 
       pre.passed
       {
-        border: #e7e7e7 1px solid;
+
         background: #f1f1f1;
+
+        border-top: 1px solid #f9f9f9;
+        border-left: 1px solid #f9f9f9;
+
+        border-bottom: 1px solid #dadada;
+        border-right: 1px solid #dadada;
+
         color: black;
       }
 
-      pre.failed
+      pre.failed, pre.skipped
       {
-        border: #b70707 1px solid;
-        background: #a11010;
+
         color: black;
+
       }
-
-      pre.skipped
-      {
-        border: #b7b7b7 1px solid;
-        //background: #c1c1c1;
-        background: #a11010;
-
-        //color: #818181;
-        color: #ffff00;
-      }
-
       span.hover_text
       {
       
