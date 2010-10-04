@@ -291,6 +291,12 @@
 
       }
 
+      img
+      {
+      
+        border: 0px;
+      
+      }
       
     </style>
   </head>
@@ -1244,11 +1250,25 @@
 
     </xsl:when>
 
+    <xsl:when test="$tag='img'">
+
+      <!-- url = substring($tag,5,string-length($tag)) -->
+            
+      <img src="{ $content }" title="" />
+
+      <xsl:call-template name="process_tags" >
+        <xsl:with-param name="text" select="$content_after" />
+      </xsl:call-template>
+
+    </xsl:when>
+
     <xsl:when test="$tag='br'">
       <br />
     </xsl:when>
 
     <xsl:otherwise>
+
+      
 
       <xsl:choose>
 
