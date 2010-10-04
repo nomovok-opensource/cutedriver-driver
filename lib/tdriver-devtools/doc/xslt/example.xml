@@ -43,13 +43,12 @@
   </feature>
   <feature type="method" object_type="*;sut" required_plugin="tdriver-sut-qt-plugin" sut_type="qt" sut_version="*" name="group_behaviours" input_type="touch">
     <behaviour module="MobyBehaviour::QT::Gesture" name="QtExampleGestureBehaviour"/>
-    <description>Groups behaviours into a single message. Commands are executed in the target in sequence using the given interval as timeout between the commands.
-The interval is not quaranteed to be exactly the specified amount and will vary depending on the load in the target device.
+    <description>Groups [b]behaviours [u]into a single[/u] message.[/b] Commands are executed in the target in sequence using the given interval as timeout between the commands. The interval is not quaranteed to be exactly the specified amount and will vary depending on the load in the target device.
 Therefore it is not recommended to use the interval as basis for the test results. The commands are all executed in the target device in a single
 roundtrip from MATTI to the target device so no verification will or can be done between the commands so do not group behaviours which change the ui
 in a way that the next command may fail. Best use cases for the grouping is static behaviours such as virtual keyboard button taps.
 Behaviours can only be qrouped for one application at a time and you need to provide the application object as parameter.
-Sut behaviours cannot be grouped.</description>
+Sut behaviours cannot be grouped. [:this_is_not_a_tag]</description>
     <info></info>
     <arguments block="true" count="3" optional="1" described="3">
       <argument type="normal" optional="false" name="interval" default="">
