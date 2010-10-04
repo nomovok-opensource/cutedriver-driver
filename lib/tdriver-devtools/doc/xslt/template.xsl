@@ -71,7 +71,7 @@
       
       div.feature_description, div.scenario_description
       {
-        font-style: italic;
+        font-style: normal; // normal more readable than italic;
       }
       
       div.feature_call_sequence
@@ -1013,14 +1013,19 @@
     <!-- display feature description (split lines with '\n') -->
 
     <div class="feature_description">
-
+  <!--
       <xsl:for-each select="str:split(description/text(),'\n')">
+  -->
 
-           <xsl:call-template name="capture">
-            <xsl:with-param name="text" select="."/> 
-           </xsl:call-template>
-           
+      <xsl:call-template name="formatted_content">
+
+        <xsl:with-param name="text" select="description/text()"/> 
+
+      </xsl:call-template><br />
+
+  <!--           
       </xsl:for-each>
+  -->
     </div>
   </xsl:if>
 
@@ -1083,7 +1088,53 @@
   </xsl:if>
 </xsl:template>
 
-<xsl:template name="capture">
+<xsl:template name="formatted_content">
+
+  <xsl:param name="text"/>
+
+  <xsl:variable name="text_with_linefeeds">
+    <xsl:call-template name="split_lines">
+      <xsl:with-param name="text" select="$text" />
+    </xsl:call-template>  
+  </xsl:variable>
+
+<!--
+  <xsl:value-of select="$text_with_linefeeds" /><br />
+
+    -->
+  <xsl:call-template name="process_tags">
+
+    <xsl:with-param name="text" select="$text_with_linefeeds" />
+
+  </xsl:call-template>
+     
+</xsl:template>
+
+<xsl:template name="split_lines">
+
+  <xsl:param name="text"/>
+
+  <!-- content before \n -->
+  <xsl:variable name="before_linefeed" select="substring-before($text, '\')"/>
+
+  <!-- content after \n -->
+  <xsl:variable name="after_linefeed" select="substring-after($text, '\')"/>
+
+  <xsl:choose>
+    <xsl:when test="substring(substring-after($text,'\'),1,1)='n'">
+      <xsl:value-of select="$before_linefeed" /><xsl:text>[br]</xsl:text>
+      <xsl:call-template name="split_lines">
+        <xsl:with-param name="text" select="substring($text,string-length($before_linefeed)+3,string-length($text))" />
+      </xsl:call-template>
+    </xsl:when>
+    <xsl:otherwise>
+      <xsl:value-of select="$text" />
+    </xsl:otherwise>
+  </xsl:choose>
+
+</xsl:template>
+
+<xsl:template name="process_tags">
 
   <xsl:param name="text"/>
 
@@ -1101,6 +1152,8 @@
   <!-- content between tag -->
   <xsl:variable name="tag_content" select="substring-before($content_after_tag, concat('[/', $tag, ']'))"/>
 
+  <xsl:variable name="content_after_start_tag" select="substring-after($text, concat('[',$tag,']'))"/>
+
   <xsl:variable name="content_after_end_tag" select="substring-after($content_after_tag, concat('[/', $tag, ']'))"/>
 
 <!--
@@ -1112,6 +1165,8 @@
 
   <br /><br />
   -->
+
+  <!-- show leading text before tag... -->
   <xsl:value-of select="$content_before_tag" />
 
   <xsl:choose>
@@ -1119,21 +1174,25 @@
     <xsl:when test="string-length($tag)>0">
  
         <xsl:call-template name="process_tag" >
+          <xsl:with-param name="tag" select="$tag" />
           <xsl:with-param name="content" select="$tag_content" />
           <xsl:with-param name="content_after" select="$content_after_end_tag" />
-          <xsl:with-param name="tag" select="$tag" />
         </xsl:call-template>
- 
-<!--
-      -->
     
+        <xsl:if test="string-length($tag_content)=0">
+
+          <xsl:call-template name="process_tags">              
+            <xsl:with-param name="text" select="$content_after_start_tag" />
+          </xsl:call-template>
+        
+        </xsl:if>
+      
     </xsl:when>
   
     <xsl:otherwise>
 
       <xsl:value-of select="$text" />
-<!--      
-    -->
+
     </xsl:otherwise>
   
   </xsl:choose>
@@ -1155,25 +1214,38 @@
   <xsl:choose>
     <xsl:when test="$tag='b'">
 
-      <b><xsl:call-template name="capture" >
+      <b><xsl:call-template name="process_tags" >
         <xsl:with-param name="text" select="$content" />
       </xsl:call-template></b>
 
-      <xsl:call-template name="capture" >
+      <xsl:call-template name="process_tags" >
         <xsl:with-param name="text" select="$content_after" />
       </xsl:call-template>
-<!--
-    -->  
+
     </xsl:when>
 
     <xsl:when test="$tag='u'">
-      <u><xsl:call-template name="capture" >
+      <u><xsl:call-template name="process_tags" >
         <xsl:with-param name="text" select="$content" />
       </xsl:call-template></u>
-      <xsl:call-template name="capture" >
+      <xsl:call-template name="process_tags" >
         <xsl:with-param name="text" select="$content_after" />
       </xsl:call-template>
 
+    </xsl:when>
+
+    <xsl:when test="$tag='i'">
+      <i><xsl:call-template name="process_tags" >
+        <xsl:with-param name="text" select="$content" />
+      </xsl:call-template></i>
+      <xsl:call-template name="process_tags" >
+        <xsl:with-param name="text" select="$content_after" />
+      </xsl:call-template>
+
+    </xsl:when>
+
+    <xsl:when test="$tag='br'">
+      <br />
     </xsl:when>
 
     <xsl:otherwise>
@@ -1192,7 +1264,7 @@
       
       </xsl:choose>
 
-      <xsl:call-template name="capture" >
+      <xsl:call-template name="process_tags" >
         <xsl:with-param name="text" select="$content_after" />
       </xsl:call-template>
     
