@@ -179,6 +179,11 @@ class ReportingStatistics
 
   def generate_duration_graph(file_name)
 
+    begin
+        require 'gruff'
+    rescue LoadError
+        $stderr.puts "Can't load the Gruff gem. If its missing from your system please run 'gem install gruff' to install it."
+    end
     reset_total_statistics()
     collect_test_case_statistics()
     begin
