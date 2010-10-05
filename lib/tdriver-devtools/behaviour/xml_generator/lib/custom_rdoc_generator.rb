@@ -698,7 +698,7 @@ EXAMPLE
 
         if nesting == 0
 
-          line =~ /^(\w+)/i
+          line =~ /^(.+)/i
 
           if !$1.nil? && (65..90).include?( $1[0] )
 
@@ -944,7 +944,7 @@ EXAMPLE
           if key == :returns
 
             value = process_formatted_section( value )
-
+    
           end
 
           if key == :exceptions
@@ -1022,6 +1022,22 @@ EXAMPLE
           method.name == method_name 
           
         }.count > 0
+    
+    end
+    
+    def encode_string( string )
+    
+      return "" if string.nil? 
+    
+      result = "%s" % string
+    
+      result.gsub!( /\&/, '&amp;' )
+      result.gsub!( /\</, '&lt;' )
+      result.gsub!( /\>/, '&gt;' )
+      result.gsub!( /\"/, '&quot;' )
+      result.gsub!( /\'/, '&apos;' )
+    
+      result
     
     end
 
@@ -1158,14 +1174,14 @@ EXAMPLE
 
       # generate return value types template
       returns = feature.last[ :returns ].collect{ | return_types |
-      
+            
         return_types.collect{ | returns |
         
-           # apply types to arguments template
+           # apply types to returns template
            apply_macros!( @templates["behaviour.xml.returns"].clone, {
-              "RETURN_VALUE_TYPE" => returns.first,
-              "RETURN_VALUE_DESCRIPTION" => returns.last["description"],
-              "RETURN_VALUE_EXAMPLE" => returns.last["example"],
+              "RETURN_VALUE_TYPE" => encode_string( returns.first ),
+              "RETURN_VALUE_DESCRIPTION" => encode_string( returns.last["description"] ),
+              "RETURN_VALUE_EXAMPLE" => encode_string( returns.last["example"] ),
             }
            )
           
@@ -1201,8 +1217,8 @@ EXAMPLE
         
            # apply types to exception template
            apply_macros!( @templates["behaviour.xml.exception"].clone, {
-              "EXCEPTION_NAME" => exception.first,
-              "EXCEPTION_DESCRIPTION" => exception.last["description"]
+              "EXCEPTION_NAME" => encode_string( exception.first ),
+              "EXCEPTION_DESCRIPTION" => encode_string( exception.last["description"] )
             }
            )
           
@@ -1275,9 +1291,9 @@ EXAMPLE
 
            apply_macros!( @templates["behaviour.xml.argument_type"].clone, {
             
-              "ARGUMENT_TYPE" => argument_type == 'block' ? "Proc" : type.first,
-              "ARGUMENT_DESCRIPTION" => type.last["description"],
-              "ARGUMENT_EXAMPLE" => type.last["example"],
+              "ARGUMENT_TYPE" => encode_string( argument_type == 'block' ? "Proc" : type.first ),
+              "ARGUMENT_DESCRIPTION" => encode_string( type.last["description"] ),
+              "ARGUMENT_EXAMPLE" => encode_string( type.last["example"] ),
            
             }
            )
@@ -1294,7 +1310,7 @@ EXAMPLE
         if default_value_set
 
           default_value = apply_macros!( @templates["behaviour.xml.argument.default"].clone, { 
-            "ARGUMENT_DEFAULT_VALUE" => default_value || ""
+            "ARGUMENT_DEFAULT_VALUE" => encode_string( default_value || "" )
             }
           )
 
@@ -1306,11 +1322,11 @@ EXAMPLE
 
          # apply types to arguments template
          apply_macros!( @templates["behaviour.xml.argument"].clone, {
-            "ARGUMENT_NAME" => argument_name,
-            "ARGUMENT_TYPE" => argument_type,
+            "ARGUMENT_NAME" => encode_string( argument_name ),
+            "ARGUMENT_TYPE" => encode_string( argument_type ),
             "ARGUMENT_TYPES" => types_xml,
             "ARGUMENT_DEFAULT_VALUE" => default_value.to_s,
-            "ARGUMENT_OPTIONAL" => argument_type == "multi" ? "true" : default_value_set.to_s
+            "ARGUMENT_OPTIONAL" => encode_string( argument_type == "multi" ? "true" : default_value_set.to_s )
           }
          )
         
@@ -1338,7 +1354,7 @@ EXAMPLE
 
           header = table[ "content" ].first.collect{ | header_item |
             apply_macros!( @templates["behaviour.xml.table.item"].clone, {
-                "ITEM" => header_item
+                "ITEM" => encode_string( header_item )
               }
             )
           }
@@ -1348,7 +1364,7 @@ EXAMPLE
             row_items = row.collect{ | row_item |
             
               apply_macros!( @templates["behaviour.xml.table.item"].clone, {
-                  "ITEM" => row_item
+                  "ITEM" => encode_string( row_item )
                 }
               )
             }
@@ -1364,8 +1380,8 @@ EXAMPLE
 
 
           apply_macros!( @templates["behaviour.xml.table"].clone, {
-              "TABLE_NAME" => table[ "name" ],
-              "TABLE_TITLE" => table[ "title" ],
+              "TABLE_NAME" => encode_string( table[ "name" ] ),
+              "TABLE_TITLE" => encode_string( table[ "title" ] ),
               "TABLE_HEADER_ITEMS" => header.join(""),
               "TABLE_ROWS" => rows.join("")
             }
@@ -1411,14 +1427,14 @@ EXAMPLE
                               
           # generate method template            
           apply_macros!( @templates["behaviour.xml.method"].clone, { 
-            "METHOD_NAME" => feature.first,
-            "METHOD_TYPE" => feature.last[:__type] || "unknown",
-            "METHOD_DESCRIPTION" => feature.last[:description],
+            "METHOD_NAME" => encode_string( feature.first ),
+            "METHOD_TYPE" => encode_string( feature.last[:__type] || "unknown" ),
+            "METHOD_DESCRIPTION" => encode_string( feature.last[:description] ),
             "METHOD_ARGUMENTS" => arguments,
             "METHOD_RETURNS" => returns,
             "METHOD_EXCEPTIONS" => exceptions,
             "METHOD_TABLES" => tables,
-            "METHOD_INFO" => feature.last[:info]
+            "METHOD_INFO" => encode_string( feature.last[:info] )
            } 
           )
 
@@ -1482,14 +1498,14 @@ EXAMPLE
 
       # apply header
       text = apply_macros!( @templates["behaviour.xml"].clone, { 
-        "REQUIRED_PLUGIN" => header[:requires],
-        "BEHAVIOUR_NAME" => header[:behaviour],
+        "REQUIRED_PLUGIN" => encode_string( header[:requires] ),
+        "BEHAVIOUR_NAME" => encode_string( header[:behaviour] ),
         "BEHAVIOUR_METHODS" => methods,
-        "OBJECT_TYPE" => header[:objects],
-        "SUT_TYPE" => header[:sut_type],
-        "INPUT_TYPE" => header[:input_type],
-        "VERSION" => header[:sut_version],
-        "MODULE_NAME" => @module_path.join("::")
+        "OBJECT_TYPE" => encode_string( header[:objects] ),
+        "SUT_TYPE" => encode_string( header[:sut_type] ),
+        "INPUT_TYPE" => encode_string( header[:input_type] ),
+        "VERSION" => encode_string( header[:sut_version] ),
+        "MODULE_NAME" => encode_string( @module_path.join("::") )
         } 
       )    
     
