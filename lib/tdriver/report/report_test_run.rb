@@ -49,6 +49,9 @@ module TDriverReportCreator
       @memory_amount_start='-'
       @memory_amount_end='-'
       @memory_amount_total='-'
+      @total_dump_count=Hash.new
+      @total_received_data=Hash.new
+      @total_sent_data=Hash.new      
       $result_storage_in_use=false
       @pages=MobyUtil::Parameter[ :report_results_per_page, 10]
       @duration_graph=MobyUtil::Parameter[ :report_generate_duration_graph, false]
@@ -851,6 +854,48 @@ module TDriverReportCreator
         end
         return  memory
       end
+    end
+    #This method gets the sut total dump count
+    #
+    # === params
+    # sut_id: sut id
+    # === returns
+    # nil
+    # === raises
+    def get_sut_total_dump_count(sut_id, sut_attributes)
+
+      dump_count=sut_attributes[:sut].dump_count
+      p "Recieved #{sut_attributes[:sut].received_data} bytes"
+      p "Sent #{sut_attributes[:sut].sent_data} bytes"
+      @total_dump_count[sut_id.to_sym]=dump_count
+      @total_dump_count
+
+    end
+
+    #This method gets the sut total received data
+    #
+    # === params
+    # sut_id: sut id
+    # === returns
+    # nil
+    # === raises
+    def get_sut_total_received_data(sut_id, sut_attributes)
+      data=sut_attributes[:sut].received_data
+      @total_received_data[sut_id.to_sym]=data
+      @total_dump_count      
+    end
+
+    #This method gets the sut total sent data
+    #
+    # === params
+    # sut_id: sut id
+    # === returns
+    # nil
+    # === raises
+    def get_sut_total_sent_data(sut_id, sut_attributes)
+      data=sut_attributes[:sut].sent_data
+      @total_sent_data[sut_id.to_sym]=data
+      @total_dump_count
     end
     
     def write_to_result_storage(status,testcase,group,reboots=0,crashes=0,start_time=nil,user_data=nil,duration=0,memory_usage=0,index=0,log='',comment='',link='')

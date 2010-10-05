@@ -23,20 +23,58 @@ module MobyBehaviour
 
       include MobyBehaviour::Behaviour
 
-      # Instructs the SUT to flash
-      # === params
-      # === returns
-      # === raises
+      # Instructs the sut to start the flash operation with default TDriver parameters for sut that are:
+      # <parameter name="flaxi_flash_attempts" value="2" /> <!-- how many times flaxi will attempt to flash the device -->
+      # <parameter name="timeout_between_command_sequence" value="25" /> <!-- timeout in seconds between the switchbox commands -->
+      # <parameter name="switchbox_commands_before_flash" value="" /> <!-- commands you want to be executed before flash -->
+      # <parameter name="flaxi_commands_before_flash" value="" /> <!-- flash command for flaxi before flash -->
+      # <parameter name="flaxi_flash_command" value="" /> <!-- intial flash command for flaxi -->
+      # <parameter name="timeout_before_executing_commands_during_flash" value="20" /> <!-- timeout in seconds before executing the commands during flash -->
+      # <parameter name="switchbox_commands_during_flash" value="" /> <!-- commands you want to be executed during flash -->
+      # <parameter name="flaxi_optional_parameters_after_flashing" value="" /> <!-- optional flash parameters -->
+      # <parameter name="flaxi_flash_images" value="" /> <!-- images to flash  -->
+      # <parameter name="flaxi_sleep_time_after_flash_command" value="70" /> <!-- need to wait for the flash process to finish -->
+      # <parameter name="flaxi_command_after_flash" value="" /> <!-- flash command for flaxi after flash -->
+      # <parameter name="switchbox_commands_after_failed_flash" value="" /> <!-- commands for switchbox after failed flash -->
+      # <parameter name="flaxi_commands_after_failed_flash" value="" /> <!-- commands for flaxi after failed flash -->
+      # <parameter name="flaxi_flash_command_success_string" value="" /> <!-- If no error then no string is displayed -->
+      # <parameter name="switchbox_commands_after_flash" value="" /> <!-- commands you want to be executed after flash -->
+			# == params
+			# == returns
+			# == raises
+      # BehaviourError If mandatory parameters are missing
+			# BehaviourError If flashing is failed
+			# === examples
+			# @sut.flash
       def flash()
 
         flash_images
 
       end
 
-      # Instructs the SUT to initialize prommer using foobox
-      # === params
-      # === returns
-      # === raises
+      # Instructs the sut to start the flash operation with the given software image file:
+      # <parameter name="flaxi_flash_attempts" value="2" /> <!-- how many times flaxi will attempt to flash the device -->
+      # <parameter name="timeout_between_command_sequence" value="25" /> <!-- timeout in seconds between the switchbox commands -->
+      # <parameter name="switchbox_commands_before_flash" value="" /> <!-- commands you want to be executed before flash -->
+      # <parameter name="flaxi_commands_before_flash" value="" /> <!-- flash command for flaxi before flash -->
+      # <parameter name="flaxi_flash_command" value="" /> <!-- intial flash command for flaxi -->
+      # <parameter name="timeout_before_executing_commands_during_flash" value="20" /> <!-- timeout in seconds before executing the commands during flash -->
+      # <parameter name="switchbox_commands_during_flash" value="" /> <!-- commands you want to be executed during flash -->
+      # <parameter name="flaxi_optional_parameters_after_flashing" value="" /> <!-- optional flash parameters -->
+      # <parameter name="flaxi_sleep_time_after_flash_command" value="70" /> <!-- need to wait for the flash process to finish -->
+      # <parameter name="flaxi_command_after_flash" value="" /> <!-- flash command for flaxi after flash -->
+      # <parameter name="switchbox_commands_after_failed_flash" value="" /> <!-- commands for switchbox after failed flash -->
+      # <parameter name="flaxi_commands_after_failed_flash" value="" /> <!-- commands for flaxi after failed flash -->
+      # <parameter name="flaxi_flash_command_success_string" value="" /> <!-- If no error then no string is displayed -->
+      # <parameter name="switchbox_commands_after_flash" value="" /> <!-- commands you want to be executed after flash -->
+			# == params
+      # flash_files: The location of the software image file
+			# == returns
+			# == raises
+      # BehaviourError If mandatory parameters are missing
+			# BehaviourError If flashing is failed
+			# === examples
+			# @sut.flash_images("C:/path/image_file.img")
       def flash_images(flash_files=nil)
 
         if flash_files==nil

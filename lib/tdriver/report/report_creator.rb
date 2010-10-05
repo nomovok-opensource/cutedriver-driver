@@ -153,6 +153,7 @@ module TDriverReportCreator
       $new_test_case.get_tc_memory_amount_end,
       $new_test_case.get_test_case_index,
       execution_log)
+
     $tdriver_reporter.set_end_time(Time.now)
     $tdriver_reporter.set_total_run(1)
     $tdriver_reporter.update_summary_page('inprogress')
@@ -336,6 +337,7 @@ module TDriverReportCreator
       MobyBase::SUTFactory.instance.connected_suts.each do |sut_id, sut_attributes|
         if sut_attributes[:is_connected]
           memory=$tdriver_reporter.get_sut_used_memory(sut_id,sut_attributes)
+          dump_count=$tdriver_reporter.get_sut_total_dump_count(sut_id,sut_attributes)
           $new_test_case.set_tc_memory_amount_end(memory)
           $tdriver_reporter.set_memory_amount_end(memory)
         end

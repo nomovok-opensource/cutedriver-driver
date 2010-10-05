@@ -30,7 +30,7 @@ module MobyBehaviour
       :current_application_id,    # id of the current appication if set
       :input,                     # the input method used for interacting with this sut as a symbol, eg. :key or :touch.
       :refresh_tries,             # number of retries for ui dump on error case
-      :refresh_timeout            # timeout between timeout retry
+      :refresh_timeout           # timeout between timeout retry
 
     )
 
@@ -53,12 +53,30 @@ module MobyBehaviour
 
     end
 
-    # Disconnects connection to sut (e.g. closes open socket)
+    # Retrieves the total amount of data sent in bytes
     # == examples
     #  @sut.disconnect
     def disconnect
 
       @_sutController.disconnect
+
+    end
+
+    # Retrieves the total amount of data received in bytes
+    # == examples
+    #  @sut.disconnect
+    def received_data
+     
+      @_sutController.received_bytes
+
+    end
+
+    # Retrieves the total amount of data sent in bytes
+    # == examples
+    #  @sut.sent_data
+    def sent_data
+      
+      @_sutController.sent_bytes
 
     end
 
@@ -603,7 +621,7 @@ module MobyBehaviour
     # sut.parameter['non_existing_parameter', 'default']
     #
     # # set the value of parameter 'product' for this particular sut
-    # sut.parameter['product'] ='new_value'
+    # sut.parameter[:product] ='new_value'
     #
     # parameters for each sut are stored in the file under group tag with name attribute matching the SUT id
     # ==params
