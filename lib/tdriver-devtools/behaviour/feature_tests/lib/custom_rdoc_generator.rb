@@ -99,7 +99,7 @@ module Generators
 
         scenarios = process_method( method ) 
 
-        results << { :header => $templates[:feature_method] % [ method.name, method.name, @module_path.join("::") ], :scenarios => scenarios, :file => generate_name( method.name ), :module_path => @module_path, :name => method.name } if scenarios.count > 0
+        results << { :header => $templates[:feature_method] % [ "%s#%s" % [ @module_path.join("::"), method.name ], method.name, @module_path.join("::") ], :scenarios => scenarios, :file => generate_name( method.name ), :module_path => @module_path, :name => method.name } if scenarios.count > 0
 
       }
 
@@ -119,23 +119,44 @@ module Generators
       previous_token = nil
 
       args = []
+      
+      capture = false
+      capture_depth = []
 
       # loop while tokens available
       while token
 
+        if [ RubyToken::TkLBRACE, RubyToken::TkLPAREN, RubyToken::TkLBRACK ].include?( token.class )
+        
+          capture_depth << token
+        
+          capture = true
+
+        elsif [ RubyToken::TkRBRACE, RubyToken::TkRPAREN, RubyToken::TkRBRACK ].include?( token.class )
+
+          capture_depth.pop
+          
+          capture = false if capture_depth.empty?
+
         # argument name
-        if token.kind_of?( RubyToken::TkIDENTIFIER )
+        elsif capture == false
+        
+          if token.kind_of?( RubyToken::TkIDENTIFIER )
 
           args << [ token.name, nil, false ]
 
           # &blocks and *arguments are handled as optional parameters
           args.last[ -1 ] = true if [ RubyToken::TkBITAND, RubyToken::TkMULT ].include?( previous_token.class )
+                  
+          # detect optional argument
+          elsif token.kind_of?( RubyToken::TkASSIGN )
 
-        # detect optional argument
-        elsif token.kind_of?( RubyToken::TkASSIGN )
+            # mark arguments as optional
+            args.last[ -1 ] = true
 
-          # mark arguments as optional
-          args.last[ -1 ] = true
+            opt = true
+
+          end
 
         end
 
@@ -232,7 +253,7 @@ module Generators
 
          attr_name = attribute.name.gsub("=",'')
 
-         results << { :header => $templates[:feature_attribute] % [ attr_name, attr_name, @module_path.join("::") ], :scenarios => scenarios, :file => generate_name( attr_name ), :module_path => @module_path, :name => attr_name } if scenarios.count > 0
+         results << { :header => $templates[:feature_attribute] % [ "%s#%s" % [ @module_path.join("::"), attribute.name ], attr_name, @module_path.join("::") ], :scenarios => scenarios, :file => generate_name( attr_name ), :module_path => @module_path, :name => attr_name } if scenarios.count > 0
 
       }
 

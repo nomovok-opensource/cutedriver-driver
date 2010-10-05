@@ -1,0 +1,10 @@
+
+      <method name="$METHOD_NAME" type="$METHOD_TYPE">
+
+        <description>$METHOD_DESCRIPTION</description>
+$METHOD_ARGUMENTS
+$METHOD_RETURNS
+$METHOD_EXCEPTIONS
+        <info>$METHOD_INFO</info>
+
+      </method>

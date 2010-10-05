@@ -329,6 +329,7 @@ module TDriverReportCreator
         # parameter not loaded, do nothing
       end
 		
+
       @tc_video_recorders = []
       	  
       begin
@@ -346,6 +347,7 @@ module TDriverReportCreator
         # make sure to stop any started cams if startup fails
         stop_video_recording
         raise e
+
       end
 	  
       nil
@@ -354,9 +356,11 @@ module TDriverReportCreator
 	  
     def stop_video_recording()
 	
+
       @tc_video_recorders.each do | video_recorder |
         video_recorder.stop_recording
       end
+
       @tc_video_recording = false
 	  
     end
@@ -431,12 +435,14 @@ module TDriverReportCreator
           FileUtils.mkdir_p video_folder
         end        
 		
+
         each_video_device do | video_device, device_index |
 		
           File.copy("cam_" + device_index + "_" + @tc_video_filename, video_folder)
           File.copy("cam_" + device_index + "_" + @tc_previous_video_filename, video_folder)
 		
         end
+
        
 		
       rescue Exception => e
