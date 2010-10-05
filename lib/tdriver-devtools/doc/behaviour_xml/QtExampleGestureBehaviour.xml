@@ -4,6 +4,7 @@
   <behaviour name="QtExampleGestureBehaviour" object_type="*;sut" sut_type="qt" input_type="touch" version="*">
 
     <module name="MobyBehaviour::QT::Gesture" />
+
     <methods>
 
       <method name="flick" type="method">
@@ -12,40 +13,31 @@
 
         <arguments>
 
-          <argument name="direction" optional="false">
-
+          <argument name="direction" optional="false" type="normal">
             <type name="Integer">
               <description>Example argument1</description>
               <example>10</example>
             </type>
-
             <type name="Hash">
               <description>Example argument 1 type 2</description>
               <example>{ :optional_1 => "value_1", :optional_2 => "value_2" }</example>
             </type>
-
           </argument>
 
-            <argument name="button" optional="true">
-
+          <argument name="button" optional="true" type="normal">
             <type name="String">
               <description>which button to use</description>
               <example>"Hello"</example>
             </type>
-
             <default>:Left</default>
-
           </argument>
 
-          <argument name="optional_params" optional="true">
-
+          <argument name="optional_params" optional="true" type="normal">
             <type name="String">
               <description>optinal parameters for blaa blaa blaa</description>
               <example>{:a => 1, :b => 2}</example>
             </type>
-
             <default>{}</default>
-
           </argument>
 
         </arguments>
@@ -55,11 +47,6 @@
           <type name="String">
             <description>Return value type</description>
             <example>"World"</example>
-          </type>
-
-          <type name="Integer">
-            <description>Return value type</description>
-            <example>1</example>
           </type>
 
         </returns>
@@ -76,19 +63,46 @@
 
         </exceptions>
 
+        <tables>
+
+          <table name="custom1">
+            <title>Custom table1</title>
+            <header>
+              <item>hdr1</item>
+              <item>hrd2</item>
+              <item>hrd3</item>
+            </header>
+            <row>
+              <item>1.1</item>
+              <item>1.2</item>
+              <item>1.3</item>
+            </row>
+            <row>
+              <item>2.1</item>
+              <item>2.2</item>
+              <item>2.3</item>
+            </row>
+          </table>
+
+          <table name="custom2">
+            <title>Custom table2</title>
+            <header>
+              <item>id</item>
+              <item>value</item>
+            </header>
+            <row>
+              <item>0</item>
+              <item>true</item>
+            </row>
+            <row>
+              <item>1</item>
+              <item>false</item>
+            </row>
+          </table>
+
+        </tables>
+
         <info>See method X, table at Y</info>
-
-      </method>
-
-      <method name="read;read=" type="accessor">
-
-        <description></description>
-
-        <arguments>
-
-        </arguments>
-
-        <info></info>
 
       </method>
 
@@ -97,15 +111,6 @@
         <description>example desc</description>
 
         <arguments>
-
-          <argument name="value" optional="false">
-
-            <type name="Integer">
-              <description>Example argument1</description>
-              <example>10</example>
-            </type>
-
-          </argument>
 
         </arguments>
 
@@ -118,29 +123,9 @@
 
         </returns>
 
-        <info></info>
+        <tables>
 
-      </method>
-
-      <method name="something;something=" type="accessor">
-
-        <description></description>
-
-        <arguments>
-
-        </arguments>
-
-        <info></info>
-
-      </method>
-
-      <method name="write;write=" type="accessor">
-
-        <description></description>
-
-        <arguments>
-
-        </arguments>
+        </tables>
 
         <info></info>
 

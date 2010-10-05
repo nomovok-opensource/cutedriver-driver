@@ -229,6 +229,53 @@ def process_behaviour_file( content )
 
                       method[ "exceptions" ] = exceptions
   
+                    when /^tables$/i
+
+                      tables = []
+                    
+                      child.children.select{ | node | node.kind_of?( Nokogiri::XML::Element ) }.each{ | child |
+                      
+                        case child.name.to_s
+                        
+                          when /^table$/i
+                                                    
+                            table = { "name" => child.attribute("name").value, "title" => "", "header" => [], "row" => [] }
+                          
+                            child.children.select{ | node | node.kind_of?( Nokogiri::XML::Element ) }.each{ | child |
+                              
+                              case child.name.to_s
+                              
+                                when /^title$/i
+                                
+                                  table[ "title" ] = child.inner_text
+                              
+                                when /^header$/i, /^row$/i, /^title$/
+                                  
+                                  table[ child.name.to_s ] << child.children.select{ | node |                                  
+                                    node.kind_of?( Nokogiri::XML::Element ) }.collect{ | child |                                  
+                                      child.inner_text
+                                  }
+                                
+                              else
+                                
+                                puts "Unknown element name: '#{ child.name.to_s }' in #{ @current_file }"
+                              
+                              end
+                                                                                    
+                            }
+                            
+                            tables << table                            
+                          
+                          else
+
+                          puts "Unknown element name: '#{ child.name.to_s }' in #{ @current_file }"
+                          
+                        end
+                      
+                      }
+                      
+                      method[ "tables" ] = tables
+  
                   # if element under methods node is unknown...
                   else
 
@@ -673,14 +720,14 @@ def generate_document_xml
           xml.description( feature_documentation[ "description" ] )
 
           # <info>example</info>
-          xml.info( feature_documentation[ "info" ] )
 
+          xml.info( feature_documentation[ "info" ] )
           # <arguments count="1" optional="0" described="1" block="true">
           xml.arguments( 
             :count => arguments_count, 
             :optional => optional_arguments_count, 
             :described => feature_documentation[ "arguments" ].count,
-            :block => feature_documentation[ "arguments" ].select{ | arg | arg[ "type" ].first == "block" }.count > 0 
+            :block => feature_documentation[ "arguments" ].select{ | arg | ( arg[ "type" ] || [] ).first == "block" }.count > 0 
               
           ){
 
@@ -763,6 +810,37 @@ def generate_document_xml
             end
             
           } # </exceptions>
+
+          # <tables>
+          xml.tables{
+
+            ( feature_documentation[ "tables" ] || [{}] ).each do | table |
+
+              xml.table( :name => table[ "name" ] ){
+              
+                xml.title( table[ "title" ].to_s )
+
+                xml.header{                                
+                  ( table[ "header" ] || [[]] ).first.each{ | item |
+                    xml.item( item )
+                  }
+                }
+
+                ( table[ "row" ] || [] ).each{ | row |
+                  
+                  xml.row{                              
+                    row.each{ | item |
+                      xml.item( item )
+                    }
+                  }
+                }              
+
+              }
+
+            end
+            
+          } # </tables>
+
 
           # collect feature tests for method (1), attr_reader (1), attr_writer (1) and attr_accessor (2)          
           names = feature_name.collect{ | name | 
