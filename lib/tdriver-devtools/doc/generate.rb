@@ -720,8 +720,10 @@ def generate_document_xml
           xml.description( feature_documentation[ "description" ] )
 
           # <info>example</info>
-
           xml.info( feature_documentation[ "info" ] )
+          
+          feature_documentation[ "arguments" ] = [] if feature_documentation[ "arguments" ].kind_of?( String )
+                    
           # <arguments count="1" optional="0" described="1" block="true">
           xml.arguments( 
             :count => arguments_count, 
@@ -743,20 +745,24 @@ def generate_document_xml
               ){
 
                 # iterate each argument                            
-                ( argument[ "types" ] || [{}] ).first.each_pair do | argument_type, value |  
-  
-                  # <type name="Integer">
-                  xml.type_( :name => argument_type ){
+                ( argument[ "types" ] || [{}] ).each{ | type |
+                
+                  type.each_pair do | argument_type, value |  
+        
+                    # <type name="Integer">
+                    xml.type!( :name => argument_type ){
 
-                    # <description>Example argument</description>
-                    xml.description( value[ "description" ] )
+                      # <description>Example argument</description>
+                      xml.description( value[ "description" ] )
 
-                    # <example>12</example>
-                    xml.example( value[ "example" ] )
+                      # <example>12</example>
+                      xml.example( value[ "example" ] )
 
-                  } # </type>
+                    } # </type>
 
-                end # arguments_types.each
+                  end # type.each_pair
+                  
+                } # arguments_types.each
               
               } # </argument>
             
@@ -841,7 +847,6 @@ def generate_document_xml
             
           } # </tables>
 
-
           # collect feature tests for method (1), attr_reader (1), attr_writer (1) and attr_accessor (2)          
           names = feature_name.collect{ | name | 
           
@@ -854,6 +859,8 @@ def generate_document_xml
             { feature_test => @executed_tests[ feature_test ] || {} }  
             
           }.flatten
+
+          #p tests
 
           # <tests count="1" passed="0" skipped="0" failed="0">
           xml.tests( 
