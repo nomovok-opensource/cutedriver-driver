@@ -19,7 +19,27 @@
 
 module MobyBehaviour
 
+  # == description
   # Describes the behaviour of SUT, aka the methods that can be used to control SUT
+  #
+  # == behaviour
+  # GenericSut
+  #
+  # == requires
+  # *
+  #
+  # == input_type
+  # *
+  #
+  # == sut_type
+  # *
+  #
+  # == sut_version
+  # *
+  #
+  # == objects
+  # *
+  #
   module SUT
 
     include MobyBehaviour::Behaviour
@@ -644,22 +664,64 @@ module MobyBehaviour
 
     end
 
+	# == description
     # Wrapper function to return translated string for this SUT
-    # Uses the Localisation singleton to read the values from data base
-    # ==usage
-    # sut.translate(:text_softkey_option) #returns the value for logical name 'text_softkey_option' for this particular sut
-    # ==params
-    # logical_name:: String or symbol representing the logical name of the item to be translated.
-	# file_name:: optional FNAME search argument for the translation
-	# plurality:: optional PLURALITY search argument for the translation
-	# numerus:: optional numeral replacement of '%Ln' tags on translation strings
-	# lenthvariant:: optional LENGTHVAR search argument for the translation
-    # ==return
-    # String:: Translation matching the logical_name
-    # ==raises
-    # LanguageNotFoundError:: In case of language is not found
-    # LogicalNameNotFoundError:: In case of logical name is not found for current language
-    # MySqlConnectError:: In case problems with the db connectivity
+	# Uses the Localisation singleton to read the values from data base
+    #
+    # == arguments
+    # logical_name
+    #  String
+    #   description: The logical name (LNAME) of the item to be translated.
+    #   example: "txt_button_ok"
+	#  Symbol
+	#   description: Symbol form of the logical name (LNAME) of the item to be translated.
+	#   example: :txt_button_ok
+    #
+	# file_name
+	#  String
+	#   description: optional FNAME search argument for the translation
+	#   example: "agenda"
+	#   default: ""
+	#
+	# plurality
+	#  String
+	#   description: optional PLURALITY search argument for the translation
+	#   example: "a" or "singular"
+	#	default:""
+	#
+	# numerus
+	#  String
+	#   description: optional numeral replacement of '%Ln' tags on translation strings
+	#   example: "1"
+	#   default: ""
+	#  Integer
+	#   decription: optional numeral replacement of '%Ln' tags on translation strings
+	#   example: 1
+	# 
+	# lengthvariant
+	#  String
+	#   description: optional LENGTHVAR search argument for the translation (1-9)
+	#   example: "1"
+	#   default: ""
+	#
+    # == returns
+    # String
+    #  description: Translation matching the logical_name
+    #  example: "Ok"
+    # Array<String> 
+    #  description: If multiple translations have been found for the search conditions an array with all will be returned
+	#  example: ["Ok", "OK"]
+	# 
+    # == exceptions
+    # LanguageNotFoundError
+    #  description: In case language is not found
+    #
+    # LogicalNameNotFoundError
+    #  description: In case no logical name is not found for current language
+    #
+	# MySqlConnectError
+	#  description: In case there are problems with the db connectivity
+	#
 	def translate( logical_name, file_name = nil, plurality = nil, numerus = nil, lengthvariant = nil )
 		Kernel::raise LogicalNameNotFoundError.new("Logical name is nil") if logical_name.nil?
 		language=nil
