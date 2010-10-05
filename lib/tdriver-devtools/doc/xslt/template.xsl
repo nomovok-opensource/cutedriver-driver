@@ -286,10 +286,43 @@
       a.toc_item:hover
       {
       
-        //text-decoration: underline;
         border-bottom: 1px dotted #515151;
 
       }
+
+      
+      a.jump_to
+      {
+      
+        font-size: 11px;
+        text-decoration: none;
+        color: #313131;
+
+      }
+
+      a.jump_to:hover
+      {
+      
+        border-bottom: 1px dotted #515151;
+
+      }
+
+      a.link
+      {
+      
+        text-decoration: none;
+        border-bottom: 1px dotted #515151;
+        color: #313131;
+
+      }
+
+      a.link:hover
+      {
+      
+        border-bottom: 1px solid #515151;
+
+      }
+
 
       img
       {
@@ -728,7 +761,7 @@
     <!-- feature separator? -->
    </xsl:if>
         
-  <a href="#top" class="toc_item">Jump to top of page</a><br />
+  <a href="#top" class="jump_to">Jump to top of page</a><br />
   <br />
           
 </xsl:template>
@@ -1140,6 +1173,67 @@
 
 </xsl:template>
 
+<xsl:template name="replace">
+
+  <xsl:param name="text"/>
+
+  <xsl:param name="string" />
+
+  <xsl:param name="with" />
+
+  <xsl:variable name="remaining_text" select="$text"/>
+
+  <!-- content before $string -->
+  <xsl:variable name="content_before_string" select="substring-before($text, $string)"/>
+
+  <!-- content after $string -->
+  <xsl:variable name="content_after_string" select="substring-after($text, $string)" />
+
+  <xsl:choose>
+  
+    <xsl:when test="contains($text, $string)">
+   
+      <!-- $string found from $text, show leading content before $string -->
+      <xsl:value-of select="$content_before_string" />
+      <xsl:value-of select="$with" />
+
+      <xsl:choose>
+      
+        <xsl:when test="contains($content_after_string, $string)">
+
+          <!-- $content_after_string contains $string, call replace template recursively -->        
+          <xsl:call-template name="replace">
+          
+            <xsl:with-param name="text" select="$content_after_string" />
+            <xsl:with-param name="string" select="$string" />
+            <xsl:with-param name="with" select="$with" />
+          
+          </xsl:call-template>
+        
+        </xsl:when>
+        
+        <xsl:otherwise>
+
+          <!-- $content_after_string doesnt contain $string, return $content_after_string as is -->
+          <xsl:value-of select="$content_after_string" />
+
+        </xsl:otherwise>
+              
+      </xsl:choose>
+
+    </xsl:when>
+
+    <xsl:otherwise>
+
+      <!-- $string not found from $text, return $text as is -->
+      <xsl:value-of select="$text" />
+    
+    </xsl:otherwise>
+  
+  </xsl:choose>
+
+</xsl:template>
+
 <xsl:template name="process_tags">
 
   <xsl:param name="text"/>
@@ -1153,7 +1247,9 @@
   <xsl:variable name="content_after_tag" select="substring-after(substring-after($text, '['), ']')"/>
 
   <!-- start tag -->
-  <xsl:variable name="tag" select="substring-after(substring-before($text, ']'), '[')"/>
+  <xsl:variable name="full_tag" select="substring-after(substring-before($text, ']'), '[')"/>
+
+  <xsl:variable name="tag" select="str:split(substring-after(substring-before($text, ']'), '['), '=')[1]"/>
 
   <!-- content between tag -->
   <xsl:variable name="tag_content" select="substring-before($content_after_tag, concat('[/', $tag, ']'))"/>
@@ -1164,6 +1260,9 @@
 
 <!--
   <br /><b>tag: </b><xsl:value-of select="$tag" />
+
+  <br /><b>tag_2: </b><xsl:value-of select="str:split($tag, '=')[1]" />
+
   <br /><b>before: </b><xsl:value-of select="$content_before_tag" />
   <br /><b>after: </b><xsl:value-of select="$content_after_tag" />
   <br /><b>content: </b><xsl:value-of select="$tag_content" />
@@ -1181,6 +1280,7 @@
  
         <xsl:call-template name="process_tag" >
           <xsl:with-param name="tag" select="$tag" />
+          <xsl:with-param name="full_tag" select="$full_tag" />
           <xsl:with-param name="content" select="$tag_content" />
           <xsl:with-param name="content_after" select="$content_after_end_tag" />
         </xsl:call-template>
@@ -1208,8 +1308,20 @@
 <xsl:template name="process_tag" >
 
   <xsl:param name="tag" />
+  <xsl:param name="full_tag" />
+  
+  
   <xsl:param name="content" />
   <xsl:param name="content_after" />
+
+  <xsl:variable name="parameter">
+    <!-- remove quotations from parameter value -->
+    <xsl:call-template name="replace">
+      <xsl:with-param name="text" select="str:split($full_tag,'=')[2]" />
+      <xsl:with-param name="string">"</xsl:with-param>
+      <xsl:with-param name="with" ></xsl:with-param>
+    </xsl:call-template>
+  </xsl:variable>
 
   <!--
   <br /><b>tag:</b> <xsl:value-of select="$tag" />
@@ -1252,10 +1364,48 @@
 
     <xsl:when test="$tag='img'">
 
-      <!-- url = substring($tag,5,string-length($tag)) -->
-            
-      <img src="{ $content }" title="" />
+      <xsl:choose>
+      
+        <xsl:when test="string-length($parameter)>0">
+          <!-- found title text for image -->
+          <img src="{ $parameter }" title="{ $content }" />
+        </xsl:when>
+        
+        <xsl:otherwise>
+          <!-- no title text for image -->
+          <img src="{ $content }" title="" />
+        </xsl:otherwise>
+      
+      </xsl:choose>
 
+      <xsl:call-template name="process_tags" >
+        <xsl:with-param name="text" select="$content_after" />
+      </xsl:call-template>
+
+    </xsl:when>
+
+    <xsl:when test="$tag='link'">
+      
+      <xsl:choose>
+      
+        <xsl:when test="string-length($parameter)>0">
+          <a href="{ $parameter }" class="link" title="{ $content }">          
+            <xsl:call-template name="process_tags" >
+              <xsl:with-param name="text" select="$content" />
+            </xsl:call-template>          
+          </a>
+        </xsl:when>
+        
+        <xsl:otherwise>
+          <a href="{ $content }" class="link" title="">
+            <xsl:call-template name="process_tags" >
+              <xsl:with-param name="text" select="$content" />
+            </xsl:call-template>          
+          </a>
+        </xsl:otherwise>
+      
+      </xsl:choose>
+            
       <xsl:call-template name="process_tags" >
         <xsl:with-param name="text" select="$content_after" />
       </xsl:call-template>
