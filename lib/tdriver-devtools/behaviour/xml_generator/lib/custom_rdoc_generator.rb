@@ -1343,15 +1343,25 @@ EXAMPLE
             )
           }
 
-          rows = table[ "content" ][ 1 .. -1 ].collect{ | row_items |
-            row_items.collect{ | row_item |
+          rows = table[ "content" ][ 1 .. -1 ].collect{ | row |
+
+            row_items = row.collect{ | row_item |
             
               apply_macros!( @templates["behaviour.xml.table.item"].clone, {
                   "ITEM" => row_item
                 }
               )
-            }.flatten
+            }
+
+            apply_macros!( @templates["behaviour.xml.table.row"].clone, {
+
+              "TABLE_ROW_ITEMS" => row_items.join("") 
+            
+              }
+            )
+                        
           }
+
 
           apply_macros!( @templates["behaviour.xml.table"].clone, {
               "TABLE_NAME" => table[ "name" ],
