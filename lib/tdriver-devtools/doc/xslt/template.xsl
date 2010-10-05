@@ -164,7 +164,7 @@
         border-right: 1px solid #c7c7c7;
       }
 
-      td.warning,div.warning, td.tablebg_warning, pre.failed, pre.skipped
+      td.warning, div.warning, span.warning, td.tablebg_warning, pre.failed, pre.skipped
       {
 
         background: #a11010;
@@ -431,11 +431,17 @@
     <!-- method: call example using parameters -->
     <xsl:if test="@type='method'">
     
-      object.<xsl:value-of select="@name" />
+      <xsl:text>object.</xsl:text><xsl:value-of select="@name" />
 
       <xsl:choose>
 
-        <xsl:when test="count(arguments/argument)=0">()</xsl:when>
+        <xsl:when test="arguments/@count>0 and count(arguments/argument)!=arguments/@count">
+        <xsl:text>( </xsl:text><xsl:call-template name="span_warning">
+          <xsl:with-param name="text">Incomplete arguments documentation</xsl:with-param>
+          </xsl:call-template><xsl:text> )</xsl:text>        
+        </xsl:when>
+
+        <xsl:when test="count(arguments/argument)=0"></xsl:when>
         
         <xsl:when test="count(arguments/argument)>0">
           <xsl:text>( </xsl:text>
@@ -1022,6 +1028,11 @@
   <div class="warning">[!!] <xsl:value-of select="$text" /></div>  
 </xsl:template>
 
+<xsl:template name="span_warning">
+  <xsl:param name="text" />
+  <span class="warning">[!!] <xsl:value-of select="$text" /></span>  
+</xsl:template>
+
 <xsl:template name="returns">
 
   <xsl:param name="type" />
@@ -1086,7 +1097,7 @@
 
   <xsl:for-each select="tables/table">
   
-    <div class="feature_section_title"><a name="{ @name }"><xsl:value-of select="@title" />:</a></div>
+    <div class="feature_section_title"><a name="{ @name }"><xsl:value-of select="title/text()" />:</a></div>
     
     <table class="default">
       <!-- header -->
@@ -1124,10 +1135,10 @@
           </xsl:otherwise>        
         </xsl:choose>
       </xsl:for-each>
-    </table>
+    </table>    
+    <br />
     
   </xsl:for-each>
-  <br />
   
 </xsl:template>
 
