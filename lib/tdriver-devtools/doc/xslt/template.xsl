@@ -1,5 +1,11 @@
 <?xml version="1.0" encoding="ISO-8859-1"?>
-<xsl:stylesheet version="1.0" xmlns:xsl="http://www.w3.org/1999/XSL/Transform" xmlns:str="http://exslt.org/strings" extension-element-prefixes="str">
+
+<xsl:stylesheet version="1.0" 
+  xmlns:xsl="http://www.w3.org/1999/XSL/Transform" 
+  xmlns:str="http://exslt.org/strings" 
+  xmlns:exsl="http://exslt.org/common" 
+  extension-element-prefixes="exsl str">
+  
 <xsl:preserve-space elements="*"/>
 <xsl:output method="html"/>
 
@@ -69,6 +75,14 @@
         
       }
       
+      div.feature_info
+      {
+
+        font-family: 'Times New Roman', Times, serif;
+        font-weight: normal; 
+      
+      }
+      
       div.feature_description, div.scenario_description
       {
         font-style: normal; // normal more readable than italic;
@@ -97,10 +111,17 @@
       
       }
 
-      tr.header
+      tr.header, tr.header_custom
       {      
         background: #96E066;
         font-weight: bold;
+      }
+      
+      tr.header_custom
+      {
+      
+        background: #d1c151;
+      
       }
 
       <!-- table-style: cellpadding -->
@@ -130,10 +151,8 @@
         background: #ededed;
         border-top: 1px solid #f5f5f5;
         border-left: 1px solid #f5f5f5;
-
         border-bottom: 1px solid #d6d6d6;
         border-right: 1px solid #d6d6d6;
-
       }
 
       td.tablebg_odd
@@ -143,7 +162,6 @@
         border-left: 1px solid #e6e6e6;
         border-bottom: 1px solid #c7c7c7;
         border-right: 1px solid #c7c7c7;
-
       }
 
       td.warning,div.warning, td.tablebg_warning, pre.failed, pre.skipped
@@ -233,7 +251,7 @@
       pre.failed, pre.skipped
       {
 
-        color: black;
+        //color: black;
 
       }
       span.hover_text
@@ -312,7 +330,8 @@
       
         text-decoration: none;
         border-bottom: 1px dotted #515151;
-        color: #313131;
+        color: #d15131;
+        font-weight: bold;
 
       }
 
@@ -750,7 +769,15 @@
     <xsl:with-param name="type" select="exceptions/type" />
     <xsl:with-param name="feature_type" select="@type" />
   </xsl:call-template>
+
+  <xsl:if test="count(tables/table)>0">
   
+    <!-- custom tables -->
+    <xsl:call-template name="tables" />
+
+   </xsl:if>
+
+
   <xsl:call-template name="tests">
     <xsl:with-param name="tests" select="tests" />
   </xsl:call-template>
@@ -759,7 +786,7 @@
   
   <xsl:if test="position()!=last()-1">
     <!-- feature separator? -->
-   </xsl:if>
+  </xsl:if>
         
   <a href="#top" class="jump_to">Jump to top of page</a><br />
   <br />
@@ -784,19 +811,23 @@
 
     <xsl:for-each select="$type">
 
-      <xsl:if test="(position() mod 2)=0" >
-        <xsl:call-template name="exception_type">
-          <xsl:with-param name="type" select="." />
-          <xsl:with-param name="class">tablebg_odd</xsl:with-param>                        
-        </xsl:call-template>
-      </xsl:if>
-
-      <xsl:if test="(position() mod 2)=1" >
-        <xsl:call-template name="exception_type">
-          <xsl:with-param name="type" select="." />
-          <xsl:with-param name="class">tablebg_even</xsl:with-param>                        
-        </xsl:call-template>
-      </xsl:if>
+      <xsl:choose>
+      
+        <xsl:when test="(number(position()-1) mod 2)=0">
+          <xsl:call-template name="exception_type">
+            <xsl:with-param name="type" select="." />
+            <xsl:with-param name="class">tablebg_even</xsl:with-param>                        
+          </xsl:call-template>
+        </xsl:when>
+        
+        <xsl:otherwise>
+          <xsl:call-template name="exception_type">
+            <xsl:with-param name="type" select="." />
+            <xsl:with-param name="class">tablebg_odd</xsl:with-param>                        
+          </xsl:call-template>
+        </xsl:otherwise>
+      
+      </xsl:choose>
       
     </xsl:for-each>
 
@@ -910,27 +941,30 @@
 
     <xsl:for-each select="arguments/argument">
 
-      <!-- table stripes: position even -->
-      <xsl:if test="(position() mod 2)=1">
-        <xsl:call-template name="argument_details">
-          <xsl:with-param name="argument_name" select="@name" />
-          <xsl:with-param name="type" select="type" />
-          <xsl:with-param name="class">tablebg_even</xsl:with-param>
-          <xsl:with-param name="default" select="@default" />
-        </xsl:call-template>
-      </xsl:if>
-
-      <!-- table stripes: position odd -->
-      <xsl:if test="(position() mod 2)=0">
-        <xsl:call-template name="argument_details">
-          <xsl:with-param name="argument_name" select="@name" />
-          <xsl:with-param name="type" select="type" />
-          <xsl:with-param name="class">tablebg_odd</xsl:with-param>
-          <xsl:with-param name="default" select="@default" />
-        </xsl:call-template>
+      <xsl:choose>
+      
+        <!-- table stripes: position even -->
+        <xsl:when test="((number(position())-1) mod 2)=0">
+          <xsl:call-template name="argument_details">
+            <xsl:with-param name="argument_name" select="@name" />
+            <xsl:with-param name="type" select="type" />
+            <xsl:with-param name="class">tablebg_even</xsl:with-param>
+            <xsl:with-param name="default" select="@default" />
+          </xsl:call-template>
+        </xsl:when>
         
-      </xsl:if>
-    
+        <!-- table stripes: position odd -->
+        <xsl:otherwise>
+          <xsl:call-template name="argument_details">
+            <xsl:with-param name="argument_name" select="@name" />
+            <xsl:with-param name="type" select="type" />
+            <xsl:with-param name="class">tablebg_odd</xsl:with-param>
+            <xsl:with-param name="default" select="@default" />
+          </xsl:call-template>        
+        </xsl:otherwise>
+      
+      </xsl:choose>
+      
     </xsl:for-each>
     
     <!-- show error message if argument is not described -->
@@ -1018,20 +1052,24 @@
     <xsl:if test="count($type)>0">
 
       <xsl:for-each select="$type">
-
-        <xsl:if test="(position() mod 2)=0" >
-          <xsl:call-template name="returns_type" >
-            <xsl:with-param name="type" select="." />
-            <xsl:with-param name="class">tablebg_odd</xsl:with-param>                        
-          </xsl:call-template>
-        </xsl:if>
-
-        <xsl:if test="(position() mod 2)=1" >
-          <xsl:call-template name="returns_type" >
-            <xsl:with-param name="type" select="." />
-            <xsl:with-param name="class">tablebg_even</xsl:with-param>                        
-          </xsl:call-template>
-        </xsl:if>
+        
+        <xsl:choose>
+        
+          <xsl:when test="(number(position()-1) mod 2)=0">
+            <xsl:call-template name="returns_type" >
+              <xsl:with-param name="type" select="." />
+              <xsl:with-param name="class">tablebg_even</xsl:with-param>                        
+            </xsl:call-template>
+          </xsl:when>
+          
+          <xsl:otherwise>
+            <xsl:call-template name="returns_type" >
+              <xsl:with-param name="type" select="." />
+              <xsl:with-param name="class">tablebg_odd</xsl:with-param>                        
+            </xsl:call-template>
+          </xsl:otherwise>
+        
+        </xsl:choose>
         
       </xsl:for-each>
 
@@ -1044,6 +1082,55 @@
 
 </xsl:template>
 
+<xsl:template name="tables">
+
+  <xsl:for-each select="tables/table">
+  
+    <div class="feature_section_title"><a name="{ @name }"><xsl:value-of select="@title" />:</a></div>
+    
+    <table class="default">
+      <!-- header -->
+      <tr class="header_custom">
+        <xsl:for-each select="header/item">
+          <td><xsl:value-of select="."/></td>
+        </xsl:for-each>
+      </tr>
+          
+      <!-- rows -->
+      <xsl:for-each select="row">
+        <xsl:choose>
+          <xsl:when test="(number(position()-1) mod 2)=0">
+            <tr>
+              <xsl:for-each select="item">
+                <td class="tablebg_even">
+                <xsl:call-template name="formatted_content">
+                  <xsl:with-param name="text" select="."/> 
+                </xsl:call-template><br />
+
+                </td>
+              </xsl:for-each>
+            </tr>
+          </xsl:when>
+          <xsl:otherwise>
+             <tr>
+              <xsl:for-each select="item">
+                <td class="tablebg_odd">
+                <xsl:call-template name="formatted_content">
+                  <xsl:with-param name="text" select="."/> 
+                </xsl:call-template><br />
+                </td>
+              </xsl:for-each>
+            </tr>
+          </xsl:otherwise>        
+        </xsl:choose>
+      </xsl:for-each>
+    </table>
+    
+  </xsl:for-each>
+  <br />
+  
+</xsl:template>
+
 <xsl:template name="description">
 
   <div class="feature_section_title">Description:</div>
@@ -1052,20 +1139,11 @@
     <!-- display feature description (split lines with '\n') -->
 
     <div class="feature_description">
-  <!--
-      <xsl:for-each select="str:split(description/text(),'\n')">
-  -->
-
       <xsl:call-template name="formatted_content">
-
         <xsl:with-param name="text" select="description/text()"/> 
-
       </xsl:call-template><br />
-
-  <!--           
-      </xsl:for-each>
-  -->
     </div>
+    
   </xsl:if>
 
   <xsl:if test="string-length(description/text())=0">
@@ -1120,11 +1198,16 @@
 
   <xsl:if test="string-length(info/text())>0">
      <!-- display feature description (split lines with '\n') -->
-    <xsl:for-each select="str:split(info/text(),'\n')">
-        <xsl:value-of select="." /><br />
-    </xsl:for-each>
+
+    <div class="feature_info">
+      <xsl:call-template name="formatted_content">
+        <xsl:with-param name="text" select="info/text()"/> 
+      </xsl:call-template>
+    </div>
+    
     <br />
   </xsl:if>
+
 </xsl:template>
 
 <xsl:template name="formatted_content">
@@ -1137,10 +1220,6 @@
     </xsl:call-template>  
   </xsl:variable>
 
-<!--
-  <xsl:value-of select="$text_with_linefeeds" /><br />
-
-    -->
   <xsl:call-template name="process_tags">
 
     <xsl:with-param name="text" select="$text_with_linefeeds" />
@@ -1194,8 +1273,8 @@
     <xsl:when test="contains($text, $string)">
    
       <!-- $string found from $text, show leading content before $string -->
-      <xsl:value-of select="$content_before_string" />
-      <xsl:value-of select="$with" />
+      <xsl:value-of disable-output-escaping="yes" select="$content_before_string" />
+      <xsl:value-of disable-output-escaping="yes" select="$with" />
 
       <xsl:choose>
       
@@ -1215,7 +1294,7 @@
         <xsl:otherwise>
 
           <!-- $content_after_string doesnt contain $string, return $content_after_string as is -->
-          <xsl:value-of select="$content_after_string" />
+          <xsl:value-of disable-output-escaping="yes" select="$content_after_string" />
 
         </xsl:otherwise>
               
@@ -1412,24 +1491,57 @@
 
     </xsl:when>
 
+
+    <xsl:when test="$tag='name'">
+      
+      <xsl:choose>
+      
+        <xsl:when test="string-length($parameter)>0">
+          <a name="{ $parameter }" title="">          
+            <xsl:call-template name="process_tags" >
+              <xsl:with-param name="text" select="$content" />
+            </xsl:call-template>          
+          </a>
+        </xsl:when>
+        
+        <xsl:otherwise>
+          <a name="{ $content }" title="">
+            <xsl:call-template name="process_tags" >
+              <xsl:with-param name="text" select="$content" />
+            </xsl:call-template>          
+          </a>
+        </xsl:otherwise>
+      
+      </xsl:choose>
+            
+      <xsl:call-template name="process_tags" >
+        <xsl:with-param name="text" select="$content_after" />
+      </xsl:call-template>
+
+    </xsl:when>
+
+
+
     <xsl:when test="$tag='br'">
       <br />
     </xsl:when>
 
     <xsl:otherwise>
 
-      
-
       <xsl:choose>
 
         <xsl:when test="string-length($content)>0">
-          <xsl:text>[</xsl:text><xsl:value-of select="$tag" /><xsl:text>]</xsl:text>
-          <xsl:value-of select="$content" />
+          <xsl:text>[</xsl:text><xsl:value-of select="$full_tag" /><xsl:text>]</xsl:text>
+
+          <xsl:call-template name="process_tags" >
+            <xsl:with-param name="text" select="$content" />
+          </xsl:call-template>
+
           <xsl:text>[/</xsl:text><xsl:value-of select="$tag" /><xsl:text>]</xsl:text>
         </xsl:when>
 
         <xsl:otherwise>
-          <xsl:text>[</xsl:text><xsl:value-of select="$tag" /><xsl:text>]</xsl:text>
+          <xsl:text>[</xsl:text><xsl:value-of select="$full_tag" /><xsl:text>]</xsl:text>
         </xsl:otherwise>
       
       </xsl:choose>
