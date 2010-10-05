@@ -75,24 +75,23 @@ module MobyUtil
         
       when "localisation"
         db_type =  MobyUtil::Parameter[ :localisation_db_type, nil ].to_s.downcase
-			  host =  MobyUtil::Parameter[ :localisation_server_ip ]
-			  username = MobyUtil::Parameter[ :localisation_server_username ]
-			  password = MobyUtil::Parameter[ :localisation_server_password ]
-			  database_name = MobyUtil::Parameter[ :localisation_server_database_name ]
+		host =  MobyUtil::Parameter[ :localisation_server_ip ]
+		username = MobyUtil::Parameter[ :localisation_server_username ]
+		password = MobyUtil::Parameter[ :localisation_server_password ]
+		database_name = MobyUtil::Parameter[ :localisation_server_database_name ]
 
         query_string = "select `#{ language }` from #{ table_name } where lname = '#{ logical_name }'"
-			  query_string += " and `FNAME` = '#{ file_name }'" unless file_name.nil?
-			  query_string += " and `PLURALITY` = '#{ plurality }'" unless plurality.nil?
-			  query_string += " and `LENGTHVAR` = '#{ lengthvariant }'" unless lengthvariant.nil?
-			  query_string += " and `#{ language }` <> \'#MISSING\'"
+		query_string += " and `FNAME` = '#{ file_name }'" unless file_name.nil?
+		query_string += " and `PLURALITY` = '#{ plurality }'" unless plurality.nil?
+		query_string += " and `LENGTHVAR` = '#{ lengthvariant }'" unless lengthvariant.nil?
+		query_string += " and `#{ language }` <> \'#MISSING\'"
 
       when "user_data"
         db_type =  MobyUtil::Parameter[ :user_data_db_type, nil ].to_s.downcase
-			  host =  MobyUtil::Parameter[ :user_data_server_ip ]
-			  username = MobyUtil::Parameter[ :user_data_server_username ]
-			  password = MobyUtil::Parameter[ :user_data_server_password ]
-			  database_name = MobyUtil::Parameter[ :user_data_server_database_name ]
-        language = MobyUtil::Parameter[ :language, language ]
+		host =  MobyUtil::Parameter[ :user_data_server_ip ]
+		username = MobyUtil::Parameter[ :user_data_server_username ]
+		password = MobyUtil::Parameter[ :user_data_server_password ]
+		database_name = MobyUtil::Parameter[ :user_data_server_database_name ]
         table_name = MobyUtil::Parameter[ :user_data_server_database_tablename]
 
         query_string = "select `#{ language }` from #{ table_name } where lname = \'#{ logical_name }' and `#{ language }` <>\'#MISSING\'"
@@ -113,6 +112,7 @@ module MobyUtil
 
 
 			begin
+				# Returns a uniform set of results as an array of rows, rows beeing an array of values ( Array<Array<String>> )
 				result = MobyUtil::DBAccess.query( db_type, host, username, password, database_name, query_string )
 			rescue
 				# if column referring to language is not found then Kernel::raise error for language not found
@@ -123,12 +123,15 @@ module MobyUtil
 			# Return only the first column of the row or and array of the values of the first column if multiple rows have been found
 			Kernel::raise LogicalNameNotFoundError.new( "No translation found for logical name '#{ logical_name }' in language '#{ language }' with given plurality and lengthvariant." ) if ( result.empty?)
 			if result.length > 1
+				# Result is an Array of rows (Array<String>)! We want the first column of each row.
 				result_array = Array.new
 				result.each do |row|
 					result_array << row[0]
 				end
+				return result_array
 			else
-				return result[0][0] # array of rows! We want the first column of the first row
+				# Result is an Array of rows (Array<String>)! We want the first column of the first row.
+				return result[0][0] 
 			end
 
 		end

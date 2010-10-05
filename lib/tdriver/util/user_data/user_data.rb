@@ -64,7 +64,7 @@ module MobyUtil
 					result_array << row[0]
 				end
 			else
-				return result[0][0] # array of rows! We want the first column of the first row
+				return result[0] # array of rows! We want the first column of the first row
 			end
 			
 		end

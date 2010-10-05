@@ -22,6 +22,23 @@ module MobyUtil
 
 	# Base class and interface for camera recorders in TDriver
 	class TDriverCam
+	
+	    # Automatically select the right kind of camera implementation for the detected platform.
+	    def self.new_cam( *args )
+		
+		  if EnvironmentHelper.windows?
+		  
+		    return TDriverWinCam.new( *args )
+		  
+		  elsif EnvironmentHelper.linux?
+		  
+		    return TDriverLinuxCam.new( *args )
+			
+		  else
+		    raise RuntimeError.new("Unidentified platform type, unable to select platform specific camera. Supported platform types: Linux, Windows.")
+		  end
+		
+		end
 
 		def initialize
 		  raise RuntimeError.new("TDriverCam abstract class")
@@ -47,7 +64,7 @@ module MobyUtil
 		@_owcc_startex = nil
 		@_owcc_stop = nil
 		STARTUP_TIMEOUT = 60
-		DEFAULT_OPTIONS = { :width => 640, :height => 480, :fps => 30 }
+		DEFAULT_OPTIONS = { :device => nil, :width => 640, :height => 480, :fps => 30 }
 		
 		# Creates a new recroding object witdh the given recording options		
 		# === params
@@ -63,6 +80,10 @@ module MobyUtil
               @_owcc_stop = Win32API.new( 'OscarWebCamControl', 'OscarWebCamControlStop', [ 'L' ], 'V' )
             rescue Exception => e
               raise RuntimeError.new( "Failed to connect to video recording DLL file (OscarWebCamControl.dll). Details:\n" + e.message )
+            end
+		    
+            if user_options.has_key? :device
+              puts "WARNING: TDriverWinCam does not support the :device option. This setting is ignored."
             end
 			
 		    @_control_id = nil
@@ -157,7 +178,7 @@ module MobyUtil
 		@_owcc_startex = nil
 		@_owcc_stop = nil
 		STARTUP_TIMEOUT = 60
-		DEFAULT_OPTIONS = { :width => 320, :height => 240, :fps => 5 }
+		DEFAULT_OPTIONS = { :device => '/dev/video0', :width => 320, :height => 240, :fps => 5 }
 		
 		# Creates a new recroding object witdh the given recording options		
 		# === params
@@ -176,7 +197,7 @@ module MobyUtil
 		# RuntimeError: No filename has been defined or recording initialization failed due to timeout.
 		def start_recording
 
-          raise RuntimeError.new("No video file defined, unable to start recording.") unless !@_video_file.nil?
+          raise RuntimeError.new( "No video file defined, unable to start recording." ) unless !@_video_file.nil?
 
 		  if File.exists?( @_video_file )		    
 		    begin
@@ -185,8 +206,16 @@ module MobyUtil
 		      # no reaction to failed file ops, unless recording fails
 		    end
 		  end	
-                  
-          @_rec_pipe = IO.popen('streamer -q -c /dev/video0 -f rgb24 -r ' + @_rec_options[ :fps ].to_s + ' -t 99:00:00 -o ' +  @_video_file.to_s + ' -s ' + @_rec_options[ :width ].to_s + 'x' + @_rec_options[ :height ].to_s + ' 2>&1', 'w+')
+
+          rec_command = 'streamer -q -c ' + @_rec_options[ :device ].to_s + ' -f rgb24 -r ' + @_rec_options[ :fps ].to_s + ' -t 99:00:00 -o ' +  @_video_file.to_s + ' -s ' + @_rec_options[ :width ].to_s + 'x' + @_rec_options[ :height ].to_s
+          
+          @_streamer_pid = fork do
+            begin
+              Kernel::exec( rec_command )
+            rescue Exception => e
+              raise RuntimeError.new( "An error was encountered while launching streamer:\n" << e.inspect )
+            end
+          end
 
           file_timed_out = false
           file_timeout = Time.now + STARTUP_TIMEOUT
@@ -203,8 +232,7 @@ module MobyUtil
 		  if file_timed_out
 		    # make sure recording is not initializing, clean up any failed file		    
 			begin
-			  Process.kill(SIGKILL, @_rec_pipe.pid)  			
-              @_rec_pipe.close
+			  Process.kill( 9, @_streamer_pid.to_i )
 			rescue
 			end
 			
@@ -227,8 +255,7 @@ module MobyUtil
 		def stop_recording 
           if @_recording		  
             @_recording = false						
-            Process.kill(9, @_rec_pipe.pid)  		
-            @_rec_pipe.close	
+            Process.kill( 9, @_streamer_pid.to_i )
 		  end
 		  return nil
 		end		

@@ -131,17 +131,28 @@ module MobyBase
 				# skip if required plugin is not registered or enabled
 				next if behaviour_data[ :requires ].collect{ | plugin | 
 
-					MobyUtil::PluginService.instance.plugin_registered?( plugin ) && MobyUtil::PluginService.instance.plugin_enabled?( plugin )
+					#MobyUtil::PluginService.instance.plugin_registered?( plugin ) && MobyUtil::PluginService.instance.plugin_enabled?( plugin )
+
+          # verify if plugin is enabled -- exception will be catched if plugin is not registered 
+					MobyUtil::PluginService.instance.plugin_enabled?( plugin ) rescue false
 
 				}.include?( false )
 
 				begin
 
-					# retrieve behaviour module 
-					behaviour_module = MobyUtil::KernelHelper.get_constant( behaviour_data[ :module ][ :name ] )
+					#behaviour_module = MobyUtil::KernelHelper.get_constant( behaviour_data[ :module ][ :name ] )
 
-					# extend target object
-					rules[ :object ].extend( behaviour_module )
+					# retrieve behaviour module from cache and extend target object
+					rules[ :object ].extend( 
+
+            @@modules_cache.fetch( behaviour_data[ :module ][ :name ] ){
+
+              # ... or store to cache for the next time if not found 
+              @@modules_cache[ behaviour_data[ :module ][ :name ] ] = MobyUtil::KernelHelper.get_constant( behaviour_data[ :module ][ :name ] )
+
+            } 
+
+          )
 
 				rescue NameError => exception
 
@@ -150,7 +161,6 @@ module MobyBase
 						"Implementation for behaviour %s does not exist. (%s)" % [ behaviour_data[ :name ], behaviour_data[ :module ][ :name ] ]
 
 					)
-
 
 				rescue Exception => exception
 

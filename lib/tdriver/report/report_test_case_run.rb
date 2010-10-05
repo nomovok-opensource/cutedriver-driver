@@ -24,6 +24,42 @@ module TDriverReportCreator
   #Test case class for new test case run
   class TestCaseRun < TDriverReportCrashFileCapture
     include TDriverReportWriter
+    attr_reader(
+      :test_case_folder,
+      :test_cases_folder,
+      :test_case_name,
+      :test_case_ended,
+      :test_case_name_full,
+      :test_case_index,
+      :test_case_start_time,
+      :test_case_end_time,
+      :test_case_run_time,
+      :test_case_status,
+      :test_case_execution_log,
+      :test_case_user_data,
+      :test_case_user_data_columns,
+      :test_case_chronological_view_data,
+      :capture_screen_error,
+      :failed_dump_error,
+      :test_case_reboots,
+      :test_case_crash_files,
+      :test_case_behaviour_log,
+      :failed_screenshot,
+      :test_case_group,
+      :tc_video_recording,
+      :tc_video_filename,
+      :tc_previous_video_filename,
+      :tc_video_recorders,
+      :tc_memory_amount_start,
+      :tc_memory_amount_end,
+      :tc_memory_amount_start,      
+      :tc_memory_amount_total,
+      :pass_statuses,
+      :fail_statuses,
+      :not_run_statuses,
+      :test_case_logging_level,
+      :trace_directory
+    )
     def initialize()
       @test_case_folder=nil
       @test_cases_folder=nil
@@ -49,7 +85,7 @@ module TDriverReportCreator
       @tc_video_recording=false
       @tc_video_filename=nil
       @tc_previous_video_filename=nil
-      @tc_video_recorder=nil
+      @tc_video_recorders=[]
       @tc_memory_amount_start=nil
       @tc_memory_amount_end=nil
       @tc_memory_amount_start='-'
@@ -270,8 +306,7 @@ module TDriverReportCreator
     # === returns
     # nil
     def start_video_recording( rec_name, previous_name )
-				
-      require File.expand_path( File.join( File.dirname( __FILE__ ), '..', 'util', 'video_rec' ) )
+		
       @tc_video_filename = rec_name
       @tc_previous_video_filename = previous_name
       tc_video_width = 640
@@ -294,21 +329,36 @@ module TDriverReportCreator
         # parameter not loaded, do nothing
       end
 		
-      #begin
-      @tc_video_recorder=MobyUtil::TDriverWinCam.new( @tc_video_filename, { :width => tc_video_width, :height => tc_video_height, :fps => tc_video_fps } )
-      @tc_video_recorder.start_recording
-      @tc_video_recording = true
-      #rescue
+      @tc_video_recorders = []
+      	  
+      begin
+        each_video_device do | video_device, device_index |
+	  	    
+          rec_options = { :width => tc_video_width, :height => tc_video_height, :fps => tc_video_fps }
+          rec_options[ :device ] = video_device unless video_device == "true" # use default device if "true"
+          video_recorder = MobyUtil::TDriverCam.new_cam( "cam_" + device_index + "_" + @tc_video_filename, rec_options )
+          video_recorder.start_recording
+          @tc_video_recorders << video_recorder
+          @tc_video_recording = true
 		  
-      #end
+        end
+      rescue Exception => e
+        # make sure to stop any started cams if startup fails
+        stop_video_recording
+        raise e
+      end
 	  
       nil
 		
     end
 	  
     def stop_video_recording()
-      @tc_video_recorder.stop_recording
+	
+      @tc_video_recorders.each do | video_recorder |
+        video_recorder.stop_recording
+      end
       @tc_video_recording = false
+	  
     end
     #This method sets the tdriver test case memory at start
     #
@@ -340,196 +390,7 @@ module TDriverReportCreator
     def set_tc_memory_amount_total(value)
       @tc_memory_amount_total=value
     end
-    #This method gets the test case reboots
-    #
-    # === params
-    # value: amount
-    # === returns
-    # nil
-    # === raises
-    def get_test_case_reboots()
-      @test_case_reboots
-    end
-    #This method gets the test case crash files
-    #
-    # === params
-    #
-    # === returns
-    # nil
-    # === raises
-    def get_test_case_crash_files()
-      @test_case_crash_files
-    end
-    #This method gets the test case folder
-    #
-    # === params
-    # nil
-    # === returns
-    # test case folder object
-    # === raises
-    def get_test_case_folder()
-      @test_case_folder
-    end
-    #This method gets the test case name
-    #
-    # === params
-    # nil
-    # === returns
-    # test case name object
-    # === raises
-    def get_test_case_name()
-      @test_case_name
-    end
-    #This method gets the full test case name
-    #
-    # === params
-    # nil
-    # === returns
-    # full test case name object
-    # === raises
-    def get_test_case_name_full()
-      @test_case_name_full
-    end
-    #This method gets the test case index
-    #
-    # === params
-    # nil
-    # === returns
-    # test case index object
-    # === raises
-    def get_test_case_index()
-      @test_case_index
-    end
-    #This method gets the tdriver test case ended status
-    #
-    # === params
-    # value: test cases report folder
-    # === returns
-    # nil
-    # === raises
-    def get_test_case_ended()
-      @test_case_ended
-    end
-    #This method gets the test case logging level
-    #
-    # === params
-    # nil
-    # === returns
-    # test case index object
-    # === raises
-    def get_test_case_logging_level()
-      @test_case_logging_level
-    end
-    #This method gets the test case start time
-    #
-    # === params
-    # nil
-    # === returns
-    # test case start time object
-    # === raises
-    def get_test_case_start_time()
-      @test_case_start_time
-    end
-    #This method gets the test case end time
-    #
-    # === params
-    # nil
-    # === returns
-    # test case end time object
-    # === raises
-    def get_test_case_end_time()
-      @test_case_end_time
-    end
-    #This method gets the test case run time
-    #
-    # === params
-    # nil
-    # === returns
-    # test case run time object
-    # === raises
-    def get_test_case_run_time()
-      @test_case_run_time
-    end
-    #This method gets the test case status
-    #
-    # === params
-    # nil
-    # === returns
-    # test case status object
-    # === raises
-    def get_test_case_status()
-      @test_case_status
-    end
-    #This method gets the test case execution log
-    #
-    # === params
-    # nil
-    # === returns
-    # test case execution log object
-    # === raises
-    def get_test_case_execution_log()
-      @test_case_execution_log
-    end
-    #This method gets the test case behaviour log
-    #
-    # === params
-    # nil
-    # === returns
-    # test case execution log object
-    # === raises
-    def get_test_case_behaviour_log()
-      @test_case_behaviour_log
-    end
-    #This method gets the tdrivertest case memory at start
-    #
-    # === params
-    # value: memory
-    # === returns
-    # nil
-    # === raises
-    def get_tc_memory_amount_start()
-      @tc_memory_amount_start
-    end
-    #This method gets the tdrivertest case memory at end
-    #
-    # === params
-    # value: memory
-    # === returns
-    # nil
-    # === raises
-    def get_tc_memory_amount_end()
-      @tc_memory_amount_end
-    end
-    #This method gets the tdrivertest case total memory
-    #
-    # === params
-    # value: memory
-    # === returns
-    # nil
-    # === raises
-    def get_tc_memory_amount_total()
-      @tc_memory_amount_total
-    end
-    #This method gets the test case group
-    #
-    # === params
-    # value: test case report folder
-    # === returns
-    # nil
-    # === raises
-    def get_test_case_group()
-      @test_case_group
-    end
-    #This method gets the test case displays data
-    #
-    # === params
-    # value: test case report folder
-    # === returns
-    # nil
-    # === raises
-    def get_test_case_chronological_view_data()
-      @test_case_chronological_view_data
-    end
+        
     #This method updates the tdrivertest case details page
     #
     # === params
@@ -570,11 +431,16 @@ module TDriverReportCreator
           FileUtils.mkdir_p video_folder
         end        
 		
-        File.copy(@tc_video_filename, video_folder)		
-        File.copy(@tc_previous_video_filename, video_folder)
+        each_video_device do | video_device, device_index |
+		
+          File.copy("cam_" + device_index + "_" + @tc_video_filename, video_folder)
+          File.copy("cam_" + device_index + "_" + @tc_previous_video_filename, video_folder)
+		
+        end
+       
 		
       rescue Exception => e
-        @test_case_execution_log=@test_case_execution_log.to_s + '<br />' + "Unable to store video file(#{@tc_video_filename}): " + e.message
+        @test_case_execution_log=@test_case_execution_log.to_s + '<br />' + "Unable to store video file: " + e.message
       end
 	  
       MobyUtil::Logger.instance.enabled=logging_enabled
@@ -622,7 +488,7 @@ module TDriverReportCreator
             state_html='<a href="state_xml/'<<
               time_stamp+'_'+sut_id.to_s+'_state.xml'<<
               '">'+time_stamp+'_'+sut_id.to_s+'_state.xml'+'</a>'
-              self.set_test_case_execution_log(state_html.to_s)
+            self.set_test_case_execution_log(state_html.to_s)
           rescue Exception=>e           
             @failed_dump_error="Unable to capture state xml #{sut_id}: " + e.message
             self.set_test_case_execution_log(@failed_dump_error.to_s)

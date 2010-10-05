@@ -24,6 +24,41 @@ module TDriverReportCreator
   class TestRun < ReportCombine
     include TDriverReportWriter
     include ReportDataTable
+    attr_reader(
+      :report_folder,
+      :reporting_groups,
+      :generic_reporting_groups,
+      :start_time,
+      :end_time,
+      :run_time,
+      :total_run,
+      :total_passed,
+      :total_failed,
+      :total_not_run,
+      :total_crash_files,
+      :total_device_resets,
+      :test_case_user_defined_status,
+      :test_run_behaviour_log,
+      :test_run_user_log,
+      :test_case_user_data,
+      :test_case_user_data_columns,
+      :test_case_user_chronological_table_data,
+      :attached_test_reports,
+      :report_pages_ready,
+      :memory_amount_start,
+      :memory_amount_end,
+      :memory_amount_total,
+      :total_dump_count,
+      :total_received_data,
+      :total_sent_data,
+      :result_storage_in_use,
+      :pages,
+      :duration_graph,
+      :pass_statuses,
+      :fail_statuses,
+      :not_run_statuses,
+      :report_editable
+    )
     #class variables for summary report
     def initialize()
       @report_folder=nil
@@ -49,6 +84,9 @@ module TDriverReportCreator
       @memory_amount_start='-'
       @memory_amount_end='-'
       @memory_amount_total='-'
+      @total_dump_count=Hash.new
+      @total_received_data=Hash.new
+      @total_sent_data=Hash.new      
       $result_storage_in_use=false
       @pages=MobyUtil::Parameter[ :report_results_per_page, 10]
       @duration_graph=MobyUtil::Parameter[ :report_generate_duration_graph, false]
@@ -287,146 +325,7 @@ module TDriverReportCreator
     def set_memory_amount_total(value)
       @memory_amount_total=value
     end
-    #This method gets the report folder
-    #
-    # === params
-    # nil
-    # === returns
-    # report folder object
-    # === raises
-    def get_report_folder()
-      @report_folder
-    end        
-    #This method gets the test set start time
-    #
-    # === params
-    # nil
-    # === returns
-    # start time object
-    # === raises
-    def get_start_time()
-      @start_time
-    end
-    #This method gets the test set end time
-    #
-    # === params
-    # nil
-    # === returns
-    # end time object
-    # === raises
-    def get_end_time()
-      @end_time
-    end
-    #This method gets the test set run time
-    #
-    # === params
-    # nil
-    # === returns
-    # run time object
-    # === raises
-    def get_run_time()
-      @run_time
-    end
-    #This method gets the test set total tests run
-    #
-    # === params
-    # nil
-    # === returns
-    # total tests run object
-    # === raises
-    def get_total_run()
-      @total_run
-    end
-    #This method gets the first passed status
-    #
-    # === params
-    # nil
-    # === returns
-    # total tests run object
-    # === raises
-    def get_passed_status()
-      @pass_statuses.first
-    end
-    #This method gets the first failed status
-    #
-    # === params
-    # nil
-    # === returns
-    # total tests run object
-    # === raises
-    def get_failed_status()
-      @fail_statuses.first
-    end
-    #This method gets the first not run status
-    #
-    # === params
-    # nil
-    # === returns
-    # total tests run object
-    # === raises
-    def get_not_run_status()
-      @not_run_statuses.first
-    end
-    #This method gets the test set total passed tests run
-    #
-    # === params
-    # nil
-    # === returns
-    # total passed tests run object
-    # === raises
-    def get_total_passed()
-      @total_passed
-    end
-    #This method gets the test set total failed tests run
-    #
-    # === params
-    # nil
-    # === returns
-    # total failed tests run object
-    # === raises
-    def get_total_failed()
-      @total_failed
-    end
-    #This method gets the test set total failed tests run
-    #
-    # === params
-    # nil
-    # === returns
-    # total failed tests run object
-    # === raises
-    def get_total_crash_files()
-      @total_crash_files
-    end
-    #This method gets the test set total device reset
-    #
-    # === params
-    # nil
-    # === returns
-    # total failed tests run object
-    # === raises
-    def get_total_device_resets()
-      @total_device_resets
-    end
-    #This method gets the test set total not run tests run
-    #
-    # === params
-    # nil
-    # === returns
-    # total not run tests object
-    # === raises
-    def get_total_not_run()
-      @total_not_run
-    end
-    #This method gets the test case user defined status
-    #
-    # === params
-    # 
-    # === returns
-    # nil
-    # === raises
-    def get_test_case_user_defined_status()
-      @test_case_user_defined_status
-    end
+    
     #This method gets the not run cases name array
     #
     # === params
@@ -471,26 +370,7 @@ module TDriverReportCreator
       #@all_cases_arr
       read_result_storage('all')
     end
-    #This method gets the memory amount end
-    #
-    # === params
-    #
-    # === returns
-    # nil
-    # === raises
-    def get_memory_amount_end()
-      @memory_amount_end
-    end
-    #This method gets the memory amount start
-    #
-    # === params
-    #
-    # === returns
-    # nil
-    # === raises
-    def get_memory_amount_start()
-      @memory_amount_start
-    end
+    
     #This method gets reporting groups
     #
     # === params
@@ -505,26 +385,7 @@ module TDriverReportCreator
       end
       @reporting_groups
     end
-    #This method gets the test run behaviour log
-    #
-    # === params
-    # nil
-    # === returns
-    # test run execution log object
-    # === raises
-    def get_test_run_behaviour_log()
-      @test_run_behaviour_log
-    end
-    #This method gets user created log
-    #
-    # === params
-    # value: test run execution log entry
-    # === returns
-    # nil
-    # === raises
-    def get_log()
-      @test_run_user_log
-    end
+    
     #This method gets user created data
     #
     # === params
@@ -535,16 +396,7 @@ module TDriverReportCreator
     def get_user_data()
       return @test_case_user_data,@test_case_user_data_columns
     end
-    #This method gets user data to display in chronological table
-    #
-    # === params
-    # nil
-    # === returns
-    # the testcase data and column objects
-    # === raises
-    def get_user_chronological_table_data()
-      @test_case_user_chronological_table_data
-    end
+    
     #This method sets user data to display in chronological table
     #
     # === params
@@ -852,6 +704,48 @@ module TDriverReportCreator
         return  memory
       end
     end
+    #This method gets the sut total dump count
+    #
+    # === params
+    # sut_id: sut id
+    # === returns
+    # nil
+    # === raises
+    def get_sut_total_dump_count(sut_id, sut_attributes)
+
+      dump_count=sut_attributes[:sut].dump_count
+      p "Recieved #{sut_attributes[:sut].received_data} bytes"
+      p "Sent #{sut_attributes[:sut].sent_data} bytes"
+      @total_dump_count[sut_id.to_sym]=dump_count
+      @total_dump_count
+
+    end
+
+    #This method gets the sut total received data
+    #
+    # === params
+    # sut_id: sut id
+    # === returns
+    # nil
+    # === raises
+    def get_sut_total_received_data(sut_id, sut_attributes)
+      data=sut_attributes[:sut].received_data
+      @total_received_data[sut_id.to_sym]=data
+      @total_received_data
+    end
+
+    #This method gets the sut total sent data
+    #
+    # === params
+    # sut_id: sut id
+    # === returns
+    # nil
+    # === raises
+    def get_sut_total_sent_data(sut_id, sut_attributes)
+      data=sut_attributes[:sut].sent_data
+      @total_sent_data[sut_id.to_sym]=data
+      @total_sent_data
+    end
     
     def write_to_result_storage(status,testcase,group,reboots=0,crashes=0,start_time=nil,user_data=nil,duration=0,memory_usage=0,index=0,log='',comment='',link='')
       while $result_storage_in_use==true
@@ -1014,8 +908,16 @@ module TDriverReportCreator
               if @fail_statuses.include?(status)
                 result_storage << [value,group,reboots,crashes,start_time,duration,memory_usage,status,index,log,comment,link,user_data]
               end
-            when 'not run'
+            when 'not_run'
               if @not_run_statuses.include?(status)
+                result_storage << [value,group,reboots,crashes,start_time,duration,memory_usage,status,index,log,comment,link,user_data]
+              end
+            when 'crash'
+              if crashes.to_i > 0
+                result_storage << [value,group,reboots,crashes,start_time,duration,memory_usage,status,index,log,comment,link,user_data]
+              end
+            when 'reboot'
+              if reboots.to_i > 0
                 result_storage << [value,group,reboots,crashes,start_time,duration,memory_usage,status,index,log,comment,link,user_data]
               end
             when 'all'
@@ -1085,6 +987,8 @@ module TDriverReportCreator
       a
     end
 
+
+
     #This method updates the tdriver test run enviroment page
     #
     # === params
@@ -1092,70 +996,48 @@ module TDriverReportCreator
     # === returns
     # nil
     # === raises
+    def update_test_case_summary_page(status,rewrite=false,title="")
+      @cases_arr=Array.new
+
+      @cases_arr=read_result_storage(status)
+      splitted_arr=Array.new
+      splitted_arr=split_array(@cases_arr,@pages.to_i)
+      page=1
+      splitted_arr.each do |case_arr|
+        if @report_pages_ready.include?("#{page}_passed")==false || rewrite==true
+          write_page_start(@report_folder+"/cases/#{page}_#{status}_index.html",title,page,splitted_arr.length)
+          write_test_case_summary_body(@report_folder+"/cases/#{page}_#{status}_index.html",status,case_arr,nil)
+          page_ready=write_page_end(@report_folder+"/cases/#{page}_#{status}_index.html",page,splitted_arr.length)
+        end
+        if page_ready!=nil
+          @report_pages_ready << "#{page_ready}_#{status}"
+        end
+        page_ready=nil
+        page+=1
+      end
+
+    end
+    #This method updates the tdriver test run enviroment pages
+    #
+    # === params
+    # status: last run test case
+    # === returns
+    # nil
+    # === raises
     def update_test_case_summary_pages(status,rewrite=false)
-      @passed_cases_arr=Array.new
-      @failed_cases_arr=Array.new
-      @not_run_cases_arr=Array.new
+
       @all_cases_arr=Array.new
       begin        
         case status
         when 'passed'
-          @passed_cases_arr=read_result_storage(status)          
-          splitted_arr=Array.new
-          splitted_arr=split_array(@passed_cases_arr,@pages.to_i)
-          page=1
-          splitted_arr.each do |case_arr|
-            #if File.exist?(@report_folder+"/cases/#{page+1}_passed_index.html")==false || rewrite==true
-            if @report_pages_ready.include?("#{page}_passed")==false || rewrite==true
-              write_page_start(@report_folder+"/cases/#{page}_passed_index.html",'Passed',page,splitted_arr.length)
-              write_test_case_summary_body(@report_folder+"/cases/#{page}_passed_index.html",status,case_arr,nil)
-              #end
-              page_ready=write_page_end(@report_folder+"/cases/#{page}_passed_index.html",page,splitted_arr.length)
-            end
-            if page_ready!=nil
-              @report_pages_ready << "#{page_ready}_passed"
-            end
-            page_ready=nil
-            page+=1
-          end
+          update_test_case_summary_page(status,rewrite,'Passed')
+          
         when 'failed'
-          @failed_cases_arr=read_result_storage(status)
-          splitted_arr=Array.new
-          splitted_arr=split_array(@failed_cases_arr,@pages.to_i)
-          page=1
-          splitted_arr.each do |case_arr|
-            if File.exist?(@report_folder+"/cases/#{page+1}_failed_index.html")==false || rewrite==true
-              if @report_pages_ready.include?("#{page}_failed")==false || rewrite==true
-                write_page_start(@report_folder+"/cases/#{page}_failed_index.html",'Failed',page,splitted_arr.length)
-                write_test_case_summary_body(@report_folder+"/cases/#{page}_failed_index.html",status,case_arr,nil)
-              end
-            end
-            page_ready=write_page_end(@report_folder+"/cases/#{page}_failed_index.html",page,splitted_arr.length) if @report_pages_ready.include?("#{page}_failed")==false || rewrite==true
-            if page_ready!=nil
-              @report_pages_ready << "#{page_ready}_failed"
-            end
-            page_ready=nil
-            page+=1
-          end
+          update_test_case_summary_page(status,rewrite,'Failed')
+
         when 'not run'
-          @not_run_cases_arr=read_result_storage(status)
-          splitted_arr=Array.new
-          splitted_arr=split_array(@not_run_cases_arr,@pages.to_i)
-          page=1
-          splitted_arr.each do |case_arr|
-            if File.exist?(@report_folder+"/cases/#{page+1}_not_run_index.html")==false || rewrite==true
-              if @report_pages_ready.include?("#{page}_not_run")==false || rewrite==true
-                write_page_start(@report_folder+"/cases/#{page}_not_run_index.html",'Not run',page,splitted_arr.length)
-                write_test_case_summary_body(@report_folder+"/cases/#{page}_not_run_index.html",status,case_arr,nil)
-              end
-            end
-            page_ready=write_page_end(@report_folder+"/cases/#{page}_not_run_index.html",page,splitted_arr.length) if @report_pages_ready.include?("#{page}_not_run")==false || rewrite==true
-            if page_ready!=nil
-              @report_pages_ready << "#{page_ready}_not_run"
-            end
-            page_ready=nil
-            page+=1
-          end
+          update_test_case_summary_page('not_run',rewrite,'Not run')
+
         when 'statistics'
           @all_cases_arr=read_result_storage('all')
           write_page_start(@report_folder+'/cases/statistics_index.html','Statistics')
@@ -1185,12 +1067,21 @@ module TDriverReportCreator
             page+=1
           end
         end
-        @passed_cases_arr=nil
-        @failed_cases_arr=nil
-        @not_run_cases_arr=nil
         @all_cases_arr=nil
+        update_test_case_summary_pages_for_crashes_and_reboots(rewrite)
       rescue Exception => e
         Kernel::raise e, "Unable to update test case summary pages", caller
+      end
+      return nil
+    end
+
+    def update_test_case_summary_pages_for_crashes_and_reboots(rewrite=false)
+      
+      begin
+        update_test_case_summary_page('crash',rewrite,'Crash')
+        update_test_case_summary_page('reboot',rewrite,'Reboot')
+      rescue Exception => e
+        Kernel::raise e, "Unable to update test case summary pages for crashes and reboots", caller
       end
       return nil
     end

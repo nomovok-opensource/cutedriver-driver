@@ -168,6 +168,8 @@ class ReportingStatistics
     result_page=1 if result_page==0
 
     tc_link='<a href="'+result_page.to_i.to_s+'_chronological_total_run_index.html">'
+    tc_link='<a href="1_reboot_index.html">' if status=="reboots" && total>0
+    tc_link='<a href="1_crash_index.html">' if status=="crashes" && total>0
     tc_link='<a href="'+result_page.to_i.to_s+'_chronological_total_run_index.html#'+test_case.gsub(' ','_')+'_' + @pass_statuses.first + '">' if @pass_statuses.include?(status) && total>0
     tc_link='<a href="'+result_page.to_i.to_s+'_chronological_total_run_index.html#'+test_case.gsub(' ','_')+'_' + @fail_statuses.first + '">' if @fail_statuses.include?(status) && total>0
     tc_link='<a href="'+result_page.to_i.to_s+'_chronological_total_run_index.html#'+test_case.gsub(' ','_')+'_' + @not_run_statuses.first + '">' if @not_run_statuses.include?(status) && total>0
@@ -177,6 +179,11 @@ class ReportingStatistics
 
   def generate_duration_graph(file_name)
 
+    begin
+        require 'gruff'
+    rescue LoadError
+        $stderr.puts "Can't load the Gruff gem. If its missing from your system please run 'gem install gruff' to install it."
+    end
     reset_total_statistics()
     collect_test_case_statistics()
     begin

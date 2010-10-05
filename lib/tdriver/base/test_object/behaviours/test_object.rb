@@ -227,28 +227,19 @@ module MobyBehaviour
     def get_application
 
       return self if application?
-      parent_object = @parent
 
-      while parent_object
+      test_object = @parent
 
-        return parent_object if parent_object.type == 'application'
-        parent_object = parent_object.parent
+      while test_object
 
-      end
+        return test_object if ( test_object.type == 'application' )
 
-      # last resort
-      begin
-
-        return @sut.child( :type => 'application' )
-
-      rescue e
-
-        # Not found
+        test_object = test_object.parent
 
       end
 
-      # no parent found
-      nil
+      # return application object or nil if no parent found
+      return @sut.child( :type => 'application' ) rescue nil
 
     end
 
