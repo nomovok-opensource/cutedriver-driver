@@ -50,7 +50,8 @@
 
       span.feature_title_text
       {
-        text-decoration: underline;    
+        text-decoration: none; //underline;
+        border-bottom: 2px solid #404040;
         font-size: 14px; 
         font-weight: bold;
       }
