@@ -322,6 +322,30 @@ module MyBehaviour
 end
 EXAMPLE
 
+        when 'table_format'
+        
+<<-EXAMPLE
+# == tables
+# table_name
+#  title: My table 1
+#  |header1|header2|header3|
+#  |1.1|1.2|1.3|
+#  |2.1|2.2|2.3|
+#  |3.1|3.2|3.3|
+#
+# another_table_name
+#  title: My table 2
+#  |id|value|
+#  |0|true|
+#  |1|false|
+def my_method
+
+  # ...
+
+end
+EXAMPLE
+        
+
 
       else
 
@@ -534,6 +558,118 @@ EXAMPLE
 
     end
 
+    def process_table( source )
+    
+      result = []
+    
+      #p source
+
+      table_name = nil
+      header_columns = 0
+
+      source.lines.to_a.each_with_index{ | line, index | 
+
+        # remove cr/lf
+        line.chomp!
+
+        # remove trailing whitespaces
+        line.rstrip!
+
+        # count nesting depth
+        line.match( /^(\s*)/ )
+
+        nesting = $1.size
+
+        #puts "%s,%s: %s" % [ index, nesting, line ]
+
+        # new table
+        if nesting == 0
+
+          unless line.empty?
+          
+            line =~ /^(\w+)/i
+
+            result << { "name" => $1, "content" => [] }
+
+            table_name = $1.to_s
+
+          else
+          
+            table_name = nil
+
+          end
+
+        else
+
+          line.lstrip!
+
+          if line[0].chr == '|'
+
+            unless table_name.nil?
+              
+              if line[-1].chr != '|'
+
+                raise_error( "Malformed custom table #{ result.last[ "name" ]}, line '#{ line }' ($MODULE). Line must start and end with '|' character.", "table_format" ) 
+
+              else
+
+                line[0] = ""
+                line[-1] = ""
+
+                columns = line.split("|")
+
+                unless result.last[ "content" ].empty?
+                
+                  raise_error( "Malformed custom table #{ result.last[ "name" ]}, line '#{ line }' ($MODULE). Number of columns (#{ columns.count }) does not match with header (#{ header_columns })", "table_format" ) if columns.count != header_columns 
+                                  
+                else
+                  
+                  header_columns = columns.count
+                
+                end
+
+                result.last[ "content" ] << columns
+              
+              end
+
+            else
+
+              raise_error( "Malformed custom table #{ result.last[ "name" ]} ($MODULE). Table name is missing.", "table_format" ) 
+
+            end
+          
+          else
+                    
+            unless line.empty?
+                    
+              line =~ /^(.*?)\:{1}($|[\r\n\t\s]{1})(.*)$/i
+
+              if $1.to_s.empty?
+
+                raise_error( "Malformed custom table #{ result.last[ "name" ]}, line '#{ line }' ($MODULE). Table section name (e.g title) is missing.", "table_format" ) 
+                  
+              else
+  
+                result.last[ $1.to_s ] = ( $3 || "" ).strip
+      
+              end
+      
+            else
+          
+              table_name = nil
+            
+            end
+      
+          end
+          
+        end
+        
+      }
+            
+      result
+    
+    end
+
     def process_formatted_section( source )
 
       result = []
@@ -569,7 +705,7 @@ EXAMPLE
             #Kernel.const_get( $1 ) rescue abort( "Line %s: \"%s\" is not valid argument variable type. (e.g. OK: \"String\", \"Array\", \"Fixnum\" etc) " % [ index + 1, $1 ] ) if verify_type
 
             # argument type
-            current_argument_type = $1
+            current_argument_type = $1 || ""
 
             current_section = nil
 
@@ -602,7 +738,7 @@ EXAMPLE
 
               end
           
-              section_content = $3.strip
+              section_content = ( $3 || "" ).strip
 
             end
 
@@ -815,6 +951,12 @@ EXAMPLE
 
             value = process_formatted_section( value )
 
+          end
+          
+          if key == :tables
+          
+              value = process_table( value )
+          
           end
 
 
@@ -1185,6 +1327,51 @@ EXAMPLE
 
 
     end
+    
+    def generate_tables_element( header, features )
+    
+      tables = []
+    
+      unless features.last[:tables].nil? #[:tables]
+        
+        tables = features.last[:tables].collect{ | table |
+
+          header = table[ "content" ].first.collect{ | header_item |
+            apply_macros!( @templates["behaviour.xml.table.item"].clone, {
+                "ITEM" => header_item
+              }
+            )
+          }
+
+          rows = table[ "content" ][ 1 .. -1 ].collect{ | row_items |
+            row_items.collect{ | row_item |
+            
+              apply_macros!( @templates["behaviour.xml.table.item"].clone, {
+                  "ITEM" => row_item
+                }
+              )
+            }.flatten
+          }
+
+          apply_macros!( @templates["behaviour.xml.table"].clone, {
+              "TABLE_NAME" => table[ "name" ],
+              "TABLE_TITLE" => table[ "title" ],
+              "TABLE_HEADER_ITEMS" => header.join(""),
+              "TABLE_ROWS" => rows.join("")
+            }
+          )
+        }
+
+      end
+    
+      apply_macros!( @templates["behaviour.xml.method.tables"].clone, {
+
+          "METHOD_TABLES" => tables.join("")
+
+        }
+      )
+    
+    end
 
     def generate_methods_element( header, features )
 
@@ -1204,6 +1391,8 @@ EXAMPLE
 
           exceptions = generate_exceptions_element( header, feature )
                     
+          tables = generate_tables_element( header, feature )
+                    
           if feature.last[:description].nil?
 
            raise_error("Warning: $TYPE description for '#{ feature.first }' ($MODULE) is empty.", 'description')
@@ -1218,6 +1407,7 @@ EXAMPLE
             "METHOD_ARGUMENTS" => arguments,
             "METHOD_RETURNS" => returns,
             "METHOD_EXCEPTIONS" => exceptions,
+            "METHOD_TABLES" => tables,
             "METHOD_INFO" => feature.last[:info]
            } 
           )
