@@ -726,8 +726,8 @@ module MobyBehaviour
     # String
     #  description: Translation matching the logical_name
     #  example: "Ok"
-    # Array<String> 
-    #  description: If multiple translations have been found for the search conditions an array with all will be returned
+    # Array
+    #  description: If multiple translations have been found for the search conditions an Array with all Strings be returned
 	#  example: ["Ok", "OK"]
 	# 
     # == exceptions
