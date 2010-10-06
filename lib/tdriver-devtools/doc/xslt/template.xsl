@@ -941,13 +941,22 @@
           </xsl:call-template>       
         </xsl:otherwise>
       </xsl:choose>
-      
-      <xsl:if test="string-length($default)=0">
-        <td class="tablebg_disabled"><xsl:value-of select="$default"/></td>
-      </xsl:if>
+     
+      <!-- default value -->
+      <xsl:if test="position()=1">
 
-      <xsl:if test="string-length($default)>0">
-        <td class="{ $class }"><xsl:value-of select="$default"/></td>
+        <xsl:choose>
+        
+          <xsl:when test="string-length($default)=0">
+            <td class="tablebg_disabled" rowspan="{ $argument_types }"><xsl:value-of select="$default"/></td>
+          </xsl:when>
+          
+          <xsl:otherwise>
+            <td class="{ $class }" rowspan="{ $argument_types }"><xsl:value-of select="$default"/></td>          
+          </xsl:otherwise>
+        
+        </xsl:choose>
+        
       </xsl:if>
 
     </tr>  
