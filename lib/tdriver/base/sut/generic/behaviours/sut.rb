@@ -806,7 +806,42 @@ module MobyBehaviour
 
     end
 
-    
+    # == description
+    # Verify always is a method for sut that allows constant verifications for the UI state.
+    #
+    # == arguments
+    # expected
+    #  Object
+    #   description: Ruby object that equals to the return value of the block
+    #   example: true
+    #
+    # message
+    #  String
+    #   description: Message if an error occurs
+    #   example: 'Required element was not found'
+    #
+    # &block
+    #  Proc
+    #   description: 
+    #     Code block to execute. Current SUT is passed as block parameter. 
+    #     If the verify block is defined outside the scope of the current SUT 
+    #     (e.g. the SUT configuration file), this can be used
+    #     to get a handle to the current sut.
+    #   example: { @sut.xml_data.empty? == false }
+    #
+    # &block#sut
+    #  MobyBase::SUT
+    #   description: Current SUT object
+    #   example: -
+    #
+    # == returns
+    # NilClass
+    #  description: -
+    #  example: -
+    # 
+    # == exceptions
+    # MobyBase::VerificationError
+    #  description: If verification failed
     def verify_always( expected, message = nil, &block )
 
       @verify_blocks << MobyUtil::VerifyBlock.new( block,expected, message, 0, MobyUtil::KernelHelper.find_source( caller( 3 ).first.to_s ) )
