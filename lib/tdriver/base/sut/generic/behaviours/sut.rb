@@ -682,65 +682,65 @@ module MobyBehaviour
 
     end
 
-	# == description
-    # Wrapper function to return translated string for this SUT
-	# Uses the Localisation singleton to read the values from data base
-    #
-    # == arguments
-    # logical_name
-    #  String
-    #   description: The logical name (LNAME) of the item to be translated.
-    #   example: "txt_button_ok"
-	#  Symbol
-	#   description: Symbol form of the logical name (LNAME) of the item to be translated.
-	#   example: :txt_button_ok
-    #
-	# file_name
-	#  String
-	#   description: optional FNAME search argument for the translation
-	#   example: "agenda"
-	#   default: ""
-	#
-	# plurality
-	#  String
-	#   description: optional PLURALITY search argument for the translation
-	#   example: "a" or "singular"
-	#	default:""
-	#
-	# numerus
-	#  String
-	#   description: optional numeral replacement of '%Ln' tags on translation strings
-	#   example: "1"
-	#   default: ""
-	#  Integer
-	#   decription: optional numeral replacement of '%Ln' tags on translation strings
-	#   example: 1
-	# 
-	# lengthvariant
-	#  String
-	#   description: optional LENGTHVAR search argument for the translation (1-9)
-	#   example: "1"
-	#   default: ""
-	#
-    # == returns
-    # String
-    #  description: Translation matching the logical_name
-    #  example: "Ok"
-    # Array
-    #  description: If multiple translations have been found for the search conditions an Array with all Strings be returned
-	#  example: ["Ok", "OK"]
-	# 
-    # == exceptions
-    # LanguageNotFoundError
-    #  description: In case language is not found
-    #
-    # LogicalNameNotFoundError
-    #  description: In case no logical name is not found for current language
-    #
-	# MySqlConnectError
-	#  description: In case there are problems with the db connectivity
-	#
+  # == description
+  # Wrapper function to return translated string for this SUT to read the values from localisation database.
+  #
+  # == arguments
+  # logical_name
+  #  String
+  #   description: Logical name (LNAME) of the item to be translated.
+  #   example: "txt_button_ok"
+  #  Symbol
+  #   description: Symbol form of the logical name (LNAME) of the item to be translated.
+  #   example: :txt_button_ok
+  #
+  # file_name
+  #  String
+  #   description: Optional FNAME search argument for the translation
+  #   example: "agenda"
+  #   default: ""
+  #
+  # plurality
+  #  String
+  #   description: Optional PLURALITY search argument for the translation
+  #   example: "a" or "singular"
+  #	  default: ""
+  #
+  # numerus
+  #  String
+  #   description: Optional numeral replacement of '%Ln' tags on translation strings
+  #   example: "1"
+  #   default: ""
+  #  Integer
+  #   description: Optional numeral replacement of '%Ln' tags on translation strings
+  #   example: 1
+  # 
+  # lengthvariant
+  #  String
+  #   description: Optional LENGTHVAR search argument for the translation (1-9)
+  #   example: "1"
+  #   default: ""
+  #
+  # == returns
+  # String
+  #  description: Translation matching the logical_name
+  #  example: "Ok"
+  # Array
+  #  description: If multiple translations have been found for the search conditions an Array with all Strings be returned
+  #  example: ["Ok", "OK"]
+  # 
+  # == exceptions
+  # LanguageNotFoundError
+  #  description: In case language is not found
+  #
+  # LogicalNameNotFoundError
+  #  description: In case no logical name is not found for current language
+  #
+  # MySqlConnectError
+  #  description: In case there are problems with the database connectivity
+  #
 	def translate( logical_name, file_name = nil, plurality = nil, numerus = nil, lengthvariant = nil )
+
 		Kernel::raise LogicalNameNotFoundError.new("Logical name is nil") if logical_name.nil?
 		language=nil
 		if ( MobyUtil::Parameter[ self.id ][:read_lang_from_app]=='true')
@@ -767,7 +767,9 @@ module MobyBehaviour
 				trans.gsub!(/%Ln/){|s| numerus}
 			end
 		end
-		return translation
+
+		translation
+
 	end
 
     # Function to update all children of current SUT
