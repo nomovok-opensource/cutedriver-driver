@@ -5,6 +5,7 @@
 $METHOD_ARGUMENTS
 $METHOD_RETURNS
 $METHOD_EXCEPTIONS
+$METHOD_TABLES
         <info>$METHOD_INFO</info>
 
       </method>

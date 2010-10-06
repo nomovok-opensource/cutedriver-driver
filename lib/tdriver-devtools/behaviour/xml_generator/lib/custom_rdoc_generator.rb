@@ -322,6 +322,30 @@ module MyBehaviour
 end
 EXAMPLE
 
+        when 'table_format'
+        
+<<-EXAMPLE
+# == tables
+# table_name
+#  title: My table 1
+#  |header1|header2|header3|
+#  |1.1|1.2|1.3|
+#  |2.1|2.2|2.3|
+#  |3.1|3.2|3.3|
+#
+# another_table_name
+#  title: My table 2
+#  |id|value|
+#  |0|true|
+#  |1|false|
+def my_method
+
+  # ...
+
+end
+EXAMPLE
+        
+
 
       else
 
@@ -534,6 +558,118 @@ EXAMPLE
 
     end
 
+    def process_table( source )
+    
+      result = []
+    
+      #p source
+
+      table_name = nil
+      header_columns = 0
+
+      source.lines.to_a.each_with_index{ | line, index | 
+
+        # remove cr/lf
+        line.chomp!
+
+        # remove trailing whitespaces
+        line.rstrip!
+
+        # count nesting depth
+        line.match( /^(\s*)/ )
+
+        nesting = $1.size
+
+        #puts "%s,%s: %s" % [ index, nesting, line ]
+
+        # new table
+        if nesting == 0
+
+          unless line.empty?
+          
+            line =~ /^(\w+)/i
+
+            result << { "name" => $1, "content" => [] }
+
+            table_name = $1.to_s
+
+          else
+          
+            table_name = nil
+
+          end
+
+        else
+
+          line.lstrip!
+
+          if line[0].chr == '|'
+
+            unless table_name.nil?
+              
+              if line[-1].chr != '|'
+
+                raise_error( "Malformed custom table #{ result.last[ "name" ]}, line '#{ line }' ($MODULE). Line must start and end with '|' character.", "table_format" ) 
+
+              else
+
+                line[0] = ""
+                line[-1] = ""
+
+                columns = line.split("|")
+
+                unless result.last[ "content" ].empty?
+                
+                  raise_error( "Malformed custom table #{ result.last[ "name" ]}, line '#{ line }' ($MODULE). Number of columns (#{ columns.count }) does not match with header (#{ header_columns })", "table_format" ) if columns.count != header_columns 
+                                  
+                else
+                  
+                  header_columns = columns.count
+                
+                end
+
+                result.last[ "content" ] << columns
+              
+              end
+
+            else
+
+              raise_error( "Malformed custom table #{ result.last[ "name" ]} ($MODULE). Table name is missing.", "table_format" ) 
+
+            end
+          
+          else
+                    
+            unless line.empty?
+                    
+              line =~ /^(.*?)\:{1}($|[\r\n\t\s]{1})(.*)$/i
+
+              if $1.to_s.empty?
+
+                raise_error( "Malformed custom table #{ result.last[ "name" ]}, line '#{ line }' ($MODULE). Table section name (e.g title) is missing.", "table_format" ) 
+                  
+              else
+  
+                result.last[ $1.to_s ] = ( $3 || "" ).strip
+      
+              end
+      
+            else
+          
+              table_name = nil
+            
+            end
+      
+          end
+          
+        end
+        
+      }
+            
+      result
+    
+    end
+
     def process_formatted_section( source )
 
       result = []
@@ -562,14 +698,14 @@ EXAMPLE
 
         if nesting == 0
 
-          line =~ /^(\w+)/i
+          line =~ /^(.+)/i
 
           if !$1.nil? && (65..90).include?( $1[0] )
 
             #Kernel.const_get( $1 ) rescue abort( "Line %s: \"%s\" is not valid argument variable type. (e.g. OK: \"String\", \"Array\", \"Fixnum\" etc) " % [ index + 1, $1 ] ) if verify_type
 
             # argument type
-            current_argument_type = $1
+            current_argument_type = $1 || ""
 
             current_section = nil
 
@@ -602,7 +738,7 @@ EXAMPLE
 
               end
           
-              section_content = $3.strip
+              section_content = ( $3 || "" ).strip
 
             end
 
@@ -644,6 +780,10 @@ EXAMPLE
 
     def process_arguments( arguments )
 
+      arguments = arguments[ 1 .. -2 ] if arguments[0].chr == "(" and arguments[-1].chr ==")"
+
+      arguments.strip!
+      
       # tokenize string
       tokenizer = RubyLex.new( arguments )
 
@@ -655,46 +795,78 @@ EXAMPLE
 
       args = []
 
-      capture = false
+      capture = true
       capture_depth = []
+      capture_default = false
+
+      default_value = []
 
       # loop while tokens available
       while token
 
         if [ RubyToken::TkLBRACE, RubyToken::TkLPAREN, RubyToken::TkLBRACK ].include?( token.class )
+
+          default_value << token.text if capture_default
         
           capture_depth << token
         
-          capture = true
+          capture = false
 
         elsif [ RubyToken::TkRBRACE, RubyToken::TkRPAREN, RubyToken::TkRBRACK ].include?( token.class )
 
+          default_value << token.text if capture_default
+
           capture_depth.pop
           
-          capture = false if capture_depth.empty?
+          capture = true if capture_depth.empty?
 
         # argument name
-        elsif capture == false
+        elsif capture == true
 
           # argument name
           if token.kind_of?( RubyToken::TkIDENTIFIER )
 
-            args << [ token.name, false ]
+            args << [ token.name, nil, false ]
 
             # &blocks and *arguments are handled as optional parameters
             if [ RubyToken::TkBITAND, RubyToken::TkMULT ].include?( previous_token.class )
              #args.last[ 1 ] = previous_token.text 
+  
              args.last[ 0 ] = previous_token.text + args.last[ 0 ] 
              args.last[ -1 ] = true 
-            end
 
+            end
+            
+            default_value = []
+            capture_default = false
+
+          elsif token.kind_of?( RubyToken::TkCOMMA )
+          
+            capture_default = false
+            
           # detect optional argument
           elsif token.kind_of?( RubyToken::TkASSIGN )
+
+            capture_default = true
 
             # mark arguments as optional
             args.last[ -1 ] = true
 
+          else
+
+            default_value << token.text if capture_default && ![ RubyToken::TkSPACE, RubyToken::TkNL ].include?( token.class )
+          
           end
+
+        else
+        
+          default_value << token.text if capture_default && ![ RubyToken::TkSPACE, RubyToken::TkNL ].include?( token.class )
+        
+        end
+
+        unless default_value.empty? 
+      
+          args.last[ 1 ] = default_value.join("")
 
         end
 
@@ -710,75 +882,16 @@ EXAMPLE
 
     end
     
-=begin
+  def process_undocumented_method_arguments( params )
 
-    def process_arguments( arguments )
-
-      # tokenize string
-      tokenizer = RubyLex.new( arguments )
-
-      # get first token
-      token = tokenizer.token
-
-      # set previous token to nil by default
-      previous_token = nil
-
-      args = []
-      
-      capture = false
-      capture_depth = []
-
-      # loop while tokens available
-      while token
-
-        if [ RubyToken::TkLBRACE, RubyToken::TkLPAREN, RubyToken::TkLBRACK ].include?( token.class )
+    params.collect{ | param |
+    
+      { param.first.to_s => { "" => { "default" => param[1] } } }
         
-          capture_depth << token
-        
-          capture = true
+    }
 
-        elsif [ RubyToken::TkRBRACE, RubyToken::TkRPAREN, RubyToken::TkRBRACK ].include?( token.class )
+  end
 
-          capture_depth.pop
-          
-          capture = false if capture_depth.empty?
-
-        # argument name
-        elsif capture == false
-        
-          if token.kind_of?( RubyToken::TkIDENTIFIER )
-
-          args << [ token.name, nil, false ]
-
-          # &blocks and *arguments are handled as optional parameters
-          args.last[ -1 ] = true if [ RubyToken::TkBITAND, RubyToken::TkMULT ].include?( previous_token.class )
-                  
-          # detect optional argument
-          elsif token.kind_of?( RubyToken::TkASSIGN )
-
-            # mark arguments as optional
-            args.last[ -1 ] = true
-
-            opt = true
-
-          end
-
-        end
-
-        # store previous token
-        previous_token = token
-
-        # get next token
-        token = tokenizer.token
-
-      end
-
-      args
-
-    end
-
-
-=end
 
     def process_method( method )
 
@@ -808,7 +921,7 @@ EXAMPLE
           if key == :returns
 
             value = process_formatted_section( value )
-
+    
           end
 
           if key == :exceptions
@@ -816,11 +929,26 @@ EXAMPLE
             value = process_formatted_section( value )
 
           end
+          
+          if key == :tables
+          
+              value = process_table( value )
+          
+          end
 
 
           [ key, value ]
 
         }]
+
+        # if no description found for arguments, add argument names to method_header hash
+        if ( params.count > 0 ) && ( method_header[:arguments].nil? || method_header[:arguments].empty? )
+                
+          #p params.count, 
+          method_header[:arguments] = process_undocumented_method_arguments( params )
+          
+        end
+
 
         method_name = method.name.clone
 
@@ -880,6 +1008,22 @@ EXAMPLE
           method.name == method_name 
           
         }.count > 0
+    
+    end
+    
+    def encode_string( string )
+    
+      return "" if string.nil? 
+    
+      result = "%s" % string
+    
+      result.gsub!( /\&/, '&amp;' )
+      result.gsub!( /\</, '&lt;' )
+      result.gsub!( /\>/, '&gt;' )
+      result.gsub!( /\"/, '&quot;' )
+      result.gsub!( /\'/, '&apos;' )
+    
+      result
     
     end
 
@@ -1016,14 +1160,14 @@ EXAMPLE
 
       # generate return value types template
       returns = feature.last[ :returns ].collect{ | return_types |
-      
+            
         return_types.collect{ | returns |
         
-           # apply types to arguments template
+           # apply types to returns template
            apply_macros!( @templates["behaviour.xml.returns"].clone, {
-              "RETURN_VALUE_TYPE" => returns.first,
-              "RETURN_VALUE_DESCRIPTION" => returns.last["description"],
-              "RETURN_VALUE_EXAMPLE" => returns.last["example"],
+              "RETURN_VALUE_TYPE" => encode_string( returns.first ),
+              "RETURN_VALUE_DESCRIPTION" => encode_string( returns.last["description"] ),
+              "RETURN_VALUE_EXAMPLE" => encode_string( returns.last["example"] ),
             }
            )
           
@@ -1059,8 +1203,8 @@ EXAMPLE
         
            # apply types to exception template
            apply_macros!( @templates["behaviour.xml.exception"].clone, {
-              "EXCEPTION_NAME" => exception.first,
-              "EXCEPTION_DESCRIPTION" => exception.last["description"]
+              "EXCEPTION_NAME" => encode_string( exception.first ),
+              "EXCEPTION_DESCRIPTION" => encode_string( exception.last["description"] )
             }
            )
           
@@ -1133,9 +1277,9 @@ EXAMPLE
 
            apply_macros!( @templates["behaviour.xml.argument_type"].clone, {
             
-              "ARGUMENT_TYPE" => argument_type == 'block' ? "Proc" : type.first,
-              "ARGUMENT_DESCRIPTION" => type.last["description"],
-              "ARGUMENT_EXAMPLE" => type.last["example"],
+              "ARGUMENT_TYPE" => encode_string( argument_type == 'block' ? "Proc" : type.first ),
+              "ARGUMENT_DESCRIPTION" => encode_string( type.last["description"] ),
+              "ARGUMENT_EXAMPLE" => encode_string( type.last["example"] ),
            
             }
            )
@@ -1152,7 +1296,7 @@ EXAMPLE
         if default_value_set
 
           default_value = apply_macros!( @templates["behaviour.xml.argument.default"].clone, { 
-            "ARGUMENT_DEFAULT_VALUE" => default_value || ""
+            "ARGUMENT_DEFAULT_VALUE" => encode_string( default_value || "" )
             }
           )
 
@@ -1164,11 +1308,11 @@ EXAMPLE
 
          # apply types to arguments template
          apply_macros!( @templates["behaviour.xml.argument"].clone, {
-            "ARGUMENT_NAME" => argument_name,
-            "ARGUMENT_TYPE" => argument_type,
+            "ARGUMENT_NAME" => encode_string( argument_name ),
+            "ARGUMENT_TYPE" => encode_string( argument_type ),
             "ARGUMENT_TYPES" => types_xml,
             "ARGUMENT_DEFAULT_VALUE" => default_value.to_s,
-            "ARGUMENT_OPTIONAL" => argument_type == "multi" ? "true" : default_value_set.to_s
+            "ARGUMENT_OPTIONAL" => encode_string( argument_type == "multi" ? "true" : default_value_set.to_s )
           }
          )
         
@@ -1184,6 +1328,61 @@ EXAMPLE
       )
 
 
+    end
+    
+    def generate_tables_element( header, features )
+    
+      tables = []
+    
+      unless features.last[:tables].nil? #[:tables]
+        
+        tables = features.last[:tables].collect{ | table |
+
+          header = table[ "content" ].first.collect{ | header_item |
+            apply_macros!( @templates["behaviour.xml.table.item"].clone, {
+                "ITEM" => encode_string( header_item )
+              }
+            )
+          }
+
+          rows = table[ "content" ][ 1 .. -1 ].collect{ | row |
+
+            row_items = row.collect{ | row_item |
+            
+              apply_macros!( @templates["behaviour.xml.table.item"].clone, {
+                  "ITEM" => encode_string( row_item )
+                }
+              )
+            }
+
+            apply_macros!( @templates["behaviour.xml.table.row"].clone, {
+
+              "TABLE_ROW_ITEMS" => row_items.join("") 
+            
+              }
+            )
+                        
+          }
+
+
+          apply_macros!( @templates["behaviour.xml.table"].clone, {
+              "TABLE_NAME" => encode_string( table[ "name" ] ),
+              "TABLE_TITLE" => encode_string( table[ "title" ] ),
+              "TABLE_HEADER_ITEMS" => header.join(""),
+              "TABLE_ROWS" => rows.join("")
+            }
+          )
+        }
+
+      end
+    
+      apply_macros!( @templates["behaviour.xml.method.tables"].clone, {
+
+          "METHOD_TABLES" => tables.join("")
+
+        }
+      )
+    
     end
 
     def generate_methods_element( header, features )
@@ -1204,6 +1403,8 @@ EXAMPLE
 
           exceptions = generate_exceptions_element( header, feature )
                     
+          tables = generate_tables_element( header, feature )
+                    
           if feature.last[:description].nil?
 
            raise_error("Warning: $TYPE description for '#{ feature.first }' ($MODULE) is empty.", 'description')
@@ -1212,13 +1413,14 @@ EXAMPLE
                               
           # generate method template            
           apply_macros!( @templates["behaviour.xml.method"].clone, { 
-            "METHOD_NAME" => feature.first,
-            "METHOD_TYPE" => feature.last[:__type] || "unknown",
-            "METHOD_DESCRIPTION" => feature.last[:description],
+            "METHOD_NAME" => encode_string( feature.first ),
+            "METHOD_TYPE" => encode_string( feature.last[:__type] || "unknown" ),
+            "METHOD_DESCRIPTION" => encode_string( feature.last[:description] ),
             "METHOD_ARGUMENTS" => arguments,
             "METHOD_RETURNS" => returns,
             "METHOD_EXCEPTIONS" => exceptions,
-            "METHOD_INFO" => feature.last[:info]
+            "METHOD_TABLES" => tables,
+            "METHOD_INFO" => encode_string( feature.last[:info] )
            } 
           )
 
@@ -1282,14 +1484,14 @@ EXAMPLE
 
       # apply header
       text = apply_macros!( @templates["behaviour.xml"].clone, { 
-        "REQUIRED_PLUGIN" => header[:requires],
-        "BEHAVIOUR_NAME" => header[:behaviour],
+        "REQUIRED_PLUGIN" => encode_string( header[:requires] ),
+        "BEHAVIOUR_NAME" => encode_string( header[:behaviour] ),
         "BEHAVIOUR_METHODS" => methods,
-        "OBJECT_TYPE" => header[:objects],
-        "SUT_TYPE" => header[:sut_type],
-        "INPUT_TYPE" => header[:input_type],
-        "VERSION" => header[:sut_version],
-        "MODULE_NAME" => @module_path.join("::")
+        "OBJECT_TYPE" => encode_string( header[:objects] ),
+        "SUT_TYPE" => encode_string( header[:sut_type] ),
+        "INPUT_TYPE" => encode_string( header[:input_type] ),
+        "VERSION" => encode_string( header[:sut_version] ),
+        "MODULE_NAME" => encode_string( @module_path.join("::") )
         } 
       )    
     
@@ -1348,7 +1550,7 @@ EXAMPLE
 
           else
 
-            warn("Skip: output XML not saved due to module #{ @module_path.join("::") } does not have proper behaviour name/description in #{ @module_in_files.join(", ") }")
+            warn("Skip: #{ @module_path.join("::") } XML not saved due to missing behaviour name/description ") #in #{ @module_in_files.join(", ") }")
 
           end
 
