@@ -780,6 +780,10 @@ EXAMPLE
 
     def process_arguments( arguments )
 
+      arguments = arguments[ 1 .. -2 ] if arguments[0].chr == "(" and arguments[-1].chr ==")"
+
+      arguments.strip!
+      
       # tokenize string
       tokenizer = RubyLex.new( arguments )
 
@@ -791,46 +795,78 @@ EXAMPLE
 
       args = []
 
-      capture = false
+      capture = true
       capture_depth = []
+      capture_default = false
+
+      default_value = []
 
       # loop while tokens available
       while token
 
         if [ RubyToken::TkLBRACE, RubyToken::TkLPAREN, RubyToken::TkLBRACK ].include?( token.class )
+
+          default_value << token.text if capture_default
         
           capture_depth << token
         
-          capture = true
+          capture = false
 
         elsif [ RubyToken::TkRBRACE, RubyToken::TkRPAREN, RubyToken::TkRBRACK ].include?( token.class )
 
+          default_value << token.text if capture_default
+
           capture_depth.pop
           
-          capture = false if capture_depth.empty?
+          capture = true if capture_depth.empty?
 
         # argument name
-        elsif capture == false
+        elsif capture == true
 
           # argument name
           if token.kind_of?( RubyToken::TkIDENTIFIER )
 
-            args << [ token.name, false ]
+            args << [ token.name, nil, false ]
 
             # &blocks and *arguments are handled as optional parameters
             if [ RubyToken::TkBITAND, RubyToken::TkMULT ].include?( previous_token.class )
              #args.last[ 1 ] = previous_token.text 
+  
              args.last[ 0 ] = previous_token.text + args.last[ 0 ] 
              args.last[ -1 ] = true 
-            end
 
+            end
+            
+            default_value = []
+            capture_default = false
+
+          elsif token.kind_of?( RubyToken::TkCOMMA )
+          
+            capture_default = false
+            
           # detect optional argument
           elsif token.kind_of?( RubyToken::TkASSIGN )
+
+            capture_default = true
 
             # mark arguments as optional
             args.last[ -1 ] = true
 
+          else
+
+            default_value << token.text if capture_default && ![ RubyToken::TkSPACE, RubyToken::TkNL ].include?( token.class )
+          
           end
+
+        else
+        
+          default_value << token.text if capture_default && ![ RubyToken::TkSPACE, RubyToken::TkNL ].include?( token.class )
+        
+        end
+
+        unless default_value.empty? 
+      
+          args.last[ 1 ] = default_value.join("")
 
         end
 
@@ -846,75 +882,16 @@ EXAMPLE
 
     end
     
-=begin
+  def process_undocumented_method_arguments( params )
 
-    def process_arguments( arguments )
-
-      # tokenize string
-      tokenizer = RubyLex.new( arguments )
-
-      # get first token
-      token = tokenizer.token
-
-      # set previous token to nil by default
-      previous_token = nil
-
-      args = []
-      
-      capture = false
-      capture_depth = []
-
-      # loop while tokens available
-      while token
-
-        if [ RubyToken::TkLBRACE, RubyToken::TkLPAREN, RubyToken::TkLBRACK ].include?( token.class )
+    params.collect{ | param |
+    
+      { param.first.to_s => { "" => { "default" => param[1] } } }
         
-          capture_depth << token
-        
-          capture = true
+    }
 
-        elsif [ RubyToken::TkRBRACE, RubyToken::TkRPAREN, RubyToken::TkRBRACK ].include?( token.class )
+  end
 
-          capture_depth.pop
-          
-          capture = false if capture_depth.empty?
-
-        # argument name
-        elsif capture == false
-        
-          if token.kind_of?( RubyToken::TkIDENTIFIER )
-
-          args << [ token.name, nil, false ]
-
-          # &blocks and *arguments are handled as optional parameters
-          args.last[ -1 ] = true if [ RubyToken::TkBITAND, RubyToken::TkMULT ].include?( previous_token.class )
-                  
-          # detect optional argument
-          elsif token.kind_of?( RubyToken::TkASSIGN )
-
-            # mark arguments as optional
-            args.last[ -1 ] = true
-
-            opt = true
-
-          end
-
-        end
-
-        # store previous token
-        previous_token = token
-
-        # get next token
-        token = tokenizer.token
-
-      end
-
-      args
-
-    end
-
-
-=end
 
     def process_method( method )
 
@@ -963,6 +940,15 @@ EXAMPLE
           [ key, value ]
 
         }]
+
+        # if no description found for arguments, add argument names to method_header hash
+        if ( params.count > 0 ) && ( method_header[:arguments].nil? || method_header[:arguments].empty? )
+                
+          #p params.count, 
+          method_header[:arguments] = process_undocumented_method_arguments( params )
+          
+        end
+
 
         method_name = method.name.clone
 
@@ -1564,7 +1550,7 @@ EXAMPLE
 
           else
 
-            warn("Skip: output XML not saved due to module #{ @module_path.join("::") } does not have proper behaviour name/description in #{ @module_in_files.join(", ") }")
+            warn("Skip: #{ @module_path.join("::") } XML not saved due to missing behaviour name/description ") #in #{ @module_in_files.join(", ") }")
 
           end
 
