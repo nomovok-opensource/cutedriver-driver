@@ -698,19 +698,19 @@ module MobyBehaviour
   #  String
   #   description: Optional FNAME search argument for the translation
   #   example: "agenda"
-  #   default: ""
+  #   default: nil
   #
   # plurality
   #  String
   #   description: Optional PLURALITY search argument for the translation
   #   example: "a" or "singular"
-  #	  default: ""
+  #	  default: nil
   #
   # numerus
   #  String
   #   description: Optional numeral replacement of '%Ln' tags on translation strings
   #   example: "1"
-  #   default: ""
+  #   default: nil
   #  Integer
   #   description: Optional numeral replacement of '%Ln' tags on translation strings
   #   example: 1
@@ -719,7 +719,7 @@ module MobyBehaviour
   #  String
   #   description: Optional LENGTHVAR search argument for the translation (1-9)
   #   example: "1"
-  #   default: ""
+  #   default: nil
   #
   # == returns
   # String
