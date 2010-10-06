@@ -436,7 +436,7 @@
 
       <xsl:choose>
 
-        <xsl:when test="arguments/@count>0 and count(arguments/argument)!=arguments/@count">
+        <xsl:when test="arguments/@count>0 and count(arguments/argument)&lt;arguments/@count">
         <xsl:text>( </xsl:text><xsl:call-template name="span_warning">
           <xsl:with-param name="text">Incomplete arguments documentation</xsl:with-param>
           </xsl:call-template><xsl:text> )</xsl:text>        
@@ -477,7 +477,7 @@
                 </xsl:choose>
 
                 <!-- separate arguments with comma if next argument defintion is not type of block --> 
-                <xsl:if test="position()!=last() and following-sibling::argument/@type!='block'">
+                <xsl:if test="position()!=last() and (string(following-sibling::argument/@type)!='block' and string(following-sibling::argument/@type)!='block_argument')">
                   <xsl:text>, </xsl:text>
                 </xsl:if>
                 
@@ -492,6 +492,26 @@
                 <xsl:if test="./@type='block'">
                 
                   <xsl:text>{ </xsl:text>
+
+                    <xsl:for-each select="../../arguments/argument[@type='block_argument']">
+
+                        <xsl:choose>
+                          <xsl:when test="position()=1">
+                            <xsl:text>| </xsl:text>
+                          </xsl:when>
+                          <xsl:otherwise>
+                            <xsl:text>, </xsl:text>                          
+                          </xsl:otherwise>
+                        </xsl:choose>
+
+                        <span title="Code block argument, mandatory or optional" class="hover_text"><xsl:value-of select="str:split(@name,'#')[2]"/></span>
+
+                        <xsl:if test="position()=last()">
+                          <xsl:text> | </xsl:text>                        
+                        </xsl:if> 
+
+                    </xsl:for-each>
+                                    
                   <span class="hover_text" title="Code block, mandatory or optional"><xsl:value-of select="@name"/></span>
                   <xsl:text> }</xsl:text>
                 
@@ -505,7 +525,7 @@
 
       <!-- describe block usage --> 
       <xsl:if test="count(arguments/block)>0">
-        <xsl:text>{ </xsl:text>
+        <xsl:text>{ dsadsa</xsl:text>
         <!-- TODO: block arguments -->
         <xsl:value-of select="arguments/block/@name" />
         <xsl:text> }</xsl:text>
@@ -877,6 +897,12 @@
 
         <xsl:choose>
 
+          <xsl:when test="string(../@type)='block_argument'">
+            <td rowspan="{ $argument_types }" class="{ $class }">
+              <span title="Code block argument, mandatory or optional" class="hover_text"><xsl:value-of select="str:split($argument_name,'#')[2]" /></span>
+            </td>
+          </xsl:when>
+
           <xsl:when test="string(../@type)='block'">
             <td rowspan="{ $argument_types }" class="{ $class }">
               <span title="Code block, mandatory or optional" class="hover_text"><xsl:value-of select="$argument_name" /></span>
@@ -932,14 +958,21 @@
 
       <!-- verify that argument example is defined -->
       <xsl:choose>
+
+        <xsl:when test="@type='block_argument'">
+          <td class="{ $class }"><xsl:value-of select="example/text()"/></td>
+        </xsl:when>
+
         <xsl:when test="string-length(example/text())>0">
           <td class="{ $class }"><xsl:value-of select="example/text()"/></td>
         </xsl:when>
+
         <xsl:otherwise>
           <xsl:call-template name="col_warning" >
             <xsl:with-param name="text">Not defined</xsl:with-param>
           </xsl:call-template>       
         </xsl:otherwise>
+
       </xsl:choose>
      
       <!-- default value -->

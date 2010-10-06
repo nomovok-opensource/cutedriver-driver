@@ -461,7 +461,7 @@ EXAMPLE
 
         if nesting == 0
 
-          line =~ /^([*|&]{0,1}\w+)$/i
+          line =~ /^([*|&]{0,1}\w+(\#\w+?)*)$/i
 
           unless $1.nil?
 
@@ -472,7 +472,7 @@ EXAMPLE
 
             current_argument_type = nil
 
-            result << { current_argument => {} }
+            result << { current_argument => { :argument_type_order => [], :types => {} } }
 
             argument_index += 1
 
@@ -481,15 +481,19 @@ EXAMPLE
         else
 
           # is line content class name? (argument variable type)
-          line =~ /^(\w+)$/i
+          line =~ /^(.*)$/i
 
-          if !$1.nil? && ( 65..90 ).include?( $1[0] ) # "Array", "String", "Integer"
+          if !$1.nil? && ( 65..90 ).include?( $1[0] ) && nesting == 1 # "Array", "String", "Integer"
 
             #Kernel.const_get( $1 ) rescue abort( "Line %s: \"%s\" is not valid argument variable type. (e.g. OK: \"String\", \"Array\", \"Fixnum\" etc) " % [ index +1, $1 ] )
 
             current_argument_type = $1
 
-            result[ argument_index ][ current_argument ][ current_argument_type ] = {}
+            result[ argument_index ][ current_argument ][ :argument_type_order ] << $1
+
+            result[ argument_index ][ current_argument ][ :types ][ current_argument_type ] = {}
+
+            #result[ argument_index ][ current_argument ][ current_argument_type ] = {}
 
             current_section = nil
 
@@ -510,9 +514,11 @@ EXAMPLE
 
               current_section = $1
 
-              unless result[ argument_index ][ current_argument ][ current_argument_type ].has_key?( current_section )
+              #unless result[ argument_index ][ current_argument ][ current_argument_type ].has_key?( current_section )
+              unless result[ argument_index ][ current_argument ][ :types ][ current_argument_type ].has_key?( current_section )
 
-                result[ argument_index ][ current_argument ][ current_argument_type ][ current_section ] = ""
+                #result[ argument_index ][ current_argument ][ current_argument_type ][ current_section ] = ""
+                result[ argument_index ][ current_argument ][ :types ][ current_argument_type ][ current_section ] = ""
 
               end
           
@@ -523,12 +529,12 @@ EXAMPLE
             abort("Unable add argument details due to argument not defined. Argument name must start from pos 1 of comment. (e.g. \"# my_variable\" NOK: \"#  my_variable\", \"#myvariable\")") if current_argument.nil?  
 
             # add one leading whitespace if current_section value is not empty 
-            section_content = " " + section_content unless result[ argument_index ][ current_argument ][ current_argument_type ][ current_section ].empty?
+            #section_content = " " + section_content unless result[ argument_index ][ current_argument ][ current_argument_type ][ current_section ].empty?
+            section_content = " " + section_content unless result[ argument_index ][ current_argument ][ :types ][ current_argument_type ][ current_section ].empty?
 
             # store section_content to current_section
-            result[ argument_index ][ current_argument ][ current_argument_type ][ current_section ] << section_content
-
-            #puts "%s#%s#%s: %s" % [ current_argument, current_argument_type, current_section, section_content ]
+            #result[ argument_index ][ current_argument ][ current_argument_type ][ current_section ] << section_content
+            result[ argument_index ][ current_argument ][ :types ][ current_argument_type ][ current_section ] << section_content
 
           end
 
@@ -553,6 +559,20 @@ EXAMPLE
         end
       
       }
+            
+
+      # add block arguments if any   
+      found_keys = order.collect{ | pair | pair.keys }.flatten
+
+      missing = result.collect{ | value | 
+      
+        order << value unless found_keys.include?( value.keys.first )
+      
+        #p value.keys
+      
+      }
+
+      #p "--", order, "--"
             
       order
 
@@ -717,13 +737,13 @@ EXAMPLE
 
          else
 
-            abort("Unable add value details (line %s: \"%s\") for %s due to detail type must be defined first.\nPlease note that return value type must start with capital letter (e.g. OK: \"String\" NOK: \"string\")" % [ index + 1, line, current_argument  ] ) if current_argument_type.nil?
+            abort("Unable add value details (line %s: \"%s\") for %s due to detail type must be defined first.\nPlease note that return value and exception type must start with capital letter (e.g. OK: \"String\" NOK: \"string\")" % [ index + 1, line, current_argument_type  ] ) if current_argument_type.nil?
 
             line =~ /^(.*?)\:{1}($|[\r\n\t\s]{1})(.*)$/i
 
             if $1.nil?
 
-              abort("Unable add value details (line %s: \"%s\") for %s due to section name not defined. Sections names are written in lowercase with trailing colon and whitespace (e.g. OK: \"example: 10\", NOK: \"example:10\")" % [ index +1, line, current_argument]) if $1.nil? && current_section.nil?
+              abort("Unable add value details (line %s: \"%s\") for %s due to section name not defined. Sections names are written in lowercase with trailing colon and whitespace (e.g. OK: \"example: 10\", NOK: \"example:10\")" % [ index +1, line, current_argument_type ]) if $1.nil? && current_section.nil?
 
               # remove leading & trailing whitespaces
               section_content = line.strip
@@ -886,7 +906,7 @@ EXAMPLE
 
     params.collect{ | param |
     
-      { param.first.to_s => { "" => { "default" => param[1] } } }
+      { param.first.to_s => { :types => { "" => { "default" => param[1] } } } }
         
     }
 
@@ -1142,7 +1162,7 @@ EXAMPLE
 
       text << help( topic ) unless topic.nil?
 
-      warn( text << "\n" )
+      #warn( text << "\n" )
 
     end
 
@@ -1240,7 +1260,7 @@ EXAMPLE
 
       # generate arguments xml
       arguments = ( feature.last[:arguments] || {} ).collect{ | arg |
-        
+                
         # generate argument types template
         arg.collect{ | argument |
 
@@ -1248,10 +1268,20 @@ EXAMPLE
          argument_name = "%s" % argument.first          
          argument_name[0]="" if argument_types.has_key?( argument_name[0].chr )
 
+         argument_type = "block_argument" if argument_type == "block" && argument_name.include?( "#" )          
+
          default_value_set = false 
          default_value = nil
                     
-         types_xml = argument.last.collect{ | type |
+         if argument.last.has_key?( :argument_type_order )
+           argument_types_in_order = argument.last[:argument_type_order].collect{ | type |                      
+            [ type, argument.last[:types][ type ] ]           
+           }
+         else         
+           argument_types_in_order = argument.last[:types] 
+         end
+                    
+         types_xml = argument_types_in_order.collect{ | type |
 
            unless type.last["default"].nil?
 
@@ -1265,7 +1295,7 @@ EXAMPLE
 
            if type.last["description"].nil?
 
-            raise_error("Warning: Argument description for '%s' ($MODULE) is empty." % [ argument.first ], 'argument_description' )
+            raise_error("Warning: Argument description for '%s' ($MODULE) is empty." % [ argument.first ], 'argument' )
 
            end
 
