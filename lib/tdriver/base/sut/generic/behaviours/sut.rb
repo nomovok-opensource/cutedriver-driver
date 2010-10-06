@@ -371,20 +371,38 @@ module MobyBehaviour
 
     end
 
+    # TODO: feature documentation example, feature tests still yet to be done
+    # == description
     # Screen capture function to take snapshot of SUTs current display view
-    # === params
-    # arguments:: Hash containing settings to be used in screen capture from device
-    # Following symbols are supported:
-    # [:Filename] (Required) String representing the output filename. When no path given current working directory will be used.
-    # === returns
-    # nil
-    # === raises
-    # ArgumentError:: Wrong argument type %s (Expected Hash)
-    # ArgumentError:: Symbol %s expected in argument(s)
-    # ArgumentError:: Invalid string length for output filename: '%s'
-    # === examples
-    #  @sut.capture_screen( :Filename => 'screen.png' ) # captures current screen and stores it to working directory/screen.png
-    #  @sut.capture_screen( :Filename => 'c:/screen.png' ) # captures current screen and stores it to c:/screen.png
+    #
+    # == arguments
+    # arguments
+    #  Hash
+    #   description: 
+    #    Options to be used for screen capture. See [link="#capture_options_table"]Options table[/link] for valid keys
+    #   example: ( :Filename => "c:/screen_shot.png" )
+    #
+    # == tables
+    # capture_options_table
+    #  title: Options table
+    #  |Key|Type|Description|Example|Required|
+    #  |:Filename|String|Filename where file is stored: either absolute path or if no path given uses working directory|:Filename => "c:/screen_shot.png"|Yes|
+    #
+    # == returns
+    # NilClass
+    #   description: -
+    #   example: -    
+    #
+    # == exceptions
+    # ArgumentError
+    #   description: Wrong argument type %s (Expected Hash)
+    #
+    # ArgumentError
+    #   description: Symbol %s expected in argument(s)
+    #
+    # ArgumentError 
+    #   description: Invalid string length for output filename: '%s'
+    # 
     def capture_screen( arguments )
 
       begin
