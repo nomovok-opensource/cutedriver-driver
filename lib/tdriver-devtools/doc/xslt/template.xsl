@@ -963,6 +963,10 @@
           <td class="{ $class }"><xsl:value-of select="example/text()"/></td>
         </xsl:when>
 
+        <xsl:when test="string(example/text())='-'">
+          <td class="tablebg_disabled" rowspan="{ $argument_types }"><xsl:value-of select="$default"/></td>
+        </xsl:when>
+
         <xsl:when test="string-length(example/text())>0">
           <td class="{ $class }"><xsl:value-of select="example/text()"/></td>
         </xsl:when>
@@ -1093,6 +1097,11 @@
 
     <!-- verify that argument description is defined -->
     <xsl:choose>
+
+      <xsl:when test="string($type/description/text())='-'">
+        <td class="tablebg_disabled" />
+      </xsl:when>
+
       <xsl:when test="string-length($type/description/text())>0">
         <td class="{ $class }">
           <xsl:call-template name="formatted_content">
@@ -1109,6 +1118,11 @@
             
     <!-- verify that return value example is defined -->
     <xsl:choose>      
+
+      <xsl:when test="string($type/example/text())='-'">
+        <td class="tablebg_disabled" />
+      </xsl:when>
+
       <xsl:when test="string-length($type/example/text())>0">
         <td class="{ $class }"><xsl:value-of select="$type/example/text()"/></td>
       </xsl:when>
