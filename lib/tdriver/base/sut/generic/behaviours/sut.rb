@@ -371,20 +371,38 @@ module MobyBehaviour
 
     end
 
+    # TODO: feature documentation example, feature tests still yet to be done
+    # == description
     # Screen capture function to take snapshot of SUTs current display view
-    # === params
-    # arguments:: Hash containing settings to be used in screen capture from device
-    # Following symbols are supported:
-    # [:Filename] (Required) String representing the output filename. When no path given current working directory will be used.
-    # === returns
-    # nil
-    # === raises
-    # ArgumentError:: Wrong argument type %s (Expected Hash)
-    # ArgumentError:: Symbol %s expected in argument(s)
-    # ArgumentError:: Invalid string length for output filename: '%s'
-    # === examples
-    #  @sut.capture_screen( :Filename => 'screen.png' ) # captures current screen and stores it to working directory/screen.png
-    #  @sut.capture_screen( :Filename => 'c:/screen.png' ) # captures current screen and stores it to c:/screen.png
+    #
+    # == arguments
+    # arguments
+    #  Hash
+    #   description: 
+    #    Options to be used for screen capture. See [link="#capture_options_table"]Options table[/link] for valid keys
+    #   example: ( :Filename => "c:/screen_shot.png" )
+    #
+    # == tables
+    # capture_options_table
+    #  title: Options table
+    #  |Key|Type|Description|Example|Required|
+    #  |:Filename|String|Filename where file is stored: either absolute path or if no path given uses working directory|:Filename => "c:/screen_shot.png"|Yes|
+    #
+    # == returns
+    # NilClass
+    #   description: -
+    #   example: -    
+    #
+    # == exceptions
+    # ArgumentError
+    #   description: Wrong argument type %s (Expected Hash)
+    #
+    # ArgumentError
+    #   description: Symbol %s expected in argument(s)
+    #
+    # ArgumentError 
+    #   description: Invalid string length for output filename: '%s'
+    # 
     def capture_screen( arguments )
 
       begin
@@ -664,65 +682,65 @@ module MobyBehaviour
 
     end
 
-	# == description
-    # Wrapper function to return translated string for this SUT
-	# Uses the Localisation singleton to read the values from data base
-    #
-    # == arguments
-    # logical_name
-    #  String
-    #   description: The logical name (LNAME) of the item to be translated.
-    #   example: "txt_button_ok"
-	#  Symbol
-	#   description: Symbol form of the logical name (LNAME) of the item to be translated.
-	#   example: :txt_button_ok
-    #
-	# file_name
-	#  String
-	#   description: optional FNAME search argument for the translation
-	#   example: "agenda"
-	#   default: ""
-	#
-	# plurality
-	#  String
-	#   description: optional PLURALITY search argument for the translation
-	#   example: "a" or "singular"
-	#	default:""
-	#
-	# numerus
-	#  String
-	#   description: optional numeral replacement of '%Ln' tags on translation strings
-	#   example: "1"
-	#   default: ""
-	#  Integer
-	#   decription: optional numeral replacement of '%Ln' tags on translation strings
-	#   example: 1
-	# 
-	# lengthvariant
-	#  String
-	#   description: optional LENGTHVAR search argument for the translation (1-9)
-	#   example: "1"
-	#   default: ""
-	#
-    # == returns
-    # String
-    #  description: Translation matching the logical_name
-    #  example: "Ok"
-    # Array<String> 
-    #  description: If multiple translations have been found for the search conditions an array with all will be returned
-	#  example: ["Ok", "OK"]
-	# 
-    # == exceptions
-    # LanguageNotFoundError
-    #  description: In case language is not found
-    #
-    # LogicalNameNotFoundError
-    #  description: In case no logical name is not found for current language
-    #
-	# MySqlConnectError
-	#  description: In case there are problems with the db connectivity
-	#
+  # == description
+  # Wrapper function to return translated string for this SUT to read the values from localisation database.
+  #
+  # == arguments
+  # logical_name
+  #  String
+  #   description: Logical name (LNAME) of the item to be translated.
+  #   example: "txt_button_ok"
+  #  Symbol
+  #   description: Symbol form of the logical name (LNAME) of the item to be translated.
+  #   example: :txt_button_ok
+  #
+  # file_name
+  #  String
+  #   description: Optional FNAME search argument for the translation
+  #   example: "agenda"
+  #   default: nil
+  #
+  # plurality
+  #  String
+  #   description: Optional PLURALITY search argument for the translation
+  #   example: "a" or "singular"
+  #	  default: nil
+  #
+  # numerus
+  #  String
+  #   description: Optional numeral replacement of '%Ln' tags on translation strings
+  #   example: "1"
+  #   default: nil
+  #  Integer
+  #   description: Optional numeral replacement of '%Ln' tags on translation strings
+  #   example: 1
+  # 
+  # lengthvariant
+  #  String
+  #   description: Optional LENGTHVAR search argument for the translation (1-9)
+  #   example: "1"
+  #   default: nil
+  #
+  # == returns
+  # String
+  #  description: Translation matching the logical_name
+  #  example: "Ok"
+  # Array
+  #  description: If multiple translations have been found for the search conditions an Array with all Strings be returned
+  #  example: ["Ok", "OK"]
+  # 
+  # == exceptions
+  # LanguageNotFoundError
+  #  description: In case language is not found
+  #
+  # LogicalNameNotFoundError
+  #  description: In case no logical name is not found for current language
+  #
+  # MySqlConnectError
+  #  description: In case there are problems with the database connectivity
+  #
 	def translate( logical_name, file_name = nil, plurality = nil, numerus = nil, lengthvariant = nil )
+
 		Kernel::raise LogicalNameNotFoundError.new("Logical name is nil") if logical_name.nil?
 		language=nil
 		if ( MobyUtil::Parameter[ self.id ][:read_lang_from_app]=='true')
@@ -749,7 +767,9 @@ module MobyBehaviour
 				trans.gsub!(/%Ln/){|s| numerus}
 			end
 		end
-		return translation
+
+		translation
+
 	end
 
     # Function to update all children of current SUT
@@ -786,7 +806,42 @@ module MobyBehaviour
 
     end
 
-    
+    # == description
+    # Verify always is a method for sut that allows constant verifications for the UI state.
+    #
+    # == arguments
+    # expected
+    #  Object
+    #   description: Ruby object that equals to the return value of the block
+    #   example: true
+    #
+    # message
+    #  String
+    #   description: Message if an error occurs
+    #   example: 'Required element was not found'
+    #
+    # &block
+    #  Proc
+    #   description: 
+    #     Code block to execute. Current SUT is passed as block parameter. 
+    #     If the verify block is defined outside the scope of the current SUT 
+    #     (e.g. the SUT configuration file), this can be used
+    #     to get a handle to the current sut.
+    #   example: { @sut.xml_data.empty? == false }
+    #
+    # &block#sut
+    #  MobyBase::SUT
+    #   description: Current SUT object
+    #   example: -
+    #
+    # == returns
+    # NilClass
+    #  description: -
+    #  example: -
+    # 
+    # == exceptions
+    # MobyBase::VerificationError
+    #  description: If verification failed
     def verify_always( expected, message = nil, &block )
 
       @verify_blocks << MobyUtil::VerifyBlock.new( block,expected, message, 0, MobyUtil::KernelHelper.find_source( caller( 3 ).first.to_s ) )
