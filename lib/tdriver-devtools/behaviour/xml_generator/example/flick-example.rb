@@ -71,16 +71,15 @@ module MobyBehaviour
       #   example: { :optional_1 => "value_1", :optional_2 => "value_2" }
       #
       # button
-      #  String
+      #  Symbol
       #   description: which button to use
-      #   example: "Hello"
-      #   default: :Left
+      #   example: :Right
+      #   xdefault: :Left_OVERRIDE
       #
       # optional_params
       #  String
       #   description: optinal parameters for blaa blaa blaa
       #   example: {:a => 1, :b => 2}
-      #   default: {}
       #
       # == returns
       # String
@@ -114,6 +113,63 @@ module MobyBehaviour
           nil
       end
 
+      # == description
+      # Wrapper function to return translated string for this SUT to read the values from localisation database.
+      #
+      # == arguments
+      # logical_name
+      #  String
+      #   description: Logical name (LNAME) of the item to be translated.
+      #   example: "txt_button_ok"
+      #  Symbol
+      #   description: Symbol form of the logical name (LNAME) of the item to be translated.
+      #   example: :txt_button_ok
+      #
+      # file_name
+      #  String
+      #   description: Optional FNAME search argument for the translation
+      #   example: "agenda"
+      #
+      # plurality
+      #  String
+      #   description: Optional PLURALITY search argument for the translation
+      #   example: "a" or "singular"
+      #
+      # numerus
+      #  String
+      #   description: Optional numeral replacement of '%Ln' tags on translation strings
+      #   example: "1"
+      #   default: "XXYYZZ"
+      #  Integer
+      #   description: Optional numeral replacement of '%Ln' tags on translation strings
+      #   example: 1
+      # 
+      # lengthvariant
+      #  String
+      #   description: Optional LENGTHVAR search argument for the translation (1-9)
+      #   example: "1"
+      #
+      # == returns
+      # String
+      #  description: Translation matching the logical_name
+      #  example: "Ok"
+      # Array
+      #  description: If multiple translations have been found for the search conditions an Array with all Strings be returned
+      #  example: ["Ok", "OK"]
+      # 
+      # == exceptions
+      # LanguageNotFoundError
+      #  description: In case language is not found
+      #
+      # LogicalNameNotFoundError
+      #  description: In case no logical name is not found for current language
+      #
+      # MySqlConnectError
+      #  description: In case there are problems with the database connectivity
+      #
+	    def translate( logical_name, file_name = nil, plurality = nil, numerus = nil, lengthvariant = nil )
+
+      end
 
     end
 

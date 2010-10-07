@@ -344,7 +344,41 @@ def my_method
 
 end
 EXAMPLE
-        
+
+      when 'default_argument_value_already_given'
+<<-EXAMPLE
+# == arguments
+# value
+#  Integer
+#   description: first argument can integer
+#   example: 10
+#   default: 1
+#  String
+#   description: ... or string
+#   example: "Hello"
+#   default: "a"
+def my_method( value = 1 )
+
+  # ...
+
+end
+EXAMPLE
+
+      when 'default_value_mandatory_argument'        
+
+<<-EXAMPLE
+# == arguments
+# value
+#  Integer
+#   description: first argument can integer
+#   example: 10
+#   default: 1
+def my_method( value )
+
+  # ...
+
+end
+EXAMPLE
 
 
       else
@@ -544,35 +578,68 @@ EXAMPLE
 
       order = []
       
-      params_array.collect{ | o | o.first }.each{ | param |
-            
-        if ( item = result.select{ | arg | arg.keys.include?( param ) }).empty?
+      #p result
+
+      params_array = params_array.collect{ | o | [ o.first, Hash[:default, o[1], :optional, o.last] ] }
+
+      params_hash = Hash[ params_array ]
+
+      default_value_already_set = []
+
+      params_array.each{ | param |
+
+        if ( item = result.select{ | arg | arg.keys.include?( param.first ) }).empty?
                 
           raise_error("Error: Argument '#{ param }' not documented in '#{ @current_method.name }' ($MODULE).\nNote that documented argument and variable name must be identical.", [ 'writer', 'accessor' ].include?( @processing ) ? 'attr_argument' : 'arguments' )
 
-          order << { param => {} }
+          order << { param.first => {} }
 
         else
 
-          order << item.first
+          arg = item.first
+          arg_name = arg.keys.first
+
+          # apply overriding default argument value from documentation
+          arg[ arg_name ][ :argument_type_order ].each{ | type_name |
+            type_hash = arg[ arg_name ][ :types ][ type_name ]
+
+            unless type_hash["default"].nil?
+
+              if arg[ arg_name ][ :default ].nil?
+
+                if params_hash[  arg_name ][ :optional ] == false
+
+                  raise_error("Error: Default value given for mandatory argument #{ arg_name } (type: #{ type_name }).", 'default_value_mandatory_argument' )
+
+                else
+
+                  arg[ arg_name ][ :default ] = type_hash["default"] 
+
+                end
+
+              else
+                raise_error("Error: Default value already given for #{ arg_name } (type: #{ type_name }).", 'default_argument_value_already_given' )
+              end
+ 
+            end
+          }
+  
+          # if optional parameter and no overriding value defined, add one from implementation
+          if arg[ arg_name ][:default].nil?
+            arg[ arg_name ][ :default ] = params_hash[ arg_name ][ :default ] if params_hash[ arg_name ][ :optional ] == true
+          end
+
+          order << arg
         
         end
       
       }
             
-
-      # add block arguments if any   
+      # collect all argument names and add block arguments if any   
       found_keys = order.collect{ | pair | pair.keys }.flatten
 
-      missing = result.collect{ | value | 
-      
-        order << value unless found_keys.include?( value.keys.first )
-      
-        #p value.keys
-      
-      }
-
-      #p "--", order, "--"
+      # add missing/undocumented arguments to order list
+      missing = result.collect{ | value | order << value unless found_keys.include?( value.keys.first ) }
             
       order
 
@@ -969,7 +1036,6 @@ EXAMPLE
           
         end
 
-
         method_name = method.name.clone
 
         type = "method"
@@ -1162,7 +1228,7 @@ EXAMPLE
 
       text << help( topic ) unless topic.nil?
 
-      #warn( text << "\n" )
+      warn( text << "\n" )
 
     end
 
@@ -1283,15 +1349,29 @@ EXAMPLE
                     
          types_xml = argument_types_in_order.collect{ | type |
 
+           unless argument.last[:default].nil?
+
+             # show warning if default value for optional argument is already set
+             #raise_error( "Error: Default value for optional argument '%s' ($MODULE) is already set! ('%s' --> '%s')" % [ argument.first, default_value, type.last["default"] ] ) if default_value_set == true
+
+
+             default_value = argument.last[:default]
+             default_value_set = true
+
+           end
+
+=begin
            unless type.last["default"].nil?
 
              # show warning if default value for optional argument is already set
-             raise_error( "Error: Default value for optional argument '%s' ($MODULE) is already set! ('%s' --> '%s')" % [ argument.first, default_value, type.last["default"] ] ) if default_value_set == true
+             #raise_error( "Error: Default value for optional argument '%s' ($MODULE) is already set! ('%s' --> '%s')" % [ argument.first, default_value, type.last["default"] ] ) if default_value_set == true
+
 
              default_value = type.last["default"]
              default_value_set = true
 
            end
+=end
 
            if type.last["description"].nil?
 
