@@ -24,6 +24,41 @@ module TDriverReportCreator
   class TestRun < ReportCombine
     include TDriverReportWriter
     include ReportDataTable
+    attr_accessor(
+      :report_folder,
+      :reporting_groups,
+      :generic_reporting_groups,
+      :start_time,
+      :end_time,
+      :run_time,
+      :total_run,
+      :total_passed,
+      :total_failed,
+      :total_not_run,
+      :total_crash_files,
+      :total_device_resets,
+      :test_case_user_defined_status,
+      :test_run_behaviour_log,
+      :test_run_user_log,
+      :test_case_user_data,
+      :test_case_user_data_columns,
+      :test_case_user_chronological_table_data,
+      :attached_test_reports,
+      :report_pages_ready,
+      :memory_amount_start,
+      :memory_amount_end,
+      :memory_amount_total,
+      :total_dump_count,
+      :total_received_data,
+      :total_sent_data,
+      :result_storage_in_use,
+      :pages,
+      :duration_graph,
+      :pass_statuses,
+      :fail_statuses,
+      :not_run_statuses,
+      :report_editable
+    )
     #class variables for summary report
     def initialize()
       @report_folder=nil
@@ -290,146 +325,7 @@ module TDriverReportCreator
     def set_memory_amount_total(value)
       @memory_amount_total=value
     end
-    #This method gets the report folder
-    #
-    # === params
-    # nil
-    # === returns
-    # report folder object
-    # === raises
-    def get_report_folder()
-      @report_folder
-    end        
-    #This method gets the test set start time
-    #
-    # === params
-    # nil
-    # === returns
-    # start time object
-    # === raises
-    def get_start_time()
-      @start_time
-    end
-    #This method gets the test set end time
-    #
-    # === params
-    # nil
-    # === returns
-    # end time object
-    # === raises
-    def get_end_time()
-      @end_time
-    end
-    #This method gets the test set run time
-    #
-    # === params
-    # nil
-    # === returns
-    # run time object
-    # === raises
-    def get_run_time()
-      @run_time
-    end
-    #This method gets the test set total tests run
-    #
-    # === params
-    # nil
-    # === returns
-    # total tests run object
-    # === raises
-    def get_total_run()
-      @total_run
-    end
-    #This method gets the first passed status
-    #
-    # === params
-    # nil
-    # === returns
-    # total tests run object
-    # === raises
-    def get_passed_status()
-      @pass_statuses.first
-    end
-    #This method gets the first failed status
-    #
-    # === params
-    # nil
-    # === returns
-    # total tests run object
-    # === raises
-    def get_failed_status()
-      @fail_statuses.first
-    end
-    #This method gets the first not run status
-    #
-    # === params
-    # nil
-    # === returns
-    # total tests run object
-    # === raises
-    def get_not_run_status()
-      @not_run_statuses.first
-    end
-    #This method gets the test set total passed tests run
-    #
-    # === params
-    # nil
-    # === returns
-    # total passed tests run object
-    # === raises
-    def get_total_passed()
-      @total_passed
-    end
-    #This method gets the test set total failed tests run
-    #
-    # === params
-    # nil
-    # === returns
-    # total failed tests run object
-    # === raises
-    def get_total_failed()
-      @total_failed
-    end
-    #This method gets the test set total failed tests run
-    #
-    # === params
-    # nil
-    # === returns
-    # total failed tests run object
-    # === raises
-    def get_total_crash_files()
-      @total_crash_files
-    end
-    #This method gets the test set total device reset
-    #
-    # === params
-    # nil
-    # === returns
-    # total failed tests run object
-    # === raises
-    def get_total_device_resets()
-      @total_device_resets
-    end
-    #This method gets the test set total not run tests run
-    #
-    # === params
-    # nil
-    # === returns
-    # total not run tests object
-    # === raises
-    def get_total_not_run()
-      @total_not_run
-    end
-    #This method gets the test case user defined status
-    #
-    # === params
-    # 
-    # === returns
-    # nil
-    # === raises
-    def get_test_case_user_defined_status()
-      @test_case_user_defined_status
-    end
+    
     #This method gets the not run cases name array
     #
     # === params
@@ -474,26 +370,7 @@ module TDriverReportCreator
       #@all_cases_arr
       read_result_storage('all')
     end
-    #This method gets the memory amount end
-    #
-    # === params
-    #
-    # === returns
-    # nil
-    # === raises
-    def get_memory_amount_end()
-      @memory_amount_end
-    end
-    #This method gets the memory amount start
-    #
-    # === params
-    #
-    # === returns
-    # nil
-    # === raises
-    def get_memory_amount_start()
-      @memory_amount_start
-    end
+    
     #This method gets reporting groups
     #
     # === params
@@ -508,26 +385,7 @@ module TDriverReportCreator
       end
       @reporting_groups
     end
-    #This method gets the test run behaviour log
-    #
-    # === params
-    # nil
-    # === returns
-    # test run execution log object
-    # === raises
-    def get_test_run_behaviour_log()
-      @test_run_behaviour_log
-    end
-    #This method gets user created log
-    #
-    # === params
-    # value: test run execution log entry
-    # === returns
-    # nil
-    # === raises
-    def get_log()
-      @test_run_user_log
-    end
+    
     #This method gets user created data
     #
     # === params
@@ -538,16 +396,7 @@ module TDriverReportCreator
     def get_user_data()
       return @test_case_user_data,@test_case_user_data_columns
     end
-    #This method gets user data to display in chronological table
-    #
-    # === params
-    # nil
-    # === returns
-    # the testcase data and column objects
-    # === raises
-    def get_user_chronological_table_data()
-      @test_case_user_chronological_table_data
-    end
+    
     #This method sets user data to display in chronological table
     #
     # === params
@@ -864,9 +713,7 @@ module TDriverReportCreator
     # === raises
     def get_sut_total_dump_count(sut_id, sut_attributes)
 
-      dump_count=sut_attributes[:sut].dump_count
-      p "Recieved #{sut_attributes[:sut].received_data} bytes"
-      p "Sent #{sut_attributes[:sut].sent_data} bytes"
+      dump_count=sut_attributes[:sut].dump_count     
       @total_dump_count[sut_id.to_sym]=dump_count
       @total_dump_count
 
@@ -882,7 +729,7 @@ module TDriverReportCreator
     def get_sut_total_received_data(sut_id, sut_attributes)
       data=sut_attributes[:sut].received_data
       @total_received_data[sut_id.to_sym]=data
-      @total_dump_count      
+      @total_received_data
     end
 
     #This method gets the sut total sent data
@@ -895,10 +742,25 @@ module TDriverReportCreator
     def get_sut_total_sent_data(sut_id, sut_attributes)
       data=sut_attributes[:sut].sent_data
       @total_sent_data[sut_id.to_sym]=data
-      @total_dump_count
+      @total_sent_data
     end
     
-    def write_to_result_storage(status,testcase,group,reboots=0,crashes=0,start_time=nil,user_data=nil,duration=0,memory_usage=0,index=0,log='',comment='',link='')
+    def write_to_result_storage(status,
+        testcase,
+        group,
+        reboots=0,
+        crashes=0,
+        start_time=nil,
+        user_data=nil,
+        duration=0,
+        memory_usage=0,
+        index=0,
+        log='',
+        comment='',
+        link='',
+        total_dump=nil,
+        total_sent=nil,
+        total_received=nil )
       while $result_storage_in_use==true
         sleep 1
       end
@@ -939,6 +801,12 @@ module TDriverReportCreator
           test_comment.content = comment
           test_link = Nokogiri::XML::Node.new("link",test)
           test_link.content = html_link
+          test_dump_count = Nokogiri::XML::Node.new("dump_count",test)
+          test_dump_count.content = total_dump
+          test_sent_bytes = Nokogiri::XML::Node.new("sent_bytes",test)
+          test_sent_bytes.content = total_sent
+          test_received_bytes = Nokogiri::XML::Node.new("received_bytes",test)
+          test_received_bytes.content = total_received
       
           test << test_name
           test << test_group
@@ -952,6 +820,9 @@ module TDriverReportCreator
           test << test_log
           test << test_comment
           test << test_link
+          test << test_dump_count
+          test << test_sent_bytes
+          test << test_received_bytes
          
           if user_data!=nil && !user_data.empty?
             test_data = Nokogiri::XML::Node.new("user_display_data",test)
@@ -991,6 +862,9 @@ module TDriverReportCreator
                 xml.log log
                 xml.comment comment
                 xml.link html_link
+                xml.dump_count total_dump
+                xml.sent_bytes total_sent
+                xml.received_bytes total_received
                 if user_data!=nil && !user_data.empty?
                   xml.user_display_data {
                     (0..counter).each { |i|
@@ -1042,6 +916,9 @@ module TDriverReportCreator
             log=node.search("log").text #9
             comment=node.search("comment").text #10
             link=node.search("link").text #11
+            dump_count=node.search("dump_count").text #12
+            sent_bytes=node.search("sent_bytes").text #13
+            received_bytes=node.search("received_bytes").text #14
             
             user_data = Hash.new
             node.xpath("user_display_data/data").each do |data_node|
@@ -1053,26 +930,122 @@ module TDriverReportCreator
             case results
             when 'passed'
               if @pass_statuses.include?(status)
-                result_storage << [value,group,reboots,crashes,start_time,duration,memory_usage,status,index,log,comment,link,user_data]
+                result_storage << [value,
+                  group,
+                  reboots,
+                  crashes,
+                  start_time,
+                  duration,
+                  memory_usage,
+                  status,
+                  index,
+                  log,
+                  comment,
+                  link,
+                  user_data,
+                  dump_count,
+                  sent_bytes,
+                  received_bytes
+                ]
               end
             when 'failed'
               if @fail_statuses.include?(status)
-                result_storage << [value,group,reboots,crashes,start_time,duration,memory_usage,status,index,log,comment,link,user_data]
+                result_storage << [value,
+                  group,
+                  reboots,
+                  crashes,
+                  start_time,
+                  duration,
+                  memory_usage,
+                  status,
+                  index,
+                  log,
+                  comment,
+                  link,
+                  user_data,
+                  dump_count,
+                  sent_bytes,
+                  received_bytes
+                ]
               end
             when 'not_run'
               if @not_run_statuses.include?(status)
-                result_storage << [value,group,reboots,crashes,start_time,duration,memory_usage,status,index,log,comment,link,user_data]
+                result_storage << [value,
+                  group,
+                  reboots,
+                  crashes,
+                  start_time,
+                  duration,
+                  memory_usage,
+                  status,
+                  index,
+                  log,
+                  comment,
+                  link,
+                  user_data,
+                  dump_count,
+                  sent_bytes,
+                  received_bytes
+                ]
               end
             when 'crash'
               if crashes.to_i > 0
-                result_storage << [value,group,reboots,crashes,start_time,duration,memory_usage,status,index,log,comment,link,user_data]
+                result_storage << [value,
+                  group,
+                  reboots,
+                  crashes,
+                  start_time,
+                  duration,
+                  memory_usage,
+                  status,
+                  index,
+                  log,
+                  comment,
+                  link,
+                  user_data,
+                  dump_count,
+                  sent_bytes,
+                  received_bytes
+                ]
               end
             when 'reboot'
               if reboots.to_i > 0
-                result_storage << [value,group,reboots,crashes,start_time,duration,memory_usage,status,index,log,comment,link,user_data]
+                result_storage << [value,
+                  group,
+                  reboots,
+                  crashes,
+                  start_time,
+                  duration,
+                  memory_usage,
+                  status,
+                  index,
+                  log,
+                  comment,
+                  link,
+                  user_data,
+                  dump_count,
+                  sent_bytes,
+                  received_bytes
+                ]
               end
             when 'all'
-              result_storage << [value,group,reboots,crashes,start_time,duration,memory_usage,status,index,log,comment,link,user_data]
+              result_storage << [value,
+                  group,
+                  reboots,
+                  crashes,
+                  start_time,
+                  duration,
+                  memory_usage,
+                  status,
+                  index,
+                  log,
+                  comment,
+                  link,
+                  user_data,
+                  dump_count,
+                  sent_bytes,
+                  received_bytes
+                ]
             end
           end
           xml_data=nil

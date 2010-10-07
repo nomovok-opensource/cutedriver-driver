@@ -461,7 +461,7 @@ EXAMPLE
 
         if nesting == 0
 
-          line =~ /^([*|&]{0,1}\w+)$/i
+          line =~ /^([*|&]{0,1}\w+(\#\w+?)*)$/i
 
           unless $1.nil?
 
@@ -472,7 +472,7 @@ EXAMPLE
 
             current_argument_type = nil
 
-            result << { current_argument => {} }
+            result << { current_argument => { :argument_type_order => [], :types => {} } }
 
             argument_index += 1
 
@@ -481,15 +481,19 @@ EXAMPLE
         else
 
           # is line content class name? (argument variable type)
-          line =~ /^(\w+)$/i
+          line =~ /^(.*)$/i
 
-          if !$1.nil? && ( 65..90 ).include?( $1[0] ) # "Array", "String", "Integer"
+          if !$1.nil? && ( 65..90 ).include?( $1[0] ) && nesting == 1 # "Array", "String", "Integer"
 
             #Kernel.const_get( $1 ) rescue abort( "Line %s: \"%s\" is not valid argument variable type. (e.g. OK: \"String\", \"Array\", \"Fixnum\" etc) " % [ index +1, $1 ] )
 
             current_argument_type = $1
 
-            result[ argument_index ][ current_argument ][ current_argument_type ] = {}
+            result[ argument_index ][ current_argument ][ :argument_type_order ] << $1
+
+            result[ argument_index ][ current_argument ][ :types ][ current_argument_type ] = {}
+
+            #result[ argument_index ][ current_argument ][ current_argument_type ] = {}
 
             current_section = nil
 
@@ -510,9 +514,11 @@ EXAMPLE
 
               current_section = $1
 
-              unless result[ argument_index ][ current_argument ][ current_argument_type ].has_key?( current_section )
+              #unless result[ argument_index ][ current_argument ][ current_argument_type ].has_key?( current_section )
+              unless result[ argument_index ][ current_argument ][ :types ][ current_argument_type ].has_key?( current_section )
 
-                result[ argument_index ][ current_argument ][ current_argument_type ][ current_section ] = ""
+                #result[ argument_index ][ current_argument ][ current_argument_type ][ current_section ] = ""
+                result[ argument_index ][ current_argument ][ :types ][ current_argument_type ][ current_section ] = ""
 
               end
           
@@ -523,12 +529,12 @@ EXAMPLE
             abort("Unable add argument details due to argument not defined. Argument name must start from pos 1 of comment. (e.g. \"# my_variable\" NOK: \"#  my_variable\", \"#myvariable\")") if current_argument.nil?  
 
             # add one leading whitespace if current_section value is not empty 
-            section_content = " " + section_content unless result[ argument_index ][ current_argument ][ current_argument_type ][ current_section ].empty?
+            #section_content = " " + section_content unless result[ argument_index ][ current_argument ][ current_argument_type ][ current_section ].empty?
+            section_content = " " + section_content unless result[ argument_index ][ current_argument ][ :types ][ current_argument_type ][ current_section ].empty?
 
             # store section_content to current_section
-            result[ argument_index ][ current_argument ][ current_argument_type ][ current_section ] << section_content
-
-            #puts "%s#%s#%s: %s" % [ current_argument, current_argument_type, current_section, section_content ]
+            #result[ argument_index ][ current_argument ][ current_argument_type ][ current_section ] << section_content
+            result[ argument_index ][ current_argument ][ :types ][ current_argument_type ][ current_section ] << section_content
 
           end
 
@@ -553,6 +559,20 @@ EXAMPLE
         end
       
       }
+            
+
+      # add block arguments if any   
+      found_keys = order.collect{ | pair | pair.keys }.flatten
+
+      missing = result.collect{ | value | 
+      
+        order << value unless found_keys.include?( value.keys.first )
+      
+        #p value.keys
+      
+      }
+
+      #p "--", order, "--"
             
       order
 
@@ -717,13 +737,13 @@ EXAMPLE
 
          else
 
-            abort("Unable add value details (line %s: \"%s\") for %s due to detail type must be defined first.\nPlease note that return value type must start with capital letter (e.g. OK: \"String\" NOK: \"string\")" % [ index + 1, line, current_argument  ] ) if current_argument_type.nil?
+            abort("Unable add value details (line %s: \"%s\") for %s due to detail type must be defined first.\nPlease note that return value and exception type must start with capital letter (e.g. OK: \"String\" NOK: \"string\")" % [ index + 1, line, current_argument_type  ] ) if current_argument_type.nil?
 
             line =~ /^(.*?)\:{1}($|[\r\n\t\s]{1})(.*)$/i
 
             if $1.nil?
 
-              abort("Unable add value details (line %s: \"%s\") for %s due to section name not defined. Sections names are written in lowercase with trailing colon and whitespace (e.g. OK: \"example: 10\", NOK: \"example:10\")" % [ index +1, line, current_argument]) if $1.nil? && current_section.nil?
+              abort("Unable add value details (line %s: \"%s\") for %s due to section name not defined. Sections names are written in lowercase with trailing colon and whitespace (e.g. OK: \"example: 10\", NOK: \"example:10\")" % [ index +1, line, current_argument_type ]) if $1.nil? && current_section.nil?
 
               # remove leading & trailing whitespaces
               section_content = line.strip
@@ -780,6 +800,10 @@ EXAMPLE
 
     def process_arguments( arguments )
 
+      arguments = arguments[ 1 .. -2 ] if arguments[0].chr == "(" and arguments[-1].chr ==")"
+
+      arguments.strip!
+      
       # tokenize string
       tokenizer = RubyLex.new( arguments )
 
@@ -791,46 +815,78 @@ EXAMPLE
 
       args = []
 
-      capture = false
+      capture = true
       capture_depth = []
+      capture_default = false
+
+      default_value = []
 
       # loop while tokens available
       while token
 
         if [ RubyToken::TkLBRACE, RubyToken::TkLPAREN, RubyToken::TkLBRACK ].include?( token.class )
+
+          default_value << token.text if capture_default
         
           capture_depth << token
         
-          capture = true
+          capture = false
 
         elsif [ RubyToken::TkRBRACE, RubyToken::TkRPAREN, RubyToken::TkRBRACK ].include?( token.class )
 
+          default_value << token.text if capture_default
+
           capture_depth.pop
           
-          capture = false if capture_depth.empty?
+          capture = true if capture_depth.empty?
 
         # argument name
-        elsif capture == false
+        elsif capture == true
 
           # argument name
           if token.kind_of?( RubyToken::TkIDENTIFIER )
 
-            args << [ token.name, false ]
+            args << [ token.name, nil, false ]
 
             # &blocks and *arguments are handled as optional parameters
             if [ RubyToken::TkBITAND, RubyToken::TkMULT ].include?( previous_token.class )
              #args.last[ 1 ] = previous_token.text 
+  
              args.last[ 0 ] = previous_token.text + args.last[ 0 ] 
              args.last[ -1 ] = true 
-            end
 
+            end
+            
+            default_value = []
+            capture_default = false
+
+          elsif token.kind_of?( RubyToken::TkCOMMA )
+          
+            capture_default = false
+            
           # detect optional argument
           elsif token.kind_of?( RubyToken::TkASSIGN )
+
+            capture_default = true
 
             # mark arguments as optional
             args.last[ -1 ] = true
 
+          else
+
+            default_value << token.text if capture_default && ![ RubyToken::TkSPACE, RubyToken::TkNL ].include?( token.class )
+          
           end
+
+        else
+        
+          default_value << token.text if capture_default && ![ RubyToken::TkSPACE, RubyToken::TkNL ].include?( token.class )
+        
+        end
+
+        unless default_value.empty? 
+      
+          args.last[ 1 ] = default_value.join("")
 
         end
 
@@ -846,75 +902,16 @@ EXAMPLE
 
     end
     
-=begin
+  def process_undocumented_method_arguments( params )
 
-    def process_arguments( arguments )
-
-      # tokenize string
-      tokenizer = RubyLex.new( arguments )
-
-      # get first token
-      token = tokenizer.token
-
-      # set previous token to nil by default
-      previous_token = nil
-
-      args = []
-      
-      capture = false
-      capture_depth = []
-
-      # loop while tokens available
-      while token
-
-        if [ RubyToken::TkLBRACE, RubyToken::TkLPAREN, RubyToken::TkLBRACK ].include?( token.class )
+    params.collect{ | param |
+    
+      { param.first.to_s => { :types => { "" => { "default" => param[1] } } } }
         
-          capture_depth << token
-        
-          capture = true
+    }
 
-        elsif [ RubyToken::TkRBRACE, RubyToken::TkRPAREN, RubyToken::TkRBRACK ].include?( token.class )
+  end
 
-          capture_depth.pop
-          
-          capture = false if capture_depth.empty?
-
-        # argument name
-        elsif capture == false
-        
-          if token.kind_of?( RubyToken::TkIDENTIFIER )
-
-          args << [ token.name, nil, false ]
-
-          # &blocks and *arguments are handled as optional parameters
-          args.last[ -1 ] = true if [ RubyToken::TkBITAND, RubyToken::TkMULT ].include?( previous_token.class )
-                  
-          # detect optional argument
-          elsif token.kind_of?( RubyToken::TkASSIGN )
-
-            # mark arguments as optional
-            args.last[ -1 ] = true
-
-            opt = true
-
-          end
-
-        end
-
-        # store previous token
-        previous_token = token
-
-        # get next token
-        token = tokenizer.token
-
-      end
-
-      args
-
-    end
-
-
-=end
 
     def process_method( method )
 
@@ -963,6 +960,15 @@ EXAMPLE
           [ key, value ]
 
         }]
+
+        # if no description found for arguments, add argument names to method_header hash
+        if ( params.count > 0 ) && ( method_header[:arguments].nil? || method_header[:arguments].empty? )
+                
+          #p params.count, 
+          method_header[:arguments] = process_undocumented_method_arguments( params )
+          
+        end
+
 
         method_name = method.name.clone
 
@@ -1156,7 +1162,7 @@ EXAMPLE
 
       text << help( topic ) unless topic.nil?
 
-      warn( text << "\n" )
+      #warn( text << "\n" )
 
     end
 
@@ -1254,7 +1260,7 @@ EXAMPLE
 
       # generate arguments xml
       arguments = ( feature.last[:arguments] || {} ).collect{ | arg |
-        
+                
         # generate argument types template
         arg.collect{ | argument |
 
@@ -1262,10 +1268,20 @@ EXAMPLE
          argument_name = "%s" % argument.first          
          argument_name[0]="" if argument_types.has_key?( argument_name[0].chr )
 
+         argument_type = "block_argument" if argument_type == "block" && argument_name.include?( "#" )          
+
          default_value_set = false 
          default_value = nil
                     
-         types_xml = argument.last.collect{ | type |
+         if argument.last.has_key?( :argument_type_order )
+           argument_types_in_order = argument.last[:argument_type_order].collect{ | type |                      
+            [ type, argument.last[:types][ type ] ]           
+           }
+         else         
+           argument_types_in_order = argument.last[:types] 
+         end
+                    
+         types_xml = argument_types_in_order.collect{ | type |
 
            unless type.last["default"].nil?
 
@@ -1279,7 +1295,7 @@ EXAMPLE
 
            if type.last["description"].nil?
 
-            raise_error("Warning: Argument description for '%s' ($MODULE) is empty." % [ argument.first ], 'argument_description' )
+            raise_error("Warning: Argument description for '%s' ($MODULE) is empty." % [ argument.first ], 'argument' )
 
            end
 
@@ -1564,7 +1580,7 @@ EXAMPLE
 
           else
 
-            warn("Skip: output XML not saved due to module #{ @module_path.join("::") } does not have proper behaviour name/description in #{ @module_in_files.join(", ") }")
+            warn("Skip: #{ @module_path.join("::") } XML not saved due to missing behaviour name/description ") #in #{ @module_in_files.join(", ") }")
 
           end
 

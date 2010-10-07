@@ -56,63 +56,63 @@ module TDriverReportAPI
   def tdriver_report_total_tests_run()
     total=0
     if $tdriver_reporter!=nil
-      total=$tdriver_reporter.get_total_run
+      total=$tdriver_reporter.total_run
     end
     return total.to_i
   end
   def tdriver_report_total_passed_tests()
     total=0
     if $tdriver_reporter!=nil
-      total=$tdriver_reporter.get_total_passed
+      total=$tdriver_reporter.total_passed
     end
     return total.to_i
   end
   def tdriver_report_total_failed_tests()
     total=0
     if $tdriver_reporter!=nil
-      total=$tdriver_reporter.get_total_failed
+      total=$tdriver_reporter.total_failed
     end
     return total.to_i
   end
   def tdriver_report_total_not_run_tests()
     total=0
     if $tdriver_reporter!=nil
-      total=$tdriver_reporter.get_total_not_run
+      total=$tdriver_reporter.total_not_run
     end
     return total.to_i
   end
   def tdriver_report_folder()
     folder=nil
     if $tdriver_reporter!=nil
-      folder=$tdriver_reporter.get_report_folder
+      folder=$tdriver_reporter.report_folder
     end
     return folder.to_s
   end
   def tdriver_report_start_time()
     start_time=nil
     if $tdriver_reporter!=nil
-      start_time=$tdriver_reporter.get_start_time
+      start_time=$tdriver_reporter.start_time
     end
     return start_time.to_s
   end
   def tdriver_report_run_time()
     run_time=nil
     if $tdriver_reporter!=nil
-      run_time=$tdriver_reporter.get_run_time
+      run_time=$tdriver_reporter.run_time
     end
     return run_time.to_s
   end
   def tdriver_report_total_crash_files()
     crash_files=0
     if $tdriver_reporter!=nil
-      crash_files=$tdriver_reporter.get_total_crash_files
+      crash_files=$tdriver_reporter.total_crash_files
     end
     return crash_files.to_i
   end
   def tdriver_report_total_device_resets()
     device_resets=0
     if $tdriver_reporter!=nil
-      device_resets=$tdriver_reporter.get_total_device_resets
+      device_resets=$tdriver_reporter.total_device_resets
     end
     return device_resets.to_i
   end
