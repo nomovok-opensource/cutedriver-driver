@@ -55,12 +55,23 @@ module MobyCommand
 			self.environment( environment )
 			self.flags( flags )
 			self.start_command( start_command )
+		    self.refresh_args
 
 			@_attribute_csv_string = nil
 
 			self
 
 		end
+
+		# Store the args for possible future use
+		def refresh_args(refresh_args={})
+		  @_refresh_args = refresh_args
+		end
+		
+		def get_refresh_args
+		  @_refresh_args
+		end
+
 
 		# Defines the type of command this Application CommandData object represents
 		# == params

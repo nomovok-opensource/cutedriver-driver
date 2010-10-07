@@ -177,16 +177,16 @@ module MobyBehaviour
           :interval => @refresh_interval,
           :unless => [ MobyBase::ControllerNotFoundError, MobyBase::CommandNotFoundError ] ) {
 
-            new_xml_data, crc = execute_command( 
+		  app_command = MobyCommand::Application.new( 
+									   :State, 
+									   ( refresh_args[ :FullName ] || refresh_args[ :name ] ),
+									   refresh_args[ :id ], 
+									   self 
+									   ) 
+		  #store in case needed
+		  app_command.refresh_args(refresh_args)
 
-              MobyCommand::Application.new( 
-                :State, 
-                ( refresh_args[ :FullName ] || refresh_args[ :name ] ),
-                refresh_args[ :id ], 
-                self 
-              ) 
-
-            )
+            new_xml_data, crc = execute_command( app_command )
         
             # remove timestamp from the beginning of tasMessage, parse if not same as previous ui state
             if ( xml_data_no_timestamp = new_xml_data.split( ">", 2 ).last ) != @last_xml_data
