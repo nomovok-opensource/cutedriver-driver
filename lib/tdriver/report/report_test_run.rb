@@ -24,7 +24,7 @@ module TDriverReportCreator
   class TestRun < ReportCombine
     include TDriverReportWriter
     include ReportDataTable
-    attr_reader(
+    attr_accessor(
       :report_folder,
       :reporting_groups,
       :generic_reporting_groups,
@@ -713,9 +713,7 @@ module TDriverReportCreator
     # === raises
     def get_sut_total_dump_count(sut_id, sut_attributes)
 
-      dump_count=sut_attributes[:sut].dump_count
-      p "Recieved #{sut_attributes[:sut].received_data} bytes"
-      p "Sent #{sut_attributes[:sut].sent_data} bytes"
+      dump_count=sut_attributes[:sut].dump_count     
       @total_dump_count[sut_id.to_sym]=dump_count
       @total_dump_count
 
@@ -747,7 +745,22 @@ module TDriverReportCreator
       @total_sent_data
     end
     
-    def write_to_result_storage(status,testcase,group,reboots=0,crashes=0,start_time=nil,user_data=nil,duration=0,memory_usage=0,index=0,log='',comment='',link='')
+    def write_to_result_storage(status,
+        testcase,
+        group,
+        reboots=0,
+        crashes=0,
+        start_time=nil,
+        user_data=nil,
+        duration=0,
+        memory_usage=0,
+        index=0,
+        log='',
+        comment='',
+        link='',
+        total_dump=nil,
+        total_sent=nil,
+        total_received=nil )
       while $result_storage_in_use==true
         sleep 1
       end
@@ -788,6 +801,12 @@ module TDriverReportCreator
           test_comment.content = comment
           test_link = Nokogiri::XML::Node.new("link",test)
           test_link.content = html_link
+          test_dump_count = Nokogiri::XML::Node.new("dump_count",test)
+          test_dump_count.content = total_dump
+          test_sent_bytes = Nokogiri::XML::Node.new("sent_bytes",test)
+          test_sent_bytes.content = total_sent
+          test_received_bytes = Nokogiri::XML::Node.new("received_bytes",test)
+          test_received_bytes.content = total_received
       
           test << test_name
           test << test_group
@@ -801,6 +820,9 @@ module TDriverReportCreator
           test << test_log
           test << test_comment
           test << test_link
+          test << test_dump_count
+          test << test_sent_bytes
+          test << test_received_bytes
          
           if user_data!=nil && !user_data.empty?
             test_data = Nokogiri::XML::Node.new("user_display_data",test)
@@ -840,6 +862,9 @@ module TDriverReportCreator
                 xml.log log
                 xml.comment comment
                 xml.link html_link
+                xml.dump_count total_dump
+                xml.sent_bytes total_sent
+                xml.received_bytes total_received
                 if user_data!=nil && !user_data.empty?
                   xml.user_display_data {
                     (0..counter).each { |i|
@@ -891,6 +916,9 @@ module TDriverReportCreator
             log=node.search("log").text #9
             comment=node.search("comment").text #10
             link=node.search("link").text #11
+            dump_count=node.search("dump_count").text #12
+            sent_bytes=node.search("sent_bytes").text #13
+            received_bytes=node.search("received_bytes").text #14
             
             user_data = Hash.new
             node.xpath("user_display_data/data").each do |data_node|
@@ -902,26 +930,122 @@ module TDriverReportCreator
             case results
             when 'passed'
               if @pass_statuses.include?(status)
-                result_storage << [value,group,reboots,crashes,start_time,duration,memory_usage,status,index,log,comment,link,user_data]
+                result_storage << [value,
+                  group,
+                  reboots,
+                  crashes,
+                  start_time,
+                  duration,
+                  memory_usage,
+                  status,
+                  index,
+                  log,
+                  comment,
+                  link,
+                  user_data,
+                  dump_count,
+                  sent_bytes,
+                  received_bytes
+                ]
               end
             when 'failed'
               if @fail_statuses.include?(status)
-                result_storage << [value,group,reboots,crashes,start_time,duration,memory_usage,status,index,log,comment,link,user_data]
+                result_storage << [value,
+                  group,
+                  reboots,
+                  crashes,
+                  start_time,
+                  duration,
+                  memory_usage,
+                  status,
+                  index,
+                  log,
+                  comment,
+                  link,
+                  user_data,
+                  dump_count,
+                  sent_bytes,
+                  received_bytes
+                ]
               end
             when 'not_run'
               if @not_run_statuses.include?(status)
-                result_storage << [value,group,reboots,crashes,start_time,duration,memory_usage,status,index,log,comment,link,user_data]
+                result_storage << [value,
+                  group,
+                  reboots,
+                  crashes,
+                  start_time,
+                  duration,
+                  memory_usage,
+                  status,
+                  index,
+                  log,
+                  comment,
+                  link,
+                  user_data,
+                  dump_count,
+                  sent_bytes,
+                  received_bytes
+                ]
               end
             when 'crash'
               if crashes.to_i > 0
-                result_storage << [value,group,reboots,crashes,start_time,duration,memory_usage,status,index,log,comment,link,user_data]
+                result_storage << [value,
+                  group,
+                  reboots,
+                  crashes,
+                  start_time,
+                  duration,
+                  memory_usage,
+                  status,
+                  index,
+                  log,
+                  comment,
+                  link,
+                  user_data,
+                  dump_count,
+                  sent_bytes,
+                  received_bytes
+                ]
               end
             when 'reboot'
               if reboots.to_i > 0
-                result_storage << [value,group,reboots,crashes,start_time,duration,memory_usage,status,index,log,comment,link,user_data]
+                result_storage << [value,
+                  group,
+                  reboots,
+                  crashes,
+                  start_time,
+                  duration,
+                  memory_usage,
+                  status,
+                  index,
+                  log,
+                  comment,
+                  link,
+                  user_data,
+                  dump_count,
+                  sent_bytes,
+                  received_bytes
+                ]
               end
             when 'all'
-              result_storage << [value,group,reboots,crashes,start_time,duration,memory_usage,status,index,log,comment,link,user_data]
+              result_storage << [value,
+                  group,
+                  reboots,
+                  crashes,
+                  start_time,
+                  duration,
+                  memory_usage,
+                  status,
+                  index,
+                  log,
+                  comment,
+                  link,
+                  user_data,
+                  dump_count,
+                  sent_bytes,
+                  received_bytes
+                ]
             end
           end
           xml_data=nil

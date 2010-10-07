@@ -428,7 +428,7 @@ display: none;
     page=nil
     title=nil
   end
-  def write_test_case_body(page,test_case_name,start_time,end_time,run_time,status,index,folder,capture_screen_error,failed_dump_error,reboots=0)
+  def write_test_case_body(page,test_case_name,start_time,end_time,run_time,status,index,folder,capture_screen_error,failed_dump_error,reboots=0,total_dump_count=nil,total_data_sent=nil,total_data_received=nil)
     status_style='test_passed' if status=='passed' || @pass_statuses.include?(status)
     status_style='test_failed' if status=='failed' || @fail_statuses.include?(status)
     status_style='test_not_run' if status=='not run' || @not_run_statuses.include?(status)
@@ -474,8 +474,36 @@ display: none;
       'Runtime</td>'<<
       '<td>'<<
       format_duration(run_time)+'</td>'<<
-      '</tr>'<<
-      '<tr><td><b>Total memory</b></td><td>'<<
+      '</tr>'
+
+    total_dump_count.each do |item|
+      html_body << '<tr>'<<
+        '<td style="font-weight: 700">'<<
+        "Dump count from sut #{item[0]}</td>"<<
+        '<td>'<<
+        item[1].to_s+'</td>'<<
+        '</tr>'
+    end
+
+    total_data_sent.each do |item|
+      html_body << '<tr>' <<
+        '<td style="font-weight: 700">'<<
+        "Sent bytes from sut #{item[0]}</td>"<<
+        '<td>'<<
+        item[1].to_s+'</td>'<<
+        '</tr>'
+    end
+
+    total_data_received.each do |item|
+      html_body << '<tr>' <<
+        '<td style="font-weight: 700">'<<
+        "Received bytes from sut #{item[0]}</td>"<<
+        '<td>'<<
+        item[1].to_s+'</td>'<<
+        '</tr>'
+    end
+
+    html_body << '<tr><td><b>Total memory</b></td><td>'<<
       @tc_memory_amount_total.to_s<<
       '</td></tr>'<<
       '<tr><td><b>Used memory at beginning</b></td><td>'<<
@@ -814,8 +842,26 @@ display: none;
       '<tr>'<<
       '<td><b>Total device resets</b></td>'<<
       '<td>'+total_device_resets.to_s+'</td>'<<
-      '</tr>'<<
-      '<tr>'<<
+      '</tr>'
+    $tdriver_reporter.total_dump_count.each do |item|
+      html_body << '<tr>'<<
+        "<td><b>Total dump count from sut #{item[0].to_s}</b></td>"<<
+        '<td>'+item[1].to_s+'</td>'<<
+        '</tr>'
+    end
+    $tdriver_reporter.total_sent_data.each do |item|
+      html_body << '<tr>'<<
+        "<td><b>Total bytes sent from sut #{item[0].to_s}</b></td>"<<
+        '<td>'+item[1].to_s+'</td>'<<
+        '</tr>'
+    end
+    $tdriver_reporter.total_received_data.each do |item|
+      html_body << '<tr>'<<
+        "<td><b>Total bytes received from sut #{item[0].to_s}</b></td>"<<
+        '<td>'+item[1].to_s+'</td>'<<
+        '</tr>'
+    end
+    html_body << '<tr>'<<
       '<td><b>Pass %</b></td>'<<
       '<td>'+pass_rate.to_f.to_s+'%</td>'<<
       '</tr>'<<

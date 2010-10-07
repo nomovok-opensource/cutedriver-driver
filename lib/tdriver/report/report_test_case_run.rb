@@ -24,7 +24,7 @@ module TDriverReportCreator
   #Test case class for new test case run
   class TestCaseRun < TDriverReportCrashFileCapture
     include TDriverReportWriter
-    attr_reader(
+    attr_accessor(
       :test_case_folder,
       :test_cases_folder,
       :test_case_name,
@@ -39,6 +39,15 @@ module TDriverReportCreator
       :test_case_user_data,
       :test_case_user_data_columns,
       :test_case_chronological_view_data,
+      :test_case_total_dump_count,
+      :test_case_total_data_sent,
+      :test_case_total_data_received,
+      :test_case_dump_count_at_start,
+      :test_case_dump_count_at_end,
+      :test_case_data_sent_at_start,
+      :test_case_data_sent_at_end,
+      :test_case_data_received_at_start,
+      :test_case_data_received_at_end,
       :capture_screen_error,
       :failed_dump_error,
       :test_case_reboots,
@@ -90,7 +99,16 @@ module TDriverReportCreator
       @tc_memory_amount_end=nil
       @tc_memory_amount_start='-'
       @tc_memory_amount_end='-'
-      @tc_memory_amount_total='-'      
+      @tc_memory_amount_total='-'
+      @test_case_total_dump_count=Hash.new
+      @test_case_total_data_sent=Hash.new
+      @test_case_total_data_received=Hash.new
+      @test_case_dump_count_at_start=Hash.new
+      @test_case_dump_count_at_end=Hash.new
+      @test_case_data_sent_at_start=Hash.new
+      @test_case_data_sent_at_end=Hash.new
+      @test_case_data_received_at_start=Hash.new
+      @test_case_data_received_at_end=Hash.new
       @pass_statuses=MobyUtil::Parameter[ :report_passed_statuses, "passed" ].split('|')
       @fail_statuses=MobyUtil::Parameter[ :report_failed_statuses, "failed" ].split('|')
       @not_run_statuses=MobyUtil::Parameter[ :report_not_run_statuses, "not run" ].split('|')
@@ -413,7 +431,21 @@ module TDriverReportCreator
         end
 
         write_page_start(@test_case_folder+'/index.html',@test_case_name)
-        write_test_case_body(@test_case_folder+'/index.html',@test_case_name_full,@test_case_start_time,@test_case_end_time,@test_case_run_time,@test_case_status,@test_case_index,@test_case_folder,@capture_screen_error,@failed_dump_error,@test_case_reboots)
+        write_test_case_body(@test_case_folder+'/index.html',
+          @test_case_name_full,
+          @test_case_start_time,
+          @test_case_end_time,
+          @test_case_run_time,
+          @test_case_status,
+          @test_case_index,
+          @test_case_folder,
+          @capture_screen_error,
+          @failed_dump_error,
+          @test_case_reboots,
+          @test_case_total_dump_count,
+          @test_case_total_data_sent,
+          @test_case_total_data_received
+        )
         write_page_end(@test_case_folder+'/index.html')
       rescue Exception => e
         Kernel::raise e
