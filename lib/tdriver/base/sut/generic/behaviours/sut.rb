@@ -822,21 +822,19 @@ module MobyBehaviour
     #
     # &block
     #  Proc
-    #   description: 
-    #     Code block to execute. Current SUT is passed as block parameter. 
-    #     If the verify block is defined outside the scope of the current SUT 
-    #     (e.g. the SUT configuration file), this can be used
-    #     to get a handle to the current sut.
+    #   description: Code block to execute. 
     #   example: { @sut.xml_data.empty? == false }
     #
     # &block#sut
     #  MobyBase::SUT
-    #   description: Current SUT object
+    #   description: 
+    #     Current SUT object is passed as block parameter. If the verify block is defined outside the scope of 
+    #     the current SUT (e.g. the SUT configuration file), this can be used to get a handle to the current SUT.
     #   example: -
     #
     # == returns
     # NilClass
-    #  description: -
+    #  description: This method doesn't pass return value
     #  example: -
     # 
     # == exceptions
