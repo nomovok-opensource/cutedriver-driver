@@ -494,8 +494,9 @@ module TDriverReportCreator
           write_summary_body(@report_folder+'/index.html',@start_time,'Tests Ongoing...',@run_time,@total_run,@total_passed,@total_failed,@total_not_run,@total_crash_files,@total_device_resets)
           write_page_end(@report_folder+'/index.html')
         else
+          all_cases_arr=read_result_storage('all')
           write_page_start(@report_folder+'/index.html','TDriver test results')
-          write_summary_body(@report_folder+'/index.html',@start_time,@end_time,@run_time,@total_run,@total_passed,@total_failed,@total_not_run,@total_crash_files,@total_device_resets)
+          write_summary_body(@report_folder+'/index.html',@start_time,@end_time,@run_time,@total_run,@total_passed,@total_failed,@total_not_run,@total_crash_files,@total_device_resets,all_cases_arr)
           write_page_end(@report_folder+'/index.html')
         end
       rescue Exception => e
@@ -786,7 +787,7 @@ module TDriverReportCreator
           test_crashes = Nokogiri::XML::Node.new("crashes",test)
           test_crashes.content = crashes
           test_start_time = Nokogiri::XML::Node.new("start_time",test)
-          test_start_time.content = start_time
+          test_start_time.content = start_time.strftime("%d.%m.%Y %H:%M:%S")
           test_duration = Nokogiri::XML::Node.new("duration",test)
           test_duration.content = duration
           test_memory_usage = Nokogiri::XML::Node.new("memory_usage",test)
@@ -854,7 +855,7 @@ module TDriverReportCreator
                 xml.group group
                 xml.reboots reboots
                 xml.crashes crashes
-                xml.start_time start_time
+                xml.start_time start_time.strftime("%d.%m.%Y %H:%M:%S")
                 xml.duration duration
                 xml.memory_usage memory_usage
                 xml.status status

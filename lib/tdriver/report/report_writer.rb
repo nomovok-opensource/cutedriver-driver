@@ -35,6 +35,13 @@ module TDriverReportWriter
     margin-right: auto;
   font-family: sans-serif;
 	font-size: medium;
+-webkit-box-shadow: 5px 5px 8px #818181;
+-moz-box-shadow: 5px 5px 8px #818181;
+-moz-border-radius: 9px 9px 9px 9px;
+-webkit-border-radius: 9px;
+-webkit-border-top-left-radius: 9px;
+-webkit-border-bottom-right-radius: 9px;
+
 }
 .page_navigation_section
 {
@@ -45,7 +52,16 @@ module TDriverReportWriter
     margin-right: auto;
   font-family: sans-serif;
 	font-size: medium;
+-webkit-box-shadow: 5px 5px 8px #818181;
+-moz-box-shadow: 5px 5px 8px #818181;
+-moz-border-radius: 9px 9px 9px 9px;
+-webkit-border-radius: 9px;
+-webkit-border-top-left-radius: 9px;
+-webkit-border-bottom-right-radius: 9px;
+
 }
+
+
 .summary
 {
 	background-color:White;
@@ -53,6 +69,12 @@ module TDriverReportWriter
 	height:100%;
 	margin-left : auto;
     margin-right: auto;
+-webkit-box-shadow: 5px 5px 8px #818181;
+-moz-box-shadow: 5px 5px 8px #818181;
+-moz-border-radius: 9px 9px 9px 9px;
+-webkit-border-radius: 9px;
+-webkit-border-top-left-radius: 9px;
+-webkit-border-bottom-right-radius: 9px;
 
 }
 .summary_total_run
@@ -62,6 +84,12 @@ module TDriverReportWriter
 	height:100%;
 	margin-left : auto;
     margin-right: auto;
+-webkit-box-shadow: 5px 5px 8px #818181;
+-moz-box-shadow: 5px 5px 8px #818181;
+-moz-border-radius: 9px 9px 9px 9px;
+-webkit-border-radius: 9px;
+-webkit-border-top-left-radius: 9px;
+-webkit-border-bottom-right-radius: 9px;
 
 }
 .summary_passed
@@ -71,6 +99,12 @@ module TDriverReportWriter
 	height:100%;
 	margin-left : auto;
     margin-right: auto;
+-webkit-box-shadow: 5px 5px 8px #818181;
+-moz-box-shadow: 5px 5px 8px #818181;
+-moz-border-radius: 9px 9px 9px 9px;
+-webkit-border-radius: 9px;
+-webkit-border-top-left-radius: 9px;
+-webkit-border-bottom-right-radius: 9px;
 
 }
 .summary_crash
@@ -80,6 +114,12 @@ module TDriverReportWriter
 	height:100%;
 	margin-left : auto;
     margin-right: auto;
+-webkit-box-shadow: 5px 5px 8px #818181;
+-moz-box-shadow: 5px 5px 8px #818181;
+-moz-border-radius: 9px 9px 9px 9px;
+-webkit-border-radius: 9px;
+-webkit-border-top-left-radius: 9px;
+-webkit-border-bottom-right-radius: 9px;
 
 }
 .summary_reboot
@@ -89,6 +129,12 @@ module TDriverReportWriter
 	height:100%;
 	margin-left : auto;
     margin-right: auto;
+-webkit-box-shadow: 5px 5px 8px #818181;
+-moz-box-shadow: 5px 5px 8px #818181;
+-moz-border-radius: 9px 9px 9px 9px;
+-webkit-border-radius: 9px;
+-webkit-border-top-left-radius: 9px;
+-webkit-border-bottom-right-radius: 9px;
 
 }
 .statistics
@@ -98,6 +144,12 @@ module TDriverReportWriter
 	height:100%;
 	margin-left : auto;
     margin-right: auto;
+-webkit-box-shadow: 5px 5px 8px #818181;
+-moz-box-shadow: 5px 5px 8px #818181;
+-moz-border-radius: 9px 9px 9px 9px;
+-webkit-border-radius: 9px;
+-webkit-border-top-left-radius: 9px;
+-webkit-border-bottom-right-radius: 9px;
 
 }
 .summary_failed
@@ -107,6 +159,12 @@ module TDriverReportWriter
 	height:100%;
 	margin-left : auto;
     margin-right: auto;
+-webkit-box-shadow: 5px 5px 8px #818181;
+-moz-box-shadow: 5px 5px 8px #818181;
+-moz-border-radius: 9px 9px 9px 9px;
+-webkit-border-radius: 9px;
+-webkit-border-top-left-radius: 9px;
+-webkit-border-bottom-right-radius: 9px;
 
 }
 .summary_not_run
@@ -116,6 +174,12 @@ module TDriverReportWriter
 	height:100%;
 	margin-left : auto;
     margin-right: auto;
+-webkit-box-shadow: 5px 5px 8px #818181;
+-moz-box-shadow: 5px 5px 8px #818181;
+-moz-border-radius: 9px 9px 9px 9px;
+-webkit-border-radius: 9px;
+-webkit-border-top-left-radius: 9px;
+-webkit-border-bottom-right-radius: 9px;
 
 }
 .test_passed
@@ -125,6 +189,12 @@ module TDriverReportWriter
 	height:100%;
 	margin-left : auto;
     margin-right: auto;
+-webkit-box-shadow: 5px 5px 8px #818181;
+-moz-box-shadow: 5px 5px 8px #818181;
+-moz-border-radius: 9px 9px 9px 9px;
+-webkit-border-radius: 9px;
+-webkit-border-top-left-radius: 9px;
+-webkit-border-bottom-right-radius: 9px;
 
 }
 .test_failed
@@ -134,6 +204,12 @@ module TDriverReportWriter
 	height:100%;
 	margin-left : auto;
     margin-right: auto;
+-webkit-box-shadow: 5px 5px 8px #818181;
+-moz-box-shadow: 5px 5px 8px #818181;
+-moz-border-radius: 9px 9px 9px 9px;
+-webkit-border-radius: 9px;
+-webkit-border-top-left-radius: 9px;
+-webkit-border-bottom-right-radius: 9px;
 
 }
 .test_not_run
@@ -143,6 +219,12 @@ module TDriverReportWriter
 	height:100%;
 	margin-left : auto;
     margin-right: auto;
+-webkit-box-shadow: 5px 5px 8px #818181;
+-moz-box-shadow: 5px 5px 8px #818181;
+-moz-border-radius: 9px 9px 9px 9px;
+-webkit-border-radius: 9px;
+-webkit-border-top-left-radius: 9px;
+-webkit-border-bottom-right-radius: 9px;
 
 }
 .environment
@@ -152,6 +234,12 @@ module TDriverReportWriter
 	height:100%;
 	margin-left : auto;
     margin-right: auto;
+-webkit-box-shadow: 5px 5px 8px #818181;
+-moz-box-shadow: 5px 5px 8px #818181;
+-moz-border-radius: 9px 9px 9px 9px;
+-webkit-border-radius: 9px;
+-webkit-border-top-left-radius: 9px;
+-webkit-border-bottom-right-radius: 9px;
 
 }
 .page_title
@@ -162,10 +250,24 @@ module TDriverReportWriter
 	margin-left : auto;
     margin-right: auto;
     color : white;
+-webkit-box-shadow: 5px 5px 8px #818181;
+-moz-box-shadow: 5px 5px 8px #818181;
+-moz-border-radius: 9px 9px 9px 9px;
+-webkit-border-radius: 9px;
+-webkit-border-top-left-radius: 9px;
+-webkit-border-bottom-right-radius: 9px;
+
 }
 .table
 {
 	width: 100%;
+-webkit-box-shadow: 5px 5px 8px #818181;
+-moz-box-shadow: 5px 5px 8px #818181;
+-moz-border-radius: 9px 9px 9px 9px;
+-webkit-border-radius: 9px;
+-webkit-border-top-left-radius: 9px;
+-webkit-border-bottom-right-radius: 9px;
+
 }
 a:link { color:Black;}
 a:visited { color:Black;}
@@ -174,7 +276,7 @@ a:hover { color:White; background-color:#005B9A;}
 #navigation
 {
 	list-style-type:none;
-	padding:10px 10px 20px 10px;	
+	padding:10px 10px 20px 10px;
   width: 47em;
 	margin: auto;
 }
@@ -194,6 +296,10 @@ a:hover { color:White; background-color:#005B9A;}
 	background-color:#74C2E1;
 	color:#FFFFFF;
 }
+#navigation_tabs_ul li a.current {
+	background-color:#74C2E1;
+	color:Black;
+}
 #navigation li a:hover {
 	background-color:#3C72B0;
 	color:#FFFFFF;
@@ -210,6 +316,69 @@ a:hover { color:White; background-color:#005B9A;}
 {
 	background-color:#E0E0E0;
 }
+
+#statistics_table
+{	
+	font-size: 12px;
+	text-align: left;
+	border-collapse: collapse;
+}
+#statistics_table th
+{
+	font-size: 13px;
+	font-weight: normal;
+	padding: 8px;
+	background: #b9c9fe;	
+	color: #039;
+}
+#statistics_table td
+{
+	padding: 8px;	
+	border-bottom: 1px solid Black;
+	color: #669;
+	border-top: 1px solid transparent;
+}
+
+
+.navigation_tabs{
+width: 100%;
+overflow: hidden;
+
+}
+
+.navigation_tabs ul{
+margin: 0;
+padding: 0;
+padding-left: 100px; /*offset of tabs relative to browser left edge*/
+font: bold 12px sans-serif;
+list-style-type: none;
+}
+
+.navigation_tabs li{
+display: inline;
+margin: 0;
+}
+
+.navigation_tabs li a{
+float: left;
+display: block;
+text-decoration: none;
+margin: 0;
+padding: 13px 8px; /*padding inside each tab*/
+border-right: 1px solid white; /*right divider between tabs*/
+color: white;
+background: #0191C8; /*background of tabs (default state)*/
+}
+
+.navigation_tabs li a:visited{
+color: white;
+}
+
+.navigation_tabs li a:hover, .navigation_tabs li.selected a{
+background: black; /*background of tabs for hover state, plus tab with "selected" class assigned to its LI */
+}
+
+
 img
 {
 	width:50%;
@@ -262,6 +431,7 @@ display: none;
 {
 	background-color:#CCCCCC;
 }
+
     '
     File.open(page, 'w') {|f| f.write(css) }
     css=nil
@@ -654,9 +824,7 @@ display: none;
 	
     html_body=Array.new
     html_body << '<div>'
-    html_body << '<H1 ALIGN=center><img border="0" src="./'+graph_file_name+'"/></H1>'
-    html_body << '<center>This graph displays the duration for each test case during the run.</center>'
-    html_body << '<center>If a test case has been executed several time, this duration is the sum of all the durations for this specific test case.</center>'
+    html_body << '<H1 ALIGN=center><img border="0" src="./'+graph_file_name+'"/></H1>'    
     html_body << '</div>'
     File.open(page, 'a') do |f2|
       f2.puts html_body
@@ -793,7 +961,7 @@ display: none;
     GC.start
   end
 
-  def write_summary_body(page,start_time,end_time,run_time,total_run,total_passed,total_failed,total_not_run,total_crash_files,total_device_resets)
+  def write_summary_body(page,start_time,end_time,run_time,total_run,total_passed,total_failed,total_not_run,total_crash_files,total_device_resets,summary_arr=nil)
     fail_rate=0
     pass_rate=0
     if total_run.to_i > 0
@@ -869,7 +1037,14 @@ display: none;
       '<td><b>Fail %</b></td>'<<
       '<td>'+fail_rate.to_f.to_s+'%</td>'<<
       '</tr>'<<
-      '</table></div>'
+      '</table></div><p />'
+    if summary_arr
+      html_body << '<div class="statistics">'
+       tdriver_group=ReportingStatistics.new(summary_arr,true)
+       html_result=tdriver_group.generate_statistics_table()
+       html_body << html_result << '</div>'
+    end
+
     File.open(page, 'a') do |f2|
       f2.puts html_body
     end
@@ -1072,8 +1247,8 @@ display: none;
       failed_link="../1_failed_index.html\""
       not_run_link="../1_not_run_index.html\""
     end
-    html_body='<div class="navigation_section">'<<
-      '<ul id="navigation">'<<
+    html_body='<div class="navigation_section"><div class="navigation_tabs">'<<
+      '<ul id="navigation_tabs_ul">'<<
       '<li><a href="'<<
       tdriver_test_results_link<<
       '>TDriver test results</a></li>'<<
@@ -1096,7 +1271,7 @@ display: none;
       not_run_link<<
       '>Not run</a></li>'<<
       '</ul>'<<
-      '</div>'
+      '</div></div>'
     File.open(page, 'a') do |f2|
       f2.puts html_body
     end
