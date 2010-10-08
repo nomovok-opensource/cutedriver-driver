@@ -19,7 +19,7 @@
 
 module Generators
 
-  abort("") unless defined?( RDoc )
+  abort("RDoc not available/loaded") unless defined?( RDoc )
 
 	class TDriverFeatureTestGenerator
 
@@ -414,6 +414,7 @@ EXAMPLE
         
         process_file( file ) unless @already_processed_files.include?( file.file_absolute_name )
 
+
       }
 
       # TODO: some other format for writing the hash to file...
@@ -533,13 +534,13 @@ EXAMPLE
 
           else
 
-            abort("Unable add argument details (line %s: \"%s\") for \"%s\" due to argument variable type must be defined first.\nPlease note that argument type must start with capital letter (e.g. OK: \"String\" NOK: \"string\")" % [ index + 1, line, current_argument  ] ) if current_argument_type.nil?
+            raise_error("Unable add argument details (line %s: \"%s\") for \"%s\" due to argument variable type must be defined first.\nPlease note that argument type must start with capital letter (e.g. OK: \"String\" NOK: \"string\")" % [ index + 1, line, current_argument  ] ) if current_argument_type.nil?
 
             line =~ /^(.*?)\:{1}($|[\r\n\t\s]{1})(.*)$/i
 
             if $1.nil?
 
-              abort("Unable add argument details (line %s: \"%s\") for \"%s\" due to section name not defined. Sections names are written in lowercase with trailing colon and whitespace (e.g. OK: \"example: 10\", NOK: \"example:10\")" % [ index +1, line, current_argument]) if $1.nil? && current_section.nil?
+              raise_error("Unable add argument details (line %s: \"%s\") for \"%s\" due to section name not defined. Sections names are written in lowercase with trailing colon and whitespace (e.g. OK: \"example: 10\", NOK: \"example:10\")" % [ index +1, line, current_argument]) if $1.nil? && current_section.nil?
 
               # remove leading & trailing whitespaces
               section_content = line.strip
@@ -548,27 +549,41 @@ EXAMPLE
 
               current_section = $1
 
-              #unless result[ argument_index ][ current_argument ][ current_argument_type ].has_key?( current_section )
-              unless result[ argument_index ][ current_argument ][ :types ][ current_argument_type ].has_key?( current_section )
+              if result[ argument_index ][ current_argument ][ :types ].has_key?( current_argument_type )
 
-                #result[ argument_index ][ current_argument ][ current_argument_type ][ current_section ] = ""
-                result[ argument_index ][ current_argument ][ :types ][ current_argument_type ][ current_section ] = ""
+                #unless result[ argument_index ][ current_argument ][ current_argument_type ].has_key?( current_section )
+                unless result[ argument_index ][ current_argument ][ :types ][ current_argument_type ].has_key?( current_section )
+
+                  #result[ argument_index ][ current_argument ][ current_argument_type ][ current_section ] = ""
+                  result[ argument_index ][ current_argument ][ :types ][ current_argument_type ][ current_section ] = ""
+
+                end
+            
 
               end
-          
+
               section_content = $3.strip
 
             end
 
-            abort("Unable add argument details due to argument not defined. Argument name must start from pos 1 of comment. (e.g. \"# my_variable\" NOK: \"#  my_variable\", \"#myvariable\")") if current_argument.nil?  
+            raise_error("Unable add argument details due to argument not defined. Argument name must start from pos 1 of comment. (e.g. \"# my_variable\" NOK: \"#  my_variable\", \"#myvariable\")") if current_argument.nil?  
 
-            # add one leading whitespace if current_section value is not empty 
-            #section_content = " " + section_content unless result[ argument_index ][ current_argument ][ current_argument_type ][ current_section ].empty?
-            section_content = " " + section_content unless result[ argument_index ][ current_argument ][ :types ][ current_argument_type ][ current_section ].empty?
+            if result[ argument_index ][ current_argument ][ :types ].has_key?( current_argument_type )
 
-            # store section_content to current_section
-            #result[ argument_index ][ current_argument ][ current_argument_type ][ current_section ] << section_content
-            result[ argument_index ][ current_argument ][ :types ][ current_argument_type ][ current_section ] << section_content
+              if result[ argument_index ][ current_argument ][ :types ][ current_argument_type ].has_key?( current_section )
+
+
+                # add one leading whitespace if current_section value is not empty 
+                #section_content = " " + section_content unless result[ argument_index ][ current_argument ][ current_argument_type ][ current_section ].empty?
+                section_content = " " + section_content unless result[ argument_index ][ current_argument ][ :types ][ current_argument_type ][ current_section ].empty?
+
+                # store section_content to current_section
+                #result[ argument_index ][ current_argument ][ current_argument_type ][ current_section ] << section_content
+                result[ argument_index ][ current_argument ][ :types ][ current_argument_type ][ current_section ] << section_content
+
+            end 
+
+            end
 
           end
 
@@ -578,8 +593,6 @@ EXAMPLE
 
       order = []
       
-      #p result
-
       params_array = params_array.collect{ | o | [ o.first, Hash[:default, o[1], :optional, o.last] ] }
 
       params_hash = Hash[ params_array ]
@@ -804,13 +817,13 @@ EXAMPLE
 
          else
 
-            abort("Unable add value details (line %s: \"%s\") for %s due to detail type must be defined first.\nPlease note that return value and exception type must start with capital letter (e.g. OK: \"String\" NOK: \"string\")" % [ index + 1, line, current_argument_type  ] ) if current_argument_type.nil?
+            raise_error("Unable add value details (line %s: \"%s\") for %s due to detail type must be defined first.\nPlease note that return value and exception type must start with capital letter (e.g. OK: \"String\" NOK: \"string\")" % [ index + 1, line, current_argument_type  ] ) if current_argument_type.nil?
 
             line =~ /^(.*?)\:{1}($|[\r\n\t\s]{1})(.*)$/i
 
             if $1.nil?
 
-              abort("Unable add value details (line %s: \"%s\") for %s due to section name not defined. Sections names are written in lowercase with trailing colon and whitespace (e.g. OK: \"example: 10\", NOK: \"example:10\")" % [ index +1, line, current_argument_type ]) if $1.nil? && current_section.nil?
+              raise_error("Unable add value details (line %s: \"%s\") for %s due to section name not defined. Sections names are written in lowercase with trailing colon and whitespace (e.g. OK: \"example: 10\", NOK: \"example:10\")" % [ index +1, line, current_argument_type ]) if $1.nil? && current_section.nil?
 
               # remove leading & trailing whitespaces
               section_content = line.strip
@@ -829,7 +842,7 @@ EXAMPLE
 
             end
 
-            abort("Unable add return value details due to variable type not defined. Argument type must be defined at pos 1 of comment. (e.g. \"# Integer\" NOK: \"#  Integer\", \"#Integer\")") if current_argument_type.nil?  
+            raise_error("Unable add return value details due to variable type not defined. Argument type must be defined at pos 1 of comment. (e.g. \"# Integer\" NOK: \"#  Integer\", \"#Integer\")") if current_argument_type.nil?  
 
             # add one leading whitespace if current_section value is not empty 
             section_content = " " + section_content unless result[ argument_index ][ current_argument_type ][ current_section ].empty?
@@ -1228,7 +1241,7 @@ EXAMPLE
 
       text << help( topic ) unless topic.nil?
 
-      warn( text << "\n" )
+      #warn( text << "\n" )
 
     end
 

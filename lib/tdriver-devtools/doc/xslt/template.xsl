@@ -1311,7 +1311,12 @@
     <xsl:value-of select="@name"/>
 
     <pre class="{@status}">
-      <xsl:text># scenario </xsl:text><xsl:value-of select="@status" /><br />
+
+      <!-- show status only if other than 'passed' -->
+      <xsl:if test="string(@status)!='passed'" >
+        <xsl:text># scenario </xsl:text><xsl:value-of select="@status" /><br />
+      </xsl:if>
+
       <xsl:for-each select="str:split(example,'\n')">
         <xsl:value-of select="text()" /><br />
       </xsl:for-each>
