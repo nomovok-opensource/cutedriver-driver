@@ -42,6 +42,9 @@ module MobyUtil
 			
 			$mobyutil_hooking_instance = self
       $mobyutil_hooking_elapsed_time = []
+
+      $mobyutil_hooking_start_benchmark_time = Time.now  
+      $mobyutil_hooking_last_call_end_time = Time.now
   
 		end
 
@@ -116,12 +119,14 @@ module MobyUtil
 
 		def print_benchmark( rules = {} )
 
+		  total_run_time = $mobyutil_hooking_last_call_end_time - $mobyutil_hooking_start_benchmark_time
+
 			# :sort => :total_time || :times_called || :average_time
 
 			rules = { :sort => :total_time, :order => :ascending, :show_uncalled_methods => true }.merge( rules )
 
-			puts "%-80s %8s %15s %15s %15s" % [ 'Name:', 'Calls:', 'Time total:', 'W/O subcalls:', 'Total/call:' ]
-			puts "%-80s %8s %15s %15s %15s" % [ '-' * 80, '-' * 8, '-' * 15, '-' * 15, '-' * 15 ]
+			puts "%-80s %8s %15s %15s %9s %15s" % [ 'Name:', 'Calls:', 'Time total:', 'W/O subcalls:', '%/run', 'Total/call:' ]
+			puts "%-80s %8s %15s %15s %9s %15s" % [ '-' * 80, '-' * 8, '-' * 15, '-' * 15, '-' * 8, '-' * 15 ]
 
 			# calculate average time for method
 			( table = @benchmark ).each{ | key, value |
@@ -144,12 +149,16 @@ module MobyUtil
 				when :total_time_no_subs
 					method_a[ 1 ][ :time_elapsed ] <=> method_b[ 1 ][ :time_elapsed ]
 
+        when :percentage
+        
+          ( ( method_a[ 1 ][ :time_elapsed ].to_f / total_run_time.to_f ) * 100 ) <=> ( ( method_b[ 1 ][ :time_elapsed ].to_f / total_run_time.to_f ) * 100 )
+
 				when :average_time
 					method_a[ 1 ][ :average_time ] <=> method_b[ 1 ][ :average_time ]
 
 			else
 
-				Kernel::raise ArgumentError.new("Invalid sorting rule, valid rules are :name, :times_called, :total_time, :total_time_no_subs or :average_time")
+				Kernel::raise ArgumentError.new("Invalid sorting rule, valid rules are :name, :times_called, :total_time, :total_time_no_subs, :percentage or :average_time")
 
 			end
 
@@ -171,7 +180,16 @@ module MobyUtil
 
 			table.each{ | method | 
 
-				puts "%-80s %8s %15.8f %15.8f %15.8f" % [ method[ 0 ], method[ 1 ][ :times_called ], method[ 1 ][ :time_elapsed_total ], method[ 1 ][ :time_elapsed ], method[ 1 ][ :average_time ] ] unless !rules[ :show_uncalled_methods ] && method[ 1 ][ :times_called ] == 0
+				puts "%-80s %8s %15.8f %15.8f %8.3f%% %15.8f" % [ 
+				  method[ 0 ], 
+				  method[ 1 ][ :times_called ], 
+				  method[ 1 ][ :time_elapsed_total ], 
+				  method[ 1 ][ :time_elapsed ], 
+				  
+          ( ( method[ 1 ][ :time_elapsed ].to_f / total_run_time.to_f ) * 100 ),
+				  
+				  method[ 1 ][ :average_time ] 
+			  ] unless !rules[ :show_uncalled_methods ] && method[ 1 ][ :times_called ] == 0
 
 			}
 
@@ -350,7 +368,7 @@ module MobyUtil
                       ensure
     
                         # calculate actual elapsed time, including time elapsed in sub calls
-                        elapsed_time = ( Time.now - start_time )
+                        elapsed_time = ( ( $mobyutil_hooking_last_call_end_time = Time.now ) - start_time )
 
                         # elapsed time in sub calls
                         elapsed_time_in_subcalls = $mobyutil_hooking_elapsed_time.pop || 0
