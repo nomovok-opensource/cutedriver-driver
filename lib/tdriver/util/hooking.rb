@@ -39,6 +39,9 @@ module MobyUtil
 
 			@logger_method = nil
 			@logger_instance = nil
+			
+			$mobyutil_hooking_instance = self
+      $mobyutil_hooking_elapsed_time = []
   
 		end
 
@@ -97,14 +100,14 @@ module MobyUtil
 		# Function to update method runtime & calls count for benchmark
 		# == params
 		# method_name:: Name of the target method
-		# start_time:: Name of the target method
-		# == returns
-		# String:: Unique name for wrappee method
-		def update_method_benchmark( method_name, start_time, end_time )
+		# time_elapsed_in_subcalls:: 
+		# total_time_elapsed:: 
+		def update_method_benchmark( method_name, time_elapsed_in_subcalls, total_time_elapsed )
 
 			@benchmark[ method_name ].tap{ | hash | 
 
-				hash[ :time_elapsed ] += ( end_time - start_time ) #( end_time < start_time ? ( ( 86400 - start_time.to_f ) + end_time.to_f ) : ( end_time - start_time ) )
+				hash[ :time_elapsed ] += ( total_time_elapsed - time_elapsed_in_subcalls ) 
+				hash[ :time_elapsed_total ] += total_time_elapsed
 				hash[ :times_called ] += 1  
 
 			}
@@ -117,12 +120,12 @@ module MobyUtil
 
 			rules = { :sort => :total_time, :order => :ascending, :show_uncalled_methods => true }.merge( rules )
 
-			puts "%-80s %15s %25s %25s" % [ 'Name:', 'Times called:', 'Total time elapsed:', 'Average time/call:' ]
-			puts "%-80s %15s %25s %25s" % [ '-' * 80, '-' * 15, '-' * 25, '-' * 25 ]
+			puts "%-80s %8s %15s %15s %15s" % [ 'Name:', 'Calls:', 'Time total:', 'W/O subcalls:', 'Total/call:' ]
+			puts "%-80s %8s %15s %15s %15s" % [ '-' * 80, '-' * 8, '-' * 15, '-' * 15, '-' * 15 ]
 
 			# calculate average time for method
 			( table = @benchmark ).each{ | key, value |
-				table[ key ][ :average_time ] = ( value[ :times_elapsed ] == 0 || value[ :times_called ] == 0 ) ? 0 : value[ :time_elapsed ] / value[ :times_called ] 
+				table[ key ][ :average_time ] = ( value[ :times_elapsed_total ] == 0 || value[ :times_called ] == 0 ) ? 0 : value[ :time_elapsed_total ] / value[ :times_called ] 
 			}
 
 			table = table.sort{ | method_a, method_b | 
@@ -136,6 +139,9 @@ module MobyUtil
 					method_a[ 1 ][ :times_called ] <=> method_b[ 1 ][ :times_called ]
 
 				when :total_time
+					method_a[ 1 ][ :time_elapsed_total ] <=> method_b[ 1 ][ :time_elapsed_total ]
+
+				when :total_time_no_subs
 					method_a[ 1 ][ :time_elapsed ] <=> method_b[ 1 ][ :time_elapsed ]
 
 				when :average_time
@@ -143,7 +149,7 @@ module MobyUtil
 
 			else
 
-				Kernel::raise ArgumentError.new("Invalid sorting rule, valid rules are :name, :total_time, :time_elapsed or :average_time")
+				Kernel::raise ArgumentError.new("Invalid sorting rule, valid rules are :name, :times_called, :total_time, :total_time_no_subs or :average_time")
 
 			end
 
@@ -165,7 +171,7 @@ module MobyUtil
 
 			table.each{ | method | 
 
-				puts "%-80s %15s %25.15f %25.15f" % [ method[ 0 ], method[ 1 ][ :times_called ], method[ 1 ][ :time_elapsed ], method[ 1 ][ :average_time ] ] unless !rules[ :show_uncalled_methods ] && method[ 1 ][ :times_called ] == 0
+				puts "%-80s %8s %15.8f %15.8f %15.8f" % [ method[ 0 ], method[ 1 ][ :times_called ], method[ 1 ][ :time_elapsed_total ], method[ 1 ][ :time_elapsed ], method[ 1 ][ :average_time ] ] unless !rules[ :show_uncalled_methods ] && method[ 1 ][ :times_called ] == 0
 
 			}
 
@@ -277,7 +283,7 @@ module MobyUtil
 			base_and_method_name = "#{ base.name }::#{ method_name }"
 
 			# add method to benchmark table
-			@benchmark[ base_and_method_name ] = { :time_elapsed => 0 , :times_called => 0 } if ENV[ 'TDRIVER_BENCHMARK' ].to_s.downcase == 'true'
+			@benchmark[ base_and_method_name ] = { :time_elapsed => 0 , :times_called => 0, :time_elapsed_total => 0 } if ENV[ 'TDRIVER_BENCHMARK' ].to_s.downcase == 'true'
 
 			# create new name for original method 
 			original_method_name = create_wrappee_name( method_name )
@@ -320,7 +326,7 @@ module MobyUtil
 								def #{ method_name }( *args, &block )
 
 									# log method call
-									MobyUtil::Hooking.instance.log( '#{ method_path( base ) }.#{ method_name }', nil )
+									$mobyutil_hooking_instance.log( '#{ method_path( base ) }.#{ method_name }', nil )
 
 									#{
 
@@ -328,20 +334,32 @@ module MobyUtil
 							
 											"# store start time for performance measurement
 											start_time = Time.now
+                      
+                      # Time elapsed in sub calls
+                      $mobyutil_hooking_elapsed_time << 0.0
 
                       begin
 
 											  # call original method
-											  result = self.method(:#{ original_method_name }).call( *args, &block )
+											  result = method(:#{ original_method_name }).call( *args, &block )
 
                       rescue Exception => exception
 
                         raise exception
                       
                       ensure
-                      
+    
+                        # calculate actual elapsed time, including time elapsed in sub calls
+                        elapsed_time = ( Time.now - start_time )
+
+                        # elapsed time in sub calls
+                        elapsed_time_in_subcalls = $mobyutil_hooking_elapsed_time.pop || 0
+                                                
+                        # add elapsed time to caller method 
+                        $mobyutil_hooking_elapsed_time[ -1 ] += elapsed_time unless $mobyutil_hooking_elapsed_time.empty?
+
 											  # store performance results to benchmark hash
-											  MobyUtil::Hooking.instance.update_method_benchmark( '#{ base_and_method_name }', start_time, Time.now )
+											  $mobyutil_hooking_instance.update_method_benchmark( '#{ base_and_method_name }', elapsed_time_in_subcalls, elapsed_time )
 
                       end
 
