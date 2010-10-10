@@ -119,7 +119,9 @@ module MobyUtil
 
 		def print_benchmark( rules = {} )
 
-		  total_run_time = $mobyutil_hooking_last_call_end_time - $mobyutil_hooking_start_benchmark_time
+		  #total_run_time = $mobyutil_hooking_last_call_end_time - $mobyutil_hooking_start_benchmark_time
+
+      total_run_time = 0
 
 			# :sort => :total_time || :times_called || :average_time
 
@@ -130,7 +132,11 @@ module MobyUtil
 
 			# calculate average time for method
 			( table = @benchmark ).each{ | key, value |
+			
 				table[ key ][ :average_time ] = ( value[ :times_elapsed_total ] == 0 || value[ :times_called ] == 0 ) ? 0 : value[ :time_elapsed_total ] / value[ :times_called ] 
+				
+	      total_run_time += value[ :time_elapsed ]
+
 			}
 
 			table = table.sort{ | method_a, method_b | 
@@ -178,6 +184,11 @@ module MobyUtil
 
 			end
 
+      total_percentage = 0.0
+      total_time_elapsed_total = 0.0
+      total_average = 0.0
+      total_calls = 0
+
 			table.each{ | method | 
 
 				puts "%-80s %8s %15.8f %15.8f %8.3f%% %15.8f" % [ 
@@ -191,7 +202,17 @@ module MobyUtil
 				  method[ 1 ][ :average_time ] 
 			  ] unless !rules[ :show_uncalled_methods ] && method[ 1 ][ :times_called ] == 0
 
+        total_percentage += ( ( method[ 1 ][ :time_elapsed ].to_f / total_run_time.to_f ) * 100 )
+
+        total_calls += method[ 1 ][ :times_called ]
+        total_time_elapsed_total += method[ 1 ][ :time_elapsed_total ]        
+        total_average += method[ 1 ][ :average_time ]
+
 			}
+
+			puts "%-80s %8s %15s %15s %9s %15s" % [ '-' * 80, '-' * 8, '-' * 15, '-' * 15, '-' * 8, '-' * 15 ]
+
+			puts "%-80s %8s %15s %15.8f %8.3f%% %15.8f" % [ 'Total:', total_calls, total_time_elapsed_total, total_run_time, total_percentage, total_average ]
 
 		end
 
