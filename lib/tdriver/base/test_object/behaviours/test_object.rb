@@ -607,13 +607,21 @@ module MobyBehaviour
 
     end
 
-  public # deprecated
-
+    # == description
     # Returns the actual test object that was used as the parent when this object instance was created. For getting the parent object in the UI object hierarchy, 
     # see get_parent.
     #
     # === returns
     # TestObject:: test object that was used as parent when this object was created. Can also be of type SUT if sut was the parent (ie. application objects)
+
+  public # deprecated
+
+    # == deprecated
+    # 0.8.x
+    #
+    # == description
+    # This method is deprecated, please use [link="#parent"]TestObject#parent[/link] instead.
+    #
     def parent_object()
 
       $stderr.puts "warning: TestObject#parent_object is deprecated, please use TestObject#parent instead."      
