@@ -240,14 +240,16 @@ module TDriverReportCreator
 
     $new_test_case.clean_crash_files_from_sut()
     $new_test_case.clean_files_from_sut()
-    begin
-      MobyBase::SUTFactory.instance.connected_suts.each do |sut_id, sut_attributes|
-        $new_test_case.set_tc_memory_amount_total($tdriver_reporter.get_sut_total_memory(sut_id,sut_attributes))
-        $new_test_case.set_tc_memory_amount_start($tdriver_reporter.get_sut_used_memory(sut_id,sut_attributes))
+    if MobyUtil::Parameter[ :report_monitor_memory, 'false']=='true'
+      begin
+        MobyBase::SUTFactory.instance.connected_suts.each do |sut_id, sut_attributes|
+          $new_test_case.set_tc_memory_amount_total($tdriver_reporter.get_sut_total_memory(sut_id,sut_attributes))
+          $new_test_case.set_tc_memory_amount_start($tdriver_reporter.get_sut_used_memory(sut_id,sut_attributes))
+        end
+      rescue
+        $new_test_case.set_tc_memory_amount_total(0)
+        $new_test_case.set_tc_memory_amount_start(0)
       end
-    rescue
-      $new_test_case.set_tc_memory_amount_total(0)
-      $new_test_case.set_tc_memory_amount_start(0)
     end
     logging_enabled = MobyUtil::Logger.instance.enabled
     begin
@@ -287,16 +289,18 @@ module TDriverReportCreator
   def update_test_case(details)        
     $new_test_case.set_test_case_execution_log(details)
     updating_test_case_details(details) if MobyUtil::Parameter[ :custom_error_recovery_module, nil ]!=nil
-    begin
-      start_memory=$new_test_case.tc_memory_amount_start()
-      if start_memory==nil
-        MobyBase::SUTFactory.instance.connected_suts.each do |sut_id, sut_attributes|
-          memory=$tdriver_reporter.get_sut_used_memory(sut_id,sut_attributes)
-          $new_test_case.set_tc_memory_amount_start(memory)
+    if  MobyUtil::Parameter[ :report_monitor_memory, 'false']=='true'
+      begin
+        start_memory=$new_test_case.tc_memory_amount_start()
+        if start_memory=='-'
+          MobyBase::SUTFactory.instance.connected_suts.each do |sut_id, sut_attributes|
+            memory=$tdriver_reporter.get_sut_used_memory(sut_id,sut_attributes)
+            $new_test_case.set_tc_memory_amount_start(memory)
+          end
         end
+      rescue
+        $new_test_case.set_tc_memory_amount_start(0)
       end
-    rescue
-      $new_test_case.set_tc_memory_amount_start(0)
     end
   end
 
@@ -469,7 +473,7 @@ module TDriverReportCreator
       end
       $new_test_case.set_test_case_end_time(Time.now)
       update_test_case_behaviour_log()
-      update_test_case_memory_usage()
+      update_test_case_memory_usage() if MobyUtil::Parameter[ :report_monitor_memory, 'false']=='true'
       execution_log=$new_test_case.test_case_execution_log
       if MobyUtil::Parameter[:report_trace_capture_only_in_failed_case, 'true']!='true'
         $new_test_case.capture_trace_files()
