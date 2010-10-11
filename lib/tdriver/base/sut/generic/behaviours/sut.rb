@@ -739,7 +739,7 @@ module MobyBehaviour
   # MySqlConnectError
   #  description: In case there are problems with the database connectivity
   #
-	def translate( logical_name, file_name = nil, plurality = nil, numerus = nil, lengthvariant = nil )
+	def translate( logical_name, file_name = nil, plurality = nil, numerus = nil, lengthvariant = nil, operator = nil )
 
 		Kernel::raise LogicalNameNotFoundError.new("Logical name is nil") if logical_name.nil?
 		language=nil
@@ -758,7 +758,8 @@ module MobyBehaviour
 			MobyUtil::Parameter[ self.id ][ :localisation_server_database_tablename ],
 			file_name,
 			plurality,
-			lengthvariant
+			lengthvariant,
+			operator
 		)
 		if translation.kind_of? String and !numerus.nil?
 			translation.gsub!(/%Ln/){|s| numerus} 
@@ -770,6 +771,76 @@ module MobyBehaviour
 
 		translation
 
+	end
+	
+	
+	# == description
+	# Wrapper function to retrieve user information for this SUT from the user information database.
+	#
+	# == arguments
+	# user_data_lname
+	#  String
+	#   description: Logical name (LNAME) of the user information item to be retrieved.
+	#   example: "uif_button_ok"
+	#  Symbol
+	#   description: Symbol form of the logical name (LNAME) of the item to be translated.
+	#   example: :txt_button_ok
+	#
+	# file_name
+	#  String
+	#   description: Optional FNAME search argument for the translation
+	#   example: "agenda"
+	#   default: nil
+	#
+	# plurality
+	#  String
+	#   description: Optional PLURALITY search argument for the translation
+	#   example: "a" or "singular"
+	#	  default: nil
+	#
+	# numerus
+	#  String
+	#   description: Optional numeral replacement of '%Ln' tags on translation strings
+	#   example: "1"
+	#   default: nil
+	#  Integer
+	#   description: Optional numeral replacement of '%Ln' tags on translation strings
+	#   example: 1
+	# 
+	# lengthvariant
+	#  String
+	#   description: Optional LENGTHVAR search argument for the translation (1-9)
+	#   example: "1"
+	#   default: nil
+	#
+	# == returns
+	# String
+	#  description: Translation matching the logical_name
+	#  example: "Ok"
+	# Array
+	#  description: If multiple translations have been found for the search conditions an Array with all Strings be returned
+	#  example: ["Ok", "OK"]
+	# 
+	# == exceptions
+	# LanguageNotFoundError
+	#  description: In case language is not found
+	#
+	# LogicalNameNotFoundError
+	#  description: In case no logical name is not found for current language
+	#
+	# MySqlConnectError
+	#  description: In case there are problems with the database connectivity
+	#
+	def get_user_information( user_data_lname )
+		language = MMobyUtil::Parameter[ self.id ][ :language ]
+		table_name = MobyUtil::Parameter[ self.id ][ :user_data_server_database_tablename ] 
+		MobyUtil::UserData.retrieve( user_data_lname, language, table_name )
+	end
+	
+	def get_operator_data( operator_data_lname )
+		operator = operator = MobyUtil::Parameter[ self.id ][ :operator_selected ]
+		table_name = MobyUtil::Parameter[ self.id ][ :operator_data_server_database_tablename]
+		MobyUtil::OperatorData.retrieve( operator_data_lname, operator, table_name )
 	end
 
     # Function to update all children of current SUT

@@ -36,7 +36,7 @@ module MobyUtil
 		# LanguageNotFoundError:: in case the language not found
 		# TableNotFoundError:: in case the table name not found
 		# SqlError:: in case of the other problem with the query
-		def self.translation( logical_name, language, table_name, file_name = nil , plurality = nil, lengthvariant = nil )
+		def self.translation( logical_name, language, table_name, file_name = nil , plurality = nil, lengthvariant = nil, operator )
 
 			Kernel::raise LogicalNameNotFoundError.new( "Logical name cannot be nil" ) if logical_name == nil
 			Kernel::raise LanguageNotFoundError.new( "Language cannot be nil" ) if language == nil
@@ -92,7 +92,6 @@ module MobyUtil
 		username = MobyUtil::Parameter[ :user_data_server_username ]
 		password = MobyUtil::Parameter[ :user_data_server_password ]
 		database_name = MobyUtil::Parameter[ :user_data_server_database_name ]
-        table_name = MobyUtil::Parameter[ :user_data_server_database_tablename]
 
         query_string = "select `#{ language }` from #{ table_name } where lname = \'#{ logical_name }' and `#{ language }` <>\'#MISSING\'"
 
@@ -102,9 +101,7 @@ module MobyUtil
         username = MobyUtil::Parameter[ :operator_data_server_username ]
         password = MobyUtil::Parameter[ :operator_data_server_password ]
         database_name = MobyUtil::Parameter[ :operator_data_server_database_name ]
-        table_name = MobyUtil::Parameter[ :operator_data_server_database_tablename]
-        operator = MobyUtil::Parameter[ :operator_selected ]
-			  search_string = "#{ logical_name }' AND `Operator` = '#{ operator }"
+		search_string = "#{ logical_name }' AND `Operator` = '#{ operator }"
 
         query_string =  "select `Value` from `#{ table_name }` where `LogicalName` = '#{ search_string }' and `LogicalName` <> '#MISSING'"
 

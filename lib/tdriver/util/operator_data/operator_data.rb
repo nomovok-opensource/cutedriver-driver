@@ -26,13 +26,15 @@ module MobyUtil
 		# Function for fetching operator data from the operator data DB 
 		# == params
 		# operator_data_lname:: String containing operator_data_lname to be used in fetching the translation
+		# operator
+		# table_name
 		# == returns
 		# String:: Operator data string
 		# == throws
 		# OperatorDataNotFoundError:: in case the desired operator data is not found
 		# OperatorDataColumnNotFoundError:: in case the desired data column name to be used for the output is not found
 		# SqlError:: in case of the other problem with the query
-		def self.retrieve( operator_data_lname )
+		def self.retrieve( operator_data_lname, operator, table_name )
 			
 		    Kernel::raise OperatorDataNotFoundError.new( "Search string parameter cannot be nil" ) if operator_data_lname == nil
 
@@ -42,8 +44,6 @@ module MobyUtil
 			username = MobyUtil::Parameter[ :operator_data_server_username ]
 			password = MobyUtil::Parameter[ :operator_data_server_password ]
 			database_name = MobyUtil::Parameter[ :operator_data_server_database_name ]
-			table_name = MobyUtil::Parameter[ :operator_data_server_database_tablename]
-			operator = MobyUtil::Parameter[ :operator_selected ]
 			search_string = "#{ operator_data_lname }' AND `Operator` = '#{ operator }"			
 			
 			query_string =  "select `Value` from `#{ table_name }` where `LogicalName` = '#{ search_string }' and `LogicalName` <> '#MISSING'"

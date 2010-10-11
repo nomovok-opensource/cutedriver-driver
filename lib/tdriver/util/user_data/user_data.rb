@@ -33,7 +33,7 @@ module MobyUtil
 		# UserDataNotFoundError:: in case the desired user data is not found
 		# UserDataColumnNotFoundError:: in case the desired data column name to be used for the output is not found
 		# SqlError:: in case of the other problem with the query
-		def self.retrieve( user_data_lname )
+		def self.retrieve( user_data_lname, language, table_name )
 			
 			Kernel::raise UserDataNotFoundError.new( "User data logical name can't be empty" ) if user_data_lname == nil
 			
@@ -43,9 +43,7 @@ module MobyUtil
 			username = MobyUtil::Parameter[ :user_data_server_username ]
 			password = MobyUtil::Parameter[ :user_data_server_password ]
 			database_name = MobyUtil::Parameter[ :user_data_server_database_name ]
-			language = MobyUtil::Parameter[ :language ]
-			table_name = MobyUtil::Parameter[ :user_data_server_database_tablename ] 
-
+			
 			query_string = "select `#{ language }` from #{ table_name } where lname = \'#{ user_data_lname }' and `#{ language }` <>\'#MISSING\'"
 			
 			begin
