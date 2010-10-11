@@ -446,6 +446,7 @@
         
         <xsl:when test="count(arguments/argument)>0">
 
+          <!-- do not show parenthesis if first argument is type of block -->
           <xsl:if test="arguments/argument[1]/@type!='block'">
             <xsl:text>( </xsl:text>
 

@@ -654,8 +654,6 @@ EXAMPLE
       # add missing/undocumented arguments to order list
       missing = result.collect{ | value | order << value unless found_keys.include?( value.keys.first ) }
             
-      p order
-
       order
 
     end
@@ -986,21 +984,15 @@ EXAMPLE
     
   def process_undocumented_method_arguments( params )
 
-    p params
-
-    r = params.collect{ | param |
+    params.collect{ | param |
     
-      p param
+      hash = {}
+      hash[ :types ] = {}
+      hash[ :default ] = param[1] if param[-1] == true
 
-      #{ param.first.to_s => { :types => { "" => { "default" => param[1] } } } }
-
-      { param.first.to_s => { :types => { }, :default => param[1] } }
+      { param.first.to_s => hash }
         
     }
-
-    p r
-
-    r
 
   end
 
@@ -1056,8 +1048,6 @@ EXAMPLE
         # if no description found for arguments, add argument names to method_header hash
         if ( params.count > 0 ) && ( method_header[ :arguments ].nil? || method_header[:arguments].empty? )
                 
-          p method.name
-
           #p params.count, 
           method_header[:arguments] = process_undocumented_method_arguments( params )
           
@@ -1365,22 +1355,38 @@ EXAMPLE
 
          default_value_set = false 
          default_value = nil
-                    
+        
          if argument.last.has_key?( :argument_type_order )
+
            argument_types_in_order = argument.last[:argument_type_order].collect{ | type |                      
             [ type, argument.last[:types][ type ] ]           
            }
+
          else         
-           argument_types_in_order = argument.last[:types] 
+
+           argument_types_in_order = argument.last[ :types ]
+
          end
-                    
+            
+         # in case of argument is not documented at all...
+         if argument_types_in_order.empty?
+
+           # set optional flag if default value given
+           unless argument.last[:default].nil?
+
+             default_value = argument.last[:default]
+             default_value_set = true
+
+           end
+
+         end
+
          types_xml = argument_types_in_order.collect{ | type |
 
            unless argument.last[:default].nil?
 
              # show warning if default value for optional argument is already set
              #raise_error( "Error: Default value for optional argument '%s' ($MODULE) is already set! ('%s' --> '%s')" % [ argument.first, default_value, type.last["default"] ] ) if default_value_set == true
-
 
              default_value = argument.last[:default]
              default_value_set = true
