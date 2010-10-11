@@ -654,6 +654,8 @@ EXAMPLE
       # add missing/undocumented arguments to order list
       missing = result.collect{ | value | order << value unless found_keys.include?( value.keys.first ) }
             
+      p order
+
       order
 
     end
@@ -984,11 +986,21 @@ EXAMPLE
     
   def process_undocumented_method_arguments( params )
 
-    params.collect{ | param |
+    p params
+
+    r = params.collect{ | param |
     
-      { param.first.to_s => { :types => { "" => { "default" => param[1] } } } }
+      p param
+
+      #{ param.first.to_s => { :types => { "" => { "default" => param[1] } } } }
+
+      { param.first.to_s => { :types => { }, :default => param[1] } }
         
     }
+
+    p r
+
+    r
 
   end
 
@@ -1042,8 +1054,10 @@ EXAMPLE
         }]
 
         # if no description found for arguments, add argument names to method_header hash
-        if ( params.count > 0 ) && ( method_header[:arguments].nil? || method_header[:arguments].empty? )
+        if ( params.count > 0 ) && ( method_header[ :arguments ].nil? || method_header[:arguments].empty? )
                 
+          p method.name
+
           #p params.count, 
           method_header[:arguments] = process_undocumented_method_arguments( params )
           
@@ -1673,7 +1687,23 @@ EXAMPLE
 
           else
 
-            warn("Skip: #{ @module_path.join("::") } XML not saved due to missing behaviour name/description ") #in #{ @module_in_files.join(", ") }")
+            if methods.count > 0
+
+              xml_file_name = ( @module_path[1..-1].join("") ) + '.xml'
+
+              warn("Warning: #{ @module_path.join("::") } does not have behaviour (module) description defined, saving as %s " % xml_file_name )
+
+              open( xml_file_name, 'w'){ | file | file << xml }
+
+            else
+
+              warn("Skip: #{ @module_path.join("::") } does not have any public methods")
+
+            end
+
+            #p xml
+
+            #warn("Skip: #{ @module_path.join("::") } XML not saved due to missing behaviour name/description ") #in #{ @module_in_files.join(", ") }")
 
           end
 

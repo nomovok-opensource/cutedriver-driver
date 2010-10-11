@@ -445,46 +445,49 @@
         <xsl:when test="count(arguments/argument)=0"></xsl:when>
         
         <xsl:when test="count(arguments/argument)>0">
-          <xsl:text>( </xsl:text>
 
-            <!-- collect arguments for example -->
-            <xsl:for-each select="arguments/argument">
+          <xsl:if test="arguments/argument[1]/@type!='block'">
+            <xsl:text>( </xsl:text>
 
-              <xsl:if test="@type='normal' or @type='multi'">
+              <!-- collect arguments for example -->
+              <xsl:for-each select="arguments/argument">
 
-                <xsl:choose>
+                <xsl:if test="@type='normal' or @type='multi'">
 
-                  <xsl:when test="@optional='true'">
-                    <span class="optional_argument" title="Optional argument">
-                     <xsl:if test="@type='multi'">
-                       <xsl:text></xsl:text>        
-                     </xsl:if>
-                      <xsl:text>[ </xsl:text>
-                      <span class="hover_text">
-                        <xsl:value-of select="@name"/>
-                         <xsl:if test="@type='multi'">
-                           <xsl:text>, ..., ...</xsl:text>        
-                         </xsl:if>
+                  <xsl:choose>
+
+                    <xsl:when test="@optional='true'">
+                      <span class="optional_argument" title="Optional argument">
+                       <xsl:if test="@type='multi'">
+                         <xsl:text></xsl:text>        
+                       </xsl:if>
+                        <xsl:text>[ </xsl:text>
+                        <span class="hover_text">
+                          <xsl:value-of select="@name"/>
+                           <xsl:if test="@type='multi'">
+                             <xsl:text>, ..., ...</xsl:text>        
+                           </xsl:if>
+                        </span>
+                        <xsl:text> ]</xsl:text>
                       </span>
-                      <xsl:text> ]</xsl:text>
-                    </span>
-                  </xsl:when>
+                    </xsl:when>
 
-                  <xsl:otherwise>
-                    <span title="Mandatory argument" class="hover_text"><xsl:value-of select="@name"/></span>
-                  </xsl:otherwise>
+                    <xsl:otherwise>
+                      <span title="Mandatory argument" class="hover_text"><xsl:value-of select="@name"/></span>
+                    </xsl:otherwise>
 
-                </xsl:choose>
+                  </xsl:choose>
 
-                <!-- separate arguments with comma if next argument defintion is not type of block --> 
-                <xsl:if test="position()!=last() and (string(following-sibling::argument/@type)!='block' and string(following-sibling::argument/@type)!='block_argument')">
-                  <xsl:text>, </xsl:text>
+                  <!-- separate arguments with comma if next argument defintion is not type of block --> 
+                  <xsl:if test="position()!=last() and (string(following-sibling::argument/@type)!='block' and string(following-sibling::argument/@type)!='block_argument')">
+                    <xsl:text>, </xsl:text>
+                  </xsl:if>
+                  
                 </xsl:if>
                 
-              </xsl:if>
-              
-            </xsl:for-each>
-          <xsl:text> ) </xsl:text>
+              </xsl:for-each>
+            <xsl:text> ) </xsl:text>
+          </xsl:if>
           
           <!-- collect arguments for example -->
           <xsl:for-each select="arguments/argument">
