@@ -787,9 +787,19 @@
 
   <xsl:call-template name="feature_name" />
 
-  <xsl:call-template name="deprecated" />
+  <xsl:if test="count(deprecated)>0">
+
+    <xsl:call-template name="deprecated" />
+
+  </xsl:if>
   
   <xsl:call-template name="description" />
+
+  <xsl:if test="count(deprecated)>0">
+
+    <xsl:call-template name="target_details" />
+
+  </xsl:if>
 
   <xsl:if test="count(deprecated)=0">
 
