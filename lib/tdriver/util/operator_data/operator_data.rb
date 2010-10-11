@@ -1,20 +1,20 @@
 ############################################################################
-## 
-## Copyright (C) 2010 Nokia Corporation and/or its subsidiary(-ies). 
-## All rights reserved. 
-## Contact: Nokia Corporation (testabilitydriver@nokia.com) 
-## 
-## This file is part of Testability Driver. 
-## 
-## If you have questions regarding the use of this file, please contact 
-## Nokia at testabilitydriver@nokia.com . 
-## 
-## This library is free software; you can redistribute it and/or 
-## modify it under the terms of the GNU Lesser General Public 
-## License version 2.1 as published by the Free Software Foundation 
-## and appearing in the file LICENSE.LGPL included in the packaging 
-## of this file. 
-## 
+##
+## Copyright (C) 2010 Nokia Corporation and/or its subsidiary(-ies).
+## All rights reserved.
+## Contact: Nokia Corporation (testabilitydriver@nokia.com)
+##
+## This file is part of Testability Driver.
+##
+## If you have questions regarding the use of this file, please contact
+## Nokia at testabilitydriver@nokia.com .
+##
+## This library is free software; you can redistribute it and/or
+## modify it under the terms of the GNU Lesser General Public
+## License version 2.1 as published by the Free Software Foundation
+## and appearing in the file LICENSE.LGPL included in the packaging
+## of this file.
+##
 ############################################################################
 
 # Utility for handling operator data inputs database
@@ -22,8 +22,8 @@
 module MobyUtil
 
 	class OperatorData
-		
-		# Function for fetching operator data from the operator data DB 
+
+		# Function for fetching operator data from the operator data DB
 		# == params
 		# operator_data_lname:: String containing operator_data_lname to be used in fetching the translation
 		# operator:: String containing the operator name to be used in fetching operator data
@@ -38,7 +38,7 @@ module MobyUtil
 			
 		    Kernel::raise OperatorDataNotFoundError.new( "Search string parameter cannot be nil" ) if operator_data_lname == nil
 
-			# Get Localization parameters for DB Connection 
+			# Get Localization parameters for DB Connection
 			db_type =  MobyUtil::Parameter[ :operator_data_db_type, nil ].to_s.downcase
 			host =  MobyUtil::Parameter[ :operator_data_server_ip ]
 			username = MobyUtil::Parameter[ :operator_data_server_username ]
@@ -47,10 +47,10 @@ module MobyUtil
 			search_string = "#{ operator_data_lname }' AND `Operator` = '#{ operator }"			
 			
 			query_string =  "select `Value` from `#{ table_name }` where `LogicalName` = '#{ search_string }' and `LogicalName` <> '#MISSING'"
-			
+
 			begin
 				result = MobyUtil::DBAccess.query( db_type, host, username, password, database_name, query_string )
-			rescue            
+			rescue
 			    # if data column to be searched is not found then Kernel::raise error for search column not found
 			    Kernel::raise OperatorDataColumnNotFoundError.new( "Search column 'Value' not found in database" ) unless $!.message.index( "Unknown column" ) == nil
 			    Kernel::raise SqlError.new( $!.message )

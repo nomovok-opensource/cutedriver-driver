@@ -22,22 +22,50 @@
 # Methods for finding test objects on the suttest objet state
 module MobyBehaviour
 
-	# Defines methods to find test objects and scroll them to the display
+	# == description
+	# This module contains generic find behaviour
+	#
+	# == behaviour
+	# GenericFind
+	#
+	# == requires
+	# *
+	#
+	# == input_type
+	# *
+	#
+	# == sut_type
+	# *
+	#
+	# == sut_version
+	# *
+	#
+	# == objects
+	# *;sut
 	module Find   
 
 		include MobyBehaviour::Behaviour
 
+		# == description
 		# Finds a child test_object given its name and type and returns it as a reference 
-		# === params
-		# find_hash:: Hash with one or more attributes defining the rules for the test object search
-		# === returns
-		# TestObject:: A reference to the found test object
-		# === raises
-		# TypeError:: This exception will be thrown if input is not of type Hash or Hash is empty
-		# MobyBase::TestObjectNotFoundError This exception will be thrown when no test object with the attributes provided in the arguments is found in the SUT
-		# MobyBase::MultipleTestObjectsIdentifiedError This exception will be thrown when multiple test objects with the attributes provided in the arguments are found in the SUT
-		# === examples
-		#  @sut.find(:type => Button, :name => 'ClearAll')
+		#
+		# == arguments
+		# find_hash
+		#  Hash
+		#   description: one or more attributes defining the rules for the test object search. Must not be empty.
+		#   example { :name => 'oneButton' }
+		#   default: {}
+		#
+		# == returns
+		# MobyBase::TestObject
+		#  description: found test object
+		#
+		# == exceptions
+		# TypeError
+		#  description: raised if agument is not a Hash or is an emtpy Hash
+		#    
+		# == info
+		#  Same as calling child method.
 		def find ( find_hash = {} )
 
 			begin
@@ -58,49 +86,6 @@ module MobyBehaviour
 
 			search_result
 		end
-
-		### Finds a child test_object given its name and type, centers it to the screen and returns it as a reference 
-		### === params
-		### find_hash:: Hash with one or more attributes defining the rules for the test object search
-		### === returns
-		### TestObject:: A reference to the found test object
-		### === raises
-		### TypeError:: This exception will be thrown if input is not of type Hash or Hash is empty
-		### MobyBase::TestObjectNotFoundError This exception will be thrown when no test object with the attributes provided in the arguments is found in the SUT
-		### MobyBase::MultipleTestObjectsIdentifiedError This exception will be thrown when multiple test objects with the attributes provided in the arguments are found in the SUT
-		### === examples
-		###  @sut.find_and_center(:type => Button, :name => 'ClearAll')
-		# def find_and_center (find_hash = {})
-		# begin
-		# search_result = find(find_hash)
-		### Calculate Center
-		#### WORKS ONLY IN QC TESTAPP!! (for now)
-		### window_width = search_result.sut.application.NodeView.attribute('width').to_i/2
-		### window_height = search_result.sut.application.NodeView.attribute('height').to_i/2
-		### window_x = search_result.sut.application.NodeView.attribute('x_absolute').to_i + window_width.to_i
-		### window_y = search_result.sut.application.NodeView.attribute('y_absolute').to_i + window_height.to_i
-
-		### window_width = search_result.sut.application.MainWindow.attribute('width').to_i/2
-		### window_height = search_result.sut.application.MainWindow.attribute('height').to_i/2
-		### window_x = search_result.sut.application.MainWindow.attribute('x_absolute').to_i + window_width.to_i
-		### window_y = search_result.sut.application.MainWindow.attribute('y_absolute').to_i + window_height.to_i
-
-		# myWindow = search_result.sut.application.find(:isWindow => "true").first # throws multiple found exeptions
-		# window_width = myWindow.attribute('width').to_i/2
-		# window_height = myWindow.attribute('height').to_i/2
-		# window_x = myWindow.attribute('x_absolute').to_i + window_width.to_i
-		# window_y = myWindow.attribute('y_absolute').to_i + window_height.to_i
-
-		### flick_to (center)
-		# search_result.flick_to(window_x.to_i, window_y.to_i)
-		# rescue Exception => e
-		###MobyUtil::Logger.instance.log "behaviour" , "FAIL;Failed to find test object.;#{id.to_s};sut;{};find;" << (find_hash.kind_of?(Hash) ? find_hash.inspect : find_hash.class.to_s)  
-		### Rescue from center and flick
-		# Kernel::raise e
-		# end
-		# MobyUtil::Logger.instance.log "behaviour" , "PASS;Test object found and centered.;#{id.to_s};sut;{};application;" << find_hash.inspect  
-		# search_result
-		# end
 
 		# enable hooking for performance measurement & debug logging
 		MobyUtil::Hooking.instance.hook_methods( self ) if defined?( MobyUtil::Hooking )

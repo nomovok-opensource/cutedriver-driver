@@ -42,17 +42,16 @@
         border-bottom: 1px solid #aaaaaa;
         border-right: 1px solid #aaaaaa;
 
-        color: #404040;
-
         padding: 8px; 
 
       }
 
-      span.feature_title_text
+      span.feature_title_text, a.feature_name_link
       {
         text-decoration: none; //underline;
         border-bottom: 2px solid #404040;
         font-size: 14px; 
+        color: #404040;
         font-weight: bold;
       }
 
@@ -66,7 +65,7 @@
       
       }
       
-      div.feature_description, div.feature_call_sequence, div.scenario_description
+      div.feature_description, div.feature_call_sequence, div.scenario_description, div.feature_deprecated_version
       {
 
         padding: 2px;
@@ -84,7 +83,7 @@
       
       }
       
-      div.feature_description, div.scenario_description
+      div.feature_description, div.scenario_description, div.feature_deprecated_version
       {
         font-style: normal; // normal more readable than italic;
       }
@@ -372,17 +371,23 @@
   <br />
   
   <div class="toc">
+
     <xsl:for-each select="feature/@name">
+
       <xsl:sort select="." />
 
+      <!---
+
+        file:///home/jussi/git/2010-10-07/driver/lib/output/example.xml#QT;TestObject;activate
+
+      -->
+
       <xsl:variable name="name"><xsl:value-of select="../@name"/></xsl:variable>
+      <xsl:variable name="module"><xsl:value-of select="../behaviour/@module"/></xsl:variable>
+      <xsl:variable name="module_name"><xsl:value-of select="../behaviour/@name"/></xsl:variable>
 
       <xsl:for-each select="str:split(.,';')">
-        <span class="toc_block">
-          <a href="#{ $name }" class="toc_item">
-            <xsl:value-of select="." />
-          </a>
-        </span>
+        <span class="toc_block"><a href="#{ $module_name }:{ $name }" class="toc_item" title="{ $module_name } ({ $module })"><xsl:value-of select="." /></a><xsl:text> </xsl:text></span>
       </xsl:for-each>
 
       <xsl:text> </xsl:text>
@@ -407,18 +412,19 @@
 
   <!-- implements following features, e.g. method name, attribute reader, attribute writer or both when attribute accessor -->
 
-  <a name="{ @name }">
+ <!-- #{ $module }.{ $name }-->
+
+  <a name="{ ./behaviour/@name }:{ @name }"></a>
   <div class="feature_title">
+  <a href="#{ ./behaviour/@name }:{ @name }" class="feature_name_link">
   <xsl:for-each select="str:split(@name,';')">
-    <span class="feature_title_text">
-      <xsl:value-of select="."/> 
-    </span>
+    <span class="feature_title_text"><xsl:value-of select="."/></span>
     <xsl:if test="position()!=last()">
     <xsl:text>, </xsl:text>
     </xsl:if>
   </xsl:for-each>
-  </div>
   </a>
+  </div>
 
   <br />
 
@@ -445,46 +451,56 @@
         <xsl:when test="count(arguments/argument)=0"></xsl:when>
         
         <xsl:when test="count(arguments/argument)>0">
-          <xsl:text>( </xsl:text>
 
-            <!-- collect arguments for example -->
-            <xsl:for-each select="arguments/argument">
+          <!-- do not show parenthesis if first argument is type of block -->
+          <xsl:if test="arguments/argument[1]/@type!='block'">
+            <xsl:text>( </xsl:text>
 
-              <xsl:if test="@type='normal' or @type='multi'">
+              <!-- collect arguments for example -->
+              <xsl:for-each select="arguments/argument">
 
-                <xsl:choose>
+                <xsl:if test="@type='normal' or @type='multi'">
 
-                  <xsl:when test="@optional='true'">
-                    <span class="optional_argument" title="Optional argument">
-                     <xsl:if test="@type='multi'">
-                       <xsl:text></xsl:text>        
-                     </xsl:if>
-                      <xsl:text>[ </xsl:text>
-                      <span class="hover_text">
-                        <xsl:value-of select="@name"/>
-                         <xsl:if test="@type='multi'">
-                           <xsl:text>, ..., ...</xsl:text>        
-                         </xsl:if>
+                  <xsl:choose>
+
+                    <xsl:when test="@optional='true'">
+
+                      <span class="optional_argument" title="Optional argument">
+
+                       <xsl:if test="@type='multi'">
+                         <xsl:text></xsl:text>        
+                       </xsl:if>
+
+                        <xsl:text>[ </xsl:text>
+                        <span class="hover_text">
+                          <xsl:value-of select="@name"/>
+                           <xsl:if test="@type='multi'">
+                             <xsl:text>, ..., ...</xsl:text>        
+                           </xsl:if>
+                        </span>
+
+                        <xsl:text> ]</xsl:text>
+
                       </span>
-                      <xsl:text> ]</xsl:text>
-                    </span>
-                  </xsl:when>
 
-                  <xsl:otherwise>
-                    <span title="Mandatory argument" class="hover_text"><xsl:value-of select="@name"/></span>
-                  </xsl:otherwise>
+                    </xsl:when>
 
-                </xsl:choose>
+                    <xsl:otherwise>
+                      <span title="Mandatory argument" class="hover_text"><xsl:value-of select="@name"/></span>
+                    </xsl:otherwise>
 
-                <!-- separate arguments with comma if next argument defintion is not type of block --> 
-                <xsl:if test="position()!=last() and (string(following-sibling::argument/@type)!='block' and string(following-sibling::argument/@type)!='block_argument')">
-                  <xsl:text>, </xsl:text>
+                  </xsl:choose>
+
+                  <!-- separate arguments with comma if next argument defintion is not type of block --> 
+                  <xsl:if test="position()!=last() and (string(following-sibling::argument/@type)!='block' and string(following-sibling::argument/@type)!='block_argument')">
+                    <xsl:text>, </xsl:text>
+                  </xsl:if>
+                  
                 </xsl:if>
                 
-              </xsl:if>
-              
-            </xsl:for-each>
-          <xsl:text> ) </xsl:text>
+              </xsl:for-each>
+            <xsl:text> ) </xsl:text>
+          </xsl:if>
           
           <!-- collect arguments for example -->
           <xsl:for-each select="arguments/argument">
@@ -589,7 +605,7 @@
       <td class="header">SUT type(s)</td>
       <td class="header">SUT version(s)</td>
       <td class="header">SUT input type(s)</td>
-      <td class="header">Behaviour module</td>
+      <td class="header">Behaviour module and name</td>
       <td class="header">Required plugin</td>
     </tr>
     <tr>
@@ -736,9 +752,28 @@
       <!-- behaviour module -->
       <xsl:choose>
         <xsl:when test="string-length(behaviour/@module)>0">
-          <td class="tablebg_even" valign="top">
-            <xsl:value-of select="behaviour/@module" />
-          </td>
+
+          <xsl:choose>
+            <xsl:when test="string-length(behaviour/@name)>0">
+
+              <td class="tablebg_even" valign="top">
+                <xsl:value-of select="behaviour/@module" /><xsl:text> (</xsl:text><xsl:value-of select="behaviour/@name" /><xsl:text>)</xsl:text>
+              </td>
+
+            </xsl:when>
+            <xsl:otherwise>
+
+              <td class="tablebg_warning" valign="top">
+                <xsl:call-template name="div_warning">
+                <xsl:with-param name="text">
+                  <xsl:value-of select="behaviour/@module" /><xsl:text> (Behaviour name not defined)</xsl:text>
+                </xsl:with-param>
+                </xsl:call-template>
+              </td>
+
+            </xsl:otherwise>
+          </xsl:choose>
+
         </xsl:when>
         <xsl:otherwise>
           <td class="tablebg_warning" valign="top">
@@ -778,36 +813,49 @@
 <xsl:template name="feature">
 
   <xsl:call-template name="feature_name" />
+
+  <xsl:if test="count(deprecated)>0">
+
+    <xsl:call-template name="deprecated" />
+
+  </xsl:if>
   
   <xsl:call-template name="description" />
 
-  <xsl:call-template name="call_sequence" />
+  <xsl:if test="count(deprecated)>0">
 
-  <xsl:call-template name="target_details" />
+    <xsl:call-template name="target_details" />
 
-  <xsl:call-template name="arguments" />
+  </xsl:if>
 
-  <xsl:call-template name="returns">
-    <xsl:with-param name="type" select="returns/type" />
-    <xsl:with-param name="feature_type" select="@type" />
-  </xsl:call-template>
+  <xsl:if test="count(deprecated)=0">
 
-  <xsl:call-template name="exceptions">
-    <xsl:with-param name="type" select="exceptions/type" />
-    <xsl:with-param name="feature_type" select="@type" />
-  </xsl:call-template>
+    <xsl:call-template name="call_sequence" />
 
-  <xsl:if test="count(tables/table)>0">
-  
-    <!-- custom tables -->
-    <xsl:call-template name="tables" />
+    <xsl:call-template name="target_details" />
 
-   </xsl:if>
+    <xsl:call-template name="arguments" />
 
+    <xsl:call-template name="returns">
+      <xsl:with-param name="type" select="returns/type" />
+      <xsl:with-param name="feature_type" select="@type" />
+    </xsl:call-template>
 
-  <xsl:call-template name="tests">
-    <xsl:with-param name="tests" select="tests" />
-  </xsl:call-template>
+    <xsl:call-template name="exceptions">
+      <xsl:with-param name="type" select="exceptions/type" />
+      <xsl:with-param name="feature_type" select="@type" />
+    </xsl:call-template>
+
+    <xsl:if test="count(tables/table)>0">    
+      <!-- custom tables -->
+      <xsl:call-template name="tables" />
+    </xsl:if>
+
+    <xsl:call-template name="tests">
+      <xsl:with-param name="tests" select="tests" />
+    </xsl:call-template>
+
+  </xsl:if>
     
   <xsl:call-template name="info" />
   
@@ -1290,6 +1338,17 @@
 
 </xsl:template>
 
+<xsl:template name="deprecated">
+
+  <div class="feature_section_title">Deprecated in version:</div>
+
+  <div class="feature_deprecated_version">
+    <xsl:value-of select="deprecated/@version"/> 
+  </div>
+  <br />
+
+</xsl:template>
+
 <xsl:template name="tests">
 
   <xsl:param name="tests" />
@@ -1311,7 +1370,12 @@
     <xsl:value-of select="@name"/>
 
     <pre class="{@status}">
-      <xsl:text># scenario </xsl:text><xsl:value-of select="@status" /><br />
+
+      <!-- show status only if other than 'passed' -->
+      <xsl:if test="string(@status)!='passed'" >
+        <xsl:text># scenario </xsl:text><xsl:value-of select="@status" /><br />
+      </xsl:if>
+
       <xsl:for-each select="str:split(example,'\n')">
         <xsl:value-of select="text()" /><br />
       </xsl:for-each>

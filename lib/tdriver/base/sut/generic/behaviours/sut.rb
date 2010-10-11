@@ -564,8 +564,8 @@ module MobyBehaviour
 
           self.wait_child(
             expected_attributes,
-            MobyUtil::Parameter[ self.id ][ :application_synchronization_timeout, '5' ].to_f,
-            MobyUtil::Parameter[ self.id ][ :application_synchronization_retry_interval, '0.5' ].to_f
+            MobyUtil::Parameter[ @id ][ :application_synchronization_timeout, '5' ].to_f,
+            MobyUtil::Parameter[ @id ][ :application_synchronization_retry_interval, '0.5' ].to_f
           )
 
         rescue MobyBase::SyncTimeoutError
@@ -670,13 +670,13 @@ module MobyBehaviour
 
       if ( arguments.count == 0 )
 
-        MobyUtil::ParameterUserAPI.instance[ self.id ]
+        MobyUtil::ParameterUserAPI.instance[ @id ]
 
       else
 
         #$stderr.puts "%s:%s warning: deprecated method usage convention, please use sut#parameter[] instead of sut#parameter()" % ( caller.first || "%s:%s" % [ __FILE__, __LINE__ ] ).split(":")[ 0..1 ]
 
-        MobyUtil::ParameterUserAPI.instance[ self.id ][ *arguments ]
+        MobyUtil::ParameterUserAPI.instance[ @id ][ *arguments ]
 
       end
 

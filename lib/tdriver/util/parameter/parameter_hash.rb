@@ -41,7 +41,7 @@ module MobyUtil
 
     def []( key, *default, &block )
 
-      fetch( key ){ 
+      $last_parameter = fetch( key ){ 
 
         if default.empty?
 
