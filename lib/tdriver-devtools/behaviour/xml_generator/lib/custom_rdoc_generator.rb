@@ -986,7 +986,11 @@ EXAMPLE
 
     params.collect{ | param |
     
-      { param.first.to_s => { :types => { "" => { "default" => param[1] } } } }
+      hash = {}
+      hash[ :types ] = {}
+      hash[ :default ] = param[1] if param[-1] == true
+
+      { param.first.to_s => hash }
         
     }
 
@@ -1042,7 +1046,7 @@ EXAMPLE
         }]
 
         # if no description found for arguments, add argument names to method_header hash
-        if ( params.count > 0 ) && ( method_header[:arguments].nil? || method_header[:arguments].empty? )
+        if ( params.count > 0 ) && ( method_header[ :arguments ].nil? || method_header[:arguments].empty? )
                 
           #p params.count, 
           method_header[:arguments] = process_undocumented_method_arguments( params )
@@ -1351,22 +1355,38 @@ EXAMPLE
 
          default_value_set = false 
          default_value = nil
-                    
+        
          if argument.last.has_key?( :argument_type_order )
+
            argument_types_in_order = argument.last[:argument_type_order].collect{ | type |                      
             [ type, argument.last[:types][ type ] ]           
            }
+
          else         
-           argument_types_in_order = argument.last[:types] 
+
+           argument_types_in_order = argument.last[ :types ]
+
          end
-                    
+            
+         # in case of argument is not documented at all...
+         if argument_types_in_order.empty?
+
+           # set optional flag if default value given
+           unless argument.last[:default].nil?
+
+             default_value = argument.last[:default]
+             default_value_set = true
+
+           end
+
+         end
+
          types_xml = argument_types_in_order.collect{ | type |
 
            unless argument.last[:default].nil?
 
              # show warning if default value for optional argument is already set
              #raise_error( "Error: Default value for optional argument '%s' ($MODULE) is already set! ('%s' --> '%s')" % [ argument.first, default_value, type.last["default"] ] ) if default_value_set == true
-
 
              default_value = argument.last[:default]
              default_value_set = true
@@ -1673,7 +1693,23 @@ EXAMPLE
 
           else
 
-            warn("Skip: #{ @module_path.join("::") } XML not saved due to missing behaviour name/description ") #in #{ @module_in_files.join(", ") }")
+            if methods.count > 0
+
+              xml_file_name = ( @module_path[1..-1].join("") ) + '.xml'
+
+              warn("Warning: #{ @module_path.join("::") } does not have behaviour (module) description defined, saving as %s " % xml_file_name )
+
+              open( xml_file_name, 'w'){ | file | file << xml }
+
+            else
+
+              warn("Skip: #{ @module_path.join("::") } does not have any public methods")
+
+            end
+
+            #p xml
+
+            #warn("Skip: #{ @module_path.join("::") } XML not saved due to missing behaviour name/description ") #in #{ @module_in_files.join(", ") }")
 
           end
 
