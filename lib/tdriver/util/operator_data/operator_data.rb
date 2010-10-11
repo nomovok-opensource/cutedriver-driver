@@ -26,8 +26,8 @@ module MobyUtil
 		# Function for fetching operator data from the operator data DB 
 		# == params
 		# operator_data_lname:: String containing operator_data_lname to be used in fetching the translation
-		# operator
-		# table_name
+		# operator:: String containing the operator name to be used in fetching operator data
+		# table_name:: String containing the name of table to be used when fetching operator data
 		# == returns
 		# String:: Operator data string
 		# == throws
@@ -58,7 +58,8 @@ module MobyUtil
 
 			# Return always the first column of the row
 			Kernel::raise OperatorDataNotFoundError.new("No matches found for search string '#{ operator_data_lname }' in search column 'LogicalName' for opreator #{ operator }" ) if ( result.empty?)
-			return result[0] # array of rows! We want the first column of the first row
+			# Result is an Array of rows (Array<String>)! We want the first column of the first row.
+			return result[0][0]
 			
 		end
 

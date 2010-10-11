@@ -26,6 +26,8 @@ module MobyUtil
 		# Function for fetching user data from the user data DB
 		# == params
 		# user_data_lname:: String containing user_data_lname to be used in fetching the translation
+		# language:: String containing language to be used in fetching user information
+		# table_name:: String containing the name of table to be used when user information
 		# == returns
 		# String:: User data string
 		# Array<String>:: Array of values when multiple user data strings found
@@ -61,8 +63,10 @@ module MobyUtil
 				result.each do |row|
 					result_array << row[0]
 				end
+				return result_array
 			else
-				return result[0] # array of rows! We want the first column of the first row
+				# Result is an Array of rows (Array<String>)! We want the first column of the first row.
+				return result[0][0]
 			end
 			
 		end
