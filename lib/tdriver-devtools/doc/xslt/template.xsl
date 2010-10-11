@@ -416,7 +416,7 @@
 
   <a name="{ ./behaviour/@name }:{ @name }"></a>
   <div class="feature_title">
-  <a href="#{ @name }" class="feature_name_link">
+  <a href="#{ ./behaviour/@name }:{ @name }" class="feature_name_link">
   <xsl:for-each select="str:split(@name,';')">
     <span class="feature_title_text"><xsl:value-of select="."/></span>
     <xsl:if test="position()!=last()">
@@ -605,7 +605,7 @@
       <td class="header">SUT type(s)</td>
       <td class="header">SUT version(s)</td>
       <td class="header">SUT input type(s)</td>
-      <td class="header">Behaviour module</td>
+      <td class="header">Behaviour module and name</td>
       <td class="header">Required plugin</td>
     </tr>
     <tr>
@@ -752,9 +752,28 @@
       <!-- behaviour module -->
       <xsl:choose>
         <xsl:when test="string-length(behaviour/@module)>0">
-          <td class="tablebg_even" valign="top">
-            <xsl:value-of select="behaviour/@module" />
-          </td>
+
+          <xsl:choose>
+            <xsl:when test="string-length(behaviour/@name)>0">
+
+              <td class="tablebg_even" valign="top">
+                <xsl:value-of select="behaviour/@module" /><xsl:text> (</xsl:text><xsl:value-of select="behaviour/@name" /><xsl:text>)</xsl:text>
+              </td>
+
+            </xsl:when>
+            <xsl:otherwise>
+
+              <td class="tablebg_warning" valign="top">
+                <xsl:call-template name="div_warning">
+                <xsl:with-param name="text">
+                  <xsl:value-of select="behaviour/@module" /><xsl:text> (Behaviour name not defined)</xsl:text>
+                </xsl:with-param>
+                </xsl:call-template>
+              </td>
+
+            </xsl:otherwise>
+          </xsl:choose>
+
         </xsl:when>
         <xsl:otherwise>
           <td class="tablebg_warning" valign="top">
