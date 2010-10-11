@@ -739,7 +739,7 @@ module MobyBehaviour
   # SqlError
   #  description: In case there are problems with the database connectivity
   #
-	def translate( logical_name, file_name = nil, plurality = nil, numerus = nil, lengthvariant = nil, operator = nil )
+	def translate( logical_name, file_name = nil, plurality = nil, numerus = nil, lengthvariant = nil )
 	
 		Kernel::raise LogicalNameNotFoundError.new("Logical name is nil") if logical_name.nil?
 		
