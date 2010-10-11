@@ -171,6 +171,20 @@ module MobyBehaviour
 
       end
 
+      # == deprecated
+      # 0.9.0
+      #
+      # == description
+      # This method is deprecated, please use [link="#parent"]TestObject#parent[/link] instead.
+      #
+      def parent_object()
+
+        $stderr.puts "warning: TestObject#parent_object is deprecated, please use TestObject#parent instead."      
+
+        @parent
+
+      end
+
     end
 
   end

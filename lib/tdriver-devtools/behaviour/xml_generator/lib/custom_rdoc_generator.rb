@@ -1086,7 +1086,6 @@ EXAMPLE
         else
 
           method_header.merge!( :__type => "method" )
-
           
         end
 
@@ -1261,11 +1260,15 @@ EXAMPLE
 
       end
 
+      count = 0
+
       # generate return value types template
       returns = feature.last[ :returns ].collect{ | return_types |
             
         return_types.collect{ | returns |
         
+           count += 1
+
            # apply types to returns template
            apply_macros!( @templates["behaviour.xml.returns"].clone, {
               "RETURN_VALUE_TYPE" => encode_string( returns.first ),
@@ -1278,12 +1281,20 @@ EXAMPLE
      
       }.join
 
-      apply_macros!( @templates["behaviour.xml.method.returns"].clone, {
+      if count > 0
 
-          "METHOD_RETURNS" => returns
+        apply_macros!( @templates["behaviour.xml.method.returns"].clone, {
 
-        }
-      )
+            "METHOD_RETURNS" => returns
+
+          }
+        )
+
+      else
+
+        ""
+
+      end
       
     end
 
@@ -1299,11 +1310,15 @@ EXAMPLE
 
       return "" if feature.last[ :exceptions ].nil? || feature.last[ :exceptions ].empty?
 
+      count = 0
+
       # generate exceptions template
       exceptions = feature.last[ :exceptions ].collect{ | exceptions |
       
         exceptions.collect{ | exception |
         
+           count += 1
+
            # apply types to exception template
            apply_macros!( @templates["behaviour.xml.exception"].clone, {
               "EXCEPTION_NAME" => encode_string( exception.first ),
@@ -1315,12 +1330,20 @@ EXAMPLE
      
       }.join
 
-      apply_macros!( @templates["behaviour.xml.method.exceptions"].clone, {
+      if count > 0
 
-          "METHOD_EXCEPTIONS" => exceptions
+        apply_macros!( @templates["behaviour.xml.method.exceptions"].clone, {
 
-        }
-      )
+            "METHOD_EXCEPTIONS" => exceptions
+
+          }
+        )
+
+      else
+
+       ""
+
+      end
 
     end
 
@@ -1519,13 +1542,57 @@ EXAMPLE
 
       end
     
-      apply_macros!( @templates["behaviour.xml.method.tables"].clone, {
+      if tables.count > 0
 
-          "METHOD_TABLES" => tables.join("")
+        apply_macros!( @templates["behaviour.xml.method.tables"].clone, {
 
-        }
-      )
+            "METHOD_TABLES" => tables.join("")
+
+          }
+        )
+
+      else
+
+        ""
+
+      end
     
+    end
+
+    def generate_deprecated_element( header, feature, &block )
+
+      if feature.last.has_key?( :deprecated )
+
+        yield
+
+        apply_macros!( @templates["behaviour.xml.method.deprecated"].clone, {
+            "DEPRECATED_IN_VERSION_NUMBER" => encode_string( feature.last[:deprecated] )
+          }
+        )
+
+      else
+
+        ""
+
+      end
+
+    end
+
+    def generate_info_element( header, feature )
+
+      if feature.last.has_key?( :info )
+
+        apply_macros!( @templates["behaviour.xml.method.info"].clone, {
+            "METHOD_INFO" => encode_string( feature.last[:info] )
+          }
+        )
+
+      else
+
+        ""
+
+      end
+
     end
 
     def generate_methods_element( header, features )
@@ -1547,7 +1614,18 @@ EXAMPLE
           exceptions = generate_exceptions_element( header, feature )
                     
           tables = generate_tables_element( header, feature )
+
+          info = generate_info_element( header, feature )
                     
+          deprecated = generate_deprecated_element( header, feature ){
+            
+            arguments = ""
+            returns = ""
+            exceptions = ""
+            tables = ""
+
+          }
+
           if feature.last[:description].nil?
 
            raise_error("Warning: $TYPE description for '#{ feature.first }' ($MODULE) is empty.", 'description')
@@ -1558,12 +1636,13 @@ EXAMPLE
           apply_macros!( @templates["behaviour.xml.method"].clone, { 
             "METHOD_NAME" => encode_string( feature.first ),
             "METHOD_TYPE" => encode_string( feature.last[:__type] || "unknown" ),
+            "METHOD_DEPRECATED" => deprecated,
             "METHOD_DESCRIPTION" => encode_string( feature.last[:description] ),
             "METHOD_ARGUMENTS" => arguments,
             "METHOD_RETURNS" => returns,
             "METHOD_EXCEPTIONS" => exceptions,
             "METHOD_TABLES" => tables,
-            "METHOD_INFO" => encode_string( feature.last[:info] )
+            "METHOD_INFO" => info # feature.last[:info]
            } 
           )
 
