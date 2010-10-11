@@ -65,7 +65,7 @@
       
       }
       
-      div.feature_description, div.feature_call_sequence, div.scenario_description
+      div.feature_description, div.feature_call_sequence, div.scenario_description, div.feature_deprecated_version
       {
 
         padding: 2px;
@@ -83,7 +83,7 @@
       
       }
       
-      div.feature_description, div.scenario_description
+      div.feature_description, div.scenario_description, div.feature_deprecated_version
       {
         font-style: normal; // normal more readable than italic;
       }
@@ -456,10 +456,13 @@
                   <xsl:choose>
 
                     <xsl:when test="@optional='true'">
+
                       <span class="optional_argument" title="Optional argument">
+
                        <xsl:if test="@type='multi'">
                          <xsl:text></xsl:text>        
                        </xsl:if>
+
                         <xsl:text>[ </xsl:text>
                         <span class="hover_text">
                           <xsl:value-of select="@name"/>
@@ -467,8 +470,11 @@
                              <xsl:text>, ..., ...</xsl:text>        
                            </xsl:if>
                         </span>
+
                         <xsl:text> ]</xsl:text>
+
                       </span>
+
                     </xsl:when>
 
                     <xsl:otherwise>
@@ -780,36 +786,39 @@
 <xsl:template name="feature">
 
   <xsl:call-template name="feature_name" />
+
+  <xsl:call-template name="deprecated" />
   
   <xsl:call-template name="description" />
 
-  <xsl:call-template name="call_sequence" />
+  <xsl:if test="count(deprecated)=0">
 
-  <xsl:call-template name="target_details" />
+    <xsl:call-template name="call_sequence" />
 
-  <xsl:call-template name="arguments" />
+    <xsl:call-template name="target_details" />
 
-  <xsl:call-template name="returns">
-    <xsl:with-param name="type" select="returns/type" />
-    <xsl:with-param name="feature_type" select="@type" />
-  </xsl:call-template>
+    <xsl:call-template name="arguments" />
 
-  <xsl:call-template name="exceptions">
-    <xsl:with-param name="type" select="exceptions/type" />
-    <xsl:with-param name="feature_type" select="@type" />
-  </xsl:call-template>
+    <xsl:call-template name="returns">
+      <xsl:with-param name="type" select="returns/type" />
+      <xsl:with-param name="feature_type" select="@type" />
+    </xsl:call-template>
 
-  <xsl:if test="count(tables/table)>0">
-  
-    <!-- custom tables -->
-    <xsl:call-template name="tables" />
+    <xsl:call-template name="exceptions">
+      <xsl:with-param name="type" select="exceptions/type" />
+      <xsl:with-param name="feature_type" select="@type" />
+    </xsl:call-template>
 
-   </xsl:if>
+    <xsl:if test="count(tables/table)>0">    
+      <!-- custom tables -->
+      <xsl:call-template name="tables" />
+    </xsl:if>
 
+    <xsl:call-template name="tests">
+      <xsl:with-param name="tests" select="tests" />
+    </xsl:call-template>
 
-  <xsl:call-template name="tests">
-    <xsl:with-param name="tests" select="tests" />
-  </xsl:call-template>
+  </xsl:if>
     
   <xsl:call-template name="info" />
   
@@ -1288,6 +1297,17 @@
       <xsl:with-param name="text">Description not defined</xsl:with-param>
     </xsl:call-template>
   </xsl:if>
+  <br />
+
+</xsl:template>
+
+<xsl:template name="deprecated">
+
+  <div class="feature_section_title">Deprecated in version:</div>
+
+  <div class="feature_deprecated_version">
+    <xsl:value-of select="deprecated/@version"/> 
+  </div>
   <br />
 
 </xsl:template>
