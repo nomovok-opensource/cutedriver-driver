@@ -42,17 +42,16 @@
         border-bottom: 1px solid #aaaaaa;
         border-right: 1px solid #aaaaaa;
 
-        color: #404040;
-
         padding: 8px; 
 
       }
 
-      span.feature_title_text
+      span.feature_title_text, a.feature_name_link
       {
         text-decoration: none; //underline;
         border-bottom: 2px solid #404040;
         font-size: 14px; 
+        color: #404040;
         font-weight: bold;
       }
 
@@ -407,18 +406,17 @@
 
   <!-- implements following features, e.g. method name, attribute reader, attribute writer or both when attribute accessor -->
 
-  <a name="{ @name }">
+  <a name="{ @name }"></a>
   <div class="feature_title">
+  <a href="#{ @name }" class="feature_name_link">
   <xsl:for-each select="str:split(@name,';')">
-    <span class="feature_title_text">
-      <xsl:value-of select="."/> 
-    </span>
+    <span class="feature_title_text"><xsl:value-of select="."/></span>
     <xsl:if test="position()!=last()">
     <xsl:text>, </xsl:text>
     </xsl:if>
   </xsl:for-each>
-  </div>
   </a>
+  </div>
 
   <br />
 
