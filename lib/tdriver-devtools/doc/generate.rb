@@ -9,6 +9,12 @@ $modules_and_methods_tested = {}
 def process_result_file( content )
 
   result = { "__file" => @current_file }
+  
+  # convert linefeeds to whitespace
+  content.gsub!( "\n", ' ' )
+
+  # convert double whitespaces to one whitespace
+  content.gsub!( '  ', ' ' )
 
   doc = Nokogiri::XML::parse( content )
 
@@ -440,7 +446,7 @@ def collect_feature_tests
 
           status = /^.*\s{1}(\w+)$/.match( example ).captures.first      
 
-          [ "example" => code, "status" => status.to_s.downcase ]
+          [ "example" => code, "status" => status.to_s.downcase, "description" => scenario["description"] ]
 
         }.flatten
 
@@ -880,12 +886,12 @@ def generate_document_xml
                   xml.scenario( 
                   
                     :type => ( feature_type == "accessor" ? ( ( scenario_name[-1] == ?= ) ? "writer" : "reader" ) : feature_type ), 
-                    :status => scenario_value[ "status" ] 
+                    :status => scenario_value[ "status" ]
 
                   ){
                   
                     # <description>Example scenario</description>
-                    xml.description( "" )
+                    xml.description( scenario_value[ "description" ] )
 
                     # <example>code</example>
                     xml.example( scenario_value[ "example" ] )
