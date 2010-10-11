@@ -371,17 +371,23 @@
   <br />
   
   <div class="toc">
+
     <xsl:for-each select="feature/@name">
+
       <xsl:sort select="." />
 
+      <!---
+
+        file:///home/jussi/git/2010-10-07/driver/lib/output/example.xml#QT;TestObject;activate
+
+      -->
+
       <xsl:variable name="name"><xsl:value-of select="../@name"/></xsl:variable>
+      <xsl:variable name="module"><xsl:value-of select="../behaviour/@module"/></xsl:variable>
+      <xsl:variable name="module_name"><xsl:value-of select="../behaviour/@name"/></xsl:variable>
 
       <xsl:for-each select="str:split(.,';')">
-        <span class="toc_block">
-          <a href="#{ $name }" class="toc_item">
-            <xsl:value-of select="." />
-          </a>
-        </span>
+        <span class="toc_block"><a href="#{ $module_name }:{ $name }" class="toc_item" title="{ $module_name } ({ $module })"><xsl:value-of select="." /></a><xsl:text> </xsl:text></span>
       </xsl:for-each>
 
       <xsl:text> </xsl:text>
@@ -406,7 +412,9 @@
 
   <!-- implements following features, e.g. method name, attribute reader, attribute writer or both when attribute accessor -->
 
-  <a name="{ @name }"></a>
+ <!-- #{ $module }.{ $name }-->
+
+  <a name="{ ./behaviour/@name }:{ @name }"></a>
   <div class="feature_title">
   <a href="#{ @name }" class="feature_name_link">
   <xsl:for-each select="str:split(@name,';')">
