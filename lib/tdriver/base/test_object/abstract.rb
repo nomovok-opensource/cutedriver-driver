@@ -1,4 +1,3 @@
-############################################################################
 ## 
 ## Copyright (C) 2010 Nokia Corporation and/or its subsidiary(-ies). 
 ## All rights reserved. 
@@ -139,6 +138,7 @@ module MobyBase
 		# Function to be renamed, possibly refactored
 		def xml_data=( xml_object )
 
+=begin
 			@name, 
 			@x_path = 
 				xml_object.attribute( 'name' ), 
@@ -147,6 +147,9 @@ module MobyBase
 					@type = xml_object.attribute( 'type' ), 
 					@id = xml_object.attribute( 'id' ) 
 				]
+=end
+
+			@name, @x_path = xml_object.attribute( 'name' ), "#{ @parent.x_path }/*//object[@type='#{ @type = xml_object.attribute( 'type' ) }' and @id='#{ @id = xml_object.attribute( 'id' ) }']"
 
 		end
 

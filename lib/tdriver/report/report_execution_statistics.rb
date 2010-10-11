@@ -19,7 +19,7 @@
 
 
 class ReportingStatistics
-  def initialize(test_cases_array)
+  def initialize(test_cases_array, summary=nil)
     @all_statuses=Array.new
     @group_test_case_arr=Array.new(test_cases_array)
     @pass_statuses=MobyUtil::Parameter[ :report_passed_statuses, "passed" ].split('|')
@@ -28,6 +28,7 @@ class ReportingStatistics
     @test_results_per_page=MobyUtil::Parameter[ :report_results_per_page, 10]
     @statistics_arr=Array.new
     @total_statistics_arr=Array.new
+    @summary=summary
   end
 
   def reset_total_statistics()
@@ -76,7 +77,7 @@ class ReportingStatistics
       tc_execution=test_case[8].to_i
       reboots=test_case[2]
       crashes=test_case[3]
-
+      tc_link=test_case[11]
       current_index=0
 
       duration=test_case[5].to_f
@@ -107,23 +108,23 @@ class ReportingStatistics
       @statistics_arr.each do |total_status|
         if total_status[1]==tc_status && total_status[0]==tc_name
           b_test_in_statistics=true
-          @statistics_arr[current_index]=[tc_name,tc_status,total_status[2].to_i+1,tc_execution]
+          @statistics_arr[current_index]=[tc_name,tc_status,total_status[2].to_i+1,tc_execution,tc_link]
         end
         if total_status[1]=="reboots" && total_status[0]==tc_name
           b_test_in_statistics=true
-          @statistics_arr[current_index]=[tc_name,"reboots",total_status[2].to_i+reboots.to_i,tc_execution]
+          @statistics_arr[current_index]=[tc_name,"reboots",total_status[2].to_i+reboots.to_i,tc_execution,tc_link]
         end
         if total_status[1]=="crashes" && total_status[0]==tc_name
           b_test_in_statistics=true
-          @statistics_arr[current_index]=[tc_name,"crashes",total_status[2].to_i+crashes.to_i,tc_execution]
+          @statistics_arr[current_index]=[tc_name,"crashes",total_status[2].to_i+crashes.to_i,tc_execution,tc_link]
         end
         if total_status[1]=="total" && total_status[0]==tc_name
           b_test_in_statistics=true
-          @statistics_arr[current_index]=[tc_name,"total",total_status[2].to_i+1,tc_execution]
+          @statistics_arr[current_index]=[tc_name,"total",total_status[2].to_i+1,tc_execution,tc_link]
         end
         if total_status[1]=="duration" && total_status[0]==tc_name
           b_test_in_statistics=true
-          @statistics_arr[current_index]=[tc_name,"duration",duration,tc_execution]
+          @statistics_arr[current_index]=[tc_name,"duration",duration,tc_execution,tc_link]
         end
         current_index+=1
       end
@@ -131,17 +132,17 @@ class ReportingStatistics
       if b_test_in_statistics==false
         @all_statuses.each do |status|
           if status==tc_status
-            @statistics_arr << [tc_name,tc_status,1,tc_execution]
+            @statistics_arr << [tc_name,tc_status,1,tc_execution,tc_link]
           elsif status=="reboots"
-            @statistics_arr << [tc_name,"reboots",reboots.to_i,tc_execution]
+            @statistics_arr << [tc_name,"reboots",reboots.to_i,tc_execution,tc_link]
           elsif status=="crashes"
-            @statistics_arr << [tc_name,"crashes",crashes.to_i,tc_execution]
+            @statistics_arr << [tc_name,"crashes",crashes.to_i,tc_execution,tc_link]
           elsif status=="total"
-            @statistics_arr << [tc_name,"total",1,tc_execution]
+            @statistics_arr << [tc_name,"total",1,tc_execution,tc_link]
           elsif status=="duration"
-            @statistics_arr << [tc_name,"duration",duration,tc_execution]
+            @statistics_arr << [tc_name,"duration",duration,tc_execution,tc_link]
           else
-            @statistics_arr << [tc_name,status,0,tc_execution]
+            @statistics_arr << [tc_name,status,0,tc_execution,tc_link]
           end
         end
       end
@@ -167,12 +168,21 @@ class ReportingStatistics
     end
     result_page=1 if result_page==0
 
-    tc_link='<a href="'+result_page.to_i.to_s+'_chronological_total_run_index.html">'
-    tc_link='<a href="1_reboot_index.html">' if status=="reboots" && total>0
-    tc_link='<a href="1_crash_index.html">' if status=="crashes" && total>0
-    tc_link='<a href="'+result_page.to_i.to_s+'_chronological_total_run_index.html#'+test_case.gsub(' ','_')+'_' + @pass_statuses.first + '">' if @pass_statuses.include?(status) && total>0
-    tc_link='<a href="'+result_page.to_i.to_s+'_chronological_total_run_index.html#'+test_case.gsub(' ','_')+'_' + @fail_statuses.first + '">' if @fail_statuses.include?(status) && total>0
-    tc_link='<a href="'+result_page.to_i.to_s+'_chronological_total_run_index.html#'+test_case.gsub(' ','_')+'_' + @not_run_statuses.first + '">' if @not_run_statuses.include?(status) && total>0
+    if @summary
+      tc_link='<a href="cases/'+result_page.to_i.to_s+'_chronological_total_run_index.html">'
+      tc_link='<a href="cases/1_reboot_index.html">' if status=="reboots" && total>0
+      tc_link='<a href="cases/1_crash_index.html">' if status=="crashes" && total>0
+      tc_link='<a href="cases/'+result_page.to_i.to_s+'_chronological_total_run_index.html#'+test_case.gsub(' ','_')+'_' + @pass_statuses.first + '">' if @pass_statuses.include?(status) && total>0
+      tc_link='<a href="cases/'+result_page.to_i.to_s+'_chronological_total_run_index.html#'+test_case.gsub(' ','_')+'_' + @fail_statuses.first + '">' if @fail_statuses.include?(status) && total>0
+      tc_link='<a href="cases/'+result_page.to_i.to_s+'_chronological_total_run_index.html#'+test_case.gsub(' ','_')+'_' + @not_run_statuses.first + '">' if @not_run_statuses.include?(status) && total>0
+    else
+      tc_link='<a href="'+result_page.to_i.to_s+'_chronological_total_run_index.html">'
+      tc_link='<a href="1_reboot_index.html">' if status=="reboots" && total>0
+      tc_link='<a href="1_crash_index.html">' if status=="crashes" && total>0
+      tc_link='<a href="'+result_page.to_i.to_s+'_chronological_total_run_index.html#'+test_case.gsub(' ','_')+'_' + @pass_statuses.first + '">' if @pass_statuses.include?(status) && total>0
+      tc_link='<a href="'+result_page.to_i.to_s+'_chronological_total_run_index.html#'+test_case.gsub(' ','_')+'_' + @fail_statuses.first + '">' if @fail_statuses.include?(status) && total>0
+      tc_link='<a href="'+result_page.to_i.to_s+'_chronological_total_run_index.html#'+test_case.gsub(' ','_')+'_' + @not_run_statuses.first + '">' if @not_run_statuses.include?(status) && total>0
+    end
     tc_link
 
   end
@@ -180,9 +190,9 @@ class ReportingStatistics
   def generate_duration_graph(file_name)
 
     begin
-        require 'gruff'
+      require 'gruff'
     rescue LoadError
-        $stderr.puts "Can't load the Gruff gem. If its missing from your system please run 'gem install gruff' to install it."
+      $stderr.puts "Can't load the Gruff gem. If its missing from your system please run 'gem install gruff' to install it."
     end
     reset_total_statistics()
     collect_test_case_statistics()
@@ -220,7 +230,7 @@ class ReportingStatistics
     table_body=Array.new
     reset_total_statistics()
     collect_test_case_statistics()
-    table_body='<table align="center" border="1" cellspacing="0" style="width:100%;">'<<
+    table_body='<table id="statistics_table" align="center" border="0" cellspacing="0" style="width:100%;">'<<
       '<tr>'<<
       '<td>'<<
       '<b>Row</b></td>'<<
@@ -235,10 +245,16 @@ class ReportingStatistics
     row=1
     @statistics_arr.each do |test_case|
       tc_name=test_case[0].to_s.gsub('_',' ')
+      if @summary
+        test_link="cases/#{test_case[4]}"
+      else
+        test_link=test_case[4]
+      end
+
       if test_case_added.include?(tc_name)==false
         table_body << "<tr>"
         table_body << "<td>#{row}</td>"
-        table_body << "<td>#{tc_name}</td>"
+        table_body << "<td><a href=\"#{test_link}\">#{tc_name}</a></td>"
         @statistics_arr.each do |test_case_statistics|
           if test_case_statistics[0]==tc_name
             table_body << "<td#{add_result_style_tag(test_case_statistics[1],test_case_statistics[2])}>#{add_result_link(test_case_statistics[0],test_case_statistics[1],test_case_statistics[2],test_case_statistics[3])}#{test_case_statistics[2]}</a></td>"

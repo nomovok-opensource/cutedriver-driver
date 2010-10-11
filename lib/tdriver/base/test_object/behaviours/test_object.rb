@@ -129,7 +129,8 @@ module MobyBehaviour
       return self if application?
 
       #find parent id
-      element_set = @sut.xml_data.xpath( "//object/objects/object[@id='%s']/../.." % @id )
+      #element_set = @sut.xml_data.xpath( "//object/objects/object[@id='%s']/../.." % @id )
+      element_set = @sut.xml_data.xpath( "//object/objects/object[@id='#{ @id }']/../.." )
 
       return self if( element_set == nil or element_set.size == 0 )
 
@@ -550,7 +551,8 @@ module MobyBehaviour
     # String:: String identifying this test object
     def identity
 
-      "%s;%s;%s" % [ @sut.id, @type, @creation_attributes.inspect ]
+      #"%s;%s;%s" % [ @sut.id, @type, @creation_attributes.inspect ]
+      "#{ @sut.id };#{ @type };#{ @creation_attributes.inspect }"
 
     end
 
@@ -569,7 +571,8 @@ module MobyBehaviour
       Kernel::raise MobyBase::TestObjectNotInitializedError.new if _xml_data.nil? || _xml_data.to_s.empty?
 
       # retrieve attribute(s) from xml
-      nodeset = _xml_data.xpath( "attributes/attribute[translate(@name,'ABCDEFGHIJKLMNOPQRSTUVWXYZ','abcdefghijklmnopqrstuvwxyz')='%s']" % name.downcase )
+      #nodeset = _xml_data.xpath( "attributes/attribute[translate(@name,'ABCDEFGHIJKLMNOPQRSTUVWXYZ','abcdefghijklmnopqrstuvwxyz')='%s']" % name.downcase )
+      nodeset = _xml_data.xpath( "attributes/attribute[translate(@name,'ABCDEFGHIJKLMNOPQRSTUVWXYZ','abcdefghijklmnopqrstuvwxyz')='#{ name.downcase }']" ) 
 
       # raise exception if no such attribute found
       Kernel::raise MobyBase::AttributeNotFoundError.new( "Could not find attribute '%s' for test object of type '%s'." % [ name, type ] ) if nodeset.empty? 
