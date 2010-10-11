@@ -530,30 +530,45 @@ module TDriverReportCreator
           FileUtils.cp_r '/etc/tdriver/defaults', @report_folder+'/environment' if File.directory?('/etc/tdriver/defaults')
           FileUtils.copy('/etc/tdriver/tdriver_parameters.xml',@report_folder+'/environment/tdriver_parameters.xml') if File.file?('/etc/tdriver/tdriver_parameters.xml')
         end
-        MobyBase::SUTFactory.instance.connected_suts.each do |sut_id, sut_attributes|
-          begin
+        if MobyUtil::Parameter[ :report_monitor_memory, 'false']=='true'
+          MobyBase::SUTFactory.instance.connected_suts.each do |sut_id, sut_attributes|
             if sut_attributes[:is_connected]
-              sw_version=get_sut_sw_version(sut_id, sut_attributes) #sut_attributes[:sut].sysinfo( :Sw_version ) if MobyUtil::Parameter[sut_id][:type]=='S60'
-              variant=get_sut_lang_version(sut_id, sut_attributes) #sut_attributes[:sut].sysinfo( :Lang_version ) if MobyUtil::Parameter[sut_id][:type]=='S60'
               @memory_amount_start=get_sut_used_memory(sut_id, sut_attributes) if @memory_amount_start==nil || @memory_amount_start=='-'
               @memory_amount_end=get_sut_used_memory(sut_id, sut_attributes)
               @memory_amount_total=get_sut_total_memory(sut_id, sut_attributes)
-              product=MobyUtil::Parameter[sut_id][:product]
-              language=MobyUtil::Parameter[sut_id][:language]
-              loc=MobyUtil::Parameter[sut_id][:localisation_server_database_tablename]
+              @memory_amount_start='-' if @memory_amount_start==nil
+              @memory_amount_end='-' if @memory_amount_end==nil
+              @memory_amount_total='-' if @memory_amount_total==nil
             end
-            @memory_amount_start='-' if @memory_amount_start==nil
-            @memory_amount_end='-' if @memory_amount_end==nil
-            @memory_amount_total='-' if @memory_amount_total==nil
-
-            sw_version='-' if sw_version==nil
-            variant='-' if variant==nil
-            product='-' if product==nil
-            language='-' if language==nil
-            loc='-' if loc==nil
-          rescue
           end
         end
+        if MobyUtil::Parameter[ :report_collect_environment_data_from_sut, 'true']=='true'
+          MobyBase::SUTFactory.instance.connected_suts.each do |sut_id, sut_attributes|
+            begin
+              if sut_attributes[:is_connected]
+                sw_version=get_sut_sw_version(sut_id, sut_attributes)
+                variant=get_sut_lang_version(sut_id, sut_attributes)
+                @memory_amount_start=get_sut_used_memory(sut_id, sut_attributes) if @memory_amount_start==nil || @memory_amount_start=='-'
+                @memory_amount_end=get_sut_used_memory(sut_id, sut_attributes)
+                @memory_amount_total=get_sut_total_memory(sut_id, sut_attributes)
+                product=MobyUtil::Parameter[sut_id][:product]
+                language=MobyUtil::Parameter[sut_id][:language]
+                loc=MobyUtil::Parameter[sut_id][:localisation_server_database_tablename]
+              end
+              @memory_amount_start='-' if @memory_amount_start==nil
+              @memory_amount_end='-' if @memory_amount_end==nil
+              @memory_amount_total='-' if @memory_amount_total==nil
+
+              sw_version='-' if sw_version==nil
+              variant='-' if variant==nil
+              product='-' if product==nil
+              language='-' if language==nil
+              loc='-' if loc==nil
+            rescue
+            end
+          end
+        end
+
         write_page_start(@report_folder+'/environment/index.html','TDriver test environment')
         write_environment_body(@report_folder+'/environment/index.html',RUBY_PLATFORM,sw_version,variant,product,language,loc)
         write_page_end(@report_folder+'/environment/index.html')
@@ -1031,22 +1046,22 @@ module TDriverReportCreator
               end
             when 'all'
               result_storage << [value,
-                  group,
-                  reboots,
-                  crashes,
-                  start_time,
-                  duration,
-                  memory_usage,
-                  status,
-                  index,
-                  log,
-                  comment,
-                  link,
-                  user_data,
-                  dump_count,
-                  sent_bytes,
-                  received_bytes
-                ]
+                group,
+                reboots,
+                crashes,
+                start_time,
+                duration,
+                memory_usage,
+                status,
+                index,
+                log,
+                comment,
+                link,
+                user_data,
+                dump_count,
+                sent_bytes,
+                received_bytes
+              ]
             end
           end
           xml_data=nil

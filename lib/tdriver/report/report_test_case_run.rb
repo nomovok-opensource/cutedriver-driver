@@ -95,8 +95,6 @@ module TDriverReportCreator
       @tc_video_filename=nil
       @tc_previous_video_filename=nil
       @tc_video_recorders=[]
-      @tc_memory_amount_start=nil
-      @tc_memory_amount_end=nil
       @tc_memory_amount_start='-'
       @tc_memory_amount_end='-'
       @tc_memory_amount_total='-'
