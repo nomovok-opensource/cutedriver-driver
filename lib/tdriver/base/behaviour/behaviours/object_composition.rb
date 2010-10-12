@@ -19,6 +19,27 @@
 
 module MobyBehaviour
 
+  # == description
+  # Generic methods for test object and SUT composition
+  #
+  # == behaviour
+  # GenericObjectComposition
+  #
+  # == requires
+  # *
+  #
+  # == input_type
+  # *
+  #
+  # == sut_type
+  # *
+  #
+  # == sut_version
+  # *
+  #
+  # == objects
+  # *;sut
+  #
 	module ObjectComposition
 
 		include MobyBehaviour::Behaviour
