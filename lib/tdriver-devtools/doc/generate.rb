@@ -324,6 +324,8 @@ def read_test_result_files( folder )
 
   }
 
+  puts "Test result files: #{ @feature_tests.count }"
+
 end
 
 def read_behaviour_xml_files( folder )
@@ -738,5 +740,16 @@ read_behaviour_hash_files( behaviour_xml_folder ) # ok
 
 accessors = []
 
-open( output_filename, 'w'){ | file | file << generate_document_xml }
+begin
+
+  open( output_filename, 'w'){ | file | file << generate_document_xml }
+  puts "\nDocumentation XML saved succesfully to #{ output_filename }"
+
+rescue Exception => e 
+
+  puts "\nDocumentation XML saved unsuccesfully due to '#{ e.message }' (#{ e.class })"
+
+end
+
+puts ""
 
