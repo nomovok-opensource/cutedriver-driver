@@ -935,118 +935,140 @@
   <xsl:param name="default" />
   <xsl:param name="class" />
 
-  <xsl:variable name="argument_types" select="count(type)" />
+  <xsl:choose>
 
-  <xsl:for-each select="type">
-
-    <tr valign="top" class="{ $class }">
+    <xsl:when test="count(type)>0">
     
-      <xsl:if test="position()=1">
+      <xsl:variable name="argument_types" select="count(type)" />
 
-        <xsl:choose>
+      <xsl:for-each select="type">
 
-          <xsl:when test="string(../@type)='block_argument'">
-            <td rowspan="{ $argument_types }" class="{ $class }">
-              <span title="Code block argument, mandatory or optional" class="hover_text"><xsl:value-of select="str:split($argument_name,'#')[2]" /></span>
-            </td>
-          </xsl:when>
-
-          <xsl:when test="string(../@type)='block'">
-            <td rowspan="{ $argument_types }" class="{ $class }">
-              <span title="Code block, mandatory or optional" class="hover_text"><xsl:value-of select="$argument_name" /></span>
-            </td>
-          </xsl:when>
-
-          <xsl:when test="string(../@optional)='true'">            
-              <td rowspan="{$argument_types}" class="{ $class }">
-                <span class="optional_argument" title="Optional argument">
-                <span class="hover_text"><xsl:value-of select="$argument_name" /></span>
-                </span>
-              </td>            
-          </xsl:when>
-
-
-          <xsl:otherwise>
-            <td rowspan="{ $argument_types }" class="{ $class }">
-              <span title="Mandatory argument" class="hover_text"><xsl:value-of select="$argument_name" /></span>
-            </td>
-          </xsl:otherwise>
-
-        </xsl:choose>
-
-      </xsl:if>
-      
-      <!-- verify that argument variable type is defined -->
-      <xsl:choose>      
-        <xsl:when test="string-length(@name)>0">
-          <td class="{ $class }"><xsl:value-of select="@name"/></td>
-        </xsl:when>
-        <xsl:otherwise>
-          <xsl:call-template name="col_warning" >
-            <xsl:with-param name="text">Not defined</xsl:with-param>
-          </xsl:call-template>       
-        </xsl:otherwise>
-      </xsl:choose>
-
-      <!-- verify that argument description is defined -->
-      <xsl:choose>
-        <xsl:when test="string-length(description/text())>0">
-          <td class="{ $class }">
-            <xsl:call-template name="formatted_content">
-             <xsl:with-param name="text" select="description/text()"/>
-            </xsl:call-template>
-          </td>
-        </xsl:when>
-        <xsl:otherwise>
-          <xsl:call-template name="col_warning" >
-            <xsl:with-param name="text">Not defined</xsl:with-param>
-          </xsl:call-template>       
-        </xsl:otherwise>
-      </xsl:choose>
-
-      <!-- verify that argument example is defined -->
-      <xsl:choose>
-
-        <xsl:when test="@type='block_argument'">
-          <td class="{ $class }"><xsl:value-of select="example/text()"/></td>
-        </xsl:when>
-
-        <xsl:when test="string(example/text())='-'">
-          <td class="tablebg_disabled" rowspan="{ $argument_types }"><xsl:value-of select="$default"/></td>
-        </xsl:when>
-
-        <xsl:when test="string-length(example/text())>0">
-          <td class="{ $class }"><xsl:value-of select="example/text()"/></td>
-        </xsl:when>
-
-        <xsl:otherwise>
-          <xsl:call-template name="col_warning" >
-            <xsl:with-param name="text">Not defined</xsl:with-param>
-          </xsl:call-template>       
-        </xsl:otherwise>
-
-      </xsl:choose>
-     
-      <!-- default value -->
-      <xsl:if test="position()=1">
-
-        <xsl:choose>
+        <tr valign="top" class="{ $class }">
         
-          <xsl:when test="string-length($default)=0">
-            <td class="tablebg_disabled" rowspan="{ $argument_types }"><xsl:value-of select="$default"/></td>
-          </xsl:when>
+          <xsl:if test="position()=1">
+
+            <xsl:choose>
+
+              <xsl:when test="string(../@type)='block_argument'">
+                <td rowspan="{ $argument_types }" class="{ $class }">
+                  <span title="Code block argument, mandatory or optional" class="hover_text"><xsl:value-of select="str:split($argument_name,'#')[2]" /></span>
+                </td>
+              </xsl:when>
+
+              <xsl:when test="string(../@type)='block'">
+                <td rowspan="{ $argument_types }" class="{ $class }">
+                  <span title="Code block, mandatory or optional" class="hover_text"><xsl:value-of select="$argument_name" /></span>
+                </td>
+              </xsl:when>
+
+              <xsl:when test="string(../@optional)='true'">            
+                  <td rowspan="{$argument_types}" class="{ $class }">
+                    <span class="optional_argument" title="Optional argument">
+                    <span class="hover_text"><xsl:value-of select="$argument_name" /></span>
+                    </span>
+                  </td>            
+              </xsl:when>
+
+
+              <xsl:otherwise>
+                <td rowspan="{ $argument_types }" class="{ $class }">
+                  <span title="Mandatory argument" class="hover_text"><xsl:value-of select="$argument_name" /></span>
+                </td>
+              </xsl:otherwise>
+
+            </xsl:choose>
+
+          </xsl:if>
           
-          <xsl:otherwise>
-            <td class="{ $class }" rowspan="{ $argument_types }"><xsl:value-of select="$default"/></td>          
-          </xsl:otherwise>
-        
-        </xsl:choose>
-        
-      </xsl:if>
+          <!-- verify that argument variable type is defined -->
+          <xsl:choose>      
+            <xsl:when test="string-length(@name)>0">
+              <td class="{ $class }"><xsl:value-of select="@name"/></td>
+            </xsl:when>
+            <xsl:otherwise>
+              <xsl:call-template name="col_warning" >
+                <xsl:with-param name="text">Not defined</xsl:with-param>
+              </xsl:call-template>       
+            </xsl:otherwise>
+          </xsl:choose>
 
-    </tr>  
+          <!-- verify that argument description is defined -->
+          <xsl:choose>
+            <xsl:when test="string-length(description/text())>0">
+              <td class="{ $class }">
+                <xsl:call-template name="formatted_content">
+                 <xsl:with-param name="text" select="description/text()"/>
+                </xsl:call-template>
+              </td>
+            </xsl:when>
+            <xsl:otherwise>
+              <xsl:call-template name="col_warning" >
+                <xsl:with-param name="text">Not defined</xsl:with-param>
+              </xsl:call-template>       
+            </xsl:otherwise>
+          </xsl:choose>
 
-  </xsl:for-each>
+          <!-- verify that argument example is defined -->
+          <xsl:choose>
+
+            <xsl:when test="@type='block_argument'">
+              <td class="{ $class }"><xsl:value-of select="example/text()"/></td>
+            </xsl:when>
+
+            <xsl:when test="string(example/text())='-'">
+              <td class="tablebg_disabled" rowspan="{ $argument_types }"><xsl:value-of select="$default"/></td>
+            </xsl:when>
+
+            <xsl:when test="string-length(example/text())>0">
+              <td class="{ $class }"><xsl:value-of select="example/text()"/></td>
+            </xsl:when>
+
+            <xsl:otherwise>
+              <xsl:call-template name="col_warning" >
+                <xsl:with-param name="text">Not defined</xsl:with-param>
+              </xsl:call-template>       
+            </xsl:otherwise>
+
+          </xsl:choose>
+         
+          <!-- default value -->
+          <xsl:if test="position()=1">
+
+            <xsl:choose>
+            
+              <xsl:when test="string-length($default)=0">
+                <td class="tablebg_disabled" rowspan="{ $argument_types }"><xsl:value-of select="$default"/></td>
+              </xsl:when>
+              
+              <xsl:otherwise>
+                <td class="{ $class }" rowspan="{ $argument_types }"><xsl:value-of select="$default"/></td>          
+              </xsl:otherwise>
+            
+            </xsl:choose>
+            
+          </xsl:if>
+
+        </tr>  
+
+      </xsl:for-each>
+
+    </xsl:when>
+
+    <xsl:otherwise>
+
+      <tr>
+      <td class="{ $class }"><xsl:value-of select="$argument_name" /></td>
+
+        <xsl:call-template name="col_warning">
+          <xsl:with-param name="colspan">4</xsl:with-param>
+          <xsl:with-param name="text">Not defined; description, example and default values cannot be shown due to variable type is not defined. Please verify also that argument name is defined properly</xsl:with-param>
+        </xsl:call-template>
+
+      </tr>
+
+    </xsl:otherwise>
+
+  </xsl:choose>
 
 </xsl:template>
 
@@ -1055,6 +1077,8 @@
   <xsl:if test="@type='writer' or @type='accessor' or (@type='method' and number(arguments/@count)>0)">
 
     <div class="feature_section_title">Arguments:</div>
+
+    count:<xsl:value-of select="count(arguments/argument)" /><br />
 
     <table class="default">
     <tr class="header">
@@ -1191,8 +1215,22 @@
 </xsl:template>
 
 <xsl:template name="col_warning">
+
   <xsl:param name="text" />
-  <td class="warning">[!!] <xsl:value-of select="$text" /></td>
+  <xsl:param name="colspan" />
+
+  <xsl:choose>
+
+    <xsl:when test="number($colspan)>0">
+      <td class="warning" colspan="{ $colspan }">[!!] <xsl:value-of select="$text" /></td>
+    </xsl:when>
+
+    <xsl:otherwise>
+      <td class="warning">[!!] <xsl:value-of select="$text" /></td>
+    </xsl:otherwise>
+
+  </xsl:choose>
+
 </xsl:template>
 
 <xsl:template name="div_warning">
