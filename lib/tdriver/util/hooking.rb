@@ -212,7 +212,7 @@ module MobyUtil
 
 			puts "%-80s %8s %15s %15s %9s %15s" % [ '-' * 80, '-' * 8, '-' * 15, '-' * 15, '-' * 8, '-' * 15 ]
 
-			puts "%-80s %8s %15s %15.8f %8.3f%% %15.8f" % [ 'Total:', total_calls, total_time_elapsed_total, total_run_time, total_percentage, total_average ]
+			puts "%-80s %8s %15.6f %15.6f %8.3f%% %15.8f" % [ 'Total:', total_calls, total_time_elapsed_total, total_run_time, total_percentage, total_average ]
 
 		end
 
