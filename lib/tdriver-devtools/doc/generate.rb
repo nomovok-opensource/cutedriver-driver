@@ -415,23 +415,22 @@ def collect_feature_tests
   
   @feature_tests.collect{ | feature |
 
-    result[ feature["description"].first ] = 
+    result[ ( feature["description"] || ["no feature test description"] ).first ] = 
 
-      feature["scenarios"].collect{ | scenario |
+      ( feature["scenarios"] || [] ).collect{ | scenario |
 
-        scenario["example_step"].collect{ | example |
+        ( scenario["example_step"] || [] ).collect{ | example |
 
           code = /\"(.*)\"/.match( example ).captures.first
 
           status = /^.*\s{1}(\w+)$/.match( example ).captures.first      
 
-          [ "example" => code, "status" => status.to_s.downcase, "description" => scenario["description"] ]
+          [ "example" => code, "status" => status.to_s.downcase, "description" => ( scenario["description"] || "" ) ]
 
         }.flatten
 
       }.flatten
     
-
   }.flatten
   
   result
