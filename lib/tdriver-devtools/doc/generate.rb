@@ -719,9 +719,9 @@ if ARGV.count < 2
 
 end
 
-feature_tests_folder = ARGV[ 0 ] || '.'
-behaviour_xml_folder = ARGV[ 1 ] || 'behaviour_xml/'
-output_filename = ARGV[2] || 'document.xml'
+feature_tests_folder = File.expand_path( ARGV[ 0 ] || '.' )
+behaviour_xml_folder = File.expand_path( ARGV[ 1 ] || 'behaviour_xml/' )
+output_filename = File.expand_path( ARGV[2] || 'document.xml' )
 
 read_test_result_files( feature_tests_folder) # ok
 read_behaviour_xml_files( behaviour_xml_folder ) # ok

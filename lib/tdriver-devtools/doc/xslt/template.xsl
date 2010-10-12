@@ -1082,8 +1082,6 @@
 
     <div class="feature_section_title">Arguments:</div>
 
-    count:<xsl:value-of select="count(arguments/argument)" /><br />
-
     <table class="default">
     <tr class="header">
       <td class="header">Name</td>
@@ -1402,17 +1400,14 @@
 
     <!-- description (splitted with '\n') -->
     <div class="scenario_description">
-
       <xsl:for-each select="str:split(description,'\n')">
         <xsl:value-of select="text()" /><br />
       </xsl:for-each>
-
     </div>
 
     <xsl:value-of select="@name"/>
 
     <pre class="{@status}">
-
       <!-- show status only if other than 'passed' -->
       <xsl:if test="string(@status)!='passed'" >
         <xsl:text># scenario </xsl:text><xsl:value-of select="@status" /><br />
@@ -1426,9 +1421,7 @@
   </xsl:for-each>
   
   <xsl:if test="count($tests/scenario)=0">
-    <xsl:call-template name="div_warning">
-      <xsl:with-param name="text">No examples/test scenarios available</xsl:with-param>
-    </xsl:call-template>
+    <xsl:call-template name="div_warning"><xsl:with-param name="text">No examples/test scenarios available</xsl:with-param></xsl:call-template>
   </xsl:if>
 
   <br />
@@ -1439,14 +1432,7 @@
 
   <xsl:if test="string-length(info/text())>0">
      <!-- display feature description (split lines with '\n') -->
-
-    <div class="feature_info">
-      <xsl:call-template name="formatted_content">
-        <xsl:with-param name="text" select="info/text()"/> 
-      </xsl:call-template>
-    </div>
-    
-    <br />
+    <div class="feature_info"><xsl:call-template name="formatted_content"><xsl:with-param name="text" select="info/text()"/></xsl:call-template></div><br />
   </xsl:if>
 
 </xsl:template>
