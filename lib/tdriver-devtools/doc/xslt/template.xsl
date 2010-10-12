@@ -65,7 +65,7 @@
       
       }
       
-      div.feature_description, div.feature_call_sequence, div.scenario_description
+      div.feature_description, div.feature_call_sequence, div.scenario_description, div.feature_deprecated_version
       {
 
         padding: 2px;
@@ -83,7 +83,7 @@
       
       }
       
-      div.feature_description, div.scenario_description
+      div.feature_description, div.scenario_description, div.feature_deprecated_version
       {
         font-style: normal; // normal more readable than italic;
       }
@@ -371,17 +371,23 @@
   <br />
   
   <div class="toc">
+
     <xsl:for-each select="feature/@name">
+
       <xsl:sort select="." />
 
+      <!---
+
+        file:///home/jussi/git/2010-10-07/driver/lib/output/example.xml#QT;TestObject;activate
+
+      -->
+
       <xsl:variable name="name"><xsl:value-of select="../@name"/></xsl:variable>
+      <xsl:variable name="module"><xsl:value-of select="../behaviour/@module"/></xsl:variable>
+      <xsl:variable name="module_name"><xsl:value-of select="../behaviour/@name"/></xsl:variable>
 
       <xsl:for-each select="str:split(.,';')">
-        <span class="toc_block">
-          <a href="#{ $name }" class="toc_item">
-            <xsl:value-of select="." />
-          </a>
-        </span>
+        <span class="toc_block"><a href="#{ $module_name }:{ $name }" class="toc_item" title="{ $module_name } ({ $module })"><xsl:value-of select="." /></a><xsl:text> </xsl:text></span>
       </xsl:for-each>
 
       <xsl:text> </xsl:text>
@@ -406,9 +412,11 @@
 
   <!-- implements following features, e.g. method name, attribute reader, attribute writer or both when attribute accessor -->
 
-  <a name="{ @name }"></a>
+ <!-- #{ $module }.{ $name }-->
+
+  <a name="{ ./behaviour/@name }:{ @name }"></a>
   <div class="feature_title">
-  <a href="#{ @name }" class="feature_name_link">
+  <a href="#{ ./behaviour/@name }:{ @name }" class="feature_name_link">
   <xsl:for-each select="str:split(@name,';')">
     <span class="feature_title_text"><xsl:value-of select="."/></span>
     <xsl:if test="position()!=last()">
@@ -456,10 +464,13 @@
                   <xsl:choose>
 
                     <xsl:when test="@optional='true'">
+
                       <span class="optional_argument" title="Optional argument">
+
                        <xsl:if test="@type='multi'">
                          <xsl:text></xsl:text>        
                        </xsl:if>
+
                         <xsl:text>[ </xsl:text>
                         <span class="hover_text">
                           <xsl:value-of select="@name"/>
@@ -467,8 +478,11 @@
                              <xsl:text>, ..., ...</xsl:text>        
                            </xsl:if>
                         </span>
+
                         <xsl:text> ]</xsl:text>
+
                       </span>
+
                     </xsl:when>
 
                     <xsl:otherwise>
@@ -591,7 +605,7 @@
       <td class="header">SUT type(s)</td>
       <td class="header">SUT version(s)</td>
       <td class="header">SUT input type(s)</td>
-      <td class="header">Behaviour module</td>
+      <td class="header">Behaviour module and name</td>
       <td class="header">Required plugin</td>
     </tr>
     <tr>
@@ -738,9 +752,28 @@
       <!-- behaviour module -->
       <xsl:choose>
         <xsl:when test="string-length(behaviour/@module)>0">
-          <td class="tablebg_even" valign="top">
-            <xsl:value-of select="behaviour/@module" />
-          </td>
+
+          <xsl:choose>
+            <xsl:when test="string-length(behaviour/@name)>0">
+
+              <td class="tablebg_even" valign="top">
+                <xsl:value-of select="behaviour/@module" /><xsl:text> (</xsl:text><xsl:value-of select="behaviour/@name" /><xsl:text>)</xsl:text>
+              </td>
+
+            </xsl:when>
+            <xsl:otherwise>
+
+              <td class="tablebg_warning" valign="top">
+                <xsl:call-template name="div_warning">
+                <xsl:with-param name="text">
+                  <xsl:value-of select="behaviour/@module" /><xsl:text> (Behaviour name not defined)</xsl:text>
+                </xsl:with-param>
+                </xsl:call-template>
+              </td>
+
+            </xsl:otherwise>
+          </xsl:choose>
+
         </xsl:when>
         <xsl:otherwise>
           <td class="tablebg_warning" valign="top">
@@ -780,36 +813,49 @@
 <xsl:template name="feature">
 
   <xsl:call-template name="feature_name" />
+
+  <xsl:if test="count(deprecated)>0">
+
+    <xsl:call-template name="deprecated" />
+
+  </xsl:if>
   
   <xsl:call-template name="description" />
 
-  <xsl:call-template name="call_sequence" />
+  <xsl:if test="count(deprecated)>0">
 
-  <xsl:call-template name="target_details" />
+    <xsl:call-template name="target_details" />
 
-  <xsl:call-template name="arguments" />
+  </xsl:if>
 
-  <xsl:call-template name="returns">
-    <xsl:with-param name="type" select="returns/type" />
-    <xsl:with-param name="feature_type" select="@type" />
-  </xsl:call-template>
+  <xsl:if test="count(deprecated)=0">
 
-  <xsl:call-template name="exceptions">
-    <xsl:with-param name="type" select="exceptions/type" />
-    <xsl:with-param name="feature_type" select="@type" />
-  </xsl:call-template>
+    <xsl:call-template name="call_sequence" />
 
-  <xsl:if test="count(tables/table)>0">
-  
-    <!-- custom tables -->
-    <xsl:call-template name="tables" />
+    <xsl:call-template name="target_details" />
 
-   </xsl:if>
+    <xsl:call-template name="arguments" />
 
+    <xsl:call-template name="returns">
+      <xsl:with-param name="type" select="returns/type" />
+      <xsl:with-param name="feature_type" select="@type" />
+    </xsl:call-template>
 
-  <xsl:call-template name="tests">
-    <xsl:with-param name="tests" select="tests" />
-  </xsl:call-template>
+    <xsl:call-template name="exceptions">
+      <xsl:with-param name="type" select="exceptions/type" />
+      <xsl:with-param name="feature_type" select="@type" />
+    </xsl:call-template>
+
+    <xsl:if test="count(tables/table)>0">    
+      <!-- custom tables -->
+      <xsl:call-template name="tables" />
+    </xsl:if>
+
+    <xsl:call-template name="tests">
+      <xsl:with-param name="tests" select="tests" />
+    </xsl:call-template>
+
+  </xsl:if>
     
   <xsl:call-template name="info" />
   
@@ -1288,6 +1334,17 @@
       <xsl:with-param name="text">Description not defined</xsl:with-param>
     </xsl:call-template>
   </xsl:if>
+  <br />
+
+</xsl:template>
+
+<xsl:template name="deprecated">
+
+  <div class="feature_section_title">Deprecated in version:</div>
+
+  <div class="feature_deprecated_version">
+    <xsl:value-of select="deprecated/@version"/> 
+  </div>
   <br />
 
 </xsl:template>

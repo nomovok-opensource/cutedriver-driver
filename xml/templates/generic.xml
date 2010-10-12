@@ -15,7 +15,7 @@
   -->
 
   <!-- this template will be loaded automatically as global parameters; usage example: value = MobyUtil::Parameter[:app_path] -->
-  <template name="global" inherits="logging;localisation;reporting;user_data;operator_data">
+  <template name="global" inherits="logging;dbaccess;reporting">
 
     <!-- orbit test application path -->
     <parameter name="app_path" value="" />
@@ -25,7 +25,7 @@
 
   </template>
 
-  <!-- default values for each SUT -->
+  <!-- default values for each SUT. Usage example: value = MobyUtil::Parameter[sut_id][:type]-->
   <template name="sut_generic">
 
     <parameter name="type" value="" />
@@ -34,8 +34,14 @@
     <parameter name="version" value="0" />
     <parameter name="language" value="English-GB" />
     <parameter name="read_lang_from_app" value="false" /> 
+	
+	<!-- default dbaccess sut-specific values -->
+	<parameter name="localisation_server_database_tablename" value="default_localization_tablename" />
+    <parameter name="user_data_server_database_tablename" value="default_userinputs_tablename" />
+    <parameter name="operator_data_server_database_tablename" value="default_operatorimputs_tablename" />
+    <parameter name="operator_selected" value="orange" /> <!-- vodafone, etc... -->
 
-		<!-- default sut specific localisation table name -->
+	<!-- default sut specific localisation table name -->
     <parameter name="localisation_server_database_tablename" value="TB10_1_week16_loc" />
 
     <!-- default device input type (e.g. key, touch) -->
@@ -72,7 +78,7 @@
   </template>
 
   <!-- default parameters for mysql localisation server settings -->
-  <template name="localisation">
+  <template name="dbaccess">
 
     <!--parameter name="localisation_db_type" value="sqlite" /-->
     <parameter name="localisation_db_type" value="mysql" />
@@ -80,10 +86,22 @@
     <parameter name="localisation_server_username" value="root" /> <!--valid only for mysql! -->
     <parameter name="localisation_server_password" value="" /> <!--valid only for mysql! -->
     <parameter name="localisation_server_database_name" value="default_tdriver_db" /> <!--path to the file for sqlite -->
-		<parameter name="localisation_server_database_tablename" value="default_userinputs_tablename" />
+  
+	<!-- default parameters for user data settings -->
+    <parameter name="user_data_db_type" value="mysql" />
+    <parameter name="user_data_server_ip" value="127.0.0.1" /> <!--valid only for mysql! -->
+    <parameter name="user_data_server_username" value="root" /> <!--valid only for mysql! -->
+    <parameter name="user_data_server_password" value="" /> <!--valid only for mysql! -->
+    <parameter name="user_data_server_database_name" value="default_tdriver_db" /> <!--path to the file for sqlite -->
+
+	<!-- default parameters for operator data settings -->
+	<parameter name="operator_data_db_type" value="sqlite" />
+	<parameter name="operator_data_server_ip" value="127.0.0.1" /> <!--valid only for mysql! -->
+	<parameter name="operator_data_server_username" value="root" /> <!--valid only for mysql! -->
+	<parameter name="operator_data_server_password" value="" /> <!--valid only for mysql! -->
+	<parameter name="operator_data_server_database_name" value="c:\operator_data.sqlite" /> <!--path to the file for sqlite -->
 
   </template>
-
 
   <!-- default parameters for logging settings -->
   <template name="logging" inherits="error_logging">
@@ -177,31 +195,6 @@
     <!-- Parameters for reconnect attempts -->
     <parameter name="reconnect_device" value="true" />
     <parameter name="reconnect_attempts" value="1" />
-
-  </template>
-
-  <!-- default parameters for user data settings -->
-  <template name="user_data">
-
-    <parameter name="user_data_db_type" value="mysql" />
-    <parameter name="user_data_server_ip" value="127.0.0.1" /> <!--valid only for mysql! -->
-    <parameter name="user_data_server_username" value="root" /> <!--valid only for mysql! -->
-    <parameter name="user_data_server_password" value="" /> <!--valid only for mysql! -->
-    <parameter name="user_data_server_database_name" value="default_tdriver_db" /> <!--path to the file for sqlite -->
-    <parameter name="user_data_server_database_tablename" value="default_userinputs_tablename" />
-
-  </template>
-
-  <!-- default parameters for operator data settings -->
-  <template name="operator_data">
-
-	  <parameter name="operator_data_db_type" value="sqlite" />
-	  <parameter name="operator_data_server_ip" value="127.0.0.1" /> <!--valid only for mysql! -->
-	  <parameter name="operator_data_server_username" value="root" /> <!--valid only for mysql! -->
-	  <parameter name="operator_data_server_password" value="" /> <!--valid only for mysql! -->
-	  <parameter name="operator_data_server_database_name" value="c:\operator_data.sqlite" /> <!--path to the file for sqlite -->
-	  <parameter name="operator_data_server_database_tablename" value="operatorinput" />
-	  <parameter name="operator_selected" value="orange" /> <!-- vodafone, etc... can be overwritten dynamically during testing -->
 
   </template>
 

@@ -688,7 +688,7 @@ module MobyBehaviour
   # == arguments
   # logical_name
   #  String
-  #   description: Logical name (LNAME) of the item to be translated.
+  #   description: Logical name (LNAME) of the item to be translated. If prefix for User Information or Operator Data are used then the appropiate retrieve methods will be called
   #   example: "txt_button_ok"
   #  Symbol
   #   description: Symbol form of the logical name (LNAME) of the item to be translated.
@@ -736,40 +736,134 @@ module MobyBehaviour
   # LogicalNameNotFoundError
   #  description: In case no logical name is not found for current language
   #
-  # MySqlConnectError
+  # SqlError
   #  description: In case there are problems with the database connectivity
   #
 	def translate( logical_name, file_name = nil, plurality = nil, numerus = nil, lengthvariant = nil )
-
+	
 		Kernel::raise LogicalNameNotFoundError.new("Logical name is nil") if logical_name.nil?
-		language=nil
-		if ( MobyUtil::Parameter[ @id ][:read_lang_from_app]=='true')
-			#read localeName app
-			language=self.application.attribute("localeName")
-			#determine the language from the locale
-			language=language.split('_')[0].to_s if (language!=nil && !language.empty?)
-		else
-			language=MobyUtil::Parameter[ @id ][ :language ]
-		end
-		Kernel::raise LanguageNotFoundError.new("Language cannot be determind to perform translation") if (language==nil || language.empty?)
-		translation = MobyUtil::Localisation.translation(
-			logical_name,
-			language,
-			MobyUtil::Parameter[ @id ][ :localisation_server_database_tablename ],
-			file_name,
-			plurality,
-			lengthvariant
-		)
-		if translation.kind_of? String and !numerus.nil?
-			translation.gsub!(/%Ln|%1/){|s| numerus} 
-		elsif translation.kind_of? Array and !numerus.nil?
-			translation.each do |trans|
-				trans.gsub!(/%Ln|%1/){|s| numerus}
+		
+		translation_type = "localisation"
+		
+		# Check for User Information prefix( "uif_...")
+		MobyUtil::Parameter[ :user_data_logical_string_identifier, 'uif_' ].split('|').each do |identifier|
+			if logical_name.to_s.index(identifier)==0
+				translation_type="user_data"
 			end
 		end
-
-		translation
-
+		
+		# Check for Operator Data prefix( "operator_...")
+		MobyUtil::Parameter[ :operator_data_logical_string_identifier, 'operator_' ].split('|').each do |identifier|
+			if logical_name.to_s.index(identifier)==0
+				translation_type="operator_data"
+			end
+		end
+		
+		case translation_type
+		
+			when "user_data"
+				get_user_information( logical_name )
+			
+			when "operator_data"
+				get_operator_data( logical_name )
+			
+			when "localisation"
+				language=nil
+				if ( MobyUtil::Parameter[ self.id ][:read_lang_from_app]=='true')
+					#read localeName app
+					language=self.application.attribute("localeName")
+					#determine the language from the locale
+					language=language.split('_')[0].to_s if (language!=nil && !language.empty?)
+				else
+					language=MobyUtil::Parameter[ self.id ][ :language ]
+				end
+				Kernel::raise LanguageNotFoundError.new("Language cannot be determind to perform translation") if (language==nil || language.empty?)
+				translation = MobyUtil::Localisation.translation(
+					logical_name,
+					language,
+					MobyUtil::Parameter[ self.id ][ :localisation_server_database_tablename ],
+					file_name,
+					plurality,
+					lengthvariant
+				)
+				if translation.kind_of? String and !numerus.nil?
+					translation.gsub!(/%Ln/){|s| numerus} 
+				elsif translation.kind_of? Array and !numerus.nil?
+					translation.each do |trans|
+						trans.gsub!(/%Ln/){|s| numerus}
+					end
+				end
+				translation
+		end
+	end
+	
+	# == description
+	# Wrapper function to retrieve user information for this SUT from the user information database.
+	#
+	# == arguments
+	# user_data_lname
+	#  String
+	#   description: Logical name (LNAME) of the user information item to be retrieved.
+	#   example: "uif_first_name"
+	#  Symbol
+	#   description: Symbol form of the logical name (LNAME) of the user information item to be retrieved.
+	#   example: :uif_first_name
+	#
+	# == returns
+	# String
+	#  description: User data string
+	#  example: "Ivan"
+	# Array
+	#  description: Array of Strings when multiple user data strings found.
+	#  example: ["Ivan", "Manolo"]
+	# 
+	# == exceptions
+	# UserDataNotFoundError
+	#  description: In case the desired user data is not found
+	#
+	# UserDataColumnNotFoundError
+	#  description: In case the desired data column name to be used for the output is not found
+	#
+	# SqlError
+	#  description: In case there are problems with the database connectivity
+	#
+	def get_user_information( user_data_lname )
+		language = MobyUtil::Parameter[ self.id ][ :language ]
+		table_name = MobyUtil::Parameter[ self.id ][ :user_data_server_database_tablename ] 
+		MobyUtil::UserData.retrieve( user_data_lname, language, table_name )
+	end
+	
+	# == description
+	# Wrapper function to retrieve operator data for this SUT from the operator data database.
+	#
+	# == arguments
+	# operator_data_lname
+	#  String
+	#   description: Logical name (LNAME) of the operator data item to be retrieved.
+	#   example: "operator_welcome_message"
+	#  Symbol
+	#   description: Symbol form of the logical name (LNAME) of the operator data item to be retrieved.
+	#   example: :operator_welcome_message
+	#
+	# == returns
+	# String
+	#  description: User data string
+	#  example: "Welcome to Orange"
+	# 
+	# == exceptions
+	# OperatorDataNotFoundError
+	#  description: In case the desired operator data is not found
+	#
+	# OperatorDataColumnNotFoundError
+	#  description: In case the desired data column name to be used for the output is not found
+	#
+	# SqlError
+	#  description: In case there are problems with the database connectivity
+	#
+	def get_operator_data( operator_data_lname )
+		operator = MobyUtil::Parameter[ self.id ][ :operator_selected ]
+		table_name = MobyUtil::Parameter[ self.id ][ :operator_data_server_database_tablename]
+		MobyUtil::OperatorData.retrieve( operator_data_lname, operator, table_name )
 	end
 
     # Function to update all children of current SUT

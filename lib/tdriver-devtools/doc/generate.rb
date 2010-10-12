@@ -69,25 +69,6 @@ def process_result_file( content )
 
   }
 
-=begin
-  { result["description"].first => 
-
-    result["scenarios"].collect{ | scenario |
-
-      scenario["example_step"].collect{ | example |
-
-        code = /\"(.*)\"/.match( example ).captures.first
-
-        status = /^.*\s{1}(\w+)$/.match( example ).captures.first      
-
-        { :example => code, :status => status.to_s.downcase }
-
-      }
-
-    }.flatten
-  }
-=end
-
   result
 
 end
@@ -142,6 +123,10 @@ def process_behaviour_file( content )
                 child.children.select{ | node | node.kind_of?( Nokogiri::XML::Element ) }.each{ | child |
 
                   case child.name.to_s
+
+                    when /^deprecated$/i
+
+                      method[ "deprecated" ] = child.attribute("version").value.to_s
 
                     when /^description$/i, /^info$/i
 
@@ -329,25 +314,21 @@ def process_behaviour_file( content )
 
 end
 
-def read_test_result_files
+def read_test_result_files( folder )
 
-  feature_xml_folder = ARGV.first.to_s
-
-  Dir.glob( File.join( feature_xml_folder, '*.xml' ) ).each{ | file |
+  Dir.glob( File.join( folder, '*.xml' ) ).each{ | file |
 
     @current_file = file
 
     @feature_tests << process_result_file( open( file, 'r' ).read )
 
-    #@feature_tests.merge!( process_result_file( open( file, 'r' ).read ) ) #{ :filename => file, :results => process_result_file( open( file, 'r' ).read ) }
-
   }
 
 end
 
-def read_behaviour_xml_files
+def read_behaviour_xml_files( folder )
 
-  Dir.glob( 'behaviour_xml/*.xml' ).each{ | file |
+  Dir.glob( File.join( folder, '*.xml' ) ).each{ | file |
 
     @current_file = file
 
@@ -357,11 +338,9 @@ def read_behaviour_xml_files
 
 end
 
-def read_behaviour_hash_files
+def read_behaviour_hash_files( folder )
 
-  file = ARGV[1] || 'behaviour_xml/'
-
-  Dir.glob( File.join( file, '*.hash' ) ).each{ | file |
+  Dir.glob( File.join( folder, '*.hash' ) ).each{ | file |
 
     @current_file = file
 
@@ -461,200 +440,6 @@ end
 
 def generate_document_xml
 
-=begin
-
- <feature>
-    <name>z</name>
-    <module>MobyBehaviour::QT::Gesture</module>
-    <full_name>MobyBehaviour::QT::Gesture#z</full_name>
-    <type>accessor</type>
-    <arguments>
-      <count>0</count>
-      <optional>0</optional>
-    </arguments>
-    <feature_documentation>
-      <describes>
-        <name>z</name>
-        <name>z=</name>
-      </describes>
-      <description>example desc</description>
-      <info></info>
-      <behaviour_name>QtExampleGestureBehaviour</behaviour_name>
-      <required_plugin>*</required_plugin>
-      <sut_types>
-        <type>qt</type>
-      </sut_types>
-      <sut_versions>
-        <version>*</version>
-      </sut_versions>
-      <object_types>
-        <version>*</version>
-        <version>sut</version>
-      </object_types>
-      <input_types>
-        <type>touch</type>
-      </input_types>
-      <arguments>
-        <argument>
-          <name>value</name>
-          <optional>false</optional>
-          <types>
-            <type>
-              <name>Integer</name>
-              <example>10</example>
-              <description>Example argument1</description>
-            </type>
-          </types>
-        </argument>
-      </arguments>
-      <returns>
-        <type>
-          <name>String</name>
-          <example>"World"</example>
-          <description>Return value type</description>
-        </type>
-      </returns>
-      <exceptions/>
-    </feature_documentation>
-    <feature_tests/>
-  </feature>
-
- <feature>
-
-    <type>accessor</type>
-
-    <implements>
-      <name>z</name>
-      <name>z=</name>
-    </implements>
-
-    <behaviour_name>QtExampleGestureBehaviour</behaviour_name>
-    <module>MobyBehaviour::QT::Gesture</module>
-    <required_plugin>*</required_plugin>
-
-    <sut_types>
-      <type>qt</type>
-    </sut_types>
-
-    <sut_versions>
-      <version>*</version>
-    </sut_versions>
-
-    <object_types>
-      <version>*</version>
-      <version>sut</version>
-    </object_types>
-
-    <input_types>
-      <type>touch</type>
-    </input_types>
-
-    <description>example desc</description>
-    <info></info>
-
-    <arguments>
-
-      <count>1</count>
-      <optional>0</optional>
-
-        <argument>
-          <name>value</name>
-          <optional>false</optional>
-          <types>
-            <type>
-              <name>Integer</name>
-              <example>10</example>
-              <description>Example argument1</description>
-            </type>
-          </types>
-        </argument>
-
-    </arguments>
-
-    <returns>
-
-      <type>
-        <name>String</name>
-        <example>"World"</example>
-        <description>Return value type</description>
-      </type>
-
-    </returns>
-      
-    <exceptions/>
-
-    <feature_tests/>
-
-  </feature>
-
-
-
-
- <feature>
-
-    <type>accessor</type>
-
-    <implements>
-      <name>z</name>
-      <name>z=</name>
-    </implements>
-
-    <behaviour_name>QtExampleGestureBehaviour</behaviour_name>
-    <module>MobyBehaviour::QT::Gesture</module>
-    <required_plugin>*</required_plugin>
-
-    <sut_types>
-      <type>qt</type>
-    </sut_types>
-
-    <sut_versions>
-      <version>*</version>
-    </sut_versions>
-
-    <object_types>
-      <version>*</version>
-      <version>sut</version>
-    </object_types>
-
-    <input_types>
-      <type>touch</type>
-    </input_types>
-
-    <description>example desc</description>
-    <info></info>
-
-    <arguments count="1" optional="0">
-
-      <argument name="value" optional="false">
-        <type name="Integer">
-          <example>10</example>
-          <description>Example argument1</description>
-        </type>
-      </argument>
-
-    </arguments>
-
-    <returns>
-
-      <type name="String">
-        <example>"World"</example>
-        <description>Return value type</description>
-      </type>
-
-    </returns>
-      
-    <exceptions/>
-
-    <feature_tests/>
-
-  </feature>
-
-
-
-
-=end
-
-
   doc = Nokogiri::XML::Builder.new{ | xml |
     
     xml.documentation{
@@ -721,6 +506,12 @@ def generate_document_xml
             :name => feature_documentation[ "__behaviour" ][ "name" ], 
             :module => module_name
           )
+
+          if feature_documentation.has_key?( "deprecated" )
+
+            xml.deprecated( :version => feature_documentation[ "deprecated" ] )
+
+          end
 
           # <description>example</description>
           xml.description( feature_documentation[ "description" ] )
@@ -921,15 +712,19 @@ def generate_document_xml
 
 end
 
-if ARGV.count < 1
+if ARGV.count < 2
   
-  abort "\nUsage: #{ File.basename( $0 ) } feature_xml_folder [behaviour_xml_folder]\n\n"
+  abort "\nUsage: #{ File.basename( $0 ) } test_results_folder behaviour_xml_folder [ output_filename ]\n\n"
 
 end
 
-read_test_result_files # ok
-read_behaviour_xml_files # ok
-read_behaviour_hash_files # ok
+feature_tests_folder = ARGV[ 0 ] || '.'
+behaviour_xml_folder = ARGV[ 1 ] || 'behaviour_xml/'
+output_filename = ARGV[2] || 'document.xml'
+
+read_test_result_files( feature_tests_folder) # ok
+read_behaviour_xml_files( behaviour_xml_folder ) # ok
+read_behaviour_hash_files( behaviour_xml_folder ) # ok
 
 #puts "all executed feature tests:"
 @executed_tests = collect_feature_tests
@@ -944,5 +739,5 @@ read_behaviour_hash_files # ok
 
 accessors = []
 
-puts generate_document_xml
+open( output_filename, 'w'){ | file | file << generate_document_xml }
 

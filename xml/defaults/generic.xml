@@ -11,29 +11,25 @@
         <!--default timeout for verify if called without timeout or with nil -->
         <parameter name="synchronization_timeout" value="10" />
 
-    	<!-- default parameters for mysql localisation server settings -->
-        <!--parameter name="localisation_db_type" value="sqlite" /-->
+    	<!-- default parameters for dbaccess server settings -->
         <parameter name="localisation_db_type" value="mysql" />
         <parameter name="localisation_server_ip" value="127.0.0.1" /> <!--valid only for mysql! -->
         <parameter name="localisation_server_username" value="root" /> <!--valid only for mysql! -->
         <parameter name="localisation_server_password" value="" /> <!--valid only for mysql! -->
         <parameter name="localisation_server_database_name" value="default_tdriver_db" /> <!--path to the file for sqlite -->
-		<parameter name="localisation_server_database_tablename" value="default_userinputs_tablename" />
 		
         <parameter name="user_data_db_type" value="mysql" />
         <parameter name="user_data_server_ip" value="127.0.0.1" /> <!--valid only for mysql! -->
         <parameter name="user_data_server_username" value="root" /> <!--valid only for mysql! -->
         <parameter name="user_data_server_password" value="" /> <!--valid only for mysql! -->
         <parameter name="user_data_server_database_name" value="default_tdriver_db" /> <!--path to the file for sqlite -->
-		<parameter name="user_data_server_database_tablename" value="default_userinputs_tablename" />
 	
 		<parameter name="operator_data_db_type" value="sqlite" />
 		<parameter name="operator_data_server_ip" value="127.0.0.1" /> <!--valid only for mysql! -->
 		<parameter name="operator_data_server_username" value="root" /> <!--valid only for mysql! -->
 		<parameter name="operator_data_server_password" value="" /> <!--valid only for mysql! -->
 		<parameter name="operator_data_server_database_name" value="c:\operator_data.sqlite" /> <!--path to the file for sqlite -->
-		<parameter name="operator_data_server_database_tablename" value="operatorinput" />
-		<parameter name="operator_selected" value="orange" /> <!-- vodafone, etc... can be overwritten dynamically during testing -->
+		
 
         <!-- Logging levels:
                         0 = DISABLED	No logging done (default)
