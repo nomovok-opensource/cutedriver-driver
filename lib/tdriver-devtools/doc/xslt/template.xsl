@@ -812,59 +812,63 @@
 
 <xsl:template name="feature">
 
-  <xsl:call-template name="feature_name" />
+  <div id="{ ./behaviour/@name }.@name">
 
-  <xsl:if test="count(deprecated)>0">
+    <xsl:call-template name="feature_name" />
 
-    <xsl:call-template name="deprecated" />
+    <xsl:if test="count(deprecated)>0">
 
-  </xsl:if>
-  
-  <xsl:call-template name="description" />
+      <xsl:call-template name="deprecated" />
 
-  <xsl:if test="count(deprecated)>0">
+    </xsl:if>
+    
+    <xsl:call-template name="description" />
 
-    <xsl:call-template name="target_details" />
+    <xsl:if test="count(deprecated)>0">
 
-  </xsl:if>
+      <xsl:call-template name="target_details" />
 
-  <xsl:if test="count(deprecated)=0">
-
-    <xsl:call-template name="call_sequence" />
-
-    <xsl:call-template name="target_details" />
-
-    <xsl:call-template name="arguments" />
-
-    <xsl:call-template name="returns">
-      <xsl:with-param name="type" select="returns/type" />
-      <xsl:with-param name="feature_type" select="@type" />
-    </xsl:call-template>
-
-    <xsl:call-template name="exceptions">
-      <xsl:with-param name="type" select="exceptions/type" />
-      <xsl:with-param name="feature_type" select="@type" />
-    </xsl:call-template>
-
-    <xsl:if test="count(tables/table)>0">    
-      <!-- custom tables -->
-      <xsl:call-template name="tables" />
     </xsl:if>
 
-    <xsl:call-template name="tests">
-      <xsl:with-param name="tests" select="tests" />
-    </xsl:call-template>
+    <xsl:if test="count(deprecated)=0">
 
-  </xsl:if>
+      <xsl:call-template name="call_sequence" />
+
+      <xsl:call-template name="target_details" />
+
+      <xsl:call-template name="arguments" />
+
+      <xsl:call-template name="returns">
+        <xsl:with-param name="type" select="returns/type" />
+        <xsl:with-param name="feature_type" select="@type" />
+      </xsl:call-template>
+
+      <xsl:call-template name="exceptions">
+        <xsl:with-param name="type" select="exceptions/type" />
+        <xsl:with-param name="feature_type" select="@type" />
+      </xsl:call-template>
+
+      <xsl:if test="count(tables/table)>0">    
+        <!-- custom tables -->
+        <xsl:call-template name="tables" />
+      </xsl:if>
+
+      <xsl:call-template name="tests">
+        <xsl:with-param name="tests" select="tests" />
+      </xsl:call-template>
+
+    </xsl:if>
+      
+    <xsl:call-template name="info" />
     
-  <xsl:call-template name="info" />
-  
-  <xsl:if test="position()!=last()-1">
-    <!-- feature separator? -->
-  </xsl:if>
-        
-  <a href="#top" class="jump_to">Jump to top of page</a><br />
-  <br />
+    <xsl:if test="position()!=last()-1">
+      <!-- feature separator? -->
+    </xsl:if>
+          
+    <a href="#top" class="jump_to">Jump to top of page</a><br />
+    <br />
+
+  </div>
           
 </xsl:template>
 
