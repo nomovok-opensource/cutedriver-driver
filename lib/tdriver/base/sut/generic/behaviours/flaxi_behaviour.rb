@@ -18,11 +18,31 @@
 ############################################################################
 
 module MobyBehaviour
-
+    # == description
+    # This module contains implementation to control device flashing
+    #
+    # == behaviour
+    # FlaxiBehaviour
+    #
+    # == requires
+    # *
+    # == input_type
+    # *
+    #
+    # == sut_type
+    # *
+    #
+    # == sut_version
+    # *
+    #
+    # == objects
+    # sut
+    #
     module FlaxiBehaviour
 
       include MobyBehaviour::Behaviour
 
+      # == description
       # Instructs the sut to start the flash operation with default TDriver parameters for sut that are:
       # <parameter name="flaxi_flash_attempts" value="2" /> <!-- how many times flaxi will attempt to flash the device -->
       # <parameter name="timeout_between_command_sequence" value="25" /> <!-- timeout in seconds between the switchbox commands -->
@@ -39,19 +59,21 @@ module MobyBehaviour
       # <parameter name="flaxi_commands_after_failed_flash" value="" /> <!-- commands for flaxi after failed flash -->
       # <parameter name="flaxi_flash_command_success_string" value="" /> <!-- If no error then no string is displayed -->
       # <parameter name="switchbox_commands_after_flash" value="" /> <!-- commands you want to be executed after flash -->
-			# == params
+			# == arguments
 			# == returns
-			# == raises
-      # BehaviourError If mandatory parameters are missing
-			# BehaviourError If flashing is failed
-			# === examples
-			# @sut.flash
+			# == exceptions
+      # BehaviourError
+      #  description: If mandatory parameters are missing
+			# BehaviourError
+      #  description: If flashing is failed
+			# === info
       def flash()
 
         flash_images
 
       end
 
+      # == description
       # Instructs the sut to start the flash operation with the given software image file:
       # <parameter name="flaxi_flash_attempts" value="2" /> <!-- how many times flaxi will attempt to flash the device -->
       # <parameter name="timeout_between_command_sequence" value="25" /> <!-- timeout in seconds between the switchbox commands -->
@@ -67,8 +89,11 @@ module MobyBehaviour
       # <parameter name="flaxi_commands_after_failed_flash" value="" /> <!-- commands for flaxi after failed flash -->
       # <parameter name="flaxi_flash_command_success_string" value="" /> <!-- If no error then no string is displayed -->
       # <parameter name="switchbox_commands_after_flash" value="" /> <!-- commands you want to be executed after flash -->
-			# == params
-      # flash_files: The location of the software image file
+			# == arguments
+      # flash_files
+      #  String
+      #  description: The location of the software image file
+      #  example: "C:/images/flash_image.img"
 			# == returns
 			# == raises
       # BehaviourError If mandatory parameters are missing
