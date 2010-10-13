@@ -150,11 +150,11 @@
 
         <methods>
             <method name="flash">
-                <description>Flashes the device using flaxi</description>
+                <description>Flashes the device using any command line tool</description>
                 <example>flash</example>
             </method>
             <method name="flash_files">
-                <description>Instructs to flash defined files</description>
+                <description>Instructs to flash defined files with a command line tool</description>
                 <example>flash_files('\tmp\image.bin \tmp\image2.bin')</example>
             </method>
         </methods>

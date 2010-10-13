@@ -110,7 +110,7 @@ module MobyBehaviour
         str_flash_command=parameter(:flash_command)
           Kernel::raise MobyBase::BehaviourError.new("flash_images", "flash_command not defined for sut in tdriver_parameters.xml") if str_flash_command == nil
 
-        str_optional_parameters=parameter(:optional_parameters_after_flashing)
+        str_optional_parameters=parameter(:optional_parameters_after_flashing,'')
           Kernel::raise MobyBase::BehaviourError.new("flash_images", "optional_parameters_after_flashing not defined for sut in tdriver_parameters.xml") if str_optional_parameters == nil
 
         #build flash command
