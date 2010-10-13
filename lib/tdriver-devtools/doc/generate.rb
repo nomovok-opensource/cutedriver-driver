@@ -357,7 +357,7 @@ def read_behaviour_hash_files( folder )
 
   }
 
-  abort "No behaviour XML files found from folder '#{ file }'" if @behaviour_hashes.empty?
+  abort "No behaviour XML files found from folder '#{ folder }'" if @behaviour_hashes.empty?
 
 end
 
