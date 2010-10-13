@@ -324,6 +324,8 @@ def read_test_result_files( folder )
 
   }
 
+  puts "Test result files: #{ @feature_tests.count }"
+
 end
 
 def read_behaviour_xml_files( folder )
@@ -415,23 +417,22 @@ def collect_feature_tests
   
   @feature_tests.collect{ | feature |
 
-    result[ feature["description"].first ] = 
+    result[ ( feature["description"] || ["no feature test description"] ).first ] = 
 
-      feature["scenarios"].collect{ | scenario |
+      ( feature["scenarios"] || [] ).collect{ | scenario |
 
-        scenario["example_step"].collect{ | example |
+        ( scenario["example_step"] || [] ).collect{ | example |
 
           code = /\"(.*)\"/.match( example ).captures.first
 
           status = /^.*\s{1}(\w+)$/.match( example ).captures.first      
 
-          [ "example" => code, "status" => status.to_s.downcase, "description" => scenario["description"] ]
+          [ "example" => code, "status" => status.to_s.downcase, "description" => ( scenario["description"] || "" ) ]
 
         }.flatten
 
       }.flatten
     
-
   }.flatten
   
   result
@@ -718,9 +719,9 @@ if ARGV.count < 2
 
 end
 
-feature_tests_folder = ARGV[ 0 ] || '.'
-behaviour_xml_folder = ARGV[ 1 ] || 'behaviour_xml/'
-output_filename = ARGV[2] || 'document.xml'
+feature_tests_folder = File.expand_path( ARGV[ 0 ] || '.' )
+behaviour_xml_folder = File.expand_path( ARGV[ 1 ] || 'behaviour_xml/' )
+output_filename = File.expand_path( ARGV[2] || 'document.xml' )
 
 read_test_result_files( feature_tests_folder) # ok
 read_behaviour_xml_files( behaviour_xml_folder ) # ok
@@ -739,5 +740,16 @@ read_behaviour_hash_files( behaviour_xml_folder ) # ok
 
 accessors = []
 
-open( output_filename, 'w'){ | file | file << generate_document_xml }
+begin
+
+  open( output_filename, 'w'){ | file | file << generate_document_xml }
+  puts "\nDocumentation XML saved succesfully to #{ output_filename }"
+
+rescue Exception => e 
+
+  puts "\nDocumentation XML saved unsuccesfully due to '#{ e.message }' (#{ e.class })"
+
+end
+
+puts ""
 

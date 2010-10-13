@@ -478,6 +478,8 @@ EXAMPLE
 
       argument_index = -1
 
+      arguments_found = 0
+
       source.lines.to_a.each_with_index{ | line, index | 
         
         # remove cr/lf
@@ -502,6 +504,8 @@ EXAMPLE
 
             # argument name
             current_argument = $1 
+
+            arguments_found += 1 unless line.include?( "#" )
 
             current_section = nil
 
@@ -653,8 +657,8 @@ EXAMPLE
 
       # add missing/undocumented arguments to order list
       missing = result.collect{ | value | order << value unless found_keys.include?( value.keys.first ) }
-            
-      order
+   
+      [ order, arguments_found ]
 
     end
 
@@ -780,6 +784,8 @@ EXAMPLE
 
       argument_index = -1
 
+      constants_to_classes = { "nil" => "NilClass", "true" => "TrueClass", "false" => "FalseClass" }
+
       source.lines.to_a.each_with_index{ | line, index | 
         
         # remove cr/lf
@@ -797,6 +803,9 @@ EXAMPLE
         line.lstrip!
 
         if nesting == 0
+
+          # convert constants nil, true, false to real class names
+          line = constants_to_classes[ line.downcase ] if constants_to_classes.include?( line.downcase )
 
           line =~ /^(.+)/i
 
@@ -831,10 +840,14 @@ EXAMPLE
             else
 
               current_section = $1
-              
-              unless result[ argument_index ][ current_argument_type ].has_key?( current_section )
 
-                result[ argument_index ][ current_argument_type ][ current_section ] = ""
+              if result[ argument_index ].has_key?( current_argument_type )
+                
+                unless result[ argument_index ][ current_argument_type ].has_key?( current_section )
+
+                  result[ argument_index ][ current_argument_type ][ current_section ] = ""
+
+                end
 
               end
           
@@ -842,13 +855,19 @@ EXAMPLE
 
             end
 
-            raise_error("Unable add return value details due to variable type not defined. Argument type must be defined at pos 1 of comment. (e.g. \"# Integer\" NOK: \"#  Integer\", \"#Integer\")") if current_argument_type.nil?  
+            if current_argument_type.nil?  
 
-            # add one leading whitespace if current_section value is not empty 
-            section_content = " " + section_content unless result[ argument_index ][ current_argument_type ][ current_section ].empty?
+              raise_error("Unable add return value details due to variable type not defined. Argument type must be defined at pos 1 of comment. (e.g. \"# Integer\" NOK: \"#  Integer\", \"#Integer\")") 
 
-            # store section_content to current_section
-            result[ argument_index ][ current_argument_type ][ current_section ] << section_content
+            else
+  
+              # add one leading whitespace if current_section value is not empty 
+              section_content = " " + section_content unless result[ argument_index ][ current_argument_type ][ current_section ].empty?
+
+              # store section_content to current_section
+              result[ argument_index ][ current_argument_type ][ current_section ] << section_content
+
+            end
 
         end
 
@@ -1014,11 +1033,13 @@ EXAMPLE
         ## TODO: remember to verify that there are documentation for each argument!
         ## TODO: verify that there is a tag for visualizer example
 
+        arguments_found = 0
+
         method_header = Hash[ method_header.collect{ | key, value |
 
           if key == :arguments
 
-            value = process_method_arguments_section( value, params )
+            value, arguments_found = process_method_arguments_section( value, params )
 
           end
 
@@ -1040,10 +1061,11 @@ EXAMPLE
           
           end
 
-
           [ key, value ]
 
         }]
+
+        method_header[ :__arguments_found ] = arguments_found        
 
         # if no description found for arguments, add argument names to method_header hash
         if ( params.count > 0 ) && ( method_header[ :arguments ].nil? || method_header[:arguments].empty? )
@@ -1244,7 +1266,7 @@ EXAMPLE
 
       text << help( topic ) unless topic.nil?
 
-      #warn( text << "\n" )
+      warn( text << "\n" )
 
     end
 
@@ -1302,11 +1324,9 @@ EXAMPLE
 
       return "" if ( feature.last[:__type] != 'method' )
 
-      if feature.last[ :exceptions ].nil?
-
-        raise_error("Error: $TYPE '#{ feature.first }' ($MODULE) doesn't have exceptions(s) defined", 'exceptions' )
-
-      end
+      #if feature.last[ :exceptions ].nil?
+      #  raise_error("Error: $TYPE '#{ feature.first }' ($MODULE) doesn't have exceptions(s) defined", 'exceptions' )
+      #end
 
       return "" if feature.last[ :exceptions ].nil? || feature.last[ :exceptions ].empty?
 
@@ -1356,7 +1376,9 @@ EXAMPLE
 
       #return "" if ( @processing == :attributes && feature.last[:__type] == 'R' )
 
-      if feature.last[ :arguments ].nil?
+      feature.last[ :__type ]
+
+      if feature.last[ :arguments ].nil? and feature.last[ :__arguments_found ] > 0
 
         note = ". Note that also attribute writer requires input value defined as argument." if [ 'writer', 'accessor' ].include?( @processing )
 

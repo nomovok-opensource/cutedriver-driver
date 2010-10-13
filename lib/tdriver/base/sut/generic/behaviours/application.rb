@@ -32,14 +32,19 @@ module MobyBehaviour
 		#
 		# Closes the application whether or not it is on foreground. Note: this will currently always try to close applications, also
 		# privilegied applications
-		# === returns
-
-		# options_hash:: Hash, possible keys :force_kill (default nil) and :check_proces (default true). For backwards compatibility: instead of a Hash, the value can also be true, false or nil, in which case it is taken as the value of :force_kill
+		#
+		# == params
+		#options_hash:: Hash, possible keys :force_kill (default nil) and :check_proces (default true). 
+		#For backwards compatibility: instead of a Hash, the value can also be true, false or nil, in which case it is taken as the value of :force_kill
+		#:force_kill:: If key is set to true, the application process is killed if close fails.  If set to nil, value of key will be  taken  as defined 
+		#by 'application_close_kill' parameter in the TDriver parameter file.
+		#:check_process:: If key is set to true, success of the close method is verified by checking if the process is still active. If set to false, 
+		#TDriver will only check that the application is no longer in the foreground.	  
+		#
 		# === raises
 		# TestObjectNotFoundError:: If this application is not the foreground application on the device under test.
 		# VerificationError:: If no application test object is found after close or if this application is still in the foreground after the close.
-
-        # ArgumentError:: Options_hash was not a Hash or one of the keys had an invalid type.
+		# ArgumentError:: Options_hash was not a Hash or one of the keys had an invalid type.
 		# === example
 		#  @sut.application.close #closes anonymous foreground application
 		#
@@ -192,9 +197,7 @@ module MobyBehaviour
 		# Returns uid of foreground application
 		#
 		# === returns
-		# String:: UID of the application.
-		# === raises
-		# something if no id defined?
+		# String:: UID of the application.		
 		# === example
 		#  puts @sut.application.uid #prints foreground executable uid to console
 		def uid
@@ -207,8 +210,6 @@ module MobyBehaviour
 		# it always returns true!
 		# === returns
 		# Boolean:: True if closing is possible with the ApplicationBehaviour::close method
-		# === raises
-		# AttributeNotFoundError:: If no closability has been defined for the application.
 		# === example
 		#  puts @sut.application.closable #prints foreground application closable status to console (at the moment always true)
 		def closable?

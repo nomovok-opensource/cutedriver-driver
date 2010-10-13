@@ -177,7 +177,7 @@ module MobyBehaviour
       # == description
       # This method is deprecated, please use [link="#parent"]TestObject#parent[/link] instead.
       #
-      def parent_object()
+      def parent_object
 
         $stderr.puts "warning: TestObject#parent_object is deprecated, please use TestObject#parent instead."      
 
@@ -185,7 +185,36 @@ module MobyBehaviour
 
       end
 
+      # == description
+	    # Function for translating all symbol values into strings using sut's translate method
+	    # Goes through all items in a hash and if a value is symbol then uses that symbol as a logical
+	    # name and tries to find a translation for that.
+	    # == params
+	    # hash:: Hash containing key, value pairs. The parameter will get modified if symbols are found from values
+	    # == raises
+	    # LanguageNotFoundError:: In case of language is not found
+	    # LogicalNameNotFoundError:: In case of logical name is not found for current language
+	    # MySqlConnectError:: In case problems with the db connectivity
+	    def translate!( hash, file_name = nil, plurality = nil, numerus = nil, lengthvariant = nil )
+
+      end
+
+      # == description
+      # Wrapper function to return translated string for this SUT to read the values from localisation database.
+      #
+      # == returns
+      # nil
+      #  description: aabbcc
+      #  example: 1
+      # 
+	    def test2
+
+      end
+
+
     end
+
+
 
   end
 end

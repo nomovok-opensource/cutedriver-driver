@@ -19,6 +19,27 @@
 
 module MobyBehaviour
 
+  # == description
+  # Describes the generic behaviour of TestObject, common methods that can be used to control TestObject
+  #
+  # == behaviour
+  # GenericTestObject
+  #
+  # == requires
+  # *
+  #
+  # == input_type
+  # *
+  #
+  # == sut_type
+  # *
+  #
+  # == sut_version
+  # *
+  #
+  # == objects
+  # *
+  #
   module TestObject
 
     # Hash containing the identification attributes that were used when the test object was created.
