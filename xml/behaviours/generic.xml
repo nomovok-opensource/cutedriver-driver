@@ -144,9 +144,9 @@
 
 	</behaviour>
 
-   <behaviour name="Flaxi" object_type="sut" sut_type="*" input_type="*" version="*">
+   <behaviour name="Flash" object_type="sut" sut_type="*" input_type="*" version="*">
 
-        <module name="MobyBehaviour::FlaxiBehaviour" />
+        <module name="MobyBehaviour::FlashBehaviour" />
 
         <methods>
             <method name="flash">
@@ -154,8 +154,8 @@
                 <example>flash</example>
             </method>
             <method name="flash_files">
-                <description>Instructs the flaxi to flash defined files</description>
-                <example>flash_files('\tmp\image.bin \tmp\variant.bin')</example>
+                <description>Instructs to flash defined files</description>
+                <example>flash_files('\tmp\image.bin \tmp\image2.bin')</example>
             </method>
         </methods>
 

@@ -38,26 +38,26 @@ module MobyBehaviour
     # == objects
     # sut
     #
-    module FlaxiBehaviour
+    module FlashBehaviour
 
       include MobyBehaviour::Behaviour
 
       # == description
       # Instructs the sut to start the flash operation with default TDriver parameters for sut that are:
-      # <parameter name="flaxi_flash_attempts" value="2" /> <!-- how many times flaxi will attempt to flash the device -->
+      # <parameter name="flash_attempts" value="2" /> <!-- how many times flaxi will attempt to flash the device -->
       # <parameter name="timeout_between_command_sequence" value="25" /> <!-- timeout in seconds between the switchbox commands -->
       # <parameter name="switchbox_commands_before_flash" value="" /> <!-- commands you want to be executed before flash -->
-      # <parameter name="flaxi_commands_before_flash" value="" /> <!-- flash command for flaxi before flash -->
-      # <parameter name="flaxi_flash_command" value="" /> <!-- intial flash command for flaxi -->
+      # <parameter name="commands_before_flash" value="" /> <!-- flash command for flaxi before flash -->
+      # <parameter name="flash_command" value="" /> <!-- intial flash command for flaxi -->
       # <parameter name="timeout_before_executing_commands_during_flash" value="20" /> <!-- timeout in seconds before executing the commands during flash -->
       # <parameter name="switchbox_commands_during_flash" value="" /> <!-- commands you want to be executed during flash -->
-      # <parameter name="flaxi_optional_parameters_after_flashing" value="" /> <!-- optional flash parameters -->
-      # <parameter name="flaxi_flash_images" value="" /> <!-- images to flash  -->
-      # <parameter name="flaxi_sleep_time_after_flash_command" value="70" /> <!-- need to wait for the flash process to finish -->
-      # <parameter name="flaxi_command_after_flash" value="" /> <!-- flash command for flaxi after flash -->
+      # <parameter name="optional_parameters_after_flashing" value="" /> <!-- optional flash parameters -->
+      # <parameter name="flash_images" value="" /> <!-- images to flash  -->
+      # <parameter name="sleep_time_after_flash_command" value="70" /> <!-- need to wait for the flash process to finish -->
+      # <parameter name="command_after_flash" value="" /> <!-- flash command for flaxi after flash -->
       # <parameter name="switchbox_commands_after_failed_flash" value="" /> <!-- commands for switchbox after failed flash -->
-      # <parameter name="flaxi_commands_after_failed_flash" value="" /> <!-- commands for flaxi after failed flash -->
-      # <parameter name="flaxi_flash_command_success_string" value="" /> <!-- If no error then no string is displayed -->
+      # <parameter name="commands_after_failed_flash" value="" /> <!-- commands for flaxi after failed flash -->
+      # <parameter name="flash_command_success_string" value="" /> <!-- If no error then no string is displayed -->
       # <parameter name="switchbox_commands_after_flash" value="" /> <!-- commands you want to be executed after flash -->
 			# == arguments
 			# == returns
@@ -75,19 +75,19 @@ module MobyBehaviour
 
       # == description
       # Instructs the sut to start the flash operation with the given software image file:
-      # <parameter name="flaxi_flash_attempts" value="2" /> <!-- how many times flaxi will attempt to flash the device -->
+      # <parameter name="flash_attempts" value="2" /> <!-- how many times flaxi will attempt to flash the device -->
       # <parameter name="timeout_between_command_sequence" value="25" /> <!-- timeout in seconds between the switchbox commands -->
       # <parameter name="switchbox_commands_before_flash" value="" /> <!-- commands you want to be executed before flash -->
-      # <parameter name="flaxi_commands_before_flash" value="" /> <!-- flash command for flaxi before flash -->
-      # <parameter name="flaxi_flash_command" value="" /> <!-- intial flash command for flaxi -->
+      # <parameter name="commands_before_flash" value="" /> <!-- flash command for flaxi before flash -->
+      # <parameter name="flash_command" value="" /> <!-- intial flash command for flaxi -->
       # <parameter name="timeout_before_executing_commands_during_flash" value="20" /> <!-- timeout in seconds before executing the commands during flash -->
       # <parameter name="switchbox_commands_during_flash" value="" /> <!-- commands you want to be executed during flash -->
-      # <parameter name="flaxi_optional_parameters_after_flashing" value="" /> <!-- optional flash parameters -->
-      # <parameter name="flaxi_sleep_time_after_flash_command" value="70" /> <!-- need to wait for the flash process to finish -->
-      # <parameter name="flaxi_command_after_flash" value="" /> <!-- flash command for flaxi after flash -->
+      # <parameter name="optional_parameters_after_flashing" value="" /> <!-- optional flash parameters -->
+      # <parameter name="sleep_time_after_flash_command" value="70" /> <!-- need to wait for the flash process to finish -->
+      # <parameter name="command_after_flash" value="" /> <!-- flash command for flaxi after flash -->
       # <parameter name="switchbox_commands_after_failed_flash" value="" /> <!-- commands for switchbox after failed flash -->
-      # <parameter name="flaxi_commands_after_failed_flash" value="" /> <!-- commands for flaxi after failed flash -->
-      # <parameter name="flaxi_flash_command_success_string" value="" /> <!-- If no error then no string is displayed -->
+      # <parameter name="commands_after_failed_flash" value="" /> <!-- commands for flaxi after failed flash -->
+      # <parameter name="flash_command_success_string" value="" /> <!-- If no error then no string is displayed -->
       # <parameter name="switchbox_commands_after_flash" value="" /> <!-- commands you want to be executed after flash -->
 			# == arguments
       # flash_files
@@ -103,18 +103,18 @@ module MobyBehaviour
       def flash_images(flash_files=nil)
 
         if flash_files==nil
-          flash_files=parameter(:flaxi_flash_images)
-          Kernel::raise MobyBase::BehaviourError.new("flash_images", "flaxi_flash_images not defined for sut in tdriver_parameters.xml") if flash_files == nil
+          flash_files=parameter(:flash_images)
+          Kernel::raise MobyBase::BehaviourError.new("flash_images", "flash_images not defined for sut in tdriver_parameters.xml") if flash_files == nil
         end
 
-        str_flaxi_flash_command=parameter(:flaxi_flash_command)
-          Kernel::raise MobyBase::BehaviourError.new("flash_images", "flaxi_flash_command not defined for sut in tdriver_parameters.xml") if str_flaxi_flash_command == nil
+        str_flash_command=parameter(:flash_command)
+          Kernel::raise MobyBase::BehaviourError.new("flash_images", "flash_command not defined for sut in tdriver_parameters.xml") if str_flash_command == nil
 
-        str_flaxi_optional_parameters=parameter(:flaxi_optional_parameters_after_flashing)
-          Kernel::raise MobyBase::BehaviourError.new("flash_images", "flaxi_optional_parameters_after_flashing not defined for sut in tdriver_parameters.xml") if str_flaxi_optional_parameters == nil
+        str_optional_parameters=parameter(:optional_parameters_after_flashing)
+          Kernel::raise MobyBase::BehaviourError.new("flash_images", "optional_parameters_after_flashing not defined for sut in tdriver_parameters.xml") if str_optional_parameters == nil
 
         #build flash command
-        flash_command="#{str_flaxi_flash_command} #{flash_files} #{str_flaxi_optional_parameters}"
+        flash_command="#{str_flash_command} #{flash_files} #{str_optional_parameters}"
 
         #start flashing
         result=start_flashing(flash_command)
@@ -148,20 +148,20 @@ module MobyBehaviour
         execute_command_sequence(:switchbox_commands_after_failed_flash)
 
         #flaxi commands after failed flash
-        execute_command_sequence(:flaxi_commands_after_failed_flash)
+        execute_command_sequence(:commands_after_failed_flash)
 
       end
 
       def start_flashing(flash_command)
 
-        flaxi_flash_attempts=parameter(:flaxi_flash_attempts)
-          Kernel::raise MobyBase::BehaviourError.new("start_flashing", "flaxi_flash_attempts not defined for sut in tdriver_parameters.xml") if flaxi_flash_attempts == nil
+        flash_attempts=parameter(:flash_attempts)
+          Kernel::raise MobyBase::BehaviourError.new("start_flashing", "flash_attempts not defined for sut in tdriver_parameters.xml") if flash_attempts == nil
 
         current_flash_attempt=0
         flash_result='false'
 
 
-        while current_flash_attempt < flaxi_flash_attempts.to_i
+        while current_flash_attempt < flash_attempts.to_i
           initialize_prommer
 
           initialize_device
@@ -175,7 +175,7 @@ module MobyBehaviour
           end
           flash_result=system(flash_command)
           if flash_result.to_s=='true'
-            current_flash_attempt==flaxi_flash_attempts
+            current_flash_attempt==flash_attempts
           else
             flash_error_recovery
           end
@@ -207,7 +207,7 @@ module MobyBehaviour
       def initialize_device()
 
         #flaxi command sequence before flash
-        execute_command_sequence(:flaxi_commands_before_flash)
+        execute_command_sequence(:commands_before_flash)
 
       end
 
@@ -229,7 +229,7 @@ module MobyBehaviour
       def finalize_device()
 
         #flaxi command sequence before flash
-        execute_command_sequence(:flaxi_command_after_flash)
+        execute_command_sequence(:command_after_flash)
 
       end
 
