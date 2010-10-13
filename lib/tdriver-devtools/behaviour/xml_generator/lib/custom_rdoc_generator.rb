@@ -606,8 +606,8 @@ EXAMPLE
       params_array.each{ | param |
 
         if ( item = result.select{ | arg | arg.keys.include?( param.first ) }).empty?
-                
-          raise_error("Error: Argument '#{ param }' not documented in '#{ @current_method.name }' ($MODULE).\nNote that documented argument and variable name must be identical.", [ 'writer', 'accessor' ].include?( @processing ) ? 'attr_argument' : 'arguments' )
+
+          raise_error("Error: Argument '#{ param.first }' is implemented but not documented in '#{ @current_method.name }' ($MODULE).\nNote that documented argument and variable name must be identical.", [ 'writer', 'accessor' ].include?( @processing ) ? 'attr_argument' : 'arguments' )
 
           order << { param.first => {} }
 
@@ -618,6 +618,7 @@ EXAMPLE
 
           # apply overriding default argument value from documentation
           arg[ arg_name ][ :argument_type_order ].each{ | type_name |
+
             type_hash = arg[ arg_name ][ :types ][ type_name ]
 
             unless type_hash["default"].nil?
@@ -643,7 +644,9 @@ EXAMPLE
   
           # if optional parameter and no overriding value defined, add one from implementation
           if arg[ arg_name ][:default].nil?
+
             arg[ arg_name ][ :default ] = params_hash[ arg_name ][ :default ] if params_hash[ arg_name ][ :optional ] == true
+
           end
 
           order << arg
@@ -651,13 +654,39 @@ EXAMPLE
         end
       
       }
-            
+      
       # collect all argument names and add block arguments if any   
       found_keys = order.collect{ | pair | pair.keys }.flatten
 
+      # collect all documented argument names
+      documented_arguments = result.collect{ | arg | arg.keys }.flatten
+
+      unimplemented_arguments = ( documented_arguments - found_keys )
+
+      unless [ :attributes ].include?( @processing )
+
+        unless unimplemented_arguments.empty?
+
+          unimplemented_arguments.each{ | argument |
+
+            raise_error("Error: Argument '#{ argument }' is documented but not implemented in '#{ @current_method.name }' ($MODULE).\nNote that documented argument and variable name must be identical.", [ :attributes ].include?( @processing ) ? 'attr_argument' : 'arguments' )
+
+          }
+
+          # remove unimplemented argument documentation
+          result = result.select{ | documented_argument |
+
+            unimplemented_arguments.include?( documented_argument.to_a.flatten.first ) == false
+
+          }
+
+        end
+
+      end
+
       # add missing/undocumented arguments to order list
       missing = result.collect{ | value | order << value unless found_keys.include?( value.keys.first ) }
-   
+
       [ order, arguments_found ]
 
     end
@@ -899,6 +928,8 @@ EXAMPLE
 
     def process_arguments( arguments )
 
+      return [] if arguments.to_s.empty?      
+
       arguments = arguments[ 1 .. -2 ] if arguments[0].chr == "(" and arguments[-1].chr ==")"
 
       arguments.strip!
@@ -942,8 +973,8 @@ EXAMPLE
         # argument name
         elsif capture == true
 
-          # argument name
-          if token.kind_of?( RubyToken::TkIDENTIFIER )
+          # argument name, or part of argument default value
+          if token.kind_of?( RubyToken::TkIDENTIFIER ) and ![ RubyToken::TkDOT, RubyToken::TkCOLON2 ].include?( previous_token.class )
 
             args << [ token.name, nil, false ]
 
@@ -1001,20 +1032,19 @@ EXAMPLE
 
     end
     
-  def process_undocumented_method_arguments( params )
+    def process_undocumented_method_arguments( params )
 
-    params.collect{ | param |
-    
-      hash = {}
-      hash[ :types ] = {}
-      hash[ :default ] = param[1] if param[-1] == true
+      params.collect{ | param |
+      
+        hash = {}
+        hash[ :types ] = {}
+        hash[ :default ] = param[1] if param[-1] == true
 
-      { param.first.to_s => hash }
-        
-    }
+        { param.first.to_s => hash }
+          
+      }
 
-  end
-
+    end
 
     def process_method( method )
 
@@ -1412,6 +1442,8 @@ EXAMPLE
            argument_types_in_order = argument.last[ :types ]
 
          end
+
+         argument_types_in_order ||= []
             
          # in case of argument is not documented at all...
          if argument_types_in_order.empty?
