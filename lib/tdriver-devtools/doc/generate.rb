@@ -4,6 +4,8 @@ require 'nokogiri'
 @behaviour_hashes = {}
 @behaviours = []
 
+$passed, $failed, $unknown = [ 0, 0, 0 ]
+
 $modules_and_methods_tested = {}
 
 def process_result_file( content )
@@ -324,7 +326,7 @@ def read_test_result_files( folder )
 
   }
 
-  puts "Test result files: #{ @feature_tests.count }"
+  puts "\nTest result files: #{ @feature_tests.count }"
 
 end
 
@@ -421,13 +423,58 @@ def collect_feature_tests
 
       ( feature["scenarios"] || [] ).collect{ | scenario |
 
+        # collect step status
+        step_results = ( scenario[ "step" ] || [] ).collect{ | step |
+        
+          #p scenario
+        
+          if /^.*\s{1}(\w+)$/.match( step )
+          
+            $1
+          
+          else
+ 
+            "unknown"
+          
+          end 
+        
+          #( /^.*\s{1}(\w+)$/.match( step ).captures || [] ).first
+        
+        }
+        
         ( scenario["example_step"] || [] ).collect{ | example |
 
           code = /\"(.*)\"/.match( example ).captures.first
 
-          status = /^.*\s{1}(\w+)$/.match( example ).captures.first      
+          status = ( /^.*\s{1}(\w+)$/.match( example ).captures || [] )      
+          
+          if status.first.to_s.downcase == 'passed'
 
-          [ "example" => code, "status" => status.to_s.downcase, "description" => ( scenario["description"] || "" ) ]
+            if ( step_results - status ).count > 0 
+              status_literal = "failed"
+              $failed += 1
+            else
+              status_literal = "passed"
+              $passed += 1
+            end
+          
+          else
+                    
+            if status.first.to_s.empty?
+              status_literal = "unknown"
+              $unknown += 1
+            else
+              status_literal = "failed"            
+              $failed += 1
+            end
+            
+          end
+
+          [ 
+            "example" => code, 
+            "status" => status_literal, 
+            "description" => ( scenario["description"] || "" ) 
+          ]
 
         }.flatten
 
@@ -739,6 +786,11 @@ read_behaviour_hash_files( behaviour_xml_folder ) # ok
 @documented_features = collect_documented_features
 
 accessors = []
+
+puts "\nTotal number of tests: #{ $passed + $failed + $unknown }\n"
+puts "Tests with passed status: #{ $passed }"
+puts "Tests with failed status: #{ $failed }"
+puts "Tests with unknown result: #{ $unknown }"
 
 begin
 
