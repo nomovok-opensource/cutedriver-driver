@@ -34,11 +34,20 @@ module RDoc
 
 end
 
-ARGV.each{ | filename | 
 
-  abort("\nUnable to create feature test due to implementation file %s not found\n\n" % [ filename ] ) unless File.exist?( File.expand_path( filename ) )
+if $source.nil?
 
-}
+  abort "Usage: #{ $0 } SOURCE_FILES [DESTINATION_FOLDER]"
+  
+else
+
+  $source = File.expand_path( ARGV[ 0 ] || $source )
+
+  $destination = File.expand_path( ARGV[ 1 ] || $destination )
+
+  abort("File or folder %s not found" % $source ) unless File.exist?( $source )
+
+end
 
 begin
 
@@ -53,9 +62,9 @@ begin
     rdoc.document( 
       [
         '--inline-source', 
-        '--op', 'behaviour_xml', 
+        '--op', $destination, 
         '--fmt', 'tdriver_behaviour_xml'
-      ] + ARGV 
+      ] << $source
     )
 
   }
