@@ -1,0 +1,5 @@
+
+          <type name="$RETURN_VALUE_TYPE">
+            <description>$RETURN_VALUE_DESCRIPTION</description>
+            <example>$RETURN_VALUE_EXAMPLE</example>
+          </type>

@@ -1,0 +1,12 @@
+
+      <method name="$METHOD_NAME" type="$METHOD_TYPE">
+
+$METHOD_DEPRECATED
+        <description>$METHOD_DESCRIPTION</description>
+$METHOD_ARGUMENTS
+$METHOD_RETURNS
+$METHOD_EXCEPTIONS
+$METHOD_TABLES
+$METHOD_INFO
+
+      </method>
