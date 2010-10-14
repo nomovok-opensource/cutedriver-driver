@@ -467,9 +467,18 @@ module TDriverReportCreator
 		
 
         each_video_device do | video_device, device_index |
-		
-          File.copy("cam_" + device_index + "_" + @tc_video_filename, video_folder)
-          File.copy("cam_" + device_index + "_" + @tc_previous_video_filename, video_folder)
+                    
+          begin		
+            File.copy("cam_" + device_index + "_" + @tc_video_filename, video_folder)
+          rescue
+            # Copy failed, do nothing
+          end
+          
+          begin
+            File.copy("cam_" + device_index + "_" + @tc_previous_video_filename, video_folder)
+          rescue
+            # Copy failed, do nothing
+          end
 		
         end
 
