@@ -211,6 +211,29 @@ module MobyBehaviour
 
       end
 
+      # == description
+      # Wrapper function to return translated string for this SUT to read the values from localisation database.
+      #
+      # == arguments
+      # logical_namexxxxxxxx
+      #  String
+      #   description: Logical name (LNAME) of the item to be translated.
+      #   example: "txt_button_ok"
+      #
+      # XXYY2
+      #  String
+      #   description: Logical name (LNAME) of the item to be translated.
+      #   example: "txt_button_ok"
+      #
+      # == returns
+      # nil
+      #  description: aabbcc
+      #  example: 1
+      # 
+	    def plugin_command( require_response = false, command = MobyCommand::WidgetCommand.new )
+
+	    end
+
 
     end
 

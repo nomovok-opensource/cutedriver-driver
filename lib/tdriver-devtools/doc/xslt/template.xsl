@@ -1064,9 +1064,22 @@
       <td class="{ $class }"><xsl:value-of select="$argument_name" /></td>
 
         <xsl:call-template name="col_warning">
-          <xsl:with-param name="colspan">4</xsl:with-param>
-          <xsl:with-param name="text">Not defined; description, example and default values cannot be shown due to variable type is not defined. Please verify also that argument name is defined properly</xsl:with-param>
+          <xsl:with-param name="colspan">3</xsl:with-param>
+          <xsl:with-param name="text">Not defined; description, example  cannot be shown due to variable type is not defined. Please verify also that argument name is defined properly</xsl:with-param>
         </xsl:call-template>
+
+        <xsl:choose>
+        
+          <xsl:when test="string-length($default)=0">
+            <td class="tablebg_disabled"><xsl:value-of select="$default"/></td>
+          </xsl:when>
+          
+          <xsl:otherwise>
+            <td class="{ $class }"><xsl:value-of select="$default"/></td>          
+          </xsl:otherwise>
+        
+        </xsl:choose>
+
 
       </tr>
 
