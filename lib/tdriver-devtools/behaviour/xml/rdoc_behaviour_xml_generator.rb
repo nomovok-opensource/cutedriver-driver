@@ -418,7 +418,7 @@ EXAMPLE
       }
 
       # TODO: some other format for writing the hash to file...
-      open("#{ $output_results_name }.hash", "w" ){ | file | file << @found_modules_and_methods.inspect }
+      #open("#{ $output_results_name }.hash", "w" ){ | file | file << @found_modules_and_methods.inspect }
 
     end
 
@@ -663,6 +663,8 @@ EXAMPLE
 
       unimplemented_arguments = ( documented_arguments - found_keys )
 
+      p unimplemented_arguments
+
       unless [ :attributes ].include?( @processing )
 
         unless unimplemented_arguments.empty?
@@ -675,15 +677,16 @@ EXAMPLE
 
           # remove unimplemented argument documentation
           result = result.select{ | documented_argument |
-
-            unimplemented_arguments.include?( documented_argument.to_a.flatten.first ) == false
+    
+            # always add block parameters
+            unimplemented_arguments.include?( documented_argument.to_a.flatten.first ) == false || documented_argument.to_a.flatten.first.include?("#")
 
           }
 
         end
 
       end
-
+      
       # add missing/undocumented arguments to order list
       missing = result.collect{ | value | order << value unless found_keys.include?( value.keys.first ) }
 
@@ -695,8 +698,6 @@ EXAMPLE
     
       result = []
     
-      #p source
-
       table_name = nil
       header_columns = 0
 
@@ -907,6 +908,7 @@ EXAMPLE
 
     end
 
+=begin
     def store_to_results( module_name, name, type, params )
 
       unless @found_modules_and_methods.has_key?( module_name )
@@ -925,6 +927,7 @@ EXAMPLE
       @found_modules_and_methods[ module_name ] << "%s#%s#%s" % [ name, type, count ] #{ :name => name, :type => type }
 
     end
+=end
 
     def process_arguments( arguments )
 
@@ -1141,7 +1144,16 @@ EXAMPLE
           
         end
 
-        store_to_results( @module_path.join("::"), method.name, type, params )
+        #p params
+        
+        #sleep 0.3
+
+        method_header.merge!( 
+          :__arguments_implemented => params.count , 
+          :__arguments_optional => params.select{ | param | param.last == true }.count 
+        )
+
+        #store_to_results( @module_path.join("::"), method.name, type, params )
 
         # do something
         [ method_name, method_header ]
@@ -1275,7 +1287,7 @@ EXAMPLE
         
       macros.each_pair{ | key, value |
                   
-        source.gsub!( /(\$#{ key })\b/, value || "" )
+        source.gsub!( /(\$#{ key })\b/, ( value || "" ).to_s )
       
       }
       
@@ -1398,6 +1410,10 @@ EXAMPLE
     end
 
     def generate_arguments_element( header, feature )
+
+      p @module_path.join("::"), @current_method.name
+
+      p header, feature
 
       return "" if ( feature.last[:__type] == 'reader' )
 
@@ -1532,7 +1548,7 @@ EXAMPLE
             "ARGUMENT_TYPE" => encode_string( argument_type ),
             "ARGUMENT_TYPES" => types_xml,
             "ARGUMENT_DEFAULT_VALUE" => default_value.to_s,
-            "ARGUMENT_OPTIONAL" => encode_string( argument_type == "multi" ? "true" : default_value_set.to_s )
+            "ARGUMENT_OPTIONAL" => encode_string( ["multi", "block", "block_argument"].include?( argument_type ) ? "true" : default_value_set.to_s )
           }
          )
         
@@ -1542,6 +1558,8 @@ EXAMPLE
 
       apply_macros!( @templates["behaviour.xml.method.arguments"].clone, {
 
+          "ARGUMENTS_IMPLEMENTED" => feature.last[ :__arguments_implemented ] || "0",
+          "ARGUMENT_OPTIONAL_COUNT" => feature.last[ :__arguments_optional ] || "0",
           "METHOD_ARGUMENTS" => arguments
 
         }

@@ -1,4 +1,4 @@
 
-        <arguments>
+        <arguments implemented="$ARGUMENTS_IMPLEMENTED" optional="$ARGUMENT_OPTIONAL_COUNT">
         $METHOD_ARGUMENTS
         </arguments>
