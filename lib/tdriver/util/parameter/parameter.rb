@@ -1,20 +1,20 @@
 ############################################################################
-## 
-## Copyright (C) 2010 Nokia Corporation and/or its subsidiary(-ies). 
-## All rights reserved. 
-## Contact: Nokia Corporation (testabilitydriver@nokia.com) 
-## 
-## This file is part of Testability Driver. 
-## 
-## If you have questions regarding the use of this file, please contact 
-## Nokia at testabilitydriver@nokia.com . 
-## 
-## This library is free software; you can redistribute it and/or 
-## modify it under the terms of the GNU Lesser General Public 
-## License version 2.1 as published by the Free Software Foundation 
-## and appearing in the file LICENSE.LGPL included in the packaging 
-## of this file. 
-## 
+##
+## Copyright (C) 2010 Nokia Corporation and/or its subsidiary(-ies).
+## All rights reserved.
+## Contact: Nokia Corporation (testabilitydriver@nokia.com)
+##
+## This file is part of Testability Driver.
+##
+## If you have questions regarding the use of this file, please contact
+## Nokia at testabilitydriver@nokia.com .
+##
+## This library is free software; you can redistribute it and/or
+## modify it under the terms of the GNU Lesser General Public
+## License version 2.1 as published by the Free Software Foundation
+## and appearing in the file LICENSE.LGPL included in the packaging
+## of this file.
+##
 ############################################################################
 
 module MobyUtil
@@ -25,7 +25,7 @@ module MobyUtil
 
     @@initialized = false
 
-  private
+    private
 
     def initialize
 
@@ -42,56 +42,48 @@ module MobyUtil
 
     def parse_command_line_arguments
 
-      # reset user_defined_file_defined_in_command_line_arguments flag  
+      # reset user_defined_file_defined_in_command_line_arguments flag
       @@user_defined_parameters_file_defined_in_command_line_arguments = false
 
-      filename = nil
+      filename = Array.new
 
-      # use command line argument if one exists. 
+      # use command line argument if one exists.
       ARGV.each_index do | index |
 
         if ARGV[ index ].to_s == '--matti_parameters'
-
-          Kernel::raise ArgumentError.new( "MATTI parameters command line argument given without a filename" ) if ARGV.count == index + 1 
           puts "--matti_parameters is deprecated, use -tdriver_parameters instead"
-
-          filename = MobyUtil::FileHelper.expand_path( ARGV[ index + 1 ] )
-
-          # remove argument from ARGV array; some testing framework fails due to invalid argument
-          ARGV.delete_at( index + 1 )
-          ARGV.delete_at( index )
-
-          @@user_defined_parameters_file_defined_in_command_line_arguments = true
-
-          break
-
+          Kernel::raise ArgumentError.new( "TDriver parameters command line argument given without a filename" ) if ARGV.count == index + 1
         end
 
         if ARGV[ index ].to_s == '--tdriver_parameters'
+          Kernel::raise ArgumentError.new( "TDriver parameters command line argument given without a filename" ) if ARGV.count == index + 1
+        end
 
-          Kernel::raise ArgumentError.new( "TDriver parameters command line argument given without a filename" ) if ARGV.count == index + 1 
-
-          filename = MobyUtil::FileHelper.expand_path( ARGV[ index + 1 ] )
-
-          # remove argument from ARGV array; some testing framework fails due to invalid argument
-          ARGV.delete_at( index + 1 )
-          ARGV.delete_at( index )
-
+        if ARGV[ index ].to_s.downcase.include?('.xml')
+          filename << MobyUtil::FileHelper.expand_path( ARGV[ index ].to_s )
           @@user_defined_parameters_file_defined_in_command_line_arguments = true
-
-          break
-
         end
 
       end
 
-      Kernel::raise MobyUtil::FileNotFoundError.new( "User defined TDriver parameters file %s does not exist" % [ filename ] ) if filename && !File.exist?( filename )
+      #clean up ARGV
+      ARGV.each_index do | index |
+        if ARGV[ index ].to_s == '--tdriver_parameters' || ARGV[ index ].to_s == '--matti_parameters'  || ARGV[ index ].to_s.downcase.include?('.xml')
+          ARGV.delete_at( index )
+        end
+      end
+
+      if filename
+        filename.each do |parameter_file|
+          Kernel::raise MobyUtil::FileNotFoundError.new( "User defined TDriver parameters file %s does not exist" % [ parameter_file ] ) if !File.exist?( parameter_file )
+        end
+      end
 
       filename
 
     end
 
-  protected
+    protected
 
     def reset_flags
 
@@ -116,17 +108,24 @@ module MobyUtil
       # load global parameters (root level, e.g. MobyUtil::Parameter[ :logging_outputter_enabled ])
       @@parameters = MobyUtil::ParameterTemplates.instance.get_template_from_xml( 'global' )
 
-      # load and merge with default parameters 
+      # load and merge with default parameters
       @@parameters.merge_with_hash!( load_default_parameter_files ) if load_parameter_defaults
 
       # use filename from command line argument if one exists otherwise use default.
-      filename = load_command_line_parameters ? @@filename_from_command_list_arguments : nil 
+      filename = load_command_line_parameters ? @@filename_from_command_list_arguments : nil
 
       # load default tdriver/tdriver_parameters.xml file
       load_parameters_xml( "tdriver_parameters.xml" ) if load_default_parameters
 
-      # load parameters file unless file does not exist
-      load_parameters_xml( filename ) if filename && File.exist?( filename )
+      # load parameters files unless file does not exist
+      if filename
+        filename.each do |parameter_file|
+
+          load_parameters_xml( parameter_file ) if File.exist?( parameter_file )
+
+        end
+      end
+
 
     end
 
@@ -143,7 +142,7 @@ module MobyUtil
       @@default_parameters_loaded = true
 
       # load default parameter values
-      MobyUtil::ParameterXml.instance.parse( 
+      MobyUtil::ParameterXml.instance.parse(
 
         MobyUtil::ParameterXml.instance.merge_files( 'defaults/', 'parameters', '/parameters/*' ){  | filename |
 
@@ -155,19 +154,19 @@ module MobyUtil
 
     end
 
-  public
+    public
 
     # reset parameters class
     def reset_parameters
 
       MobyUtil::ParameterXml.instance.reset
 
-      reset( true, true, true, true ) 
+      reset( true, true, true, true )
 
     end
 
     # load additional parameter xml files
-    def load_parameters_xml( filename, reset = false ) 
+    def load_parameters_xml( filename, reset = false )
 
       reset_parameters if reset == true
 
@@ -175,7 +174,7 @@ module MobyUtil
 
       Kernel::raise MobyUtil::FileNotFoundError.new( "Parameters file %s does not exist" % [ filename ] ) if !File.exist?( filename )
 
-      @@parameters.merge_with_hash!( 
+      @@parameters.merge_with_hash!(
 
         MobyUtil::ParameterXml.instance.parse_file( filename )
 
@@ -196,9 +195,9 @@ module MobyUtil
 
     end
 
-  public # singleton methods
+    public # singleton methods
 
-    # Function for returning the value of a parameter. If the parameters is not yet populated it populates 
+    # Function for returning the value of a parameter. If the parameters is not yet populated it populates
     # it with default file (tdriver_home/tdriver_parameters.xml)
     # == params
     # key:: Symbol containing the name of the parameter to be returned
