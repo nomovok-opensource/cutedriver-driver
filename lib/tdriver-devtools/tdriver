@@ -27,6 +27,7 @@ require 'tdriver/version.rb'
 options = { 
  
   :verbose => false,
+  :tests => '.'
 
 }
 
@@ -48,7 +49,7 @@ optparse = OptionParser.new do | opts |
       '               Feature test result files and images are optional',
       ' ',
       '               Default source folder is "behaviours/"',
-      '               Default destination folder is "doc/"',
+      '               Default destination file is "doc/document.xml"',
       ' ',
       '  behaviours : Generate behaviour XML files from implementation.',
       '               All behaviour implementation files with .rb extension in',
@@ -56,6 +57,13 @@ optparse = OptionParser.new do | opts |
       ' ',
       '               Default source folder is current folder.',
       '               Default destination folder is "behaviours/"',
+      ' ',
+      '  both       : Generate behaviour XML files and documentation',
+      '               Behaviour XML files are saved to temp. folder and deleted',
+      '               after documentation XML is saved.', 
+      ' ',
+      '               Default source folder (implementation) is current folder.',
+      '               Default destination folder is "doc/document.xml"',
       ' '
       
   ) do | mode |
@@ -65,7 +73,7 @@ optparse = OptionParser.new do | opts |
       when 'doc'
         options[ :generate ] = mode.to_sym
         options[ :source ] ||= 'behaviours/'
-        options[ :destination ] ||= 'doc/'
+        options[ :destination ] ||= 'doc/document.xml'
 
       when 'behaviours'
         options[ :generate ] = mode.to_sym
@@ -105,6 +113,8 @@ optparse = OptionParser.new do | opts |
     '--tests [FOLDER]', 
     'Source folder for feature test result files', ' ' 
   ) do | folder |
+
+    options[ :tests ] = folder
   
   end
 
@@ -186,6 +196,13 @@ case options[ :generate ]
     puts ''
 
   when :doc
+
+    $source = File.expand_path( ARGV[0] || options[ :source ] )
+    $tests = File.expand_path( options[ :tests ] )
+    $destination = File.expand_path( ARGV[1] || options[ :destination ] )
+
+    require 'lib/tdriver-devtools/doc/generate.rb'
+
 
 else
 
