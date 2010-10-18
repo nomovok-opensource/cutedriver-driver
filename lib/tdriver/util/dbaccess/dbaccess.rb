@@ -75,11 +75,11 @@ module MobyUtil
 			
 			# Return a uniform set of results as an array of rows, rows beeing an array of values ( Array<Array<String>> )
 			result = Array.new
-			if db_type == DB_TYPE_MYSQL
+			if db_type == DB_TYPE_MYSQL and !query_result.nil?
 				query_result.num_rows.times do |i|
 					result << query_result.fetch_row
 				end				
-		    elsif db_type == DB_TYPE_SQLITE
+		    elsif db_type == DB_TYPE_SQLITE and !query_result.nil?
 				# Create Array<SQLite3::ResultSet::ArrayWithTypesAndFields<String>> type result
 				# it effectively behaves the same as with Array<Array<String>> but the inner Arrays have .fields and .types properties 
 				# which return the column name and type for each value on the row (Array) returned.
@@ -89,7 +89,36 @@ module MobyUtil
 		    end
 			return result
 		end
-	
+		
+		
+		# Retunrs the number of affected rows on the latest sql query on the server  
+	    # == params
+	    # db_type::
+		# host::
+		# username::
+		# password::
+		# database_name::
+		# query_string::
+	    # == returns
+	    # Array<Array<String>>:: Returns an Array of rows, where each row is and Array of Strings
+	    # == throws
+	    # DbTypeNotDefinedError:: 
+	    # ArgumentError:: 
+		def self.affected_rows(db_type, host, username, password, database_name)
+			# Check for exsting connection for that host and create it if needed
+			if !@@_connections.has_key?( host + db_type + database_name ) # make connection ID unique by using host, type and db on the key
+				connector = self.instance.connect_db(  db_type, host, username, password, database_name )
+				@@_connections[ host + db_type + database_name ] = DBConnection.new(  db_type, host, database_name, connector )
+			end
+			result = 0
+			if db_type == DB_TYPE_MYSQL
+				result = @@_connections[ host + db_type + database_name ].connector.affected_rows
+			elsif db_type == DB_TYPE_SQLITE
+				result = @@_connections[ host + db_type + database_name ].connector.changes
+			end
+			return result
+		end
+		
 		
 		# Function establishes a connection to mysql server if needed
 	    # == params
