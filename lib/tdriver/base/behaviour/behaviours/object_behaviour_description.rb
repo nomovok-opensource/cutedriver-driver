@@ -17,9 +17,29 @@
 ## 
 ############################################################################
 
-
 module MobyBehaviour
 
+  # == description
+  # Generic methods for inspecting test object and it's methods
+  #
+  # == behaviour
+  # GenericObjectDescription
+  #
+  # == requires
+  # *
+  #
+  # == input_type
+  # *
+  #
+  # == sut_type
+  # *
+  #
+  # == sut_version
+  # *
+  #
+  # == objects
+  # *;sut
+  #
 	module ObjectBehaviourDescription
 
 		def behaviours( return_indexes = false )
