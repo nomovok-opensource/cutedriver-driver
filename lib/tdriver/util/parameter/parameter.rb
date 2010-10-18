@@ -46,6 +46,7 @@ module MobyUtil
       @@user_defined_parameters_file_defined_in_command_line_arguments = false
 
       filename = Array.new
+      delete_values=Array.new
 
       # use command line argument if one exists.
       ARGV.each_index do | index |
@@ -53,24 +54,26 @@ module MobyUtil
         if ARGV[ index ].to_s == '--matti_parameters'
           puts "--matti_parameters is deprecated, use -tdriver_parameters instead"
           Kernel::raise ArgumentError.new( "TDriver parameters command line argument given without a filename" ) if ARGV.count == index + 1
+          delete_values << ARGV[ index ].to_s
         end
 
         if ARGV[ index ].to_s == '--tdriver_parameters'
           Kernel::raise ArgumentError.new( "TDriver parameters command line argument given without a filename" ) if ARGV.count == index + 1
+          delete_values << ARGV[ index ].to_s
         end
 
         if ARGV[ index ].to_s.downcase.include?('.xml')
           filename << MobyUtil::FileHelper.expand_path( ARGV[ index ].to_s )
           @@user_defined_parameters_file_defined_in_command_line_arguments = true
+          delete_values << ARGV[ index ].to_s
         end
 
       end
 
       #clean up ARGV
-      ARGV.each_index do | index |
-        if ARGV[ index ].to_s == '--tdriver_parameters' || ARGV[ index ].to_s == '--matti_parameters'  || ARGV[ index ].to_s.downcase.include?('.xml')
-          ARGV.delete_at( index )
-        end
+      delete_values.each do |value|
+        indx=ARGV.index(value)
+        ARGV.delete_at(indx)
       end
 
       if filename
