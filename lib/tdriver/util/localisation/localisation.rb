@@ -44,6 +44,12 @@ module MobyUtil
 			Kernel::raise LanguageNotFoundError.new( "Language cannot be nil" ) if language == nil
 			Kernel::raise TableNotFoundError.new( "Table name cannot be nil" ) if table_name == nil
 			
+			# Avoid system column names for language columns
+			language = language.to_s.downcase
+			if language.eql? "id" or language.eql? "fname" or language.eql? "lname" or language.eql? "plurality" or language.eql? "lengthvar" 
+				language += "_"
+			end
+			
 			db_type =  MobyUtil::Parameter[ :localisation_db_type, nil ].to_s.downcase
 			host =  MobyUtil::Parameter[ :localisation_server_ip ]
 			username = MobyUtil::Parameter[ :localisation_server_username ]
@@ -93,6 +99,7 @@ module MobyUtil
 			elsif ( match = file.match(/(.*)\.qm/) )
 				if(! system "lconvert -o " + match[1] + ".ts " + file )
 					puts "[ERROR] lconvert can't convert .qm file to .ts. Skiping. \n\n" + match[0]
+					return nil
 				end
 				file = match[1] + ".ts"
 			end
@@ -177,6 +184,12 @@ module MobyUtil
 			raise Exception.new("Language not provided.") if language.nil? or language.to_s.empty?
 			raise Exception.new("No data povided. Please make sure the source of your data is valid.") if data.nil? or data.empty?
 			raise Exception.new("No table name provided.") if table_name.nil? or table_name.empty?
+			
+			# Avoid system column names for language columns
+			language = language.to_s.downcase
+			if language.eql? "id" or language.eql? "fname" or language.eql? "lname" or language.eql? "plurality" or language.eql? "lengthvar" 
+				language += "_"
+			end
 			
 			if connection.empty?
 				db_type =  MobyUtil::Parameter[ :localisation_db_type, nil ].to_s.downcase 
