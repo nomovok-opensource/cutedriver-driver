@@ -140,7 +140,7 @@ module MobyBehaviour
 
     end
         
-    # Returns theparent test object for the current object in question, according to the UI object hierarchy. For getting the test object that was actually used 
+    # Returns the parent test object for the current object in question, according to the UI object hierarchy. For getting the test object that was actually used 
     # as the parent when the test object instance was created, see parent_object.
     #
     # === returns

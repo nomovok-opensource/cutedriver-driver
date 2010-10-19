@@ -137,8 +137,16 @@ def process_behaviour_file( content )
 
                     when /^arguments$/i
 
+                      method[ "arguments_data" ] = {}
+
                       arguments = []
-                      
+
+                      child.attributes.each{ | attribute |
+
+                        method[ "arguments_data" ][ attribute.first ] = attribute.last.value 
+
+                      }
+
                       child.children.select{ | node | node.kind_of?( Nokogiri::XML::Element ) }.each{ | child |
 
                         argument = { "types" => [] }
@@ -363,6 +371,7 @@ def read_behaviour_hash_files( folder )
 
 end
 
+=begin
 def collect_all_features
 
   @behaviour_hashes.collect{ | module_name, methods |
@@ -376,6 +385,7 @@ def collect_all_features
   }.flatten
 
 end
+=end
 
 def collect_documented_features
 
@@ -495,11 +505,45 @@ def generate_document_xml
       # TODO: behaviour.hash should have feature type (method/attribute) mentioned  
       # TODO: behaviour.hash should have number of arguments incl. optional + blocks
 
-      collect_all_features.sort.each{ | feature |
-            
-        module_name, method_name, feature_type, feature_parameters = feature.split("#")
 
-        arguments_count, optional_arguments_count = feature_parameters.split(";")
+   #   p @documented_features
+    
+      @documented_features.sort.each{ | feature_name, feature_documentation | 
+
+        feature_documentation.default = ""
+
+        module_name, method_name = feature_name.split("#")
+
+        feature_type = feature_documentation[ "type" ].first
+
+        arguments_count = feature_documentation[ "arguments_data" ][ "implemented" ]
+        optional_arguments_count = feature_documentation[ "arguments_data" ][ "optional" ]
+
+
+
+      }
+
+#exit  
+
+      @documented_features.sort.each{ | feature, feature_documentation |
+            
+        #module_name, method_name, feature_type, feature_parameters = feature.split("#")
+
+        #arguments_count, optional_arguments_count = feature_parameters.split(";")
+
+
+
+        module_name, method_name = feature.split("#")
+
+        feature_type = feature_documentation[ "type" ].first
+
+        arguments_count = feature_documentation[ "arguments_data" ][ "implemented" ]
+        optional_arguments_count = feature_documentation[ "arguments_data" ][ "optional" ]
+
+
+        #p feature        
+
+
                 
         feature = "%s#%s" % [ module_name, method_name ]
       
@@ -517,7 +561,7 @@ def generate_document_xml
           
         else
         
-          warn("Unknown feature type %s for %s" % [ feature_type, feature_name ] )
+          warn("Unknown feature type %s for %s" % [ feature_type, feature ] )
         
           [ method_name ]
         
@@ -525,18 +569,18 @@ def generate_document_xml
       
         # get document
 
-        documented = @documented_features.keys.include?( feature )
+        #documented = @documented_features.keys.include?( feature )
 
-        feature_documentation = {}
-        feature_documentation.default = ""
+        #feature_documentation = {}
+        #feature_documentation.default = ""
 
-        if documented 
+#        if documented 
           
-          feature_documentation.merge!( @documented_features[ feature.to_s ] )
+        # feature_documentation.merge!( @documented_features[ feature.to_s ] )
 
-        end
+#        end
        
-        next if feature_documentation.empty?
+        # next if feature_documentation.empty?
        
         # <feature type="accessor" name="z;z=" types="qt" versions="*" input_types="touch" object_types="*;sut" requires_plugin="x">
         xml.feature( 
@@ -695,6 +739,7 @@ def generate_document_xml
           # collect feature tests for method (1), attr_reader (1), attr_writer (1) and attr_accessor (2)          
           names = feature_name.collect{ | name | 
           
+            
             feature.split("#").first + "#" + name 
             
           }
@@ -766,20 +811,21 @@ if ARGV.count < 2
 
 end
 
-feature_tests_folder = File.expand_path( ARGV[ 0 ] || '.' )
-behaviour_xml_folder = File.expand_path( ARGV[ 1 ] || 'behaviour_xml/' )
-output_filename = File.expand_path( ARGV[2] || 'document.xml' )
+feature_tests_folder = File.expand_path( $tests || ARGV[ 0 ] || '.' )
+behaviour_xml_folder = File.expand_path( $source || ARGV[ 1 ] || 'behaviour_xml/' )
+output_filename = File.expand_path( $destination || ARGV[2] || 'document.xml' )
 
 read_test_result_files( feature_tests_folder) # ok
 read_behaviour_xml_files( behaviour_xml_folder ) # ok
-read_behaviour_hash_files( behaviour_xml_folder ) # ok
+
+#read_behaviour_hash_files( behaviour_xml_folder ) # ok
 
 #puts "all executed feature tests:"
 @executed_tests = collect_feature_tests
 
 #puts ""
 #puts "all available features:"
-@all_features = collect_all_features
+#@all_features = collect_all_features
 
 #puts ""
 #puts "all documented features:"

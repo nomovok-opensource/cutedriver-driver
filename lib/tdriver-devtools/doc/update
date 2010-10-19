@@ -1,1 +1,1 @@
-ruby generate.rb feature_xml/
+ruby generate.rb feature_xml/ behaviour_xml/ output/example.xml
