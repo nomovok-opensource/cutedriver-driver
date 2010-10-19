@@ -42,7 +42,12 @@ module MobyBehaviour
   #
   module TestObject
 
-    # Hash containing the identification attributes that were used when the test object was created.
+    # == description
+    # attr_accessor
+    # == returns
+    # Hash
+    #  description: Hash containing the identification attributes that were used when the test object was created.
+    #  example: { :name => 'Triangle1', :type => :Triangle }
     attr_accessor :creation_attributes
 
     # Determine is current test object a application
@@ -55,9 +60,13 @@ module MobyBehaviour
 
     end
 
+    # == description
     # Return all test object attributes
     # === returns
     # Hash:: Test object attributes
+    # == example
+    # @test_app = @sut.run(:name => 'testapp') # launches testapp 
+    # attributes_hash = @test_app.Triangle( :name => 'Triangle1' ).attributes # retrieve all attribute for triangle object
     def attributes
 
       # return hash of test object attributes
@@ -65,9 +74,13 @@ module MobyBehaviour
 
     end
 
+    # == description
     # Changes the status of the test object to active
     # == returns 
     # TrueClass::
+    # == example
+    # @app = @sut.run(:name => 'testapp') # launches testapp 
+    # @app.Node( :name => 'Node1' ).activate() # activate given object
     def activate
 
       @_active = true
@@ -100,6 +113,7 @@ module MobyBehaviour
 
     end
 
+    # == description
     # Function returns a attribute of test object 
     # === params
     # name:: String definig the name of the attribute to get
@@ -108,6 +122,9 @@ module MobyBehaviour
     # === raises
     # TestObjectNotInitializedError:: if the test object xml data has not been initialized
     # AttributeNotFoundError:: if the requested attribute can not be found in the xml data of the object
+    # == example
+    # @test_app = @sut.run(:name => 'testapp') # launches testapp 
+    # puts @test_app.Triangle( :name => 'Triangle1' ).attribute('color') # prints color of triangle object
     def attribute( name )
 
       # note: count of tries represents total number of tries
@@ -139,12 +156,15 @@ module MobyBehaviour
       }
 
     end
-        
+		
+    # == description
     # Returns the parent test object for the current object in question, according to the UI object hierarchy. For getting the test object that was actually used 
     # as the parent when the test object instance was created, see parent_object.
-    #
     # === returns
     # TestObject:: test object that is parent of this test object, self if no parent (ie. application objects)
+    # ==example
+    # @app = @sut.run(:name => 'testapp') # launches testapp 
+    # parent_test_object = @app.Node( :name => 'Node1' ).get_parent() #get parent for some test object
     def get_parent()
 
       return self if application?
@@ -242,10 +262,12 @@ module MobyBehaviour
 
     end
 
-    # Function for finding out the application for this test ojbect
-    # All test objects should be under application object now so this should be ok?
+    # == description
+    # Function for finding out the application this test ojbect
     # === returns
-    # String:: representing the id of the application test object
+    #TestObject:: Application test object that the test object belongs to, or nil, if no parent of type application can be found.
+    # == example
+    # parent_app = @app.Node( :name => 'Node1' ).get_application() #get application for some test object, this should return @app.
     def get_application
 
       return self if application?
@@ -265,10 +287,12 @@ module MobyBehaviour
 
     end
 
-    # Function for finding out the application id for this test ojbect
-    # All test objects should be under application object now so this should be ok?
+    # == description
+    # Function for finding out the application id for this test objsect
     # === returns
-    # String:: representing the id of the application test object
+    # String:: representing the id of the application test object that this test object belongs to.
+    # == example
+    # puts @app.Node( :name => 'Node1' ).get_application_id() #print the application id, this should print @app.id
     def get_application_id
 
       return @_application_id if @_application_id
@@ -635,7 +659,7 @@ module MobyBehaviour
     # === returns
     # TestObject:: test object that was used as parent when this object was created. Can also be of type SUT if sut was the parent (ie. application objects)
 
-  public # deprecated
+  public
 
     # == deprecated
     # 0.8.x
