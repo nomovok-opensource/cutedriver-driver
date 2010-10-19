@@ -226,7 +226,7 @@ module MobyUtil
 				when "mysql"
 					begin
 						MobyUtil::DBAccess.query( db_type, host, username, password, database_name, 
-							"ALTER TABLE `" + table_name + "` ADD  `" + language + "` VARCHAR(350) NULL DEFAULT NULL;")
+							"ALTER TABLE `" + table_name + "` ADD  `" + language + "` VARCHAR(350) NULL DEFAULT NULL COLLATE utf8_general_ci;")
 					rescue Mysql::Error # catch if language column already exists
 					end
 				when "sqlite"
@@ -285,6 +285,7 @@ module MobyUtil
 					rescue Exception => e
 						puts e.inspect
 						puts e.backtrace.join("\n")
+						MobyUtil::DBAccess.query( db_type, host, username, password, database_name, "ROLLBACK TRANSACTION")
 					end
 			end
 		end
