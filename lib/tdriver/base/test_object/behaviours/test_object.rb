@@ -283,12 +283,14 @@ module MobyBehaviour
       end
 
       # return application object or nil if no parent found
+      # Does is make sense to return nil - should  n't all test objects belong to an application? Maybe throw exception if application not found
+
       return @sut.child( :type => 'application' ) rescue nil
 
     end
 
     # == description
-    # Function for finding out the application id for this test objsect
+    # Function for finding out the application id for this test object
     # === returns
     # String:: representing the id of the application test object that this test object belongs to.
     # == example
@@ -296,7 +298,7 @@ module MobyBehaviour
     def get_application_id
 
       return @_application_id if @_application_id
-
+      #What about the case when get_application returns nil? This line will throw an exception in that case.
       get_application.id
 
     end
@@ -307,11 +309,15 @@ module MobyBehaviour
 
      end
 
+    # == description
     # Returns a StateObject containing the current state of this test object as XML.
     # The state object is static and thus is not refreshed or synchronized etc.
-    #
     # === returns
     # StateObject:: State of this test object
+    # == example
+    # app_state = @sut.application( :name => "calculator" ).state #get the state object for the app
+    # button_state = app_state.Button( :text => "Backspace" ) #get the state for test object button
+    # button_text = button_state.attribute( "text" ) #get attribute text from the button state object
     def state
 
       MobyBase::StateObject.new( xml_data, self )
