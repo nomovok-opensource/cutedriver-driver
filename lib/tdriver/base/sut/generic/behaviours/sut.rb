@@ -46,25 +46,25 @@ module MobyBehaviour
 
     attr_accessor(
 
-      :dump_count,                # number of UI dump requests done to current SUT
-      :current_application_id,    # id of the current appication if set
-      :input,                     # the input method used for interacting with this sut as a symbol, eg. :key or :touch.
-      :refresh_tries,             # number of retries for ui dump on error case
-      :refresh_timeout           # timeout between timeout retry
+				  :dump_count,                # number of UI dump requests done to current SUT
+				  :current_application_id,    # id of the current appication if set
+				  :input,                     # the input method used for interacting with this sut as a symbol, eg. :key or :touch.
+				  :refresh_tries,             # number of retries for ui dump on error case
+				  :refresh_timeout           # timeout between timeout retry
 
-    )
+				  )
 
     attr_reader(
 
-      :xml_data,      # sut xml_data
-      :x_path,        # x_path pattern for xml_data
-      :ui_type,       # type of the UI used on the sut, ie. s60, qt, windows
-      :ui_version,    # version of the ui used on the sut, ie 3.2.3
-      :frozen,        # flag that tells if the ui dump getting is disabled
-      :xml_data_crc,  # crc of the previous ui state message
-      :verify_blocks  # verify blocks              
+				:xml_data,      # sut xml_data
+				:x_path,        # x_path pattern for xml_data
+				:ui_type,       # type of the UI used on the sut, ie. s60, qt, windows
+				:ui_version,    # version of the ui used on the sut, ie 3.2.3
+				:frozen,        # flag that tells if the ui dump getting is disabled
+				:xml_data_crc,  # crc of the previous ui state message
+				:verify_blocks  # verify blocks              
 
-    )
+				)
 
     #TODO: document
     def connect( id )
@@ -86,7 +86,7 @@ module MobyBehaviour
     # == examples
     #  @sut.disconnect
     def received_data
-     
+	  
       @_sutController.received_bytes
 
     end
@@ -133,7 +133,7 @@ module MobyBehaviour
     # == examples
     #  @sut.xml_data = "<tasMessage>.....</tasMessage>"
     #  @sut.xml_data = xml_element
-     #  @sut.xml_data = nil
+	#  @sut.xml_data = nil
     # == raises
     # ArgumentError:: Unexpected argument type (%s) for xml, expected: %s
     def xml_data=( xml )
@@ -157,7 +157,7 @@ module MobyBehaviour
         Kernel::raise ArgumentError.new( "Unexpected argument type (%s) for xml, expected: %s" % [ xml.class, "MobyUtil::XML::Element or String"] )
 
       end
-    
+	  
       # freeze sut - xml won't be updated unless unfreezed first
       @frozen = true unless xml.nil?
 
@@ -166,51 +166,57 @@ module MobyBehaviour
     # Function asks for fresh xml ui data from the device and stores the result
     # == returns
     # MobyUtil::XML::Element:: xml document containing valid xml fragment describing the current state of the device
-    def refresh_ui_dump( refresh_args = {} )
+    def refresh_ui_dump( refresh_args = {}, creation_attributes = [] )
 
       current_time = Time.now
 
       if !@frozen && ( @_previous_refresh.nil? || ( current_time - @_previous_refresh ).to_f > @refresh_interval )
 
         MobyUtil::Retryable.while(
-          :tries => @refresh_tries,
-          :interval => @refresh_interval,
-          :unless => [ MobyBase::ControllerNotFoundError, MobyBase::CommandNotFoundError ] ) {
-
-		  app_command = MobyCommand::Application.new( 
-									   :State, 
-									   ( refresh_args[ :FullName ] || refresh_args[ :name ] ),
-									   refresh_args[ :id ], 
-									   self 
-									   ) 
-		  #store in case needed
-		  app_command.refresh_args(refresh_args)
-
-            new_xml_data, crc = execute_command( app_command )
-        
-            # remove timestamp from the beginning of tasMessage, parse if not same as previous ui state
-            if ( xml_data_no_timestamp = new_xml_data.split( ">", 2 ).last ) != @last_xml_data
-
-              @xml_data, @childs_updated = MobyUtil::XML.parse_string( new_xml_data ).root, false
-
-              @last_xml_data = xml_data_no_timestamp
-
-            end
+								  :tries => @refresh_tries,
+								  :interval => @refresh_interval,
+								  :unless => [ MobyBase::ControllerNotFoundError, MobyBase::CommandNotFoundError ] ) {
 
 
-#            if ( @xml_data_crc == 0 || crc != @xml_data_crc || crc.nil? )          
-#              @xml_data, @xml_data_crc, @childs_updated = MobyUtil::XML.parse_string( new_xml_data ).root, crc, false
-         
-#            end
-        
-            @dump_count += 1
-        
-            @_previous_refresh = current_time
+		  #use find_object if set on and the method exists
+		  if MobyUtil::Parameter[ @id ][ :use_find_object, 'false' ] == 'true' and self.methods.include?('find_object')
+			new_xml_data, crc = find_object(refresh_args.clone, creation_attributes)
+		  else
+			app_command = MobyCommand::Application.new( 
+													 :State, 
+													 ( refresh_args[ :FullName ] || refresh_args[ :name ] ),
+													 refresh_args[ :id ], 
+													 self 
+													 ) 
+			#store in case needed
+			app_command.refresh_args(refresh_args)
+			new_xml_data, crc = execute_command( app_command )
+		  end  
+
+		  
+		  # remove timestamp from the beginning of tasMessage, parse if not same as previous ui state
+		  if ( xml_data_no_timestamp = new_xml_data.split( ">", 2 ).last ) != @last_xml_data
+
+			@xml_data, @childs_updated = MobyUtil::XML.parse_string( new_xml_data ).root, false
+
+			@last_xml_data = xml_data_no_timestamp
+
+		  end
+
+
+		  #            if ( @xml_data_crc == 0 || crc != @xml_data_crc || crc.nil? )          
+		  #              @xml_data, @xml_data_crc, @childs_updated = MobyUtil::XML.parse_string( new_xml_data ).root, crc, false
+		  
+		  #            end
+		  
+		  @dump_count += 1
+		  
+		  @_previous_refresh = current_time
 
         } 
 
         
-      
+		
 
       end
 
@@ -290,17 +296,17 @@ module MobyBehaviour
       end
 
 =begin
-      @_child_objects.each do | _child |
+		 @_child_objects.each do | _child |
 
-        if _child.eql? child_test_object
+		  if _child.eql? child_test_object
 
-          # Update the attributes that were used to create the child object.
-          _child.creation_attributes = creation_hash
-          return _child
+			# Update the attributes that were used to create the child object.
+			_child.creation_attributes = creation_hash
+			return _child
 
-        end
+		  end
 
-      end
+		end
 =end
       # Store the attributes that were used to create the child object.
       child.creation_attributes = creation_hash
@@ -319,20 +325,20 @@ module MobyBehaviour
     def state
 
       # refresh if xml data is empty
-      self.refresh if @xml_data.empty?
+      self.refresh({},{}) if @xml_data.empty?
 
       Kernel::raise RuntimeError.new( "Can not create state object of SUT with id '%s', no XML content or SUT not initialized properly." % @id ) if @xml_data.empty?
 
       MobyBase::StateObject.new( 
 
-        MobyUtil::XML.parse_string( 
+								MobyUtil::XML.parse_string( 
 
-          "<sut name='sut' type='sut' id='%s'><objects>%s</objects></sut>" % [ @id, xml_data.xpath("tasInfo/object").collect{ | element | element.to_s }.join ]
+														   "<sut name='sut' type='sut' id='%s'><objects>%s</objects></sut>" % [ @id, xml_data.xpath("tasInfo/object").collect{ | element | element.to_s }.join ]
 
-        ).root, 
-        self 
+														   ).root, 
+								self 
 
-      )
+								)
 
     end
 
@@ -484,12 +490,12 @@ module MobyBehaviour
           app_info = find_app(app_list, {:name => target[ :name ]}) unless app_info
           app = self.application(:id => app_info.id) if app_info
           if app
-          begin
-          app.bring_to_foreground
-          rescue Exception => e
-            MobyUtil::Logger.instance.log "WARNING", "Could not bring app to foreground"
-          end
-          return app
+			begin
+			  app.bring_to_foreground
+			rescue Exception => e
+			  MobyUtil::Logger.instance.log "WARNING", "Could not bring app to foreground"
+			end
+			return app
           end
         end
 
@@ -498,15 +504,15 @@ module MobyBehaviour
           execute_shell_command( target[ :start_command ], :detached => "true" )
         else
           run_command = MobyCommand::Application.new(
-            :Run,
-            target[ :name ],
-            target[ :uid ],
-            self,
-            target[ :arguments ],
-            target[ :environment ],
-            target[ :events_to_listen ],
-            target[ :signals_to_listen ]
-          )
+													 :Run,
+													 target[ :name ],
+													 target[ :uid ],
+													 self,
+													 target[ :arguments ],
+													 target[ :environment ],
+													 target[ :events_to_listen ],
+													 target[ :signals_to_listen ]
+													 )
 
           # execute the application control service request
           execute_command( run_command )
@@ -563,10 +569,10 @@ module MobyBehaviour
         begin
 
           self.wait_child(
-            expected_attributes,
-            MobyUtil::Parameter[ @id ][ :application_synchronization_timeout, '5' ].to_f,
-            MobyUtil::Parameter[ @id ][ :application_synchronization_retry_interval, '0.5' ].to_f
-          )
+						  expected_attributes,
+						  MobyUtil::Parameter[ @id ][ :application_synchronization_timeout, '5' ].to_f,
+						  MobyUtil::Parameter[ @id ][ :application_synchronization_retry_interval, '0.5' ].to_f
+						  )
 
         rescue MobyBase::SyncTimeoutError
 
@@ -682,119 +688,119 @@ module MobyBehaviour
 
     end
 
-  # == description
-  # Wrapper function to return translated string for this SUT to read the values from localisation database.
-  #
-  # == arguments
-  # logical_name
-  #  String
-  #   description: Logical name (LNAME) of the item to be translated. If prefix for User Information or Operator Data are used then the appropiate retrieve methods will be called
-  #   example: "txt_button_ok"
-  #  Symbol
-  #   description: Symbol form of the logical name (LNAME) of the item to be translated.
-  #   example: :txt_button_ok
-  #
-  # file_name
-  #  String
-  #   description: Optional FNAME search argument for the translation
-  #   example: "agenda"
-  #   default: nil
-  #
-  # plurality
-  #  String
-  #   description: Optional PLURALITY search argument for the translation
-  #   example: "a" or "singular"
-  #	  default: nil
-  #
-  # numerus
-  #  String
-  #   description: Optional numeral replacement of '%Ln' tags on translation strings
-  #   example: "1"
-  #   default: nil
-  #  Integer
-  #   description: Optional numeral replacement of '%Ln' tags on translation strings
-  #   example: 1
-  # 
-  # lengthvariant
-  #  String
-  #   description: Optional LENGTHVAR search argument for the translation (1-9)
-  #   example: "1"
-  #   default: nil
-  #
-  # == returns
-  # String
-  #  description: Translation matching the logical_name
-  #  example: "Ok"
-  # Array
-  #  description: If multiple translations have been found for the search conditions an Array with all Strings be returned
-  #  example: ["Ok", "OK"]
-  # 
-  # == exceptions
-  # LanguageNotFoundError
-  #  description: In case language is not found
-  #
-  # LogicalNameNotFoundError
-  #  description: In case no logical name is not found for current language
-  #
-  # SqlError
-  #  description: In case there are problems with the database connectivity
-  #
+	# == description
+	# Wrapper function to return translated string for this SUT to read the values from localisation database.
+	#
+	# == arguments
+	# logical_name
+	#  String
+	#   description: Logical name (LNAME) of the item to be translated. If prefix for User Information or Operator Data are used then the appropiate retrieve methods will be called
+	#   example: "txt_button_ok"
+	#  Symbol
+	#   description: Symbol form of the logical name (LNAME) of the item to be translated.
+	#   example: :txt_button_ok
+	#
+	# file_name
+	#  String
+	#   description: Optional FNAME search argument for the translation
+	#   example: "agenda"
+	#   default: nil
+	#
+	# plurality
+	#  String
+	#   description: Optional PLURALITY search argument for the translation
+	#   example: "a" or "singular"
+	#	  default: nil
+	#
+	# numerus
+	#  String
+	#   description: Optional numeral replacement of '%Ln' tags on translation strings
+	#   example: "1"
+	#   default: nil
+	#  Integer
+	#   description: Optional numeral replacement of '%Ln' tags on translation strings
+	#   example: 1
+	# 
+	# lengthvariant
+	#  String
+	#   description: Optional LENGTHVAR search argument for the translation (1-9)
+	#   example: "1"
+	#   default: nil
+	#
+	# == returns
+	# String
+	#  description: Translation matching the logical_name
+	#  example: "Ok"
+	# Array
+	#  description: If multiple translations have been found for the search conditions an Array with all Strings be returned
+	#  example: ["Ok", "OK"]
+	# 
+	# == exceptions
+	# LanguageNotFoundError
+	#  description: In case language is not found
+	#
+	# LogicalNameNotFoundError
+	#  description: In case no logical name is not found for current language
+	#
+	# SqlError
+	#  description: In case there are problems with the database connectivity
+	#
 	def translate( logical_name, file_name = nil, plurality = nil, numerus = nil, lengthvariant = nil )
-	
-		Kernel::raise LogicalNameNotFoundError.new("Logical name is nil") if logical_name.nil?
-		
-		translation_type = "localisation"
-		
-		# Check for User Information prefix( "uif_...")
-		MobyUtil::Parameter[ :user_data_logical_string_identifier, 'uif_' ].split('|').each do |identifier|
-			if logical_name.to_s.index(identifier)==0
-				translation_type="user_data"
-			end
+	  
+	  Kernel::raise LogicalNameNotFoundError.new("Logical name is nil") if logical_name.nil?
+	  
+	  translation_type = "localisation"
+	  
+	  # Check for User Information prefix( "uif_...")
+	  MobyUtil::Parameter[ :user_data_logical_string_identifier, 'uif_' ].split('|').each do |identifier|
+		if logical_name.to_s.index(identifier)==0
+		  translation_type="user_data"
 		end
-		
-		# Check for Operator Data prefix( "operator_...")
-		MobyUtil::Parameter[ :operator_data_logical_string_identifier, 'operator_' ].split('|').each do |identifier|
-			if logical_name.to_s.index(identifier)==0
-				translation_type="operator_data"
-			end
+	  end
+	  
+	  # Check for Operator Data prefix( "operator_...")
+	  MobyUtil::Parameter[ :operator_data_logical_string_identifier, 'operator_' ].split('|').each do |identifier|
+		if logical_name.to_s.index(identifier)==0
+		  translation_type="operator_data"
 		end
+	  end
+	  
+	  case translation_type
 		
-		case translation_type
+	  when "user_data"
+		get_user_information( logical_name )
 		
-			when "user_data"
-				get_user_information( logical_name )
-			
-			when "operator_data"
-				get_operator_data( logical_name )
-			
-			when "localisation"
-				language=nil
-				if ( MobyUtil::Parameter[ self.id ][:read_lang_from_app]=='true')
-					#read localeName app
-					language=self.application.attribute("localeName")
-					#determine the language from the locale
-					language=language.split('_')[0].to_s if (language!=nil && !language.empty?)
-				else
-					language=MobyUtil::Parameter[ self.id ][ :language ]
-				end
-				Kernel::raise LanguageNotFoundError.new("Language cannot be determind to perform translation") if (language==nil || language.empty?)
-				translation = MobyUtil::Localisation.translation(
-					logical_name,
-					language,
-					MobyUtil::Parameter[ self.id ][ :localisation_server_database_tablename ],
-					file_name,
-					plurality,
-					lengthvariant
-				)
-				if translation.kind_of? String and !numerus.nil?
-					translation.gsub!(/%Ln/){|s| numerus} 
-				elsif translation.kind_of? Array and !numerus.nil?
-					translation.each do |trans|
-						trans.gsub!(/%Ln/){|s| numerus}
-					end
-				end
-				translation
+	  when "operator_data"
+		get_operator_data( logical_name )
+		
+	  when "localisation"
+		language=nil
+		if ( MobyUtil::Parameter[ self.id ][:read_lang_from_app]=='true')
+		  #read localeName app
+		  language=self.application.attribute("localeName")
+		  #determine the language from the locale
+		  language=language.split('_')[0].to_s if (language!=nil && !language.empty?)
+		else
+		  language=MobyUtil::Parameter[ self.id ][ :language ]
 		end
+		Kernel::raise LanguageNotFoundError.new("Language cannot be determind to perform translation") if (language==nil || language.empty?)
+		translation = MobyUtil::Localisation.translation(
+														 logical_name,
+														 language,
+														 MobyUtil::Parameter[ self.id ][ :localisation_server_database_tablename ],
+														 file_name,
+														 plurality,
+														 lengthvariant
+														 )
+		if translation.kind_of? String and !numerus.nil?
+		  translation.gsub!(/%Ln/){|s| numerus} 
+		elsif translation.kind_of? Array and !numerus.nil?
+		  translation.each do |trans|
+			trans.gsub!(/%Ln/){|s| numerus}
+		  end
+		end
+		translation
+	  end
 	end
 	
 	# == description
@@ -828,9 +834,9 @@ module MobyBehaviour
 	#  description: In case there are problems with the database connectivity
 	#
 	def get_user_information( user_data_lname )
-		language = MobyUtil::Parameter[ self.id ][ :language ]
-		table_name = MobyUtil::Parameter[ self.id ][ :user_data_server_database_tablename ] 
-		MobyUtil::UserData.retrieve( user_data_lname, language, table_name )
+	  language = MobyUtil::Parameter[ self.id ][ :language ]
+	  table_name = MobyUtil::Parameter[ self.id ][ :user_data_server_database_tablename ] 
+	  MobyUtil::UserData.retrieve( user_data_lname, language, table_name )
 	end
 	
 	# == description
@@ -861,9 +867,9 @@ module MobyBehaviour
 	#  description: In case there are problems with the database connectivity
 	#
 	def get_operator_data( operator_data_lname )
-		operator = MobyUtil::Parameter[ self.id ][ :operator_selected ]
-		table_name = MobyUtil::Parameter[ self.id ][ :operator_data_server_database_tablename]
-		MobyUtil::OperatorData.retrieve( operator_data_lname, operator, table_name )
+	  operator = MobyUtil::Parameter[ self.id ][ :operator_selected ]
+	  table_name = MobyUtil::Parameter[ self.id ][ :operator_data_server_database_tablename]
+	  MobyUtil::OperatorData.retrieve( operator_data_lname, operator, table_name )
 	end
 
     # Function to update all children of current SUT
@@ -891,9 +897,9 @@ module MobyBehaviour
 
     end
 
-    def refresh( refresh_args = {} )
+    def refresh( refresh_args = {}, creation_attributes = {})
       
-      refresh_ui_dump refresh_args
+      refresh_ui_dump refresh_args, creation_attributes
 
       # update childs only if ui state is new
       update if !@childs_updated
@@ -972,7 +978,7 @@ module MobyBehaviour
 
     end
 
-  private
+	private
 
     def fetch_references( xml )
 
@@ -1015,56 +1021,56 @@ module MobyBehaviour
 
             begin
 
-                subdata =
-                  MobyUtil::XML.parse_string( 
-                    execute_command( 
-                      MobyCommand::Application.new(
-                        :State,
-                        nil,
-                        pid,
-                        self,
-                        nil,
-                        nil,
-                        nil,
-                        nil,
-                        {
-                          'x_parent_absolute' => x_prev,
-                          'y_parent_absolute' => y_prev,
-                          'embedded' => 'true',
-                          'parent_size' => winSize
-                        }
-                      )
-                    )[ 0 ]
-                  )
+			  subdata =
+				MobyUtil::XML.parse_string( 
+										   execute_command( 
+														   MobyCommand::Application.new(
+																						:State,
+																						nil,
+																						pid,
+																						self,
+																						nil,
+																						nil,
+																						nil,
+																						nil,
+																						{
+																						  'x_parent_absolute' => x_prev,
+																						  'y_parent_absolute' => y_prev,
+																						  'embedded' => 'true',
+																						  'parent_size' => winSize
+																						}
+																						)
+														   )[ 0 ]
+										   )
 
-                child = subdata.root.xpath('//object')[0]
+			  child = subdata.root.xpath('//object')[0]
 
-                # Remove the attribute with the pid retrieval was not successful.
-                # (server returns the previous hit if not found)
-                if child.attribute('id' ) != pid
-      
-                  element.remove
+			  # Remove the attribute with the pid retrieval was not successful.
+			  # (server returns the previous hit if not found)
+			  if child.attribute('id' ) != pid
+				
+				element.remove
 
-                else
+			  else
 
-                  # Remove the application layer
-                  objs = child.xpath( '/tasMessage/tasInfo/object/objects/*' )
+				# Remove the application layer
+				objs = child.xpath( '/tasMessage/tasInfo/object/objects/*' )
 
-                  if !objs.nil?
+				if !objs.nil?
 
-                    objs.each { | el | element.add_previous_sibling( el ) }
+				  objs.each { | el | element.add_previous_sibling( el ) }
 
-                    element.remove
+				  element.remove
 
-                  end
+				end
 
-                end
+			  end
 
             rescue RuntimeError => e
 
-                raise e unless e.message.include? "no longer available"
+			  raise e unless e.message.include? "no longer available"
 
-                return xml
+			  return xml
 
             end
 
@@ -1143,9 +1149,9 @@ module MobyBehaviour
         @refresh_interval = MobyUtil::Parameter[ @id ][ :refresh_interval, @refresh_interval ].to_f
 
       end
-    
+	  
       @last_xml_data = nil
-  
+	  
       ruby_file = MobyUtil::Parameter[ @id ][ :verify_blocks ] 
 
       @verify_blocks = []
@@ -1165,7 +1171,7 @@ module MobyBehaviour
 
     end
 
-  public # deprecated
+	public # deprecated
 
     #TODO: Update documentation
     #TODO: Is this function deprecated? (see SUT#refresh_ui_dump)
@@ -1176,10 +1182,10 @@ module MobyBehaviour
     # == raises
     # someException:: If Dump does not conform to the tasMessage schema error is raised
     def get_ui_dump( refresh_args = {} )
-   
+	  
       #$stderr.puts "warning: SUT#get_ui_dump is deprecated, please use SUT#refresh_ui_dump instead."
 
-      refresh_ui_dump refresh_args
+      refresh_ui_dump refresh_args, {}
 
     end
 

@@ -155,8 +155,9 @@ module MobyBehaviour
 			#puts "app.close: close app passed --> exit "
 
 			MobyUtil::Logger.instance.log "behaviour", "PASS;Closed successfully.;#{ identity };close;"
-      @sut.refresh
-      nil
+		  #@sut.refresh
+		  @sut.application
+		  nil
 
 		end
 

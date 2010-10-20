@@ -109,7 +109,7 @@ module MobyBehaviour
     # TestObjectNotInitializedError:: if the test object xml data has not been initialized
     # AttributeNotFoundError:: if the requested attribute can not be found in the xml data of the object
     def attribute( name )
-
+	  
       # note: count of tries represents total number of tries
       MobyUtil::Retryable.while( :tries => 2, :interval => 0 ) { | attempt |
 
@@ -223,7 +223,10 @@ module MobyBehaviour
     # TestObjectNotFoundError:: if TestObject is not identified within synch timeout.
     def refresh( refresh_args = {} )
 
-      @sut.refresh( refresh_args )
+	  object_search_params = @test_object_factory.make_object_search_params(@creation_attributes)
+	  search_params = @test_object_factory.get_parent_params(parent)
+	  search_params.push(object_search_params)	    
+      @sut.refresh( refresh_args, search_params )
 
     end
 
@@ -238,7 +241,7 @@ module MobyBehaviour
     # TestObjectNotFoundError:: if TestObject is not identified within synch timeout.
     def force_refresh( refresh_args = {} )
 
-      @sut.refresh( refresh_args )
+      refresh(refresh_args)
 
     end
 
@@ -400,7 +403,7 @@ module MobyBehaviour
 
       refresh_args = ( attributes[ :type ] == 'application' ? { :name => attributes[ :name ], :id => attributes[ :id ] } : { :id => get_application_id } )
 
-      @sut.refresh( refresh_args )
+      refresh( refresh_args)
 
       begin
 
@@ -580,7 +583,16 @@ module MobyBehaviour
     def find_attribute( name )
 
       # store xml data to variable, due to xml_data is a function that returns result of xpath to sut.xml_data
-      _xml_data = xml_data
+	  _xml_data = nil
+	  begin
+		_xml_data = xml_data
+	  rescue MobyBase::TestObjectNotFoundError		
+		#lets refresh if not found initially
+		refresh_args = ( @creation_attributes[ :type ] == 'application' ? { :name => @creation_attributes[ :name ], :id => @creation_attributes[ :id ] } : { :id => get_application_id } )
+		
+		refresh( refresh_args)
+		_xml_data = xml_data
+	  end
 
       # convert name to string if variable type is symbol
       name = name.to_s if name.kind_of?( Symbol )
