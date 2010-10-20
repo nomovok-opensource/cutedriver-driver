@@ -44,7 +44,7 @@ module MobyUtil
 			Kernel::raise LanguageNotFoundError.new( "Language cannot be nil" ) if language == nil
 			Kernel::raise TableNotFoundError.new( "Table name cannot be nil" ) if table_name == nil
 			
-			# Avoid system column names for language columns
+			# Avoid system column names for language columns and user only downcase
 			language = language.to_s.downcase
 			if language.eql? "id" or language.eql? "fname" or language.eql? "lname" or language.eql? "plurality" or language.eql? "lengthvar" 
 				language += "_"
@@ -56,6 +56,8 @@ module MobyUtil
 			password = MobyUtil::Parameter[ :localisation_server_password ]
 			database_name = MobyUtil::Parameter[ :localisation_server_database_name ]
 			
+			db_connection = DBConnection.new(  db_type, host, database_name, username, password )
+			
 			query_string = "select `#{ language }` from #{ table_name } where lname = '#{ logical_name }'"
 			query_string += " and `FNAME` = '#{ file_name }'" unless file_name.nil?
 			query_string += " and `PLURALITY` = '#{ plurality }'" unless plurality.nil?
@@ -64,7 +66,7 @@ module MobyUtil
 			
 			begin
 				# Returns a uniform set of results as an array of rows, rows beeing an array of values ( Array<Array<String>> )
-				result = MobyUtil::DBAccess.query( db_type, host, username, password, database_name, query_string )
+				result = MobyUtil::DBAccess.query( db_connection, query_string )
 			rescue
 				# if column referring to language is not found then Kernel::raise error for language not found
 				Kernel::raise LanguageNotFoundError.new( "No language '#{ language }' found" ) unless $!.message.index( "Unknown column" ) == nil
@@ -185,12 +187,13 @@ module MobyUtil
 			raise Exception.new("No data povided. Please make sure the source of your data is valid.") if data.nil? or data.empty?
 			raise Exception.new("No table name provided.") if table_name.nil? or table_name.empty?
 			
-			# Avoid system column names for language columns
+			# Avoid system column names for language columns and user only downcase
 			language = language.to_s.downcase
 			if language.eql? "id" or language.eql? "fname" or language.eql? "lname" or language.eql? "plurality" or language.eql? "lengthvar" 
 				language += "_"
 			end
 			
+			# Get a connection to the DB
 			if connection.empty?
 				db_type =  MobyUtil::Parameter[ :localisation_db_type, nil ].to_s.downcase 
 				host =  MobyUtil::Parameter[ :localisation_server_ip ]
@@ -205,11 +208,9 @@ module MobyUtil
 				database_name = connection['database_name']
 			end
 			
-			sql_file = File.open(table_name + ".#{db_type}.sql", 'a') if record_sql
+			db_connection = DBConnection.new(  db_type, host, database_name, username, password )
 			
-			# Set UFT8 in mysql
-			MobyUtil::DBAccess.query( db_type, host, username, password, database_name, "SET NAMES utf8;" ) if db_type == "mysql"
-			sql_file.write("SET NAMES utf8; \n") if record_sql
+			sql_file = File.open(table_name + ".#{db_type}.sql", 'a') if record_sql
 
 			# CREATE TABLE if doesn't exist (language columns to be created as needed)
 			case db_type
@@ -224,7 +225,7 @@ module MobyUtil
 									UNIQUE INDEX `FileLogicNameIndex` (`FNAME`,`LNAME`, `PLURALITY`, `LENGTHVAR`),
 									INDEX `LNameIndex` (`LNAME`)
 									) COLLATE=utf8_general_ci;"
-					MobyUtil::DBAccess.query( db_type, host, username, password, database_name, query_string )
+					MobyUtil::DBAccess.query( db_connection, query_string )
 					sql_file.write( query_string + "\n" ) if record_sql
 				when "sqlite"
 					query_string = "CREATE TABLE IF NOT EXISTS " + table_name + " (
@@ -233,15 +234,15 @@ module MobyUtil
 									`LNAME` VARCHAR(150) NOT NULL,
 									`PLURALITY` VARCHAR(50),
 									`LENGTHVAR` INT(10));"
-					MobyUtil::DBAccess.query( db_type, host, username, password, database_name, query_string )
+					MobyUtil::DBAccess.query( db_connection, query_string )
 					sql_file.write( query_string + "\n" ) if record_sql
 					
 					query_string = "CREATE UNIQUE INDEX IF NOT EXISTS 'FileLogicNameIndex' ON " + table_name + " (`FNAME`,`LNAME`, `PLURALITY`, `LENGTHVAR`);"
-					MobyUtil::DBAccess.query( db_type, host, username, password, database_name, query_string )
+					MobyUtil::DBAccess.query( db_connection, query_string )
 					sql_file.write( query_string + "\n" ) if record_sql
 					
 					query_string = "CREATE INDEX IF NOT EXISTS 'FileLogicIndex' ON " + table_name + " (`LNAME`);" 
-					MobyUtil::DBAccess.query( db_type, host, username, password, database_name, query_string )
+					MobyUtil::DBAccess.query( db_connection, query_string )
 					sql_file.write( query_string + "\n" ) if record_sql
 			end
 			
@@ -250,14 +251,14 @@ module MobyUtil
 				when "mysql"
 					begin
 						query_string = "ALTER TABLE `" + table_name + "` ADD  `" + language + "` VARCHAR(350) NULL DEFAULT NULL COLLATE utf8_general_ci;"
-						MobyUtil::DBAccess.query( db_type, host, username, password, database_name, query_string )
+						MobyUtil::DBAccess.query( db_connection, query_string )
 						sql_file.write( query_string + "\n" ) if record_sql
 					rescue Mysql::Error # catch if language column already exists
 					end
 				when "sqlite"
 					begin
 						query_string = "ALTER TABLE `" + table_name + "` ADD  `" + language + "` TEXT;"
-						MobyUtil::DBAccess.query( db_type, host, username, password, database_name, query_string )
+						MobyUtil::DBAccess.query( db_connection, query_string )
 						sql_file.write( query_string + "\n" ) if record_sql
 					rescue SQLite3::SQLException # catch if language column already exists
 					end
@@ -278,7 +279,7 @@ module MobyUtil
 						# INSERT Query
 						query_string = "INSERT INTO `" + table_name + "` (FNAME, LNAME, `" + language + "`, `PLURALITY`, `LENGTHVAR`) VALUES " + insert_values +
 							"ON DUPLICATE KEY UPDATE fname = VALUES(fname), lname = VALUES(lname), `" + language + "` = VALUES(`" + language + "`) ;"
-						MobyUtil::DBAccess.query( db_type, host, username, password, database_name, query_string )
+						MobyUtil::DBAccess.query( db_connection, query_string )
 						sql_file.write( query_string + "\n" ) if record_sql
 					rescue Exception => e
 						puts e.inspect
@@ -290,7 +291,7 @@ module MobyUtil
 						counter = 0
 						cumulated = 0
 						union_all = ""
-						MobyUtil::DBAccess.query( db_type, host, username, password, database_name, "BEGIN TRANSACTION")
+						MobyUtil::DBAccess.query( db_connection, "BEGIN TRANSACTION")
 						sql_file.write( "BEGIN TRANSACTION\n" ) if record_sql
 						data.each do |fname, source, translation, plurality, lengthvar|
 							counter += 1
@@ -301,21 +302,21 @@ module MobyUtil
 							### UPDATE OR INSERT IF NO ROWS AFFECTED
 							query_string = "UPDATE `" + table_name + "` SET `#{language}`='#{translation}' WHERE FNAME='#{fname}' AND " +
 								"LNAME='#{source}' AND `PLURALITY`='#{plurality}' AND `LENGTHVAR`='#{lengthvar}';"
-							MobyUtil::DBAccess.query( db_type, host, username, password, database_name, query_string )
+							MobyUtil::DBAccess.query( db_connectione, query_string )
 							sql_file.write( query_string + "\n" ) if record_sql
-							if MobyUtil::DBAccess.affected_rows( db_type, host, username, password, database_name ) == 0
+							if MobyUtil::DBAccess.affected_rows( db_connection ) == 0
 								query_string = "INSERT INTO `" + table_name + "` (FNAME, LNAME, `" + language + "`, `PLURALITY`, `LENGTHVAR`) " + 
 									"VALUES ('#{fname}' ,'#{source}','#{translation}', '#{plurality}', '#{lengthvar}');"
-								MobyUtil::DBAccess.query( db_type, host, username, password, database_name, query_string )
+								MobyUtil::DBAccess.query( db_connection, query_string )
 								sql_file.write( query_string + "\n" ) if record_sql
 							end
 						end
-						MobyUtil::DBAccess.query( db_type, host, username, password, database_name, "COMMIT TRANSACTION")
+						MobyUtil::DBAccess.query( db_connection, "COMMIT TRANSACTION")
 						sql_file.write( "COMMIT TRANSACTION\n" ) if record_sql
 					rescue Exception => e
 						puts e.inspect
 						puts e.backtrace.join("\n")
-						MobyUtil::DBAccess.query( db_type, host, username, password, database_name, "ROLLBACK TRANSACTION")
+						MobyUtil::DBAccess.query( db_connection, "ROLLBACK TRANSACTION")
 						sql_file.write( "ROLLBACK TRANSACTION\n" ) if record_sql
 					end
 			end
