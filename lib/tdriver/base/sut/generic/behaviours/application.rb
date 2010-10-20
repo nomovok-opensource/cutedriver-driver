@@ -28,8 +28,7 @@ module MobyBehaviour
 
 		include MobyBehaviour::Behaviour
 
-		# Closes application
-		#
+		# == description
 		# Closes the application whether or not it is on foreground. Note: this will currently always try to close applications, also
 		# privilegied applications
 		#
@@ -161,8 +160,8 @@ module MobyBehaviour
 
 		end
 
+		# == description
 		# Returns executable name (exe) of foreground application
-		#
 		# === returns
 		# String:: Name(exe) of the application.
 		# === raises
@@ -195,8 +194,8 @@ module MobyBehaviour
 
 		end
 
+		# == description
 		# Returns uid of foreground application
-		#
 		# === returns
 		# String:: UID of the application.		
 		# === example
@@ -206,7 +205,8 @@ module MobyBehaviour
 			id
 
 		end
-
+		
+		# == description
 		# Indicates whether this application can be closed with the ApplicationBehaviour::close method. Note: at the moment
 		# it always returns true!
 		# === returns
