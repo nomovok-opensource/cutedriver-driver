@@ -50,7 +50,7 @@ module MobyUtil
 				language += "_"
 			end
 			
-			db_type =  MobyUtil::Parameter[ :localisation_db_type, nil ].to_s.downcase
+			db_type =  MobyUtil::Parameter[ :localisation_db_type, nil ]
 			host =  MobyUtil::Parameter[ :localisation_server_ip ]
 			username = MobyUtil::Parameter[ :localisation_server_username ]
 			password = MobyUtil::Parameter[ :localisation_server_password ]
@@ -89,8 +89,47 @@ module MobyUtil
 
 		end
 		
+		# Function for uploading qm and ts files to the localization DB
+		# == params
+		# file:: String
+		# table_name:: String
+		# db_connection:: DBConnection Optional. Connection details for the upload. If not provided then tdriver parameters will be used.
+		# column_names_map:: Hash Optional. If provided it will set the language column names to the String provided instead of the language code extracted from the file names.
+		# record_sql:: Bool Optional. It will record all SQL queries performed on a file with name <table>.<db_type>.sql
+		# == returns
+		# == throws
+		# ArgumentError:: when arguments provided are not valid
+		# Exception:: when its not possible to parse the file provided
+		def self.upload_translation_file( file, table_name, db_connection = nil, column_names_map = {}, record_sql = false)	
+			Kernel::raise ArgumentError.new("") if file.nil? or file.empty?
+			Kernel::raise ArgumentError.new("") if table_name.nil? or table_name.empty?
+
+			# Get a connection to the DB
+			if db_connection.nil? or !db_connection.kind_of? MobyUtil::DBConnection
+				db_type =  MobyUtil::Parameter[ :localisation_db_type ]
+				host =  MobyUtil::Parameter[ :localisation_server_ip ]
+				database_name = MobyUtil::Parameter[ :localisation_server_database_name ]
+				username = MobyUtil::Parameter[ :localisation_server_username ]
+				password = MobyUtil::Parameter[ :localisation_server_password ]
+				
+				db_connection = DBConnection.new(  db_type, host, database_name, username, password )
+			end
+			# Check File and convert to TS File if needed
+			tsFile = MobyUtil::Localisation.convert_to_ts( file )
+			Kernel::raise Exception.new("Failed to convert #{file} to .ts") if tsFile == nil	
+			# Collect data for INSERT query from TS File
+			language, data = MobyUtil::Localisation.parse_ts_file( tsFile, column_names_map )
+			Kernel::raise Exception.new("Error while parsing #{file}.") if language == nil or data == ""
+			# Upload language data to DB for current language file
+			MobyUtil::Localisation.upload_ts_data( language, data, table_name, db_connection, record_sql )
+		end
+		
+		
+		
+		private
 		
 		# Check File and convert to TS if needed
+		# Returns TS file
 		def self.convert_to_ts(file)
 			if !File.exists?(file)
 				puts "[WARNING] File '" + file + "' not found. Skiping."
@@ -181,11 +220,12 @@ module MobyUtil
 		
 		
 		# Upload language data to DB
-		def self.upload_ts_data( language, data, table_name, connection = {}, record_sql = false )
+		def self.upload_ts_data( language, data, table_name, db_connection, record_sql = false )
 			
 			raise Exception.new("Language not provided.") if language.nil? or language.to_s.empty?
 			raise Exception.new("No data povided. Please make sure the source of your data is valid.") if data.nil? or data.empty?
 			raise Exception.new("No table name provided.") if table_name.nil? or table_name.empty?
+			raise Exception.new("Invalid connection object provided.") if db_connection.nil? or !db_connection.kind_of? MobyUtil::DBConnection
 			
 			# Avoid system column names for language columns and user only downcase
 			language = language.to_s.downcase
@@ -193,27 +233,10 @@ module MobyUtil
 				language += "_"
 			end
 			
-			# Get a connection to the DB
-			if connection.empty?
-				db_type =  MobyUtil::Parameter[ :localisation_db_type, nil ].to_s.downcase 
-				host =  MobyUtil::Parameter[ :localisation_server_ip ]
-				username = MobyUtil::Parameter[ :localisation_server_username ]
-				password = MobyUtil::Parameter[ :localisation_server_password ]
-				database_name = MobyUtil::Parameter[ :localisation_server_database_name ]
-			else
-				db_type =  connection['db_type']
-				host =  connection['host']
-				username = connection['username']
-				password = connection['password']
-				database_name = connection['database_name']
-			end
-			
-			db_connection = DBConnection.new(  db_type, host, database_name, username, password )
-			
-			sql_file = File.open(table_name + ".#{db_type}.sql", 'a') if record_sql
+			sql_file = File.open(table_name + ".#{db_connection.db_type}.sql", 'a') if record_sql
 
 			# CREATE TABLE if doesn't exist (language columns to be created as needed)
-			case db_type
+			case db_connection.db_type
 				when "mysql"
 					query_string = "CREATE TABLE IF NOT EXISTS " + table_name + " ( 
 									`ID` INT(10) UNSIGNED NOT NULL AUTO_INCREMENT,
@@ -247,7 +270,7 @@ module MobyUtil
 			end
 			
 			# ADD NEW COLUMNS for new language if needed
-			case db_type
+			case db_connection.db_type
 				when "mysql"
 					begin
 						query_string = "ALTER TABLE `" + table_name + "` ADD  `" + language + "` VARCHAR(350) NULL DEFAULT NULL COLLATE utf8_general_ci;"
@@ -264,7 +287,7 @@ module MobyUtil
 					end
 			end
 			# INSERT new data
-			case db_type
+			case db_connection.db_type
 				when "mysql"
 					begin
 						# Formatting (seems like there is no length limit for the insert string)
@@ -302,7 +325,7 @@ module MobyUtil
 							### UPDATE OR INSERT IF NO ROWS AFFECTED
 							query_string = "UPDATE `" + table_name + "` SET `#{language}`='#{translation}' WHERE FNAME='#{fname}' AND " +
 								"LNAME='#{source}' AND `PLURALITY`='#{plurality}' AND `LENGTHVAR`='#{lengthvar}';"
-							MobyUtil::DBAccess.query( db_connectione, query_string )
+							MobyUtil::DBAccess.query( db_connection, query_string )
 							sql_file.write( query_string + "\n" ) if record_sql
 							if MobyUtil::DBAccess.affected_rows( db_connection ) == 0
 								query_string = "INSERT INTO `" + table_name + "` (FNAME, LNAME, `" + language + "`, `PLURALITY`, `LENGTHVAR`) " + 
@@ -322,8 +345,6 @@ module MobyUtil
 			end
 		end
 		
-		
-		private
 		
 		# Extracs application name from filename (removes language tags and extension)
 		def self.parseFName(file)

@@ -25,8 +25,8 @@ module MobyUtil
 		
 		# Initialize the singleton
 		def initialize( db_type, host, database_name, username, password )
-			@db_type = db_type
-			@host = host
+			@db_type = db_type.to_s.downcase
+			@host = host.to_s.downcase
 			@database_name = database_name
 			@username = username
 			@password = password

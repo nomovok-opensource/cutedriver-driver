@@ -39,12 +39,8 @@ module MobyUtil
 		
 		# Function for fetching SQL data  
 	    # == params
-	    # db_type::
-		# host::
-		# username::
-		# password::
-		# database_name::
-		# query_string::
+	    # dbc:: DBConnection 
+		# query_string:: String
 	    # == returns
 	    # Array<Array<String>>:: Returns an Array of rows, where each row is and Array of Strings
 	    # == throws
@@ -114,13 +110,13 @@ module MobyUtil
 			# Check for exsting connection for that host and create it if needed
 			if !@@_connections.has_key?( dbc.host + dbc.db_type + dbc.database_name ) # make connection ID unique by using host, type and db on the key
 				dbc.dbh = self.instance.connect_db(  dbc.db_type, dbc.host, dbc.username, dbc.password, dbc.database_name )
-				@@_connections[ host + db_type + database_name ] = dbc
+				@@_connections[ dbc.host + dbc.db_type + dbc.database_name ] = dbc
 			end
 			result = 0
-			if db_type == DB_TYPE_MYSQL
-				result = @@_connections[ host + db_type + database_name ].dbh.affected_rows
-			elsif db_type == DB_TYPE_SQLITE
-				result = @@_connections[ host + db_type + database_name ].dbh.changes
+			if dbc.db_type == DB_TYPE_MYSQL
+				result = @@_connections[ dbc.host + dbc.db_type + dbc.database_name ].dbh.affected_rows
+			elsif dbc.db_type == DB_TYPE_SQLITE
+				result = @@_connections[ dbc.host + dbc.db_type + dbc.database_name ].dbh.changes
 			end
 			return result
 		end
