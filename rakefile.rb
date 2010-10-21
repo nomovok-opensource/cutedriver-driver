@@ -67,40 +67,44 @@ def make_spec
 
 	return Gem::Specification.new do |s|
     
-	  	gem_version = @__gem_version
-		s.platform      =   Gem::Platform::RUBY
-	  	s.name          =   "testability-driver"
-		s.version       =   "#{gem_version}"
-	  	s.author        =   "Testability Driver team"
-		s.email         =   "testabilitydriver@nokia.com"
-		s.homepage      =   "http://code.nokia.com"
-	  	s.summary       =   "Testability Driver"
-		s.executables = ['start_app_perf']
+    gem_version     =   @__gem_version
+    s.platform      =   Gem::Platform::RUBY
+    s.name          =   "testability-driver"
+    s.version       =   "#{gem_version}"
+    s.author        =   "Testability Driver team"
+    s.email         =   "testabilitydriver@nokia.com"
+    s.homepage      =   "http://code.nokia.com"
+    s.summary       =   "Testability Driver"
 
-		s.files         =   FileList[ 
-					'README',
-					'lib/*.rb',
-					'lib/tdriver/*.rb',
-					'lib/tdriver/base/**/*',
-					'lib/tdriver/sut/**/*',
-					'lib/tdriver/verify/**/*',
-					'lib/tdriver/report/**/*',
-					'lib/tdriver/util/**/*',
-					'xml/**/*',
-					'bin/**/*',
-					'ext/**/*',
-          'config/**/*'
-					].to_a
+    s.bindir        =   "bin/"    
+    s.executables   =   FileList['tdriver-devtools', 'start_app_perf']
 
-	  	s.require_path  =   "lib/."
-	  	s.has_rdoc      =   false
+		s.files         =   
+		  FileList[ 
+			  'README',
+			  'lib/*.rb',
+			  'lib/tdriver/*.rb',
+			  'lib/tdriver/base/**/*',
+			  'lib/tdriver/sut/**/*',
+			  'lib/tdriver/verify/**/*',
+			  'lib/tdriver/report/**/*',
+			  'lib/tdriver/util/**/*',
+			  'lib/tdriver-devtools/**/*',
+			  'xml/**/*',
+			  'bin/**/*',
+			  'ext/**/*',
+        'config/**/*'
+  		].to_a
 
-	  	#s.add_dependency("libxml-ruby", "=0.9.4")
-	  	s.add_dependency("log4r", ">=1.1.7")
-	  	s.add_dependency("nokogiri", ">=1.4.1")
-		s.add_dependency("builder", ">=2.1.2")
+    s.require_path  =   "lib/."
+    s.has_rdoc      =   false
 
-	  	s.extensions << 'ext/extconf.rb'
+    #s.add_dependency("libxml-ruby", "=0.9.4")
+    s.add_dependency("log4r", ">=1.1.7")
+    s.add_dependency("nokogiri", ">=1.4.1")
+    s.add_dependency("builder", ">=2.1.2")
+
+    s.extensions << 'ext/extconf.rb'
   
 	end
 
@@ -111,6 +115,3 @@ Rake::GemPackageTask.new(make_spec) do |pkg|
   #pkg.need_tar = true
 end
 
-
-
-        
