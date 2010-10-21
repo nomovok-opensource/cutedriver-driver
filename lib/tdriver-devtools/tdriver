@@ -21,7 +21,7 @@
 require 'rdoc/rdoc'
 require 'optparse'
 require 'tdriver/version.rb'
-#require 'tdriver-devtools/doc/generate.rb'
+require 'tdriver/util/common/loader.rb'
 
 # default options
 options = { 
@@ -201,8 +201,23 @@ case options[ :generate ]
     $tests = File.expand_path( options[ :tests ] )
     $destination = File.expand_path( ARGV[1] || options[ :destination ] )
 
-    require 'lib/tdriver-devtools/doc/generate.rb'
+    destination_folder = File.dirname( $destination )
 
+    begin
+
+      unless MobyUtil::FileHelper.folder_exist?( destination_folder )
+
+        MobyUtil::FileHelper.mkdir_path( destination_folder )        
+      
+      end
+
+    rescue Exception => exception
+    
+      raise RuntimeError.new("Unable to create destination folder %s (%s: %s)" % [ destination_folder, exception.class, exception.message ])
+    
+    end
+
+    require 'lib/tdriver-devtools/doc/generate.rb'
 
 else
 

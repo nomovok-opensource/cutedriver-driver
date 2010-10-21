@@ -35,7 +35,7 @@ module RDoc
 end
 
 
-if $source.nil?
+if $source.nil? or ARGV.count < 1
 
   abort "Usage: #{ $0 } SOURCE_FILES [DESTINATION_FOLDER]"
   
@@ -43,7 +43,7 @@ else
 
   $source = File.expand_path( ARGV[ 0 ] || $source )
 
-  $destination = File.expand_path( ARGV[ 1 ] || $destination )
+  $destination = File.expand_path( ARGV[ 1 ] || $destination || 'behaviour_xml' )
 
   abort("File or folder %s not found" % $source ) unless File.exist?( $source )
 
