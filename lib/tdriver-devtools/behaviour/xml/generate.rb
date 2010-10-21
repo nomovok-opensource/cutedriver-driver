@@ -34,16 +34,15 @@ module RDoc
 
 end
 
-
-if $source.nil? or ARGV.count < 1
+if $source.nil? and ARGV.count < 1
 
   abort "Usage: #{ $0 } SOURCE_FILES [DESTINATION_FOLDER]"
   
 else
 
-  $source = File.expand_path( ARGV[ 0 ] || $source )
+  $source = File.expand_path( $source || ARGV[ 0 ] )
 
-  $destination = File.expand_path( ARGV[ 1 ] || $destination || 'behaviour_xml' )
+  $destination = File.expand_path( $destination || ARGV[ 1 ] || 'behaviour_xml' )
 
   abort("File or folder %s not found" % $source ) unless File.exist?( $source )
 
@@ -59,13 +58,25 @@ begin
       File.expand_path( File.join( File.dirname( __FILE__ ), 'rdoc_behaviour_xml_generator.rb' ) ) 
     )
 
+
+    current_dir = Dir.pwd
+
+    Dir.chdir( File.expand_path( $destination ) )
+
     rdoc.document( 
       [
         '--inline-source', 
         '--op', $destination, 
-        '--fmt', 'tdriver_behaviour_xml'
+        '--fmt', 'tdriver_behaviour_xml',
+        '--force-update',
+        '--one-file',
       ] << $source
     )
+
+    # delete creater.rid timestamp file
+    File.delete('created.rid')
+    
+    Dir.chdir( current_dir )
 
   }
 
