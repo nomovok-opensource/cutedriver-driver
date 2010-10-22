@@ -235,8 +235,10 @@ case options[ :generate ]
     
     end
 
+    #File.expand_path( File.join( File.dirname( __FILE__ ), 'behaviour/xml/generate.rb' ) )
+
     # run 'implementation to behaviour xml' generator
-    require 'lib/tdriver-devtools/behaviour/xml/generate.rb'
+    require File.expand_path( File.join( File.dirname( __FILE__ ), 'behaviour/xml/generate.rb' ) ) #'lib/tdriver-devtools/behaviour/xml/generate.rb'
 
     puts ''
 
@@ -262,7 +264,10 @@ case options[ :generate ]
     
     end
 
-    require 'lib/tdriver-devtools/doc/generate.rb'
+    #require 'lib/tdriver-devtools/doc/generate.rb'
+
+    require File.expand_path( File.join( File.dirname( __FILE__ ), 'doc/generate.rb' ) ) #'lib/tdriver-devtools/behaviour/xml/generate.rb'
+
 
   when :both
   
