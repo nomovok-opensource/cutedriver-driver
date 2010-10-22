@@ -42,14 +42,42 @@ module MobyBehaviour
   #
 	module ObjectBehaviourDescription
 
+    # == description
+    # Return list of behaviour name(s) which caller object contains. This method may be useful when implementing/testing custom behaviour modules.
+    #
+    # == arguments
+    # return_indexes
+    #  TrueClass
+    #   description: Returns result as array of behaviour indexes  
+    #   example: true
+    #  FalseClass
+    #   description: Returns result as array of behaviour names
+    #   example: false
+    #
+    # == returns
+    # Array
+    #  description: If 'return_indexes' is true, result is a array of indexes (Fixnum) 
+    #  example: [1,2,3,4,5]
+    #
+    # Array
+    #  description: If 'return_indexes' is false, result is a array of behaviour names (String)
+    #  example: ["GenericApplication", "GenericFind", "GenericObjectComposition"]
+    #
+    # == footer
+    #
 		def behaviours( return_indexes = false )
 
 			return_indexes ? @object_behaviours : @object_behaviours.collect{ | index | MobyBase::BehaviourFactory.instance.get_behaviour_at_index( index )[ :name ] }.uniq.compact.sort
 
 		end
 
+    # == description
+    # Returns a list of the names of (behaviour) methods publicly accessible in object. This method may be useful when implementing/testing custom behaviour modules.
+    # == returns
+    # Array
+    #  description: List of method names 
+    #  example: ["application?", "close", "closable?", "describe"]
 		def object_methods
-
 
 			[].tap{ | methods | 
 				@object_behaviours.each{ | index | 
@@ -59,6 +87,46 @@ module MobyBehaviour
 
 		end
 
+    # == description
+    # Return brief method description either as return value or printed to STDOUT. This method may be useful when implementing/testing custom behaviour modules. 
+    #
+    # == arguments
+    # method_name
+    #  String
+    #   description: Name of the method  
+    #   example: "type"
+    #
+    # print
+    #  TrueClass
+    #   description: Print result to STDOUT and return as String
+    #   example: true
+    #  FalseClass
+    #   description: Return result as Hash instead of printing to STDOUT 
+    #   example: false
+    #
+    # return_result
+    #  TrueClass
+    #   description: Pass result as return value
+    #   example: true
+    #  FalseClass
+    #   description: Do not pass result as return value
+    #   example: false
+    #
+    # == returns
+    # String
+    #  description: String representation of object description/details 
+    #  example: "Description:\nReturns type of the test object\n\nExample:\ntype"
+    #
+    # Hash
+    #  description: Hash representation of object description/details 
+    #  example: { :description=>"Returns type of the test object", :example=>"type" }
+    #
+    # NilClass
+    #  description: When 'return_result' is false
+    #  example: nil
+    #
+    # == footer
+    #
 		def describe_method( method_name, print = true, return_result = false )
 			
 			# convert to symbol if method_name is a string
@@ -109,6 +177,41 @@ module MobyBehaviour
 
 		end
 
+    # == description
+    # Return list of methods and behaviour name(s) which caller object contains. This method may be useful when implementing/testing custom behaviour modules.    
+    #
+    # == arguments
+    # print
+    #  TrueClass
+    #   description: Print result to STDOUT and return as String
+    #   example: true
+    #  FalseClass
+    #   description: Return result as Hash instead of printing to STDOUT 
+    #   example: false
+    #
+    # return_result
+    #  TrueClass
+    #   description: Pass result as return value
+    #   example: true
+    #  FalseClass
+    #   description: Do not pass result as return value
+    #   example: false
+    #
+    # == returns
+    # String
+    #  description: String representation of object details 
+    #  example: "Object:\n	sut => sut_qt\n	type => application\n\nBehaviours:\n	GenericApplication\n\nMethods:\n	application?\n"
+    #
+    # Hash
+    #  description: Hash representation of object details 
+    #  example: { :methods=>["application?"], :behaviours=>["GenericApplication"], :object=>{:sut=>:sut_qt, :type=>"application"} }
+    #
+    # NilClass
+    #  description: When 'return_result' is false
+    #  example: nil
+    #
+    # == footer
+    #
 		def describe( print = true, return_result = false )
 
 			# print result to stdout if argument not boolean
