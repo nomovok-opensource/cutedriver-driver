@@ -293,7 +293,7 @@ module MobyBase
 		object_search_params.merge!(creation_attributes)
 		object_search_params[:className] = object_search_params.delete(:type) if creation_attributes.has_key?(:type) 
 		object_search_params[:objectName] = object_search_params.delete(:name) if creation_attributes.has_key?(:name)
-	  end
+	  end	  
 	  object_search_params
 	end
 
