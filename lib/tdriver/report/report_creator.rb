@@ -145,7 +145,7 @@ module TDriverReportCreator
       current_status=$tdriver_reporter.not_run_statuses.first
       $tdriver_reporter.set_total_not_run(1)
     end
-     
+
     $tdriver_reporter.write_to_result_storage(current_status,test_case_name,group,reboots,crashes,
       $new_test_case.test_case_start_time,
       $new_test_case.test_case_chronological_view_data,
@@ -187,7 +187,7 @@ module TDriverReportCreator
       end
     end
   end
-  
+
 
   #This method updates the current test case user data
   #
@@ -214,12 +214,12 @@ module TDriverReportCreator
   # === returns
   # nil
   # === raises
-  def start_test_case(test_case)    
+  def start_test_case(test_case)
     if $new_test_case!=nil
       if $new_test_case.test_case_ended==false
         end_test_case($new_test_case.test_case_name,@tc_status)
       end
-    end    
+    end
     $test_case_run_index=$test_case_run_index.to_i+1
     $new_test_case=TestCaseRun.new
     $new_test_case.set_test_cases_folder($current_tdriver_report_folder.to_s+'/cases')
@@ -229,17 +229,39 @@ module TDriverReportCreator
     $new_test_case.test_case_dump_count_at_start=$tdriver_reporter.total_dump_count.clone
     $new_test_case.test_case_data_sent_at_start=$tdriver_reporter.total_sent_data.clone
     $new_test_case.test_case_data_received_at_start=$tdriver_reporter.total_received_data.clone
-   
+
     create_test_case_folder('result')
-    if start_error_recovery()==true
-      $tdriver_reporter.set_total_device_resets(1)
-      $new_test_case.set_test_case_reboots(1)
+    begin
+      if start_error_recovery()==true
+        $tdriver_reporter.set_total_device_resets(1)
+        $new_test_case.set_test_case_reboots(1)
+      end
+    rescue Exception => e
+      update_test_case("Error recovery failed Exception: #{e.message} Backtrace: #{e.backtrace}")
+      end_test_case($new_test_case.test_case_name,@tc_status)
+      exit(1)
     end
     $new_test_case.read_crash_monitor_settings()
     $new_test_case.read_file_monitor_settings()
 
-    $new_test_case.clean_crash_files_from_sut()
-    $new_test_case.clean_files_from_sut()
+    amount_of_crash_files=$new_test_case.check_if_crash_files_exist()
+    if amount_of_crash_files.to_i > 0
+      update_test_case('Crash files found in the beginning of the test')
+      $new_test_case.capture_crash_files()
+      $new_test_case.clean_crash_files_from_sut()
+      $tdriver_reporter.set_total_crash_files(amount_of_crash_files.to_i)
+      $new_test_case.set_test_case_crash_files(amount_of_crash_files.to_i)
+    end
+
+    amount_of_files=$new_test_case.check_if_crash_files_exist()
+    if amount_of_files.to_i > 0
+      update_test_case('Files found in the beginning of the test')
+      $new_test_case.capture_files()
+      $new_test_case.clean_files_from_sut()
+      $tdriver_reporter.set_total_crash_files(amount_of_files.to_i)
+      $new_test_case.set_test_case_crash_files(amount_of_files.to_i)
+    end
+
     if MobyUtil::Parameter[ :report_monitor_memory, 'false']=='true'
       begin
         MobyBase::SUTFactory.instance.connected_suts.each do |sut_id, sut_attributes|
@@ -253,7 +275,7 @@ module TDriverReportCreator
     end
     logging_enabled = MobyUtil::Logger.instance.enabled
     begin
-		  
+
       if MobyUtil::Parameter[:report_video, "false"] != "false"
         # copy previous recording
         MobyUtil::Logger.instance.enabled=false
@@ -275,7 +297,7 @@ module TDriverReportCreator
 
     ensure
       MobyUtil::Logger.instance.enabled=logging_enabled
-    end    
+    end
     update_test_case_user_data()
     starting_test_case(test_case, MobyBase::SUTFactory.instance.connected_suts) if MobyUtil::Parameter[ :custom_error_recovery_module, nil ]!=nil
   end
@@ -286,7 +308,7 @@ module TDriverReportCreator
   # === returns
   # nil
   # === raises
-  def update_test_case(details)        
+  def update_test_case(details)
     $new_test_case.set_test_case_execution_log(details)
     updating_test_case_details(details) if MobyUtil::Parameter[ :custom_error_recovery_module, nil ]!=nil
     if  MobyUtil::Parameter[ :report_monitor_memory, 'false']=='true'
@@ -325,7 +347,7 @@ module TDriverReportCreator
 
   #This method takes a screenshot of current test case execution
   #
-  # === params  
+  # === params
   # === returns
   # nil
   # === raises
@@ -389,19 +411,19 @@ module TDriverReportCreator
         $tdriver_reporter.get_sut_total_sent_data(sut_id,sut_attributes)
         $tdriver_reporter.get_sut_total_received_data(sut_id,sut_attributes)
       end
-    end   
-    
+    end
+
     $new_test_case.test_case_dump_count_at_end=$tdriver_reporter.total_dump_count
-    $new_test_case.test_case_dump_count_at_end.each do |item|      
+    $new_test_case.test_case_dump_count_at_end.each do |item|
       at_start=$new_test_case.test_case_dump_count_at_start[item[0]].to_i
       at_start=0 if at_start==nil
       at_end=item[1].to_i
-      total=at_end-at_start     
+      total=at_end-at_start
       $new_test_case.test_case_total_dump_count[item[0]]=total
     end
 
     $new_test_case.test_case_data_sent_at_end=$tdriver_reporter.total_sent_data
-    $new_test_case.test_case_data_sent_at_end.each do |item|     
+    $new_test_case.test_case_data_sent_at_end.each do |item|
       at_start=$new_test_case.test_case_data_sent_at_start[item[0]].to_i
       at_start=0 if at_start==nil
       at_end=item[1].to_i
@@ -410,7 +432,7 @@ module TDriverReportCreator
     end
 
     $new_test_case.test_case_data_received_at_end=$tdriver_reporter.total_received_data
-    $new_test_case.test_case_data_received_at_end.each do |item|      
+    $new_test_case.test_case_data_received_at_end.each do |item|
       at_start=$new_test_case.test_case_data_received_at_start[item[0]].to_i
       at_start=0 if at_start==nil
       at_end=item[1].to_i
@@ -430,7 +452,7 @@ module TDriverReportCreator
   # === raises
   def end_test_case(test_case,status)
     $new_test_case.set_test_case_ended(true) if $new_test_case
-    update_test_case_user_data()   
+    update_test_case_user_data()
     if $new_test_case != nil
       calculate_execution_footprint_data_for_test_case
       if MobyUtil::Parameter[:report_crash_file_monitor] == 'true'
@@ -508,7 +530,7 @@ module TDriverReportCreator
   # Cleans any temporary files created by recording video
   def clean_video_files
     [ @_video_file_name, @_previous_video_file_name ].each do | file_name |
-      
+
       each_video_device do | video_device, device_index |
         begin
           delete_file = "cam_" + device_index + "_" + file_name
@@ -521,21 +543,21 @@ module TDriverReportCreator
       end
     end
   end
-  
+
   def each_video_device
 
     if MobyUtil::Parameter[:report_video, nil] != nil
-      
+
       device_index = 0
-      MobyUtil::Parameter[:report_video].split("|").each do | video_device |	    	    
+      MobyUtil::Parameter[:report_video].split("|").each do | video_device |
         if !video_device.strip.empty?
           yield video_device.strip, device_index.to_s
           device_index += 1
         end
       end
-	  
+
     end
-     
+
   end
 
 end #TDriverReportCreator
