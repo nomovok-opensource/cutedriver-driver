@@ -44,12 +44,14 @@ module MobyUtil
 			username = MobyUtil::Parameter[ :operator_data_server_username ]
 			password = MobyUtil::Parameter[ :operator_data_server_password ]
 			database_name = MobyUtil::Parameter[ :operator_data_server_database_name ]
-			search_string = "#{ operator_data_lname }' AND `Operator` = '#{ operator }"			
 			
+			db_connection = DBConnection.new(  db_type, host, database_name, username, password )
+			
+			search_string = "#{ operator_data_lname }' AND `Operator` = '#{ operator }"			
 			query_string =  "select `Value` from `#{ table_name }` where `LogicalName` = '#{ search_string }' and `LogicalName` <> '#MISSING'"
 
 			begin
-				result = MobyUtil::DBAccess.query( db_type, host, username, password, database_name, query_string )
+				result = MobyUtil::DBAccess.query( db_connection, query_string )
 			rescue
 			    # if data column to be searched is not found then Kernel::raise error for search column not found
 			    Kernel::raise OperatorDataColumnNotFoundError.new( "Search column 'Value' not found in database" ) unless $!.message.index( "Unknown column" ) == nil

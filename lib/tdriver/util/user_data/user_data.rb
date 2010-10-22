@@ -45,11 +45,13 @@ module MobyUtil
 			username = MobyUtil::Parameter[ :user_data_server_username ]
 			password = MobyUtil::Parameter[ :user_data_server_password ]
 			database_name = MobyUtil::Parameter[ :user_data_server_database_name ]
+			
+			db_connection = DBConnection.new(  db_type, host, database_name, username, password )
 
 			query_string = "select `#{ language }` from #{ table_name } where lname = \'#{ user_data_lname }' and `#{ language }` <>\'#MISSING\'"
 
 			begin
-				result = MobyUtil::DBAccess.query( db_type, host, username, password, database_name, query_string )
+				result = MobyUtil::DBAccess.query( db_connection, query_string )
 			rescue
 				# if column referring to language is not found then Kernel::raise error for language not found
 				Kernel::raise UserDataColumnNotFoundError.new( "User data language column '#{ language }' was not found" ) unless $!.message.index( "Unknown column" ) == nil
