@@ -73,7 +73,9 @@
     <parameter name="refresh_interval" value="0" />
 
     <parameter name="verify_blocks" value="" />
-      
+
+	<parameter name="use_find_object" value="false" />
+	
 
   </template>
 

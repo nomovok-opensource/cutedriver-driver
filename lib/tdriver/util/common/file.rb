@@ -95,8 +95,10 @@ module MobyUtil
     # String:: String presentation of TDriver home directory
     def self.tdriver_home()
 
-      File.expand_path(           
-        MobyUtil::FileHelper.fix_path( ENV['TDRIVER_HOME'] || ( (MobyUtil::EnvironmentHelper::ruby_platform =~ /mswin/i) ? "c:/tdriver" : "/etc/tdriver" ) )
+      File.expand_path(
+        MobyUtil::FileHelper.fix_path( 
+          ENV['TDRIVER_HOME'] || ( MobyUtil::EnvironmentHelper.windows? ? "c:/tdriver" : "/etc/tdriver" ) 
+        )
       )
 
     end
@@ -116,7 +118,7 @@ module MobyUtil
 
       dirname =  File.dirname( path )
 
-      if MobyUtil::EnvironmentHelper::ruby_platform =~ /mswin/i
+      if MobyUtil::EnvironmentHelper.windows?
 
         # windows
         ( dirname =~ /^[a-z]+:(\\|\/)/i ).nil? && ( dirname[ 0 ].chr =~ /(\\|\/)/ ).nil?    
