@@ -238,7 +238,7 @@ module TDriverReportCreator
       end
     rescue Exception => e
       update_test_case("Error recovery failed Exception: #{e.message} Backtrace: #{e.backtrace}")
-      end_test_case($new_test_case.test_case_name,@tc_status)
+      end_test_case($new_test_case.test_case_name,'failed')
       exit(1)
     end
     $new_test_case.read_crash_monitor_settings()
@@ -351,14 +351,21 @@ module TDriverReportCreator
   # === raises
   def capture_screen_test_case()
     create_test_case_folder($tdriver_reporter.fail_statuses.first)
-    if start_error_recovery()==true
-      error_in_connection_detected
+    begin
+      if start_error_recovery()==true
+        error_in_connection_detected
+      end
+    rescue Exception => e
+      update_test_case("Error recovery failed Exception: #{e.message} Backtrace: #{e.backtrace}")
+      end_test_case($new_test_case.test_case_name,'failed')
+      exit(1)
+
+      $new_test_case.capture_dump()
+      if $new_test_case.video_recording?
+        $new_test_case.copy_video_capture()
+      end
+      error_in_test_case(MobyBase::SUTFactory.instance.connected_suts) if MobyUtil::Parameter[ :custom_error_recovery_module, nil ]!=nil
     end
-    $new_test_case.capture_dump()
-    if $new_test_case.video_recording?
-      $new_test_case.copy_video_capture()
-    end
-    error_in_test_case(MobyBase::SUTFactory.instance.connected_suts) if MobyUtil::Parameter[ :custom_error_recovery_module, nil ]!=nil
   end
   #This updates the test case behaviour log
   #
