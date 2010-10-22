@@ -35,6 +35,9 @@ module MobyUtil
         # skip native extension build if running in java environment
         raise LoadError if MobyUtil::EnvironmentHelper.java?
 
+        # skip also if windows env. until proper solution found how to compile in windows env.
+        raise LoadError if MobyUtil::EnvironmentHelper.windows? 
+
         # makefile creation module
         require 'mkmf'
         
@@ -46,13 +49,6 @@ module MobyUtil
 
         # create makefile for implementation 
         create_makefile( extension_name )
-
-        # create nmake.bat in windows env.
-        if MobyUtil::EnvironmentHelper.windows? 
-
-          File.open( 'nmake.bat', 'w') { |f| f.write "SET ERRORLEVEL=0" }
-
-        end
 
       rescue Exception
 
@@ -77,7 +73,7 @@ module MobyUtil
 
     def self.grant_file_access_rights( folder, user_name = nil, user_group = nil )
 
-      if MobyUtil::EnvironmentHelper.posix? #ruby_platform !~ /mswin/
+      if MobyUtil::EnvironmentHelper.posix? #ruby_platform !~ /mswin|mingw|windows/
 
         # change folder ownership to user and add writing access to each file
         user_name = MobyUtil::EnvironmentHelper.user_name if user_name.nil?

@@ -30,6 +30,13 @@ module MobyBase
 		# The test object factory is needed for populating child object accessor methods
 		#@test_object_factory
 
+		# == description
+		# attr_accessor
+		#
+		# == returns
+		# Test Object
+		#  description: test object that was used as parent when this object was created. Can also be of type SUT if sut was the parent (ie. application objects)
+		#  example: "@sut"
 		attr_accessor :parent
 
 		# Creates a new StateObject from XML source data.

@@ -1123,7 +1123,7 @@ EXAMPLE
               #store_to_results( @module_path.join("::"), method.name + "=", type )
             when "RW"
               type = "accessor"
-              method_name << ";#{ method_name }="
+              #method_name << ";#{ method_name }="
               #store_to_results( @module_path.join("::"), method.name + "=", type )
 
           else
