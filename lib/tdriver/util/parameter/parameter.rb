@@ -63,7 +63,9 @@ module MobyUtil
         end
 
         if ARGV[ index ].to_s.downcase.include?('.xml')
-          filename << MobyUtil::FileHelper.expand_path( ARGV[ index ].to_s )
+          # no absolute path required
+          filename << File.expand_path( ARGV[ index ].to_s )
+          #filename << MobyUtil::FileHelper.expand_path( ARGV[ index ].to_s )
           @@user_defined_parameters_file_defined_in_command_line_arguments = true
           delete_values << ARGV[ index ].to_s
         end
@@ -71,13 +73,13 @@ module MobyUtil
       end
 
       #clean up ARGV
-      delete_values.each do |value|
-        indx=ARGV.index(value)
-        ARGV.delete_at(indx)
+      delete_values.each do | value |
+        indx = ARGV.index( value )
+        ARGV.delete_at( indx )
       end
 
       if filename
-        filename.each do |parameter_file|
+        filename.each do | parameter_file |
           Kernel::raise MobyUtil::FileNotFoundError.new( "User defined TDriver parameters file %s does not exist" % [ parameter_file ] ) if !File.exist?( parameter_file )
         end
       end
@@ -186,7 +188,7 @@ module MobyUtil
       @@loaded_parameter_files << filename
 
     end
-
+ 
     # empty parameters hash
     def clear
 
