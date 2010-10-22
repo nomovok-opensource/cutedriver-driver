@@ -35,6 +35,9 @@ module MobyUtil
         # skip native extension build if running in java environment
         raise LoadError if MobyUtil::EnvironmentHelper.java?
 
+        # skip also if windows env. until proper solution found how to compile in windows env.
+        raise LoadError if MobyUtil::EnvironmentHelper.windows? 
+
         # makefile creation module
         require 'mkmf'
         
@@ -46,13 +49,6 @@ module MobyUtil
 
         # create makefile for implementation 
         create_makefile( extension_name )
-
-        # create nmake.bat in windows env.
-        if MobyUtil::EnvironmentHelper.windows? 
-
-          File.open( 'nmake.bat', 'w') { |f| f.write "SET ERRORLEVEL=0" }
-
-        end
 
       rescue Exception
 
