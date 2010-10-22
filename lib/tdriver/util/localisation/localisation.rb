@@ -25,19 +25,67 @@ module MobyUtil
 
 	class Localisation
 
-		# Function for fetching a translation from the localisation DB
-		# == params
-		# logical_name:: Symbol containing the logical name that acts as a key when fetching translation
-		# language:: String containing language to be used in fetching the translation
-		# table_name:: String containing the name of table to be used when fetching translation
+		# == description
+		# Function to fetch a translation for a given logical name from the localisation DB
+		#
+		# == arguments
+		# logical_name
+		#  String
+		#   description: Logical name (LNAME) of the item to be translated. If prefix for User Information or Operator Data are used then the appropiate retrieve methods will be called
+		#   example: "txt_button_ok"
+		#  Symbol
+		#   description: Symbol form of the logical name (LNAME) of the item to be translated.
+		#   example: :txt_button_ok
+		#
+		# language
+		#  String
+		#   description: Name of the language column to be used. This is normally the language code found on the .ts or .qm translation files
+		#   example: "en"
+		#
+		# table_name
+		#  String
+		#   description: Name of the translation table to use form the localisation DB
+		#   example: "B10_1_week201042_loc"
+		# 
+		# file_name
+		#  String
+		#   description: Optional FNAME search argument for the translation. The FNAME column stores the application name that the translation belongs to
+		#   example: "calendar"
+		#   default: nil
+		#
+		# plurality
+		#  String
+		#   description: Optional PLURALITY search argument for the translation
+		#   example: "a" or "singular"
+		#	default: nil
+		#
+		# lengthvariant
+		#  String
+		#   description: Optional LENGTHVAR search argument for the translation (1-9)
+		#   example: "1"
+		#   default: nil
+		#
 		# == returns
-		# String:: Value of the localisation
-		# Array<String>:: Array of values when multiple translations found
-		# == throws
-		# LogicalNameNotFoundError:: in case the localisation for logical name not found
-		# LanguageNotFoundError:: in case the language not found
-		# TableNotFoundError:: in case the table name not found
-		# SqlError:: in case of the other problem with the query
+		# String
+		#  description: Translation matching the logical_name
+		#  example: "Ok"
+		# Array
+		#  description: If multiple translations have been found for the search conditions an Array with all Strings be returned
+		#  example: ["Ok", "OK"]
+		# 
+		# == exceptions
+		# LanguageNotFoundError
+		#  description: In case language is not found
+		#
+		# LogicalNameNotFoundError
+		#  description: In case no logical name is not found for current language
+		#
+		# TableNotFoundError
+		#  description: If the table name argument is not valid
+		#
+		# SqlError
+		#  description: In case there are problems with the database connectivity
+		#
 		def self.translation( logical_name, language, table_name, file_name = nil , plurality = nil, lengthvariant = nil )
 		
 			Kernel::raise LogicalNameNotFoundError.new( "Logical name cannot be nil" ) if logical_name == nil
@@ -89,17 +137,48 @@ module MobyUtil
 
 		end
 		
-		# Function for uploading qm and ts files to the localization DB
-		# == params
-		# file:: String
-		# table_name:: String
-		# db_connection:: DBConnection Optional. Connection details for the upload. If not provided then tdriver parameters will be used.
-		# column_names_map:: Hash Optional. If provided it will set the language column names to the String provided instead of the language code extracted from the file names.
-		# record_sql:: Bool Optional. It will record all SQL queries performed on a file with name <table>.<db_type>.sql
+
+		# == description
+		# Function to fetch a translation for a given logical name from the localisation DB
+		#
+		# == arguments
+		# file
+		#  String
+		#   description: Path to Qt Linguist translation file to upload. Both .ts and .qm files are allowed.
+		#   example: "accessories_ar.ts"
+		#
+		# table_name
+		#  String
+		#   description: Name of the translation table to use form the localisation DB
+		#   example: "B10_1_week201042_loc"
+		# 
+		# db_connection
+		#  MobyUtil::DBConnection
+		#   description: A DBConnection object contains all the connection details required to connect to a SQL DB (mysql or sqlite)
+		#	example: "MobyUtil::DBConnection.new('mysql', '192.168.0.1', 'tdriver_locale', 'username', 'password')"
+		#   default: nil
+		#
+		# column_names_map
+		#  Hash
+		#   description: Hash with the language codes from the translation files as keys and the desired column names as values
+		#   example: {"en" => "en_GB"}
+		#   default: {}
+		#
+		# record_sql
+		#  Bool
+		#   description: When this flag is set to true then 
+		#   example: true
+		#   default: false
+		#
 		# == returns
+		#
 		# == throws
-		# ArgumentError:: when arguments provided are not valid
-		# Exception:: when its not possible to parse the file provided
+		# ArgumentError
+		#  description: When arguments provided are not valid
+		#
+		# Exception
+		#  description: When its not possible to parse the file provided
+		#
 		def self.upload_translation_file( file, table_name, db_connection = nil, column_names_map = {}, record_sql = false)	
 			Kernel::raise ArgumentError.new("") if file.nil? or file.empty?
 			Kernel::raise ArgumentError.new("") if table_name.nil? or table_name.empty?
@@ -128,8 +207,22 @@ module MobyUtil
 		
 		private
 		
-		# Check File and convert to TS if needed
-		# Returns TS file
+		
+		# == description
+		# Checks Qt Linguist translation file for validity and converts to TS if needed
+		#
+		# == arguments
+		# file
+		#  String
+		#   description: Name (and path) of the Qt Linguist translation file (.ts or .qm)
+		#   example: "calendar.qm"
+		#
+		# == returns
+		# String
+		#  description: Name (and path) of the checked and maybe converted .ts Qt Linguist translation file
+		#
+		# == throws
+		# 
 		def self.convert_to_ts(file)
 			if !File.exists?(file)
 				puts "[WARNING] File '" + file + "' not found. Skiping."
@@ -148,7 +241,30 @@ module MobyUtil
 		end
 		
 		
-		# Extract translation data from TS file
+		# == description
+		# Extracts translation data from TS file
+		#
+		# == arguments
+		# file
+		#  String
+		#   description: Name (and path) of the Qt Linguist translation file (.ts or .qm)
+		#   example: "calendar.qm"
+		#
+		# column_names_map
+		#  Hash
+		#   description: Hash with the language codes from the translation files as keys and the desired column names as values
+		#   example: {"en" => "en_GB"}
+		#   default: {}
+		#
+		# == returns
+		# String
+		#  description: Name (and path) of the checked and maybe converted .ts Qt Linguist translation file
+		#
+		# Array
+		#  description: Two dimentional Array with columns [ FNAME, Source, Translation, Plurality, Lengthvariant Priority ]
+		# 
+		# == throws
+		# 
 		def self.parse_ts_file(file, column_names_map = {} )
 			# Read TS file
 			open_file = File.new( file )
@@ -219,7 +335,7 @@ module MobyUtil
 		end
 		
 		
-		# Upload language data to DB
+		# Uploads language data to DB
 		def self.upload_ts_data( language, data, table_name, db_connection, record_sql = false )
 			
 			raise Exception.new("Language not provided.") if language.nil? or language.to_s.empty?
