@@ -68,11 +68,9 @@ module TDriverErrorRecovery
     MobyUtil::Logger.instance.log "behaviour" , "WARNING;Connection lost attempting to reconnect"
     attempt_reconnects=@recovery_settings.get_reconnect_attempts
     current_reconnect_attempt=0
+    b_error_recovery_succesful=false
     while current_reconnect_attempt.to_i<attempt_reconnects.to_i
       if @recovery_settings.get_ats4_error_recovery_enabled=='true'
-        MobyUtil::Logger.instance.log "behaviour" , "WARNING;Resetting sut: #{current_sut.id.to_s}"
-        current_sut.reset
-        MobyUtil::Logger.instance.log "behaviour" , "WARNING;Sut resetted"
         MobyUtil::Logger.instance.log "behaviour" , "WARNING;Restarting ATS4 DataGateway"
         TDriver_Error_Recovery_ATS4.restartDatagateway(current_sut.id.to_s);
         sleep @recovery_settings.get_wait_time_for_ats4_error_recovery.to_i
@@ -83,12 +81,14 @@ module TDriverErrorRecovery
         MobyUtil::Logger.instance.log "behaviour" , "WARNING;Sut resetted"
       end
       if ping_device(current_sut)==true
+        b_error_recovery_succesful=true
         MobyUtil::Logger.instance.log "behaviour" , "PASS;Device reconnected"
         current_reconnect_attempt=attempt_reconnects.to_i
       else
         current_reconnect_attempt+=1
       end
     end
+    Kernel::raise BehaviourError.new("Error Recovery", "Error recovery failed after #{attempt_reconnects} recovry attemprs") if b_error_recovery_succesful==false
   end
 
   # Reconnects the devices without ping
