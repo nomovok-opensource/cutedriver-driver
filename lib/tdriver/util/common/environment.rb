@@ -123,15 +123,12 @@ module MobyUtil
 
     def self.change_file_ownership!( target, user_name, user_group, recursively = true )
 
-      # `chown -h #{ recursively ? '-R' : '' } #{ user_name }:#{ user_group } #{ target }` unless MobyUtil::EnvironmentHelper.ruby_platform =~ /mswin|mingw|windows/
       `chown -h #{ recursively ? '-R' : '' } #{ user_name }:#{ user_group } #{ target }` if MobyUtil::EnvironmentHelper.posix?
 
     end
 
     # linux
     def self.user_group( name = nil )
-
-      # `id -g -n #{ name }`.chomp unless MobyUtil::EnvironmentHelper.ruby_platform =~ /mswin|mingw|windows/
 
       `id -g -n #{ name }`.chomp if MobyUtil::EnvironmentHelper.posix?
       

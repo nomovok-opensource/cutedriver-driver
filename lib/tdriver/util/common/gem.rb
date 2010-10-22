@@ -73,7 +73,7 @@ module MobyUtil
 
     def self.grant_file_access_rights( folder, user_name = nil, user_group = nil )
 
-      if MobyUtil::EnvironmentHelper.posix? #ruby_platform !~ /mswin|mingw|windows/
+      if MobyUtil::EnvironmentHelper.posix?
 
         # change folder ownership to user and add writing access to each file
         user_name = MobyUtil::EnvironmentHelper.user_name if user_name.nil?
@@ -97,7 +97,6 @@ module MobyUtil
       MobyUtil::GemHelper.create_build_files
 
       MobyUtil::GemHelper.grant_file_access_rights( parameters.first )
-
 
     end
 
