@@ -39,20 +39,22 @@ module MobyUtil
 		
 		# Function for fetching SQL data  
 	    # == params
-	    # db_type::
-		# host::
-		# username::
-		# password::
-		# database_name::
-		# query_string::
+	    # dbc:: DBConnection 
+		# query_string:: String
 	    # == returns
 	    # Array<Array<String>>:: Returns an Array of rows, where each row is and Array of Strings
 	    # == throws
 	    # DbTypeNotDefinedError:: 
 	    # ArgumentError:: 
-	    def self.query( db_type, host, username, password, database_name, query_string )
+	    def self.query( dbc, query_string )
 			# Create first instance of this class if it doesn't exist
 			self.instance
+			
+			db_type = dbc.db_type
+			host = dbc.host
+			username = dbc.username
+			password = dbc.password
+			database_name = dbc.database_name
 			
 			# Check creation parameters
 		    Kernel::raise DbTypeNotDefinedError.new( "Database type need to be either 'mysql' or 'sqlite'!" ) if  db_type == nil 
@@ -67,19 +69,19 @@ module MobyUtil
 			
 			# Check for exsting connection for that host and create it if needed
 			if !@@_connections.has_key?( host + db_type + database_name ) # make connection ID unique by using host, type and db on the key
-				connector = self.instance.connect_db(  db_type, host, username, password, database_name )
-				@@_connections[ host + db_type + database_name ] = DBConnection.new(  db_type, host, database_name, connector )
+				dbc.dbh = self.instance.connect_db( db_type, host, username, password, database_name )
+				@@_connections[ host + db_type + database_name ] = dbc
 			end
 			
-				query_result = @@_connections[ host + db_type + database_name ].connector.query( query_string )
+				query_result = @@_connections[ host + db_type + database_name ].dbh.query( query_string )
 			
 			# Return a uniform set of results as an array of rows, rows beeing an array of values ( Array<Array<String>> )
 			result = Array.new
-			if db_type == DB_TYPE_MYSQL
+			if db_type == DB_TYPE_MYSQL and !query_result.nil?
 				query_result.num_rows.times do |i|
 					result << query_result.fetch_row
 				end				
-		    elsif db_type == DB_TYPE_SQLITE
+		    elsif db_type == DB_TYPE_SQLITE and !query_result.nil?
 				# Create Array<SQLite3::ResultSet::ArrayWithTypesAndFields<String>> type result
 				# it effectively behaves the same as with Array<Array<String>> but the inner Arrays have .fields and .types properties 
 				# which return the column name and type for each value on the row (Array) returned.
@@ -89,7 +91,36 @@ module MobyUtil
 		    end
 			return result
 		end
-	
+		
+		
+		# Retunrs the number of affected rows on the latest sql query on the server  
+	    # == params
+	    # db_type::
+		# host::
+		# username::
+		# password::
+		# database_name::
+		# query_string::
+	    # == returns
+	    # Array<Array<String>>:: Returns an Array of rows, where each row is and Array of Strings
+	    # == throws
+	    # DbTypeNotDefinedError:: 
+	    # ArgumentError:: 
+		def self.affected_rows(dbc)
+			# Check for exsting connection for that host and create it if needed
+			if !@@_connections.has_key?( dbc.host + dbc.db_type + dbc.database_name ) # make connection ID unique by using host, type and db on the key
+				dbc.dbh = self.instance.connect_db(  dbc.db_type, dbc.host, dbc.username, dbc.password, dbc.database_name )
+				@@_connections[ dbc.host + dbc.db_type + dbc.database_name ] = dbc
+			end
+			result = 0
+			if dbc.db_type == DB_TYPE_MYSQL
+				result = @@_connections[ dbc.host + dbc.db_type + dbc.database_name ].dbh.affected_rows
+			elsif dbc.db_type == DB_TYPE_SQLITE
+				result = @@_connections[ dbc.host + dbc.db_type + dbc.database_name ].dbh.changes
+			end
+			return result
+		end
+		
 		
 		# Function establishes a connection to mysql server if needed
 	    # == params
@@ -114,14 +145,14 @@ module MobyUtil
 			end
 
 			begin
-				connector = @@_mysql.connect( host, username, password, database_name) if  db_type == DB_TYPE_MYSQL
-				connector.query 'SET NAMES utf8' if db_type == DB_TYPE_MYSQL # set the utf8 encoding
-                connector = SQLite3::Database.new( database_name ) if db_type == DB_TYPE_SQLITE				
+				dbh = @@_mysql.connect( host, username, password, database_name) if  db_type == DB_TYPE_MYSQL
+				dbh.query 'SET NAMES utf8' if db_type == DB_TYPE_MYSQL # set the utf8 encoding
+                dbh = SQLite3::Database.new( database_name ) if db_type == DB_TYPE_SQLITE				
 			rescue
 				Kernel::raise SqlConnectError.new( $!.message )
 			end
 			
-			return connector
+			return dbh
 
 		end
 

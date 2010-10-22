@@ -1,3 +1,9 @@
+libtestability-driver-ruby (0.9.1-5) unstable; urgency=low
+
+  * fixes Bug 196800 - Bad translation of qtn_msg_view_title_conversations_list logical string for SMS 
+
+ -- Testability Driver Team <testabilitydriver@nokia.com>  Tue, 22 Oct 2010 12:30:00 +0300
+ 
 libtestability-driver-ruby (0.9.1-4) unstable; urgency=low
 
   * touch pressure now 1 instead of 0
