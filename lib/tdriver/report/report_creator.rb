@@ -245,17 +245,15 @@ module TDriverReportCreator
     $new_test_case.read_file_monitor_settings()
 
     amount_of_crash_files=$new_test_case.check_if_crash_files_exist()
-    if amount_of_crash_files.to_i > 0
-      update_test_case('Crash files found in the beginning of the test')
+    if amount_of_crash_files.to_i > 0      
       $new_test_case.capture_crash_files()
       $new_test_case.clean_crash_files_from_sut()
       $tdriver_reporter.set_total_crash_files(amount_of_crash_files.to_i)
       $new_test_case.set_test_case_crash_files(amount_of_crash_files.to_i)
     end
 
-    amount_of_files=$new_test_case.check_if_crash_files_exist()
-    if amount_of_files.to_i > 0
-      update_test_case('Files found in the beginning of the test')
+    amount_of_files=$new_test_case.check_if_files_exist()
+    if amount_of_files.to_i > 0      
       $new_test_case.capture_files()
       $new_test_case.clean_files_from_sut()
       $tdriver_reporter.set_total_crash_files(amount_of_files.to_i)

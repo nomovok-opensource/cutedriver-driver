@@ -71,9 +71,6 @@ module TDriverErrorRecovery
     b_error_recovery_succesful=false
     while current_reconnect_attempt.to_i<attempt_reconnects.to_i
       if @recovery_settings.get_ats4_error_recovery_enabled=='true'
-        MobyUtil::Logger.instance.log "behaviour" , "WARNING;Resetting sut: #{current_sut.id.to_s}"
-        current_sut.reset
-        MobyUtil::Logger.instance.log "behaviour" , "WARNING;Sut resetted"
         MobyUtil::Logger.instance.log "behaviour" , "WARNING;Restarting ATS4 DataGateway"
         TDriver_Error_Recovery_ATS4.restartDatagateway(current_sut.id.to_s);
         sleep @recovery_settings.get_wait_time_for_ats4_error_recovery.to_i
