@@ -663,8 +663,6 @@ EXAMPLE
 
       unimplemented_arguments = ( documented_arguments - found_keys )
 
-      p unimplemented_arguments
-
       unless [ :attributes ].include?( @processing )
 
         unless unimplemented_arguments.empty?
@@ -1125,7 +1123,7 @@ EXAMPLE
               #store_to_results( @module_path.join("::"), method.name + "=", type )
             when "RW"
               type = "accessor"
-              method_name << ";#{ method_name }="
+              #method_name << ";#{ method_name }="
               #store_to_results( @module_path.join("::"), method.name + "=", type )
 
           else
@@ -1410,10 +1408,6 @@ EXAMPLE
     end
 
     def generate_arguments_element( header, feature )
-
-      p @module_path.join("::"), @current_method.name
-
-      p header, feature
 
       return "" if ( feature.last[:__type] == 'reader' )
 
