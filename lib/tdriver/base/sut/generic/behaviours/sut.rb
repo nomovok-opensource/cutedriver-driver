@@ -710,7 +710,7 @@ module MobyBehaviour
 	#  String
 	#   description: Optional PLURALITY search argument for the translation
 	#   example: "a" or "singular"
-	#	  default: nil
+	#	default: nil
 	#
 	# numerus
 	#  String
@@ -784,14 +784,9 @@ module MobyBehaviour
 		  language=MobyUtil::Parameter[ self.id ][ :language ]
 		end
 		Kernel::raise LanguageNotFoundError.new("Language cannot be determind to perform translation") if (language==nil || language.empty?)
-		translation = MobyUtil::Localisation.translation(
-														 logical_name,
-														 language,
-														 MobyUtil::Parameter[ self.id ][ :localisation_server_database_tablename ],
-														 file_name,
-														 plurality,
-														 lengthvariant
-														 )
+		translation = MobyUtil::Localisation.translation( logical_name, language,
+			MobyUtil::Parameter[ self.id ][ :localisation_server_database_tablename ], file_name,
+			plurality, lengthvariant )
 		if translation.kind_of? String and !numerus.nil?
 		  translation.gsub!(/%Ln/){|s| numerus} 
 		elsif translation.kind_of? Array and !numerus.nil?
