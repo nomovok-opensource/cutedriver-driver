@@ -27,7 +27,7 @@ module MobyUtil
     DB_TYPE_SQLITE = 'sqlite'
 
 	include Singleton
-
+		
 		# == description
 		# Initialize the singleton
 		# connection is maintained as long as the connectivity parameters remain the same
@@ -38,6 +38,12 @@ module MobyUtil
 			@@_mysql = nil
 		end
 
+		# == description
+		# Class Method that returns existing connections
+		#
+		def DBAccess.connections()
+			return @@_connections
+		end
 		
 		# == description
 		# Runs an SQL query on the on the given MobyUtil::DBConnection 
@@ -89,7 +95,11 @@ module MobyUtil
 				@@_connections[ host + db_type + database_name ] = dbc
 			end
 			
+			if db_type == DB_TYPE_MYSQL
 				query_result = @@_connections[ host + db_type + database_name ].dbh.query( query_string )
+			elsif dbc.db_type == DB_TYPE_SQLITE
+				query_result = @@_connections[ host + db_type + database_name ].dbh.query( query_string )
+			end
 			
 			# Return a uniform set of results as an array of rows, rows beeing an array of values ( Array<Array<String>> )
 			result = Array.new
@@ -104,6 +114,8 @@ module MobyUtil
 				while ( row = query_result.next )
 					result << row
 				end
+				# it is essentially a prepare method so we need to call close to free the connection
+				query_result.close 
 		    end
 			return result
 		end
