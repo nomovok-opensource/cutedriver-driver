@@ -23,18 +23,42 @@ module MobyUtil
 
 	class UserData
 
+		# == description
 		# Function for fetching user data from the user data DB
-		# == params
-		# user_data_lname:: String containing user_data_lname to be used in fetching the translation
-		# language:: String containing language to be used in fetching user information
-		# table_name:: String containing the name of table to be used when user information
+		#
+		# == arguments
+		# user_data_lname
+		#  String
+		#   description: String containing user_data_lname to be used in fetching the translation
+		#   example: "uif_first_name"
+		#
+		# language
+		#  String
+		#   description: Scring containing language to be used in fetching user information
+		#   example: "en"
+		#
+		# table_name
+		#  String
+		#   description: String containing the name of table to be used when user information
+		#   example: "user_data_week201042"
+		#
 		# == returns
-		# String:: User data string
-		# Array<String>:: Array of values when multiple user data strings found
+		# String
+		#  description: User data string
+		#
+		# Array
+		#  description: Array of values when multiple user data strings found
+		#
 		# == throws
-		# UserDataNotFoundError:: in case the desired user data is not found
-		# UserDataColumnNotFoundError:: in case the desired data column name to be used for the output is not found
-		# SqlError:: in case of the other problem with the query
+		# UserDataNotFoundError
+		#  description: If the desired user data is not found
+		#
+		# UserDataColumnNotFoundError
+		#  description: If the desired data column name to be used for the output is not found
+		#
+		# SqlError
+		#  description: If there is and sql error while executing the query
+		#
 		def self.retrieve( user_data_lname, language, table_name )
 			
 			Kernel::raise UserDataNotFoundError.new( "User data logical name can't be empty" ) if user_data_lname == nil

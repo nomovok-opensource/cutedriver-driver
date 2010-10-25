@@ -44,7 +44,7 @@ module MobyUtil
 		#
 		# table_name
 		#  String
-		#   description: Name of the translation table to use form the localisation DB
+		#   description: Name of the translation table to use from the localisation DB
 		#   example: "B10_1_week201042_loc"
 		# 
 		# file_name

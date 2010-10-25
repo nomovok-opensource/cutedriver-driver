@@ -23,17 +23,39 @@ module MobyUtil
 
 	class OperatorData
 
-		# Function for fetching operator data from the operator data DB
-		# == params
-		# operator_data_lname:: String containing operator_data_lname to be used in fetching the translation
-		# operator:: String containing the operator name to be used in fetching operator data
-		# table_name:: String containing the name of table to be used when fetching operator data
+		# == description
+		# Function to fetch a translation for a given logical name from the localisation DB
+		#
+		# == arguments
+		# operator_data_lname
+		#  String
+		#   description: operator data identifier
+		#   example: "op_welcome_message""
+		#
+		# operator
+		#  String
+		#   description: Operator column name to be used when fetching operator data
+		#	example: "Orange"
+		#
+		# table_name
+		#  String
+		#   description: Name of the operator data table to use from the operator table DB
+		#   example: "operator_data_week201042"
+		#
 		# == returns
-		# String:: Operator data string
+		# String
+		#  description: Operator data string
+		#
 		# == throws
-		# OperatorDataNotFoundError:: in case the desired operator data is not found
-		# OperatorDataColumnNotFoundError:: in case the desired data column name to be used for the output is not found
-		# SqlError:: in case of the other problem with the query
+		# OperatorDataColumnNotFoundError
+		#  description: If the desired operator data is not found
+		#
+		# OperatorDataColumnNotFoundError
+		#  description: If the desired data column name to be used for the output is not found
+		#
+		# SqlError
+		#  description: if there is and sql error while executing the query
+		#
 		def self.retrieve( operator_data_lname, operator, table_name )
 			
 		    Kernel::raise OperatorDataNotFoundError.new( "Search string parameter cannot be nil" ) if operator_data_lname == nil
