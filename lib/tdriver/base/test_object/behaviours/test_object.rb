@@ -389,13 +389,24 @@ module MobyBehaviour
 
     end
 
+    # == description
     # Function similar to child, but returns an array of children test objects that meet the given criteria
     # === params
     # attributes:: Hash object holding information for identifying which child to create, eg. :type => :slider
     # find_all_children:: Boolean specifying whether all children under the test node or just immediate children should be retreived.
     # === returns
     # An array of TestObjects
-    def children( attributes, find_all_children = true )
+    # == exceptions
+    # TypeError
+    # description: raised if agument is not a Hash
+    # TestObjectNotFoundError
+    # description: raised if the child object could not be found
+    # TestObjectNotVisibleError
+    # description: rasied if the parent test object is no longer visible
+    # == example
+    # @test_app = @sut.run(:name => 'testapp') # launches testapp 
+		# testobjs_array = @test_app.children(:toolButtonStyle => 'ToolButtonIconOnly')  #returns array of test objects which match the criteria
+		def children( attributes, find_all_children = true )
 
       # verify attributes argument format
       raise TypeError.new( 'Unexpected argument type (%s) for attributes, expecting %s' % [ attributes.class, "Hash" ] ) unless attributes.kind_of?( Hash ) 
