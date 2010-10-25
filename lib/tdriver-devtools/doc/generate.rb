@@ -102,7 +102,11 @@ def process_behaviour_file( content )
         behaviour = {}
 
         # get behaviour element attributes, e.g. behaviour name, input_type, sut_type etc
-        child.attributes.each{ | attribute | behaviour[ attribute.first ] = attribute.last.value.split(";") }          
+        child.attributes.each{ | attribute | 
+
+          behaviour[ attribute.first ] = attribute.last.value.split(";") 
+
+        }          
 
         # retrieve module & method definitions
         child.children.select{ | node | node.kind_of?( Nokogiri::XML::Element ) }.each{ | child |
@@ -119,7 +123,9 @@ def process_behaviour_file( content )
                 method = {}
 
                 # get behaviour element attributes, e.g. behaviour name, input_type, sut_type etc
-                child.attributes.each{ | attribute | method[ attribute.first ] = attribute.last.value.split(";") }          
+                child.attributes.each{ | attribute | 
+                  method[ attribute.first ] = attribute.last.value.split(";") 
+                }          
 
                 # retrieve method details
                 child.children.select{ | node | node.kind_of?( Nokogiri::XML::Element ) }.each{ | child |
@@ -340,13 +346,24 @@ end
 
 def read_behaviour_xml_files( folder )
 
-  Dir.glob( File.join( folder, '*.xml' ) ).each{ | file |
+  if File.directory?( folder )
+  
+    files = Dir.glob( File.join( folder, '*.xml' ) )
+    
+  else
+  
+    files = [ folder ]
+  end
+
+  files.each{ | file |
 
     @current_file = file
 
     @behaviours << { :filename => file, :behaviours => process_behaviour_file( open( file, 'r' ).read ) }
 
   }
+  
+  puts "\nBehaviour XML files: #{ @behaviours.count }"
 
 end
 
@@ -519,8 +536,6 @@ def generate_document_xml
         arguments_count = feature_documentation[ "arguments_data" ][ "implemented" ]
         optional_arguments_count = feature_documentation[ "arguments_data" ][ "optional" ]
 
-
-
       }
 
 #exit  
@@ -539,10 +554,6 @@ def generate_document_xml
 
         arguments_count = feature_documentation[ "arguments_data" ][ "implemented" ]
         optional_arguments_count = feature_documentation[ "arguments_data" ][ "optional" ]
-
-
-        #p feature        
-
 
                 
         feature = "%s#%s" % [ module_name, method_name ]

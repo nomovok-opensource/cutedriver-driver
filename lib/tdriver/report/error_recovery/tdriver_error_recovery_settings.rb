@@ -72,24 +72,26 @@ class TDriverErrorRecoverySettings
 
   end
   def get_ats4_error_recovery_enabled
-    @ats4_error_recovery_enabled
+    MobyUtil::Parameter[ :ats4_error_recovery_enabled ]
   end
   def get_wait_time_for_ats4_error_recovery
-    @wait_time_for_ats4_error_recovery
+    MobyUtil::Parameter[ :wait_time_for_ats4_error_recovery ]
   end
   def get_error_recovery_enabled
-    @error_recovery_enabled
+    MobyUtil::Parameter[ :error_recovery_enabled ]
   end
   def get_ping_connection
-    @ping_connection
+    MobyUtil::Parameter[ :ping_connection ]
   end
   def get_reconnect_device
-    @reconnect_device
+    MobyUtil::Parameter[ :reconnect_device ]
   end
   def get_reconnect_attempts
-    @reconnect_attempts
+    MobyUtil::Parameter[ :reconnect_attempts ]
   end
   def get_monitored_sut
+    str_parameter=MobyUtil::Parameter[ :error_recovery_monitored_sut_ids ]
+    @monitored_suts=str_parameter.split('|')
     @monitored_suts
   end
 

@@ -27,71 +27,77 @@ module MobyUtil
     # intialize plugin service
     def initialize
 
-      reset_plugins_list
+      @@registered_plugins = {}
 
     end
 
     # return all or plugins of given type
     def registered_plugins( type = nil )
 
-      plugins( :type, type )
+      # return all or plugins of given type
+      Hash[ @@registered_plugins.select{ | key, value | type.nil? || value[ :type ] == type } ]
 
     end
 
     # returns true if plugin is registered, plugin type can be given as optional parameter
     def plugin_registered?( plugin_name, type = nil )
-
-      # check if given plugin is registered
-      result = is_plugin_registered?( plugin_name )
     
-      # if plugin type defined, compare plugin type with given 
-      result = ( plugin_value( plugin_name, :type ) == type ) if !type.nil? && result
+      # check if given plugin is registered
+      if @@registered_plugins.has_key?( plugin_name )
       
-      # return result
-      result
+        unless type.nil?
+        
+          # plugin registered, compare that given plugin type matches
+          @@registered_plugins[ plugin_name ][ :type ] == type
+                
+        else
+        
+          # plugin registered, no specific plugin type given 
+          true
+        
+        end
+      
+      else
+      
+        # plugin not registered, not found from @@registered_plugins hash
+        false
+      
+      end
 
     end
 
     def enable_plugin( plugin_name )
-
-      Kernel::raise ArgumentError.new( "No such plugin registered %s" % [ plugin_name ] ) unless is_plugin_registered?( plugin_name )
-
-      set_plugin_value( plugin_name, :enabled, true )
-
+        
+      ( @@registered_plugins[ plugin_name ][ :enabled ] = true ) rescue Kernel::raise( ArgumentError.new( "No such plugin registered %s" % [ plugin_name ] ) )
+      
     end
 
     def disable_plugin( plugin_name )
 
-      Kernel::raise ArgumentError.new( "No such plugin registered %s" % [ plugin_name ] ) unless is_plugin_registered?( plugin_name )
-
-      set_plugin_value( plugin_name, :enabled, false )
+      ( @@registered_plugins[ plugin_name ][ :enabled ] = false ) rescue Kernel::raise( ArgumentError.new( "No such plugin registered %s" % [ plugin_name ] ) )
+      
     end
 
     def plugin_enabled?( plugin_name )
 
-      Kernel::raise ArgumentError.new( "No such plugin registered %s" % [ plugin_name ] ) unless is_plugin_registered?( plugin_name )
-
-      plugin_value( plugin_name, :enabled )
-
+      ( @@registered_plugins[ plugin_name ][ :enabled ] ) rescue false
+          
     end
 
     def register_plugin( plugin_module )
-
+ 
       # retrieve plugin name
       plugin_name = plugin_data_value( plugin_module, :plugin_name )
 
       # throw exception if plugin is already registered
-      Kernel::raise ArgumentError.new( "Plugin %s is already registered" % [ plugin_name ] ) if is_plugin_registered?( plugin_name )
+      Kernel::raise ArgumentError.new( "Plugin %s is already registered" % [ plugin_name ] ) if @@registered_plugins.has_key?( plugin_name )
 
       # plugin configuration
-      set_plugin_values( 
-        plugin_name, 
-        { 
-          :type => plugin_data_value( plugin_module, :plugin_type ), 
-          :plugin_module => plugin_module, 
-          :enabled => true 
-        } 
-      )
+      @@registered_plugins[ plugin_name ] = { 
+        :type => plugin_data_value( plugin_module, :plugin_type ), 
+        :plugin_module => plugin_module, 
+        :enabled => true 
+      } 
 
       # register plugin
       plugin_module.register_plugin
@@ -100,13 +106,11 @@ module MobyUtil
 
     def unregister_plugin( plugin_name )
 
-      Kernel::raise ArgumentError.new( "Unregister failed due to plugin %s is not registered" % [ plugin_name ] ) unless plugin_registered?( plugin_name )
+      # unregister plugin, raise exception if plugin is not registered
+      ( @@registered_plugins[ plugin_name ][ :plugin_module ].unregister_plugin ) rescue Kernel::raise( ArgumentError.new( "Unregister failed due to plugin %s is not registered" % [ plugin_name ] ) )
 
-      # remove from the plugins list
-      delete_plugin( plugin_name )
-
-      # unregister plugin
-      plugin_module.unregister_plugin
+      # remove from the plugins hash
+      @@registered_plugins.delete( plugin_name )
 
     end
 
@@ -133,7 +137,17 @@ module MobyUtil
 
       begin
 
-        plugin_value( plugin_name, :plugin_module ).method( method_name.to_sym ).call( *args )
+        plugin_module = @@registered_plugins[ plugin_name ][ :plugin_module ]
+        
+      rescue
+      
+        Kernel::raise( ArgumentError.new( "No such plugin registered %s" % [ plugin_name ] ) )
+
+      end
+
+      begin
+
+        plugin_module.send( method_name.to_sym, *args )
 
       rescue Exception => exception
 
@@ -145,46 +159,9 @@ module MobyUtil
 
   private
 
-    def is_plugin_registered?( plugin_name )
-
-      @@registered_plugins.has_key?( plugin_name )
-
-    end
-
     def reset_plugins_list
 
       @@registered_plugins = {}
-
-    end
-
-    def get_plugin( plugin_name )
-
-      @@registered_plugins[ plugin_name ]
-
-    end
-
-    def plugins( expected_key = nil, expected_value = nil )
-
-      # return all or plugins of given type
-      Hash[ @@registered_plugins.select{ | key, value | expected_key.nil? || expected_value.nil? || value[ expected_key ] == expected_value } ]
-
-    end
-
-    def set_plugin_value( plugin_name, name, value )
-
-      @@registered_plugins[ plugin_name ][ name.to_sym ] = value
-
-    end
-
-    def set_plugin_values( plugin_name, hash = {} )
-
-      @@registered_plugins[ plugin_name ] = ( @@registered_plugins[ plugin_name ] ||= {} ).merge!( hash )
-
-    end
-
-    def plugin_value( plugin_name, name )
-
-      @@registered_plugins[ plugin_name ][ name.to_sym ]
 
     end
 
@@ -196,12 +173,12 @@ module MobyUtil
     end
 
     def plugin_data_value( plugin_module, value_name, optional = false )
-
+      
       begin
 
-        result = plugin_module.method( value_name.to_sym ).call
+        result = plugin_module.send( value_name.to_sym )
 
-      rescue NameError
+      rescue NoMethodError
 
         Kernel::raise RuntimeError.new( "Plugin must have %s value defined" % [ value_name.to_s ] ) if !optional
 

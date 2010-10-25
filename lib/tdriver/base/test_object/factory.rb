@@ -287,6 +287,25 @@ module MobyBase
 
 	end
 
+	def make_object_search_params(creation_attributes)
+	  object_search_params = {}
+	  if creation_attributes[:type] != 'application'
+		object_search_params.merge!(creation_attributes)
+		object_search_params[:className] = object_search_params.delete(:type) if creation_attributes.has_key?(:type) 
+		object_search_params[:objectName] = object_search_params.delete(:name) if creation_attributes.has_key?(:name)
+	  end	  
+	  object_search_params
+	end
+
+	def get_parent_params(test_object)	  
+	  search_params = []
+	  if test_object.type != 'application' and test_object.type != 'sut'
+		search_params.concat(get_parent_params(test_object.parent)) if test_object.parent 
+		search_params.concat([{:className => test_object.type, :tasId => test_object.id}]) if test_object
+	  end
+	  search_params
+	end
+
     private
 
 	# TODO: This method should be in application test object
@@ -344,8 +363,13 @@ module MobyBase
 								# following exceptions are allowed; Retry until timeout exceeds or other exception type is raised
 								:exception => [ MobyBase::TestObjectNotFoundError, MobyBase::MultipleTestObjectsIdentifiedError ] ) {
 
-        # refresh sut ui state
-        sut.refresh( refresh_arguments )
+		#make search params
+		object_search_params = make_object_search_params(creation_attributes)
+		search_params = get_parent_params(parent)
+		search_params.push(object_search_params)
+
+        # refresh sut ui state		
+        sut.refresh( refresh_arguments, search_params )
 
         # identify test objects from xml
         matches, rule = test_object_identificator.find_objects( parent.xml_data, find_all_children )
@@ -384,7 +408,7 @@ module MobyBase
 								  
 								  :timeout => @timeout, :interval => @_retry_interval, :exception => MobyBase::TestObjectNotFoundError ) { 
 		  
-		  sut.refresh( refresh_args ); test_object_identificator.find_object_data( sut.xml_data )
+		  sut.refresh( refresh_args, [attributes.clone] ); test_object_identificator.find_object_data( sut.xml_data )
 
 	  }
 
