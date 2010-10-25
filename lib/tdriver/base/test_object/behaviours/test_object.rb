@@ -50,10 +50,14 @@ module MobyBehaviour
     #  example: { :name => 'Triangle1', :type => :Triangle }
     attr_accessor :creation_attributes
 
-    # Determine is current test object a application
+    # === description
+    # Determines if the current test object is of type 'application'
     # === returns
     # TrueClass:: 
     # FalseClass:: 
+    #  == example
+    # @test_app = @sut.run(:name => 'testapp') # launches testapp    
+    # isApplication = @test_app.application?
     def application?
 
       @type == 'application'
@@ -345,6 +349,7 @@ module MobyBehaviour
 
     end
 
+    # == description
     # Creates a test object for a child object of this test object
     # Associates child object as current object's child.
     # and associates self as child object's parent.
@@ -359,6 +364,18 @@ module MobyBehaviour
     # attributes:: Hash object holding information for identifying which child to create, eg. :type => :slider
     # === returns
     # TestObject:: new child test object or reference to existing child
+    # == exceptions
+    # TypeError
+    # description: raised if agument is not a Hash
+    # MultipleTestObjectsIdentifiedError
+    # description:  raised if multiple objects found that match the given attributes
+    # TestObjectNotFoundError
+    # description:  raised if the child object could not be found
+    # TestObjectNotVisibleError
+    # description: rasied if the parent test object is no longer visible
+    # == example
+    # @test_app = @sut.run(:name => 'testapp') # launches testapp 
+    # child_testobj = @test_app.child( :text => 'MC' )
     def child( attributes )
 
       # verify attributes argument format
