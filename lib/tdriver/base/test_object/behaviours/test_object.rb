@@ -50,10 +50,14 @@ module MobyBehaviour
     #  example: { :name => 'Triangle1', :type => :Triangle }
     attr_accessor :creation_attributes
 
-    # Determine is current test object a application
+    # === description
+    # Determines if the current test object is of type 'application'
     # === returns
     # TrueClass:: 
     # FalseClass:: 
+    #  == example
+    # @test_app = @sut.run(:name => 'testapp') # launches testapp    
+    # isApplication = @test_app.application?
     def application?
 
       @type == 'application'
@@ -348,6 +352,7 @@ module MobyBehaviour
 
     end
 
+    # == description
     # Creates a test object for a child object of this test object
     # Associates child object as current object's child.
     # and associates self as child object's parent.
@@ -362,6 +367,18 @@ module MobyBehaviour
     # attributes:: Hash object holding information for identifying which child to create, eg. :type => :slider
     # === returns
     # TestObject:: new child test object or reference to existing child
+    # == exceptions
+    # TypeError
+    # description: raised if agument is not a Hash
+    # MultipleTestObjectsIdentifiedError
+    # description:  raised if multiple objects found that match the given attributes
+    # TestObjectNotFoundError
+    # description:  raised if the child object could not be found
+    # TestObjectNotVisibleError
+    # description: rasied if the parent test object is no longer visible
+    # == example
+    # @test_app = @sut.run(:name => 'testapp') # launches testapp 
+    # child_testobj = @test_app.child( :text => 'MC' )
     def child( attributes )
 
       # verify attributes argument format
@@ -372,13 +389,24 @@ module MobyBehaviour
 
     end
 
+    # == description
     # Function similar to child, but returns an array of children test objects that meet the given criteria
     # === params
     # attributes:: Hash object holding information for identifying which child to create, eg. :type => :slider
     # find_all_children:: Boolean specifying whether all children under the test node or just immediate children should be retreived.
     # === returns
     # An array of TestObjects
-    def children( attributes, find_all_children = true )
+    # == exceptions
+    # TypeError
+    # description: raised if agument is not a Hash
+    # TestObjectNotFoundError
+    # description: raised if the child object could not be found
+    # TestObjectNotVisibleError
+    # description: rasied if the parent test object is no longer visible
+    # == example
+    # @test_app = @sut.run(:name => 'testapp') # launches testapp 
+		# testobjs_array = @test_app.children(:toolButtonStyle => 'ToolButtonIconOnly')  #returns array of test objects which match the criteria
+		def children( attributes, find_all_children = true )
 
       # verify attributes argument format
       raise TypeError.new( 'Unexpected argument type (%s) for attributes, expecting %s' % [ attributes.class, "Hash" ] ) unless attributes.kind_of?( Hash ) 
