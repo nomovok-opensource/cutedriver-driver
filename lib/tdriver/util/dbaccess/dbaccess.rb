@@ -28,27 +28,43 @@ module MobyUtil
 
 	include Singleton
 
+		# == description
 		# Initialize the singleton
 		# connection is maintained as long as the connectivity parameters remain the same
 		# this is to avoid constant connect as this takes time
+		#
 		def initialize
 			@@_connections = {}
 			@@_mysql = nil
 		end
 
 		
-		# Function for fetching SQL data  
-	    # == params
-	    # dbc:: DBConnection 
-		# query_string:: String
-	    # == returns
-	    # Array<Array<String>>:: Returns an Array of rows, where each row is and Array of Strings
-	    # == throws
-	    # DbTypeNotDefinedError:: 
-	    # ArgumentError:: 
+		# == description
+		# Runs an SQL query on the on the given MobyUtil::DBConnection 
+		#
+		# == arguments
+		# dbc
+		#  MobyUtil::DBConnection
+		#   description: object with the connection details of an open sql connection
+		#
+		# query_string
+		#  String
+		#   description: database-specific SQL query (note that mysql and sqlite have slightly different syntax)
+		#   example: "select * from tdriver_locale;"
+		#
+		# == returns
+		# Array
+		#  description: Array of rows returned by the server. Each row is an array of String values.
+		#
+		# == throws
+		# ArgumentError
+		#  description: if the argument provided is not the right object type
+		#
 	    def self.query( dbc, query_string )
 			# Create first instance of this class if it doesn't exist
 			self.instance
+			
+			raise ArgumentError.new("Invalid connection object provided.") if dbc.nil? or !dbc.kind_of? MobyUtil::DBConnection
 			
 			db_type = dbc.db_type
 			host = dbc.host
@@ -57,19 +73,19 @@ module MobyUtil
 			database_name = dbc.database_name
 			
 			# Check creation parameters
-		    Kernel::raise DbTypeNotDefinedError.new( "Database type need to be either 'mysql' or 'sqlite'!" ) if  db_type == nil 
-            Kernel::raise DbTypeNotSupportedError.new( "Database type '#{db_type}' not supported! Type need to be either 'mysql' or 'sqlite'!" ) unless  db_type == DB_TYPE_MYSQL or  db_type == DB_TYPE_SQLITE
+		    raise DbTypeNotDefinedError.new( "Database type need to be either 'mysql' or 'sqlite'!" ) if  db_type == nil 
+            raise DbTypeNotSupportedError.new( "Database type '#{db_type}' not supported! Type need to be either 'mysql' or 'sqlite'!" ) unless  db_type == DB_TYPE_MYSQL or  db_type == DB_TYPE_SQLITE
 			if db_type == DB_TYPE_MYSQL
-				Kernel::raise ArgumentError.new("Host must be provided as a non empty string.") if host.nil? or host.class != String or host.empty?
-				Kernel::raise ArgumentError.new("Username must be provided as a non empty string.") if username.nil? or username.class != String or username.empty?
-				Kernel::raise ArgumentError.new("Password must be provided as a string.") if password.nil? or password.class != String
+				raise ArgumentError.new("Host must be provided as a non empty string.") if host.nil? or host.class != String or host.empty?
+				raise ArgumentError.new("Username must be provided as a non empty string.") if username.nil? or username.class != String or username.empty?
+				raise ArgumentError.new("Password must be provided as a string.") if password.nil? or password.class != String
 			end
-			Kernel::raise ArgumentError.new("The database name must be provided as a non empty string.") if database_name.nil? or database_name.class != String or database_name.empty?
-			Kernel::raise ArgumentError.new("The query qtring must be provided as a non empty string.") if query_string.nil? or query_string.class != String or query_string.empty?
+			raise ArgumentError.new("The database name must be provided as a non empty string.") if database_name.nil? or database_name.class != String or database_name.empty?
+			raise ArgumentError.new("The query qtring must be provided as a non empty string.") if query_string.nil? or query_string.class != String or query_string.empty?
 			
 			# Check for exsting connection for that host and create it if needed
 			if !@@_connections.has_key?( host + db_type + database_name ) # make connection ID unique by using host, type and db on the key
-				dbc.dbh = self.instance.connect_db( db_type, host, username, password, database_name )
+				dbc.dbh = connect_db( db_type, host, username, password, database_name )
 				@@_connections[ host + db_type + database_name ] = dbc
 			end
 			
@@ -92,24 +108,29 @@ module MobyUtil
 			return result
 		end
 		
-		
-		# Retunrs the number of affected rows on the latest sql query on the server  
-	    # == params
-	    # db_type::
-		# host::
-		# username::
-		# password::
-		# database_name::
-		# query_string::
-	    # == returns
-	    # Array<Array<String>>:: Returns an Array of rows, where each row is and Array of Strings
-	    # == throws
-	    # DbTypeNotDefinedError:: 
-	    # ArgumentError:: 
+	
+		# == description
+		# Retunrs the number of affected rows on the latest sql query on the given MobyUtil::DBConnection 
+		#
+		# == arguments
+		# dbc
+		#  MobyUtil::DBConnection
+		#   description: object with the connection details of an open sql connection
+		#
+		# == returns
+		# Integer
+		#  description: number of rows affected
+		#
+		# == throws
+		# ArgumentError
+		#  description: if the argument provided is not the right object type
+		#
 		def self.affected_rows(dbc)
+			raise ArgumentError.new("Invalid connection object provided.") if dbc.nil? or !dbc.kind_of? MobyUtil::DBConnection
+			
 			# Check for exsting connection for that host and create it if needed
 			if !@@_connections.has_key?( dbc.host + dbc.db_type + dbc.database_name ) # make connection ID unique by using host, type and db on the key
-				dbc.dbh = self.instance.connect_db(  dbc.db_type, dbc.host, dbc.username, dbc.password, dbc.database_name )
+				dbc.dbh = connect_db(  dbc.db_type, dbc.host, dbc.username, dbc.password, dbc.database_name )
 				@@_connections[ dbc.host + dbc.db_type + dbc.database_name ] = dbc
 			end
 			result = 0
@@ -122,19 +143,13 @@ module MobyUtil
 		end
 		
 		
-		# Function establishes a connection to mysql server if needed
-	    # == params
-	    # db_type::
-		# host::
-		# username::
-		# password::
-		# database_name::
-		# == returns
-		# MySql:: MySql object that encapsulated the connection into MySQL database
-		# SQLite3::Database SQLite Database object that encapsulated the connection into SQLite database
-		# == throws
-		# SqlConnectError:: in case there is a problem with the connectivity
-		def connect_db(  db_type, host, username, password, database_name )
+		
+		private
+		
+		# == description
+		# Function establishes a new connection to as sql server and returns it's handle
+		#
+	    def self.connect_db(  db_type, host, username, password, database_name )
 
 			# if mysql API and connection are not initialized, then initialize the mysql API
 			if (  db_type == DB_TYPE_MYSQL ) && ( @@_mysql.nil? )
@@ -149,7 +164,7 @@ module MobyUtil
 				dbh.query 'SET NAMES utf8' if db_type == DB_TYPE_MYSQL # set the utf8 encoding
                 dbh = SQLite3::Database.new( database_name ) if db_type == DB_TYPE_SQLITE				
 			rescue
-				Kernel::raise SqlConnectError.new( $!.message )
+				raise SqlConnectError.new( $!.message )
 			end
 			
 			return dbh

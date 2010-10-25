@@ -51,19 +51,16 @@ module MobyUtil
 		#  String
 		#   description: Optional FNAME search argument for the translation. The FNAME column stores the application name that the translation belongs to
 		#   example: "calendar"
-		#   default: nil
 		#
 		# plurality
 		#  String
 		#   description: Optional PLURALITY search argument for the translation
 		#   example: "a" or "singular"
-		#	default: nil
 		#
 		# lengthvariant
 		#  String
 		#   description: Optional LENGTHVAR search argument for the translation (1-9)
 		#   example: "1"
-		#   default: nil
 		#
 		# == returns
 		# String
@@ -139,7 +136,7 @@ module MobyUtil
 		
 
 		# == description
-		# Function to fetch a translation for a given logical name from the localisation DB
+		# Function upload translations in a given Qt Linguist translation file to the localisation DB
 		#
 		# == arguments
 		# file
@@ -156,19 +153,16 @@ module MobyUtil
 		#  MobyUtil::DBConnection
 		#   description: A DBConnection object contains all the connection details required to connect to a SQL DB (mysql or sqlite)
 		#	example: "MobyUtil::DBConnection.new('mysql', '192.168.0.1', 'tdriver_locale', 'username', 'password')"
-		#   default: nil
 		#
 		# column_names_map
 		#  Hash
 		#   description: Hash with the language codes from the translation files as keys and the desired column names as values
 		#   example: {"en" => "en_GB"}
-		#   default: {}
 		#
 		# record_sql
 		#  Bool
 		#   description: When this flag is set to true then 
 		#   example: true
-		#   default: false
 		#
 		# == returns
 		#
@@ -254,7 +248,6 @@ module MobyUtil
 		#  Hash
 		#   description: Hash with the language codes from the translation files as keys and the desired column names as values
 		#   example: {"en" => "en_GB"}
-		#   default: {}
 		#
 		# == returns
 		# String
@@ -335,7 +328,9 @@ module MobyUtil
 		end
 		
 		
-		# Uploads language data to DB
+		# == description
+		# Uploads language data to Localisation DB and optionally records the sql queries on a file
+		#
 		def self.upload_ts_data( language, data, table_name, db_connection, record_sql = false )
 			
 			raise Exception.new("Language not provided.") if language.nil? or language.to_s.empty?
@@ -462,7 +457,9 @@ module MobyUtil
 		end
 		
 		
-		# Extracs application name from filename (removes language tags and extension)
+		# == description
+		# Extracs application name used for FNAME from a given filename (removes language tags and file extension)
+		#
 		def self.parseFName(file)
 			fname = file.split('/').last
 			#(wordlist matching)

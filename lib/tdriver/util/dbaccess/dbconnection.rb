@@ -23,7 +23,9 @@ module MobyUtil
 	class DBConnection
 		attr_accessor :db_type, :host, :database_name, :username, :password, :dbh
 		
-		# Initialize the singleton
+		# == description
+		# Initialize connection object
+		#
 		def initialize( db_type, host, database_name, username, password )
 			@db_type = db_type.to_s.downcase
 			@host = host.to_s.downcase
