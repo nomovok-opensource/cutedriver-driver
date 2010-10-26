@@ -317,11 +317,16 @@ module MobyBehaviour
 
     end
 
-    # Returns a StateObject containing the current state of this sut object as XML.
+		# == description
+    # Returns a StateObject containing the current state of this test object as XML.
     # The state object is static and thus is not refreshed or synchronized etc.
-    #
-    # === returns
-    # StateObject:: State of this SUT object
+    # == returns
+    # StateObject:: State of this test object
+    # == exceptions
+    # RuntimeError
+    # description: If the xml source for the object is not in initialized
+    # == example
+    # sut_state = @sut.state #get the state object for the sut
     def state
 
       # refresh if xml data is empty
