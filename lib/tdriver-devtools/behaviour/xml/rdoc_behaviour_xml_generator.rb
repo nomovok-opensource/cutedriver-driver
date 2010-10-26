@@ -29,6 +29,8 @@ module Generators
 
       @found_modules_and_methods = {}
 
+      @created_files = {}
+
       load_templates
 
       @options = options
@@ -607,7 +609,7 @@ EXAMPLE
 
         if ( item = result.select{ | arg | arg.keys.include?( param.first ) }).empty?
 
-          raise_error("Error: Argument '#{ param.first }' is implemented but not documented in '#{ @current_method.name }' ($MODULE).\nNote that documented argument and variable name must be identical.", [ 'writer', 'accessor' ].include?( @processing ) ? 'attr_argument' : 'arguments' )
+          raise_error("Error: Argument '#{ param.first }' is implemented but not documented in '#{ @current_method.name }' ($MODULE).\nNote that documented argument and variable name must be identical.", [ 'writer', 'accessor' ].include?( @processing ) ? 'attr_argument' : 'arguments' ) unless param.first.to_s.include?("#")
 
           order << { param.first => {} }
 
@@ -1832,6 +1834,18 @@ EXAMPLE
 
           if xml_file_name != '.xml' 
 
+            if @created_files.has_key?( xml_file_name )
+
+              xml_file_name = '%s_duplicate_name.%s' % [ module_header[:behaviour], 'xml' ]
+              
+              warn("Warning! One of the behaviour modules is already using name '#{ module_header[:behaviour] }', saving as #{ xml_file_name }")
+
+              sleep 1
+          
+            end
+
+            @created_files[ xml_file_name ] = {}
+
             open( xml_file_name, 'w'){ | file | file << xml }
 
             puts ".xml"
@@ -1843,6 +1857,19 @@ EXAMPLE
               xml_file_name = ( @module_path[1..-1].join("") ) + '.xml'
 
               warn("Warning: #{ @module_path.join("::") } does not have behaviour (module) description defined, saving as %s " % xml_file_name )
+              sleep 2
+
+              if @created_files.has_key?( xml_file_name )
+
+                warn("Warning! One of the behaviour modules is already using name '#{ module_header[:behaviour] }'")
+
+                xml_file_name = ( @module_path[1..-1].join("") ) + '_duplicate_name.xml'
+
+                sleep 1
+            
+              end
+              
+              @created_files[ xml_file_name ] = {}
 
               open( xml_file_name, 'w'){ | file | file << xml }
 

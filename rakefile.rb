@@ -127,10 +127,26 @@ task :behaviours do | task |
 
 end
 
-task :doc do | task |
-
+task :doc, :tests do | task, args |
+  
+  test_results_folder = args[:tests] || "../tests/test/feature_xml"
+      
+  if args[:tests].nil?
+  
+    puts "\nWarning: Test results folder not given, using default location (#{ test_results_folder })"
+    puts "\nSame as executing:\nrake doc[#{ test_results_folder }]\n\n"
+    sleep 1
+  
+  else
+  
+    puts "Using given test results from #{ test_results_folder }"
+    
+  end
+   
+  test_results_folder = File.expand_path( test_results_folder )
+   
   # reset arguments constant without warnings
-  ARGV.clear; ['-g', 'both', 'lib/tdriver', 'doc/document.xml'].each{ | argument | ARGV << argument }
+  ARGV.clear; ['-g', 'both', '-t', test_results_folder, 'lib/tdriver', 'doc/document.xml'].each{ | argument | ARGV << argument }
 
   puts "\nGenerating documentation XML file... "   
 
@@ -138,7 +154,7 @@ task :doc do | task |
 
 end
 
-Rake::GemPackageTask.new(spec) do |pkg|
+Rake::GemPackageTask.new( spec ) do | pkg |
   pkg.gem_spec = spec
   pkg.package_dir = "pkg"
 end
