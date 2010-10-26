@@ -1,5 +1,5 @@
 
-      <method name="$METHOD_NAME" type="$METHOD_TYPE">
+      <method name="$METHOD_NAME" type="$METHOD_TYPE" nodoc="$NODOC">
 
 $METHOD_DEPRECATED
         <description>$METHOD_DESCRIPTION</description>

@@ -1055,6 +1055,9 @@ EXAMPLE
 
       method_header = nil
 
+      # if this tag ("== nodoc") is found in method description, it should not be added to documentation 
+      no_doc = false
+
       if ( method.visibility == :public && @module_path.first =~ /MobyBehaviour/ )
 
         params = method.kind_of?( RDoc::Attr ) ? [] : process_arguments( method.params )
@@ -1069,6 +1072,12 @@ EXAMPLE
         arguments_found = 0
 
         method_header = Hash[ method_header.collect{ | key, value |
+
+          if key == :nodoc
+                    
+            no_doc = true
+          
+          end
 
           if key == :arguments
 
@@ -1155,7 +1164,7 @@ EXAMPLE
 
         #store_to_results( @module_path.join("::"), method.name, type, params )
 
-        # do something
+        #no_doc ? nil : 
         [ method_name, method_header ]
 
       else
@@ -1201,11 +1210,7 @@ EXAMPLE
 
       attributes.each{ | attribute | 
 
-        #p attribute.comment
-
         results << process_method( attribute )
-
-        # TODO: tapa miten saadaan attribuuttien getteri ja setteri dokumentoitua implemenaatioon
 
       }
 
@@ -1243,6 +1248,8 @@ EXAMPLE
             line.gsub!( /[\n\r]/, "" )
 
             current_section = line.to_sym
+
+            header[ current_section ] = "nodoc" if line.to_s == "nodoc"
 
           else
 
@@ -1704,6 +1711,7 @@ EXAMPLE
           apply_macros!( @templates["behaviour.xml.method"].clone, { 
             "METHOD_NAME" => encode_string( feature.first ),
             "METHOD_TYPE" => encode_string( feature.last[:__type] || "unknown" ),
+            "NODOC" => feature.last.has_key?(:nodoc).to_s,
             "METHOD_DEPRECATED" => deprecated,
             "METHOD_DESCRIPTION" => encode_string( feature.last[:description] ),
             "METHOD_ARGUMENTS" => arguments,
@@ -1875,7 +1883,7 @@ EXAMPLE
 
             else
 
-              warn("Skip: #{ @module_path.join("::") } does not have any public methods")
+              warn("Skip: #{ @module_path.join("::") } does not have any public methods") unless @module_path.join("::") == "MobyBehaviour"
 
             end
 
