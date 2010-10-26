@@ -134,6 +134,7 @@ module MobyUtil
 
 		end
 		
+<<<<<<< HEAD
 
 		# == description
 		# Function upload translations in a given Qt Linguist translation file to the localisation DB
@@ -173,6 +174,19 @@ module MobyUtil
 		# Exception
 		#  description: When its not possible to parse the file provided
 		#
+=======
+		# Function for uploading qm and ts files to the localization DB
+		# == params
+		# file:: String
+		# table_name:: String
+		# db_connection:: DBConnection Optional. Connection details for the upload. If not provided then tdriver parameters will be used.
+		# column_names_map:: Hash Optional. If provided it will set the language column names to the String provided instead of the language code extracted from the file names.
+		# record_sql:: Bool Optional. It will record all SQL queries performed on a file with name <table>.<db_type>.sql
+		# == returns
+		# == throws
+		# ArgumentError:: when arguments provided are not valid
+		# Exception:: when its not possible to parse the file provided
+>>>>>>> 0.9.1-5
 		def self.upload_translation_file( file, table_name, db_connection = nil, column_names_map = {}, record_sql = false)	
 			Kernel::raise ArgumentError.new("") if file.nil? or file.empty?
 			Kernel::raise ArgumentError.new("") if table_name.nil? or table_name.empty?
@@ -201,6 +215,7 @@ module MobyUtil
 		
 		private
 		
+<<<<<<< HEAD
 		
 		# == description
 		# Checks Qt Linguist translation file for validity and converts to TS if needed
@@ -217,6 +232,10 @@ module MobyUtil
 		#
 		# == throws
 		# 
+=======
+		# Check File and convert to TS if needed
+		# Returns TS file
+>>>>>>> 0.9.1-5
 		def self.convert_to_ts(file)
 			if !File.exists?(file)
 				puts "[WARNING] File '" + file + "' not found. Skiping."
@@ -235,6 +254,7 @@ module MobyUtil
 		end
 		
 		
+<<<<<<< HEAD
 		# == description
 		# Extracts translation data from TS file
 		#
@@ -258,6 +278,9 @@ module MobyUtil
 		# 
 		# == throws
 		# 
+=======
+		# Extract translation data from TS file
+>>>>>>> 0.9.1-5
 		def self.parse_ts_file(file, column_names_map = {} )
 			# Read TS file
 			open_file = File.new( file )
@@ -328,9 +351,13 @@ module MobyUtil
 		end
 		
 		
+<<<<<<< HEAD
 		# == description
 		# Uploads language data to Localisation DB and optionally records the sql queries on a file
 		#
+=======
+		# Upload language data to DB
+>>>>>>> 0.9.1-5
 		def self.upload_ts_data( language, data, table_name, db_connection, record_sql = false )
 			
 			raise Exception.new("Language not provided.") if language.nil? or language.to_s.empty?
@@ -457,9 +484,13 @@ module MobyUtil
 		end
 		
 		
+<<<<<<< HEAD
 		# == description
 		# Extracs application name used for FNAME from a given filename (removes language tags and file extension)
 		#
+=======
+		# Extracs application name from filename (removes language tags and extension)
+>>>>>>> 0.9.1-5
 		def self.parseFName(file)
 			fname = file.split('/').last
 			#(wordlist matching)

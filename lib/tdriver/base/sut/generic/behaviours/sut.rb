@@ -795,6 +795,7 @@ module MobyBehaviour
 		translation = MobyUtil::Localisation.translation( logical_name, language,
 			MobyUtil::Parameter[ self.id ][ :localisation_server_database_tablename ], file_name,
 			plurality, lengthvariant )
+
 		if translation.kind_of? String and !numerus.nil?
 		  translation.gsub!(/%Ln/){|s| numerus} 
 		elsif translation.kind_of? Array and !numerus.nil?
