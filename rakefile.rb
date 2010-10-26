@@ -132,7 +132,7 @@ task :doc do | task |
   # reset arguments constant without warnings
   ARGV.clear; ['-g', 'both', 'lib/tdriver', 'doc/document.xml'].each{ | argument | ARGV << argument }
 
-  puts "\nGenerating behaviour and documentation XML files... "   
+  puts "\nGenerating documentation XML file... "   
 
   require File.expand_path( File.join( File.dirname( __FILE__ ), 'lib/tdriver-devtools/tdriver-devtools.rb' ) )
 

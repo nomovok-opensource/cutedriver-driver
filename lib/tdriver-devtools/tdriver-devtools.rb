@@ -24,6 +24,7 @@ require 'optparse'
 require 'tdriver/version.rb'
 require 'tdriver/util/common/loader.rb'
 require 'tmpdir'
+require 'fileutils'
 
 # default options
 options = { 
@@ -63,7 +64,8 @@ optparse = OptionParser.new do | opts |
       ' ',
       '  both       : Generate behaviour XML files and documentation',
       '               Behaviour XML files are saved to temp. folder and deleted',
-      '               after documentation XML is saved.', 
+      '               after documentation XML is saved. Copies also all XSLT ',
+      '               templates to destination folder.', 
       ' ',
       '               Default source folder (implementation) is current folder.',
       '               Default destination folder is "doc/document.xml"',
@@ -88,7 +90,7 @@ optparse = OptionParser.new do | opts |
         options[ :source ] ||= '.'
         options[ :destination_behaviours ] = File.expand_path( File.join( Dir.tmpdir, "tdriver-devtools-behaviours" ) ) 
         options[ :destination ] ||= 'doc/document.xml'
-                    
+            
     else
 
       puts "Invalid value for generate option: #{ mode }", ""
@@ -310,6 +312,18 @@ case options[ :generate ]
     end
 
     require 'lib/tdriver-devtools/doc/generate.rb'
+
+    begin
+        
+      FileUtils.cp( Dir.glob( File.expand_path( File.join( File.dirname( __FILE__ ), 'doc/xslt/*.xsl' ) ) ), destination_folder )
+
+      puts "Template XSLT file(s) copied to destination folder succesfully\n\n"
+
+    rescue Exception => exception
+    
+      warn("Error while copying template xslt files to destination due to %s (%s)" % [ exception.message, exception.class ] )
+    
+    end
 
 else
 
