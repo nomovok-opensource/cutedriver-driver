@@ -23,7 +23,7 @@ module MobyBehaviour
   # Generic methods for applying behaviours to target object
   #
   # == behaviour
-  # GenericObjectComposition
+  # GenericObjectBehaviourComposition
   #
   # == requires
   # *
