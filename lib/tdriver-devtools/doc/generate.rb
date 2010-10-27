@@ -3,6 +3,8 @@ require 'nokogiri'
 @feature_tests = []
 @behaviour_hashes = {}
 @behaviours = []
+$features = 0
+$features_nodoc = 0
 
 $passed, $failed, $unknown = [ 0, 0, 0 ]
 
@@ -363,7 +365,7 @@ def read_behaviour_xml_files( folder )
 
   }
   
-  puts "\nBehaviour XML files: #{ @behaviours.count }"
+  puts "Behaviour XML files: #{ @behaviours.count }"
 
 end
 
@@ -592,6 +594,13 @@ def generate_document_xml
 #        end
        
         # next if feature_documentation.empty?
+             
+        $features += 1
+                          
+        if feature_documentation["nodoc"][0].to_s.downcase == "true"
+          $features_nodoc += 1
+          next 
+        end
        
         # <feature type="accessor" name="z;z=" types="qt" versions="*" input_types="touch" object_types="*;sut" requires_plugin="x">
         xml.feature( 
@@ -849,9 +858,13 @@ puts "Tests with passed status: #{ $passed }"
 puts "Tests with failed status: #{ $failed }"
 puts "Tests with unknown result: #{ $unknown }"
 
+
 begin
 
   open( output_filename, 'w'){ | file | file << generate_document_xml }
+
+  puts "\nTotal number of features: #{ $features } (#{ $features_nodoc } with nodoc tag)"
+
   puts "\nDocumentation XML saved succesfully to #{ output_filename }"
 
 rescue Exception => e 

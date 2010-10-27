@@ -317,11 +317,16 @@ module MobyBehaviour
 
     end
 
-    # Returns a StateObject containing the current state of this sut object as XML.
+		# == description
+    # Returns a StateObject containing the current state of this test object as XML.
     # The state object is static and thus is not refreshed or synchronized etc.
-    #
-    # === returns
-    # StateObject:: State of this SUT object
+    # == returns
+    # StateObject:: State of this test object
+    # == exceptions
+    # RuntimeError
+    # description: If the xml source for the object is not in initialized
+    # == example
+    # sut_state = @sut.state #get the state object for the sut
     def state
 
       # refresh if xml data is empty
@@ -648,30 +653,33 @@ module MobyBehaviour
       nil
 
     end
-
-    # Wrapper function to access sut specific parameters
-    # ==usage
-    #
-    # # returns the hash of all sut parameters
-    # sut.parameter
-    #
-    # # returns the value for parameter 'product' for this particular sut
-    # sut.parameter['product']
-    #
-    # # raises exception that 'non_existing_parameter' was not found
-    # sut.parameter['non_existing_parameter']
-    #
-    # # return default value if given parameter is not found
-    # sut.parameter['non_existing_parameter', 'default']
-    #
-    # # set the value of parameter 'product' for this particular sut
-    # sut.parameter[:product] ='new_value'
-    #
-    # parameters for each sut are stored in the file under group tag with name attribute matching the SUT id
+    
+    # == description
+    # Wrapper function to access sut specific parameters.
+    # Parameters for each sut are stored in the parameters xml file under group tag with name attribute matching the SUT id
     # ==params
+    # *arguments
+    #	String
+    #   description: Optional argument which is the name of parameter.
+    #   example: 'new_parameter'
+    # 	Symbol
+    # 	description: Optional argument which is the name of parameter.
+    #	example: :product
     # ==return
-    # String:: Value matching the parameter_name
-    # MobyUtil::ParameterHash:: Hash of values
+    #String
+    #	description: Value matching the parameter name given as argument
+    #	example: 'testability-driver-qt-sut-plugin'
+    # MobyUtil::ParameterHash
+    # 	description:: Hash of values, if no arguments is specified
+    # == exceptions
+    # ParameterNotFoundError
+    #	description: If the parameter with the given name does not exist
+    # == example
+    # parameter_hash = @sut.parameter	 #returns the hash of all sut parameters
+    # value = @sut.parameter[:product] 	#returns the value for parameter 'product' for this particular sut
+    # value = @sut.parameter['non_existing_parameter'] #raises exception that 'non_existing_parameter' was not found
+    # value = sut.parameter['non_existing_parameter', 'default'] #returns default value if given parameter is not found
+    # sut.parameter[:new_parameter] ='new_value'  # set the value of parameter 'product' for this particular sut
     def parameter( *arguments )
 
       if ( arguments.count == 0 )
@@ -787,6 +795,7 @@ module MobyBehaviour
 		translation = MobyUtil::Localisation.translation( logical_name, language,
 			MobyUtil::Parameter[ self.id ][ :localisation_server_database_tablename ], file_name,
 			plurality, lengthvariant )
+
 		if translation.kind_of? String and !numerus.nil?
 		  translation.gsub!(/%(Ln|1)/){|s| numerus} 
 		elsif translation.kind_of? Array and !numerus.nil?

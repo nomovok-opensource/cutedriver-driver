@@ -133,7 +133,6 @@ module MobyUtil
 			end
 
 		end
-		
 
 		# == description
 		# Function upload translations in a given Qt Linguist translation file to the localisation DB

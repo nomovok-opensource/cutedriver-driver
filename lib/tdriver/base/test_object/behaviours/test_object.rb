@@ -119,11 +119,11 @@ module MobyBehaviour
 
     # == description
     # Function returns a attribute of test object 
-    # === params
+    # == params
     # name:: String definig the name of the attribute to get
-    # === returns
+    # == returns
     # String:: Value of the attribute as a string
-    # === raises
+    # == exceptions
     # TestObjectNotInitializedError:: if the test object xml data has not been initialized
     # AttributeNotFoundError:: if the requested attribute can not be found in the xml data of the object
     # == example
@@ -164,9 +164,9 @@ module MobyBehaviour
     # == description
     # Returns the parent test object for the current object in question, according to the UI object hierarchy. For getting the test object that was actually used 
     # as the parent when the test object instance was created, see parent_object.
-    # === returns
+    # == returns
     # TestObject:: test object that is parent of this test object, self if no parent (ie. application objects)
-    # ==example
+    # == example
     # @app = @sut.run(:name => 'testapp') # launches testapp 
     # parent_test_object = @app.Node( :name => 'Node1' ).get_parent() #get parent for some test object
     def get_parent()
@@ -271,7 +271,7 @@ module MobyBehaviour
 
     # == description
     # Function for finding out the application this test ojbect
-    # === returns
+    # == returns
     #TestObject:: Application test object that the test object belongs to, or nil, if no parent of type application can be found.
     # == example
     # parent_app = @app.Node( :name => 'Node1' ).get_application() #get application for some test object, this should return @app.
@@ -298,7 +298,7 @@ module MobyBehaviour
 
     # == description
     # Function for finding out the application id for this test object
-    # === returns
+    # == returns
     # String:: representing the id of the application test object that this test object belongs to.
     # == example
     # puts @app.Node( :name => 'Node1' ).get_application_id() #print the application id, this should print @app.id
@@ -319,8 +319,11 @@ module MobyBehaviour
     # == description
     # Returns a StateObject containing the current state of this test object as XML.
     # The state object is static and thus is not refreshed or synchronized etc.
-    # === returns
+    # == returns
     # StateObject:: State of this test object
+    # == exceptions
+    # ArgumentError
+    # description: If the xml source for the object cannot be read
     # == example
     # app_state = @sut.application( :name => "calculator" ).state #get the state object for the app
     # button_state = app_state.Button( :text => "Backspace" ) #get the state for test object button
@@ -363,9 +366,9 @@ module MobyBehaviour
     # note the usage of equal? above instead of normally used eql?. Please refer to Ruby manual for more information.
     #
     # NOTE: The accessor methods for child objects created automatically by the DataGenerator are dependent on this method.
-    # === params
+    # == params
     # attributes:: Hash object holding information for identifying which child to create, eg. :type => :slider
-    # === returns
+    # == returns
     # TestObject:: new child test object or reference to existing child
     # == exceptions
     # TypeError
@@ -391,10 +394,10 @@ module MobyBehaviour
 
     # == description
     # Function similar to child, but returns an array of children test objects that meet the given criteria
-    # === params
+    # ===params
     # attributes:: Hash object holding information for identifying which child to create, eg. :type => :slider
     # find_all_children:: Boolean specifying whether all children under the test node or just immediate children should be retreived.
-    # === returns
+    # == returns
     # An array of TestObjects
     # == exceptions
     # TypeError
@@ -702,7 +705,7 @@ module MobyBehaviour
     # Returns the actual test object that was used as the parent when this object instance was created. For getting the parent object in the UI object hierarchy, 
     # see get_parent.
     #
-    # === returns
+    # == returns
     # TestObject:: test object that was used as parent when this object was created. Can also be of type SUT if sut was the parent (ie. application objects)
 
   public

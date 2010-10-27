@@ -29,6 +29,8 @@ module Generators
 
       @found_modules_and_methods = {}
 
+      @created_files = {}
+
       load_templates
 
       @options = options
@@ -607,7 +609,7 @@ EXAMPLE
 
         if ( item = result.select{ | arg | arg.keys.include?( param.first ) }).empty?
 
-          raise_error("Error: Argument '#{ param.first }' is implemented but not documented in '#{ @current_method.name }' ($MODULE).\nNote that documented argument and variable name must be identical.", [ 'writer', 'accessor' ].include?( @processing ) ? 'attr_argument' : 'arguments' )
+          raise_error("Error: Argument '#{ param.first }' is implemented but not documented in '#{ @current_method.name }' ($MODULE).\nNote that documented argument and variable name must be identical.", [ 'writer', 'accessor' ].include?( @processing ) ? 'attr_argument' : 'arguments' ) unless param.first.to_s.include?("#")
 
           order << { param.first => {} }
 
@@ -1053,6 +1055,9 @@ EXAMPLE
 
       method_header = nil
 
+      # if this tag ("== nodoc") is found in method description, it should not be added to documentation 
+      no_doc = false
+
       if ( method.visibility == :public && @module_path.first =~ /MobyBehaviour/ )
 
         params = method.kind_of?( RDoc::Attr ) ? [] : process_arguments( method.params )
@@ -1067,6 +1072,12 @@ EXAMPLE
         arguments_found = 0
 
         method_header = Hash[ method_header.collect{ | key, value |
+
+          if key == :nodoc
+                    
+            no_doc = true
+          
+          end
 
           if key == :arguments
 
@@ -1153,7 +1164,7 @@ EXAMPLE
 
         #store_to_results( @module_path.join("::"), method.name, type, params )
 
-        # do something
+        #no_doc ? nil : 
         [ method_name, method_header ]
 
       else
@@ -1199,11 +1210,7 @@ EXAMPLE
 
       attributes.each{ | attribute | 
 
-        #p attribute.comment
-
         results << process_method( attribute )
-
-        # TODO: tapa miten saadaan attribuuttien getteri ja setteri dokumentoitua implemenaatioon
 
       }
 
@@ -1241,6 +1248,8 @@ EXAMPLE
             line.gsub!( /[\n\r]/, "" )
 
             current_section = line.to_sym
+
+            header[ current_section ] = "nodoc" if line.to_s == "nodoc"
 
           else
 
@@ -1702,6 +1711,7 @@ EXAMPLE
           apply_macros!( @templates["behaviour.xml.method"].clone, { 
             "METHOD_NAME" => encode_string( feature.first ),
             "METHOD_TYPE" => encode_string( feature.last[:__type] || "unknown" ),
+            "NODOC" => feature.last.has_key?(:nodoc).to_s,
             "METHOD_DEPRECATED" => deprecated,
             "METHOD_DESCRIPTION" => encode_string( feature.last[:description] ),
             "METHOD_ARGUMENTS" => arguments,
@@ -1832,6 +1842,18 @@ EXAMPLE
 
           if xml_file_name != '.xml' 
 
+            if @created_files.has_key?( xml_file_name )
+
+              xml_file_name = '%s_duplicate_name.%s' % [ module_header[:behaviour], 'xml' ]
+              
+              warn("Warning! One of the behaviour modules is already using name '#{ module_header[:behaviour] }', saving as #{ xml_file_name }")
+
+              sleep 1
+          
+            end
+
+            @created_files[ xml_file_name ] = {}
+
             open( xml_file_name, 'w'){ | file | file << xml }
 
             puts ".xml"
@@ -1843,12 +1865,25 @@ EXAMPLE
               xml_file_name = ( @module_path[1..-1].join("") ) + '.xml'
 
               warn("Warning: #{ @module_path.join("::") } does not have behaviour (module) description defined, saving as %s " % xml_file_name )
+              sleep 2
+
+              if @created_files.has_key?( xml_file_name )
+
+                warn("Warning! One of the behaviour modules is already using name '#{ module_header[:behaviour] }'")
+
+                xml_file_name = ( @module_path[1..-1].join("") ) + '_duplicate_name.xml'
+
+                sleep 1
+            
+              end
+              
+              @created_files[ xml_file_name ] = {}
 
               open( xml_file_name, 'w'){ | file | file << xml }
 
             else
 
-              warn("Skip: #{ @module_path.join("::") } does not have any public methods")
+              warn("Skip: #{ @module_path.join("::") } does not have any public methods") unless @module_path.join("::") == "MobyBehaviour"
 
             end
 

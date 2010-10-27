@@ -14,7 +14,6 @@
 		<parameter name="application_synchronization_retry_interval" value="0.25" />
 		<parameter name="synchronization_timeout" value="30" />
 		<parameter name="default_timeout" value="30" />
-        <parameter name="event_type" value="0" />
 	</sut>
 
 	<!-- overload default behaviours parameter (see generic.xml in defaults folder) -->

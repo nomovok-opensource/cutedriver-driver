@@ -118,8 +118,7 @@ module MobyUtil
 				query_result.close 
 		    end
 			return result
-		end
-		
+		end		
 	
 		# == description
 		# Retunrs the number of affected rows on the latest sql query on the given MobyUtil::DBConnection 

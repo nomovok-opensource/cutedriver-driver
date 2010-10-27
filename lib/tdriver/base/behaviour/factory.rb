@@ -74,7 +74,6 @@ module MobyBase
 								( !( rules[ :object_type ] & behaviour[ :object_type ] ).empty? ) && 
 								( !( rules[ :version ] & behaviour[ :version ] ).empty? )
 
-
 							) 
 
 								behaviour( :name => @@behaviours[ @_method_index ][ :name ], :object_type => @@behaviours[ @_method_index ][ :object_type ].join(";") ){ 
@@ -93,8 +92,6 @@ module MobyBase
 					}
 
 				}
-
-				
 
 			}.to_xml
 
@@ -119,7 +116,9 @@ module MobyBase
 		def apply_behaviour!( rules = {} )
 
 			# merge user-defined rules on top of default rules set
-			rules = { :sut_type => ['*'], :object_type => ['*'], :input_type => ['*'], :version => ['*'] }.merge!( rules )
+			#rules = { :sut_type => ['*'], :object_type => ['*'], :input_type => ['*'], :version => ['*'] }.merge!( rules )
+
+      rules.default = ['*']
 
 			Kernel::raise ArgumentError.new( "No target object defined in rules hash" ) if rules[ :object ].nil?			
 
@@ -145,10 +144,10 @@ module MobyBase
 					# retrieve behaviour module from cache and extend target object
 					rules[ :object ].extend( 
 
-            @@modules_cache.fetch( behaviour_data[ :module ][ :name ] ){
-
+            @@modules_cache.fetch( behaviour_data[ :module ][ :name ] ){ | name |
+            
               # ... or store to cache for the next time if not found 
-              @@modules_cache[ behaviour_data[ :module ][ :name ] ] = MobyUtil::KernelHelper.get_constant( behaviour_data[ :module ][ :name ] )
+              @@modules_cache[ name ] = MobyUtil::KernelHelper.get_constant( name )
 
             } 
 
@@ -157,24 +156,18 @@ module MobyBase
 				rescue NameError => exception
 
 					Kernel::raise exception.class.new( 
-
 						"Implementation for behaviour %s does not exist. (%s)" % [ behaviour_data[ :name ], behaviour_data[ :module ][ :name ] ]
-
 					)
 
 				rescue Exception => exception
 
 					Kernel::raise RuntimeError.new( 
-
 						"Error while applying %s (%s) behaviour to target object. Reason: %s (%s)" % [
-
 							behaviour_data[ :name ],
 							behaviour_data[ :module ][ :name ],	
 							exception.message,
 							exception.class
-
 						]
-
 					)
 
 				end
@@ -241,7 +234,9 @@ module MobyBase
 
 				rescue => exception
 
-					Kernel::raise MobyUtil::XML::ParseError.new( "Error occured while parsing behaviour XML file %s. Error: %s " % [ behaviours[ :filename ], exception.message ] ) 
+					Kernel::raise MobyUtil::XML::ParseError.new( 
+					  "Error occured while parsing behaviour XML file %s. Error: %s " % [ behaviours[ :filename ], exception.message ] 
+				  ) 
 
 				end
 
@@ -312,8 +307,6 @@ module MobyBase
 						:methods => methods_hash
 
 					}
-
-
 
 				}
 

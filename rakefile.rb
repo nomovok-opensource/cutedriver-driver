@@ -18,7 +18,6 @@
 ############################################################################
 
 # rakefile for building and releasing Testability Driver
-
 @__release_mode = ENV['rel_mode']
 @__release_mode = 'minor' if @__release_mode == nil
   
@@ -55,7 +54,6 @@ def make_version_file(tdriver_version)
 	File.open('version.rb', 'w') { |f| f.write "ENV['TDRIVER_VERSION'] = '#{tdriver_version}'" }
 
 end
-
 
 @__gem_version = @__revision
 
@@ -110,8 +108,54 @@ def make_spec
 
 end
 
-#desc "Task for creating gem file"
-Rake::GemPackageTask.new(make_spec) do |pkg|
-  #pkg.need_tar = true
+spec = make_spec
+
+task :default do | task |
+
+  puts "supported tasks: gem, doc, behaviours"
+
+end
+
+task :behaviours do | task |
+
+  # reset arguments constant without warnings
+  ARGV.clear; ['-g', 'behaviours', 'lib/tdriver', 'behaviours'].each{ | argument | ARGV << argument }
+
+  puts "\nGenerating behaviour XML files from implementation... "   
+
+  require File.expand_path( File.join( File.dirname( __FILE__ ), 'lib/tdriver-devtools/tdriver-devtools.rb' ) )
+
+end
+
+task :doc, :tests do | task, args |
+  
+  test_results_folder = args[:tests] || "../tests/test/feature_xml"
+      
+  if args[:tests].nil?
+  
+    puts "\nWarning: Test results folder not given, using default location (#{ test_results_folder })"
+    puts "\nSame as executing:\nrake doc[#{ test_results_folder }]\n\n"
+    sleep 1
+  
+  else
+  
+    puts "Using given test results from #{ test_results_folder }"
+    
+  end
+   
+  test_results_folder = File.expand_path( test_results_folder )
+   
+  # reset arguments constant without warnings
+  ARGV.clear; ['-g', 'both', '-t', test_results_folder, 'lib/tdriver', 'doc/document.xml'].each{ | argument | ARGV << argument }
+
+  puts "\nGenerating documentation XML file... "   
+
+  require File.expand_path( File.join( File.dirname( __FILE__ ), 'lib/tdriver-devtools/tdriver-devtools.rb' ) )
+
+end
+
+Rake::GemPackageTask.new( spec ) do | pkg |
+  pkg.gem_spec = spec
+  pkg.package_dir = "pkg"
 end
 
