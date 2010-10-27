@@ -237,10 +237,8 @@ case options[ :generate ]
     
     end
 
-    #File.expand_path( File.join( File.dirname( __FILE__ ), 'behaviour/xml/generate.rb' ) )
-
-    # run 'implementation to behaviour xml' generator
-    require File.expand_path( File.join( File.dirname( __FILE__ ), 'behaviour/xml/generate.rb' ) ) #'lib/tdriver-devtools/behaviour/xml/generate.rb'
+    # run behaviour xml generator
+    require File.expand_path( File.join( File.dirname( __FILE__ ), 'behaviour/xml/generate.rb' ) )
 
     puts ''
 
@@ -265,8 +263,6 @@ case options[ :generate ]
       raise RuntimeError.new("Unable to create destination folder %s (%s: %s)" % [ destination_folder, exception.class, exception.message ])
     
     end
-
-    #require 'lib/tdriver-devtools/doc/generate.rb'
 
     require File.expand_path( File.join( File.dirname( __FILE__ ), 'doc/generate.rb' ) ) #'lib/tdriver-devtools/behaviour/xml/generate.rb'
 
@@ -295,8 +291,8 @@ case options[ :generate ]
     $destination = destination_folder
 
     # run 'implementation to behaviour xml' generator
-    require 'lib/tdriver-devtools/behaviour/xml/generate.rb'
-    
+    require File.expand_path( File.join( File.dirname( __FILE__ ), 'behaviour/xml/generate.rb' ) )
+
     # documentation
     $source = destination_folder
     $tests = File.expand_path( options[ :tests ] )
@@ -311,7 +307,7 @@ case options[ :generate ]
       raise RuntimeError.new("Unable to create destination folder %s (%s: %s)" % [ destination_folder, exception.class, exception.message ])
     end
 
-    require 'lib/tdriver-devtools/doc/generate.rb'
+    require File.expand_path( File.join( File.dirname( __FILE__ ), 'doc/generate.rb' ) )
 
     begin
         
