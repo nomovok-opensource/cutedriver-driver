@@ -227,14 +227,15 @@
       
       }
 
-      pre.passed, pre.failed, pre.skipped{
+      pre.passed, pre.failed, pre.skipped, pre.block
+      {
       
         margin: 5px 2px 9px 2px;
         padding: 10px 10px 10px 8px;
             
       }
 
-      pre.passed
+      pre.passed, pre.block
       {
 
         background: #f1f1f1;
@@ -1675,6 +1676,16 @@
       <i><xsl:call-template name="process_tags" >
         <xsl:with-param name="text" select="$content" />
       </xsl:call-template></i>
+      <xsl:call-template name="process_tags" >
+        <xsl:with-param name="text" select="$content_after" />
+      </xsl:call-template>
+
+    </xsl:when>
+
+    <xsl:when test="$tag='code'">
+
+      <pre class="block"><xsl:value-of select="$content" /></pre>
+
       <xsl:call-template name="process_tags" >
         <xsl:with-param name="text" select="$content_after" />
       </xsl:call-template>
