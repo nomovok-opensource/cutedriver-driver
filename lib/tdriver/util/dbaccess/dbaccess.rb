@@ -45,7 +45,6 @@ module MobyUtil
 			return @@_connections
 		end
 		
-<<<<<<< HEAD
 		# == description
 		# Runs an SQL query on the on the given MobyUtil::DBConnection 
 		#
