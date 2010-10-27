@@ -788,10 +788,10 @@ module MobyBehaviour
 			MobyUtil::Parameter[ self.id ][ :localisation_server_database_tablename ], file_name,
 			plurality, lengthvariant )
 		if translation.kind_of? String and !numerus.nil?
-		  translation.gsub!(/%Ln/){|s| numerus} 
+		  translation.gsub!(/%(Ln|1)/){|s| numerus} 
 		elsif translation.kind_of? Array and !numerus.nil?
 		  translation.each do |trans|
-			trans.gsub!(/%Ln/){|s| numerus}
+			trans.gsub!(/%(Ln|1)/){|s| numerus}
 		  end
 		end
 		translation
