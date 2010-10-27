@@ -382,7 +382,6 @@ module MobyBehaviour
 
     end
 
-    # TODO: feature documentation example, feature tests still yet to be done
     # == description
     # Screen capture function to take snapshot of SUTs current display view
     #
