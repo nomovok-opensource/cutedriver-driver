@@ -35,7 +35,7 @@
       span.feature_title_text, a.feature_name_link
       {
         text-decoration: none; //underline;
-        border-bottom: 1px dotted #404040;
+        #border-bottom: 1px dotted #404040;
         font-size: 14px; 
         color: #404040;
         font-weight: bold;

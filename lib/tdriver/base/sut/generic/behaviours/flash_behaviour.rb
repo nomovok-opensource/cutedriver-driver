@@ -45,15 +45,15 @@ module MobyBehaviour
     # == description
     # Instructs the sut to start the flash operation with default TDriver parameters for sut that are:
     # how many times TDriver will attempt to flash the device:
-    # <parameter name="flash_attempts" value="2" />
+    # [code]<parameter name="flash_attempts" value="2" />[/code]
     # timeout in seconds between the switchbox commands:
-    # <parameter name="timeout_between_command_sequence" value="25" />
+    # [code]<parameter name="timeout_between_command_sequence" value="25" />[/code]
     # commands you want to be executed before flash:
-    # <parameter name="switchbox_commands_before_flash" value="" />
+    # [code]<parameter name="switchbox_commands_before_flash" value="" />[/code]
     # flash commands before flash:
-    # <parameter name="commands_before_flash" value="" />
+    # [code]<parameter name="commands_before_flash" value="" />[/code]
     # intial flash command:
-    # <parameter name="flash_command" value="" />
+    # [code]<parameter name="flash_command" value="" />[/code]
     # timeout in seconds before executing the commands during flash:
     # <parameter name="timeout_before_executing_commands_during_flash" value="20" />
     # commands you want to be executed during flash:
