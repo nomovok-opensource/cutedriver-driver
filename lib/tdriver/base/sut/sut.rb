@@ -22,7 +22,7 @@ module MobyBase
 
 	class SUT
 
-		attr_reader(
+		attr_accessor(
 			:id,		# id of current SUT
 			:ui_type,	# ui type
 			:ui_version,	# ui version
