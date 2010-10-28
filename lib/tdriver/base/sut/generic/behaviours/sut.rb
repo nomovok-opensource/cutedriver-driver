@@ -44,6 +44,7 @@ module MobyBehaviour
 
     include MobyBehaviour::Behaviour
 
+    # == nodoc
     attr_accessor(
 
 				  :dump_count,                # number of UI dump requests done to current SUT
@@ -52,8 +53,9 @@ module MobyBehaviour
 				  :refresh_tries,             # number of retries for ui dump on error case
 				  :refresh_timeout           # timeout between timeout retry
 
-				  )
+	  )
 
+    # == nodoc
     attr_reader(
 
 				:xml_data,      # sut xml_data
@@ -64,7 +66,7 @@ module MobyBehaviour
 				:xml_data_crc,  # crc of the previous ui state message
 				:verify_blocks  # verify blocks              
 
-				)
+		)
 
     #TODO: document
     def connect( id )
@@ -115,6 +117,7 @@ module MobyBehaviour
 
     end
 
+    # == nodoc
     # function to get TestObject
     # TODO: Still under construction. Should be able to create single descendant of the SUT
     # Then is Should create path (parent-child-child-child...) until reaching the particular TestObject
@@ -133,7 +136,7 @@ module MobyBehaviour
     # == examples
     #  @sut.xml_data = "<tasMessage>.....</tasMessage>"
     #  @sut.xml_data = xml_element
-	#  @sut.xml_data = nil
+  	#  @sut.xml_data = nil
     # == raises
     # ArgumentError:: Unexpected argument type (%s) for xml, expected: %s
     def xml_data=( xml )
@@ -163,6 +166,7 @@ module MobyBehaviour
 
     end
 
+    # == nodoc
     # Function asks for fresh xml ui data from the device and stores the result
     # == returns
     # MobyUtil::XML::Element:: xml document containing valid xml fragment describing the current state of the device
@@ -287,7 +291,9 @@ module MobyBehaviour
         if _child.eql?( child_test_object )
 
           # Update the attributes that were used to create the child object.
-          _child.creation_attributes = creation_hash
+          #_child.creation_attributes = creation_hash
+
+          _child.instance_eval("@creation_attributes = #{ creation_hash.inspect }")
 
           return _child
 
@@ -875,6 +881,7 @@ module MobyBehaviour
 	  MobyUtil::OperatorData.retrieve( operator_data_lname, operator, table_name )
 	end
 
+    # == nodoc
     # Function to update all children of current SUT
     # Iterates on all children of the SUT and calls TestObject#update on all children
     # === params
@@ -899,7 +906,8 @@ module MobyBehaviour
       @childs_updated = true
 
     end
-
+    
+    # == nodoc
     def refresh( refresh_args = {}, creation_attributes = {})
       
       refresh_ui_dump refresh_args, creation_attributes
@@ -1176,6 +1184,8 @@ module MobyBehaviour
 
 	public # deprecated
 
+    
+    # == nodoc
     #TODO: Update documentation
     #TODO: Is this function deprecated? (see SUT#refresh_ui_dump)
     #TODO: rethink get_ui_dump and refresh --> functions!
