@@ -616,18 +616,25 @@ module MobyBehaviour
 
     end
 
+    # == description
     # Press_key function to pass symbol or sequence to the assosiacted SUT controllers
     # execute_cmd function.
-    # === params
-    # keypress:: either symbol or object of type MobyController::KeySequence
+    #
+    # === arguments
+    # keypress
+    #  Symbol
+    #   description: one of the key symbols defined in /tdriver/keymaps/
+    #   example: @sut.press_key(:kDown)
+    #  MobyController::KeySequence
+    #   description: a KeySequence object of key symbols
+    #   example: @sut.press_key( MobyCommand::KeySequence.new(:kDown).times!(3) )
+    # 
     # === returns
     # nil
-    # === raises
+    #
+    # === exceptions
     # ArgumentError:: if input not a symbol or not of type MobyCommand::KeySequence
-    # === examples
-    #  @sut.press_key(:kDown) # presses Down on SUT
-    #  key_sequence = MobyCommand::KeySequence.new(:kDown).times!(3) # creates keysequence to press 3 times down on SUT
-    #  @sut.press_key( key_sequence ) # executes above keysequence on device
+    #
     def press_key( symbol_or_sequence )
 
       begin
