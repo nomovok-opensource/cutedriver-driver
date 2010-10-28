@@ -20,7 +20,27 @@
 
 module MobyBehaviour
 
-	# Describes the behaviour of SUT, aka the methods that can be used to control SUT
+  # == description
+  # SUT controller behaviours
+  #
+  # == behaviour
+  # GenericSutController
+  #
+  # == requires
+  # *
+  #
+  # == input_type
+  # *
+  #
+  # == sut_type
+  # *
+  #
+  # == sut_version
+  # *
+  #
+  # == objects
+  # sut
+  #
 	module SutController
 
 		include MobyBehaviour::Behaviour
