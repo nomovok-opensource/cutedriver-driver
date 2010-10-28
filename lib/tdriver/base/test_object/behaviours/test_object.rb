@@ -363,32 +363,35 @@ module MobyBehaviour
     end
 
     # == description
-    # Creates a test object for a child object of this test object
-    # Associates child object as current object's child.
-    # and associates self as child object's parent.
+    # Creates a test object for a child object of this test object. Caller test object will be result (child) object's parent object.\n
+    # \n
+    # [b]NOTE:[/b] Subsequent calls to TestObject#child( rule ) always returns reference to same Testobject:\n
+    # [code]a = to.child( :type => 'Button', :text => '1' )
+    # b = to.child( :type => 'Button', :text => '1' )
+    # a.eql?( b ) # => true[/code]
+    # == arguments
+    # attributes
+    #  Hash
+    #   description: Hash object holding information for identifying which child to create
+    #   example: { :type => :slider }
     #
-    # NOTE:
-    # Subsequent calls to TestObject#child(rule) always returns reference to same Testobject:
-    # a = to.child(rule) ; b = to.child(rule) ; a.equal?( b ); # => true
-    # note the usage of equal? above instead of normally used eql?. Please refer to Ruby manual for more information.
-    #
-    # NOTE: The accessor methods for child objects created automatically by the DataGenerator are dependent on this method.
-    # == params
-    # attributes:: Hash object holding information for identifying which child to create, eg. :type => :slider
     # == returns
-    # TestObject:: new child test object or reference to existing child
+    # MobyBase::TestObject
+    #  description: new child test object or reference to existing child
+    #  example: -
+    #
     # == exceptions
     # TypeError
-    # description: raised if agument is not a Hash
+    #  description: raised if agument is not a Hash
+    #
     # MultipleTestObjectsIdentifiedError
-    # description:  raised if multiple objects found that match the given attributes
+    #  description:  raised if multiple objects found that match the given attributes
+    #
     # TestObjectNotFoundError
-    # description:  raised if the child object could not be found
+    #  description:  raised if the child object could not be found
+    #
     # TestObjectNotVisibleError
-    # description: rasied if the parent test object is no longer visible
-    # == example
-    # @test_app = @sut.run(:name => 'testapp') # launches testapp 
-    # child_testobj = @test_app.child( :text => 'MC' )
+    #  description: rasied if the parent test object is no longer visible
     def child( attributes )
 
       # verify attributes argument format
