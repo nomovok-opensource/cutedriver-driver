@@ -616,18 +616,25 @@ module MobyBehaviour
 
     end
 
+    # == description
     # Press_key function to pass symbol or sequence to the assosiacted SUT controllers
     # execute_cmd function.
-    # === params
-    # keypress:: either symbol or object of type MobyController::KeySequence
+    #
+    # === arguments
+    # keypress
+    #  Symbol
+    #   description: one of the key symbols defined in /tdriver/keymaps/
+    #   example: @sut.press_key(:kDown)
+    #  MobyController::KeySequence
+    #   description: a KeySequence object of key symbols
+    #   example: @sut.press_key( MobyCommand::KeySequence.new(:kDown).times!(3) )
+    # 
     # === returns
     # nil
-    # === raises
+    #
+    # === exceptions
     # ArgumentError:: if input not a symbol or not of type MobyCommand::KeySequence
-    # === examples
-    #  @sut.press_key(:kDown) # presses Down on SUT
-    #  key_sequence = MobyCommand::KeySequence.new(:kDown).times!(3) # creates keysequence to press 3 times down on SUT
-    #  @sut.press_key( key_sequence ) # executes above keysequence on device
+    #
     def press_key( symbol_or_sequence )
 
       begin
@@ -665,23 +672,29 @@ module MobyBehaviour
     # == description
     # Wrapper function to access sut specific parameters.
     # Parameters for each sut are stored in the parameters xml file under group tag with name attribute matching the SUT id
-    # ==params
+    #
+    # == arguments
     # *arguments
-    #	String
+    #	 String
     #   description: Optional argument which is the name of parameter.
     #   example: 'new_parameter'
-    # 	Symbol
-    # 	description: Optional argument which is the name of parameter.
-    #	example: :product
-    # ==return
-    #String
-    #	description: Value matching the parameter name given as argument
-    #	example: 'testability-driver-qt-sut-plugin'
+    #  Symbol
+    #   description: Optional argument which is the name of parameter.
+    #	  example: :product
+    #
+    # == returns
+    # String
+    #	 description: Value matching the parameter name given as argument
+    #	 example: 'testability-driver-qt-sut-plugin'
+    #
     # MobyUtil::ParameterHash
-    # 	description:: Hash of values, if no arguments is specified
+    # 	description: Hash of values, if no arguments is specified
+    #   example: { :value => '1', :inner_hash => { :another_value => 100 } }
+    #
     # == exceptions
     # ParameterNotFoundError
-    #	description: If the parameter with the given name does not exist
+    #	 description: If the parameter with the given name does not exist
+    #
     # == example
     # parameter_hash = @sut.parameter	 #returns the hash of all sut parameters
     # value = @sut.parameter[:product] 	#returns the value for parameter 'product' for this particular sut
