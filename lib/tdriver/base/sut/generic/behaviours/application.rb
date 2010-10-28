@@ -17,13 +17,29 @@
 ## 
 ############################################################################
 
-
-# Application behaviour
-#
-# Describes the behaviour of application and its associated methods
-#
 module MobyBehaviour
 
+  # == description
+  # Describes the behaviour of application and its associated methods
+  #
+  # == behaviour
+  # GenericApplication
+  #
+  # == requires
+  # *
+  #
+  # == input_type
+  # *
+  #
+  # == sut_type
+  # *
+  #
+  # == sut_version
+  # *
+  #
+  # == objects
+  # application
+  #
 	module Application
 
 		include MobyBehaviour::Behaviour

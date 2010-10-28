@@ -19,140 +19,164 @@
 
 module MobyBehaviour
   
-    module SwitchboxBehaviour
-      include MobyBehaviour::Behaviour
+  # == description
+  # SwitchboxBehaviour related behaviour
+  #
+  # == behaviour
+  # GenericSwitchboxBehaviour
+  #
+  # == requires
+  # *
+  #
+  # == input_type
+  # *
+  #
+  # == sut_type
+  # *
+  #
+  # == sut_version
+  # *
+  #
+  # == objects
+  # sut
+  #
+  module SwitchboxBehaviour
 
-      # Instructs the SUT to reboot
-      # === params
-      # === returns
-      # === raises
-      def reset
-        str_sleep_time_before_powerup = parameter(:switchbox_sleep_before_powerup_in_reboot)
-        Kernel::raise BehaviourError.new("reboot", "switchbox_sleep_before_powerup_in_reboot not defined for sut in tdriver_parameters.xml") if str_sleep_time_before_powerup == nil
+    include MobyBehaviour::Behaviour
 
-        str_sleep_time_after_powerup = parameter(:switchbox_sleep_after_powerup_in_reboot)
-        Kernel::raise BehaviourError.new("reboot", "switchbox_sleep_after_powerup_in_reboot not defined for sut in tdriver_parameters.xml") if str_sleep_time_after_powerup == nil
+    # Instructs the SUT to reboot
+    # === params
+    # === returns
+    # === raises
+    def reset
+      str_sleep_time_before_powerup = parameter(:switchbox_sleep_before_powerup_in_reboot)
+      Kernel::raise BehaviourError.new("reboot", "switchbox_sleep_before_powerup_in_reboot not defined for sut in tdriver_parameters.xml") if str_sleep_time_before_powerup == nil
 
-        str_commands_after_powerup = parameter(:switchbox_commands_after_powerup_in_reboot)
+      str_sleep_time_after_powerup = parameter(:switchbox_sleep_after_powerup_in_reboot)
+      Kernel::raise BehaviourError.new("reboot", "switchbox_sleep_after_powerup_in_reboot not defined for sut in tdriver_parameters.xml") if str_sleep_time_after_powerup == nil
 
-        begin
-          sleep_time_before_powerup = str_sleep_time_before_powerup.to_i
-          Kernel::raise BehaviourError.new("reboot", "switchbox_sleep_before_powerup_in_reboot need to be non-negative integer smaller than 50 seconds") if sleep_time_before_powerup < 0 or sleep_time_before_powerup > 50
+      str_commands_after_powerup = parameter(:switchbox_commands_after_powerup_in_reboot)
 
-        rescue
-          Kernel::raise BehaviourError.new("reboot", "switchbox_sleep_in_reboot could not be converted to integer")
-        end
+      begin
+        sleep_time_before_powerup = str_sleep_time_before_powerup.to_i
+        Kernel::raise BehaviourError.new("reboot", "switchbox_sleep_before_powerup_in_reboot need to be non-negative integer smaller than 50 seconds") if sleep_time_before_powerup < 0 or sleep_time_before_powerup > 50
 
-        begin
-          sleep_time_after_powerup = str_sleep_time_after_powerup.to_i
-          Kernel::raise BehaviourError.new("reboot", "switchbox_sleep_after_powerup_in_reboot need to be non-negative integer smaller than 500 seconds") if sleep_time_after_powerup < 0 or sleep_time_after_powerup > 500
-
-        rescue
-          Kernel::raise BehaviourError.new("reboot", "switchbox_sleep_after_powerup_in_reboot could not be converted to integer")
-        end
-
-        
-        
-        power_down
-        begin
-          disconnect
-        rescue
-        end
-        sleep sleep_time_before_powerup
-        power_up
-        sleep sleep_time_after_powerup
-
-        MobyUtil::Retryable.until( :timeout => 60, :retry_timeout => 5 ) {
-					system(str_commands_after_powerup) if str_commands_after_powerup != nil
-          if MobyUtil::Parameter[ :ats4_error_recovery_enabled, false ]=='true'
-            MobyUtil::Logger.instance.log "behaviour" , "PASS;TDriver attempting reconnect"
-					  self.connect(self.id)
-            MobyUtil::Logger.instance.log "behaviour" , "PASS;TDriver connected"
-          else
-            MobyUtil::Logger.instance.log "behaviour" , "PASS;ATS4 handling reconnection"
-          end
-
-				}
+      rescue
+        Kernel::raise BehaviourError.new("reboot", "switchbox_sleep_in_reboot could not be converted to integer")
       end
 
-      # Instructs the switchbox to power down the sut
-      # === params
-      # === returns
-      # === raises
-      def power_down
-        str_command_arr = []
+      begin
+        sleep_time_after_powerup = str_sleep_time_after_powerup.to_i
+        Kernel::raise BehaviourError.new("reboot", "switchbox_sleep_after_powerup_in_reboot need to be non-negative integer smaller than 500 seconds") if sleep_time_after_powerup < 0 or sleep_time_after_powerup > 500
 
-        str_command = parameter(:switchbox_powerdown_command_sequence)
-
-        switchbox_sequence_timeout = parameter(:switchbox_timeout_between_command_sequence)
-
-        Kernel::raise BehaviourError.new("power_down", "switchbox_timeout_between_command_sequence not defined for sut in tdriver_parameters.xml") if switchbox_sequence_timeout == nil
-
-        Kernel::raise BehaviourError.new("power_down", "switchbox_powerdown_command not defined for sut in tdriver_parameters.xml") if str_command == nil
-
-        str_result = parameter(:switchbox_powerdown_command_success_string)
-        Kernel::raise BehaviourError.new("power_down", "switchbox_powerdown_command_success string not defined for sut in tdriver_parameters.xml") if str_result == nil
-
-        #generate the sequence
-        str_command_arr = str_command.split('|')
-
-        #execute switchbox command
-        str_command_arr.each do |foobox_command|
-          MobyUtil::Logger.instance.log "behaviour" , "PASS;Executing powerdown command #{foobox_command}"
-          std_out = system(foobox_command)
-          MobyUtil::Logger.instance.log "behaviour" , "PASS;Powerdown command #{foobox_command} executed"
-          sleep switchbox_sequence_timeout.to_i
-          Kernel::raise BehaviourError.new("power_down", "Failed to power down") unless std_out.to_s.downcase.include?(str_result.to_s.downcase)
-        end
-        @switch_box_power_status = false
+      rescue
+        Kernel::raise BehaviourError.new("reboot", "switchbox_sleep_after_powerup_in_reboot could not be converted to integer")
       end
 
-      # Instructs the switchbox to power up the sut
-      # === params
-      # === returns
-      # === raises
-      def power_up
-        str_command_arr = []
+      
+      
+      power_down
+      begin
+        disconnect
+      rescue
+      end
+      sleep sleep_time_before_powerup
+      power_up
+      sleep sleep_time_after_powerup
 
-        switchbox_sequence_timeout = parameter(:switchbox_timeout_between_command_sequence)
-
-        Kernel::raise BehaviourError.new("power_down", "switchbox_timeout_between_command_sequence not defined for sut in tdriver_parameters.xml") if switchbox_sequence_timeout == nil
-
-        str_command = parameter(:switchbox_powerup_command_sequence)
-        Kernel::raise BehaviourError.new("power_up", "switchbox_powerup_command not defined for sut in tdriver_parameters.xml") if str_command == nil
-
-        str_result = parameter(:switchbox_powerup_command_success_string)
-        Kernel::raise BehaviourError.new("power_up", "switchbox_powerup_command_success string not defined for sut in tdriver_parameters.xml") if str_result == nil
-
-        #generate the sequence
-        str_command_arr = str_command.split('|')
-
-        #execute switchbox command
-        str_command_arr.each do |foobox_command|
-          MobyUtil::Logger.instance.log "behaviour" , "PASS;Executing powerup command #{foobox_command}"
-          std_out = system(foobox_command)
-          MobyUtil::Logger.instance.log "behaviour" , "PASS;Ppowerup command #{foobox_command} executed"
-          sleep switchbox_sequence_timeout.to_i
-          Kernel::raise BehaviourError.new("power_up", "Failed to power up") unless std_out.to_s.downcase.include?(str_result.to_s.downcase)
+      MobyUtil::Retryable.until( :timeout => 60, :retry_timeout => 5 ) {
+        system(str_commands_after_powerup) if str_commands_after_powerup != nil
+        if MobyUtil::Parameter[ :ats4_error_recovery_enabled, false ]=='true'
+          MobyUtil::Logger.instance.log "behaviour" , "PASS;TDriver attempting reconnect"
+          self.connect(self.id)
+          MobyUtil::Logger.instance.log "behaviour" , "PASS;TDriver connected"
+        else
+          MobyUtil::Logger.instance.log "behaviour" , "PASS;ATS4 handling reconnection"
         end
 
-        @switch_box_power_status = true
-      end
-
-	    # Gets the current power status of the switchbox
-	    # === params
-	    # === returns
-	    # === raises
-	    def power_status
-	      if @switch_box_power_status == nil
-		false
-	      else
-		@switch_box_power_status
-	      end
-	    end
-	# enable hooking for performance measurement & debug logging
-	MobyUtil::Hooking.instance.hook_methods( self ) if defined?( MobyUtil::Hooking )
-
+      }
     end
 
+    # Instructs the switchbox to power down the sut
+    # === params
+    # === returns
+    # === raises
+    def power_down
+      str_command_arr = []
+
+      str_command = parameter(:switchbox_powerdown_command_sequence)
+
+      switchbox_sequence_timeout = parameter(:switchbox_timeout_between_command_sequence)
+
+      Kernel::raise BehaviourError.new("power_down", "switchbox_timeout_between_command_sequence not defined for sut in tdriver_parameters.xml") if switchbox_sequence_timeout == nil
+
+      Kernel::raise BehaviourError.new("power_down", "switchbox_powerdown_command not defined for sut in tdriver_parameters.xml") if str_command == nil
+
+      str_result = parameter(:switchbox_powerdown_command_success_string)
+      Kernel::raise BehaviourError.new("power_down", "switchbox_powerdown_command_success string not defined for sut in tdriver_parameters.xml") if str_result == nil
+
+      #generate the sequence
+      str_command_arr = str_command.split('|')
+
+      #execute switchbox command
+      str_command_arr.each do |foobox_command|
+        MobyUtil::Logger.instance.log "behaviour" , "PASS;Executing powerdown command #{foobox_command}"
+        std_out = system(foobox_command)
+        MobyUtil::Logger.instance.log "behaviour" , "PASS;Powerdown command #{foobox_command} executed"
+        sleep switchbox_sequence_timeout.to_i
+        Kernel::raise BehaviourError.new("power_down", "Failed to power down") unless std_out.to_s.downcase.include?(str_result.to_s.downcase)
+      end
+      @switch_box_power_status = false
+    end
+
+    # Instructs the switchbox to power up the sut
+    # === params
+    # === returns
+    # === raises
+    def power_up
+      str_command_arr = []
+
+      switchbox_sequence_timeout = parameter(:switchbox_timeout_between_command_sequence)
+
+      Kernel::raise BehaviourError.new("power_down", "switchbox_timeout_between_command_sequence not defined for sut in tdriver_parameters.xml") if switchbox_sequence_timeout == nil
+
+      str_command = parameter(:switchbox_powerup_command_sequence)
+      Kernel::raise BehaviourError.new("power_up", "switchbox_powerup_command not defined for sut in tdriver_parameters.xml") if str_command == nil
+
+      str_result = parameter(:switchbox_powerup_command_success_string)
+      Kernel::raise BehaviourError.new("power_up", "switchbox_powerup_command_success string not defined for sut in tdriver_parameters.xml") if str_result == nil
+
+      #generate the sequence
+      str_command_arr = str_command.split('|')
+
+      #execute switchbox command
+      str_command_arr.each do |foobox_command|
+        MobyUtil::Logger.instance.log "behaviour" , "PASS;Executing powerup command #{foobox_command}"
+        std_out = system(foobox_command)
+        MobyUtil::Logger.instance.log "behaviour" , "PASS;Ppowerup command #{foobox_command} executed"
+        sleep switchbox_sequence_timeout.to_i
+        Kernel::raise BehaviourError.new("power_up", "Failed to power up") unless std_out.to_s.downcase.include?(str_result.to_s.downcase)
+      end
+
+      @switch_box_power_status = true
+    end
+
+    # Gets the current power status of the switchbox
+    # === params
+    # === returns
+    # === raises
+    def power_status
+      if @switch_box_power_status == nil
+        false
+      else
+        @switch_box_power_status
+      end
+    end
+
+    # enable hooking for performance measurement & debug logging
+    MobyUtil::Hooking.instance.hook_methods( self ) if defined?( MobyUtil::Hooking )
+
+  end
+
 end
+

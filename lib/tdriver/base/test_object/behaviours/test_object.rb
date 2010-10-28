@@ -717,11 +717,12 @@ module MobyBehaviour
 
   public
 
+    # This method is deprecated, please use [link="#GenericTestObject:parent"]TestObject#parent[/link] instead.
     # == deprecated
     # 0.8.x
     #
     # == description
-    # This method is deprecated, please use [link="#GenericTestObject:parent"]TestObject#parent[/link] instead.
+    # This method is deprecated, please use TestObject#parent
     #
     def parent_object()
 

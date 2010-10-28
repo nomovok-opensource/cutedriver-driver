@@ -53,12 +53,13 @@ module MobyBehaviour
 		# find_hash
 		#  Hash
 		#   description: one or more attributes defining the rules for the test object search. Must not be empty.
-		#   example { :name => 'oneButton' }
+		#   example: { :name => 'oneButton' }
 		#   default: {}
 		#
 		# == returns
 		# MobyBase::TestObject
 		#  description: found test object
+    #  example: -
 		#
 		# == exceptions
 		# TypeError

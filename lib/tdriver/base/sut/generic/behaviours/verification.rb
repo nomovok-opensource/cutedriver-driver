@@ -17,13 +17,29 @@
 ## 
 ############################################################################
 
-
-# Verification behaviour 
-#
-# Methods for verifying sut and test object state
 module MobyBehaviour
-
-	# Defines methods for verification of sut and test object state 
+ 
+  # == description
+  # Defines methods for verification of sut and test object state 
+  #
+  # == behaviour
+  # GenericVerification
+  #
+  # == requires
+  # *
+  #
+  # == input_type
+  # *
+  #
+  # == sut_type
+  # *
+  #
+  # == sut_version
+  # *
+  #
+  # == objects
+  # *;sut
+  #
 	module Verification
 
 		include MobyBehaviour::Behaviour
