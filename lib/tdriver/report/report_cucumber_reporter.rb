@@ -93,7 +93,7 @@ module TDriverReport
       visit_feature_element_name(keyword, name, file_colon_line, source_indent)
     end
     def feature_name(keyword,name)
-      @current_feature_group=keyword + " " + name      
+      @current_feature_group=keyword + " " + name.gsub(/[:]/,' ')
       add_report_group('Features:'+@current_feature_group+'|')
     end
     #This method determines when new test case needs to be started
