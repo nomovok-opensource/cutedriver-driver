@@ -17,23 +17,6 @@
       div.feature_title
       {
 
-        background: #f1f1f1;
-
-        border-top: 1px solid #f9f9f9;
-        border-left: 1px solid #f9f9f9;
-
-        border-bottom: 1px solid #dadada;
-        border-right: 1px solid #dadada;
-
-
-        background: #d1d1d1;
-
-        border-top: 1px solid #d9d9d9;
-        border-left: 1px solid #d9d9d9;
-
-        border-bottom: 1px solid #bababa;
-        border-right: 1px solid #bababa;
-
         background: #c1c1c1;
 
         border-top: 1px solid #c9c9c9;
@@ -42,14 +25,17 @@
         border-bottom: 1px solid #aaaaaa;
         border-right: 1px solid #aaaaaa;
 
-        padding: 8px; 
+        padding: 8px;
 
+        -moz-box-shadow: 1px 1px 4px #818181;
+        -webkit-box-shadow: 1px 1px 4px #818181;
+ 
       }
 
       span.feature_title_text, a.feature_name_link
       {
         text-decoration: none; //underline;
-        border-bottom: 2px solid #404040;
+        border-bottom: 1px dotted #404040;
         font-size: 14px; 
         color: #404040;
         font-weight: bold;
@@ -113,15 +99,21 @@
 
       tr.header, tr.header_custom
       {      
-        background: #96E066;
+        #background: #96E066;
         font-weight: bold;
       }
       
       tr.header_custom
       {
       
-        background: #f0a646;
+        #background: #f0a646;
       
+      }
+
+      td.header_custom{
+
+        background: #f0a646;
+
       }
 
       <!-- table-style: cellpadding -->
@@ -136,6 +128,8 @@
 
       td.header
       {
+
+        background: #96E066;
 
         font-size: 11px;      
         border-top: 1px solid #a6f076;
@@ -349,6 +343,18 @@
       
         border: 0px;
       
+      }
+
+      tr.header, tr.header_custom, div.feature_title, table.default, td.header, td.header_custom, td.tablebg_even, td.tablebg_odd, td.tablebg_warning, td.warning, div.warning, td.tablebg_disabled, pre.passed, pre.failed, pre.skipped, pre.block
+      {
+
+        -moz-border-radius: 5px 5px 5px 5px;
+
+        -webkit-border-radius: 9px;
+        -webkit-border-top-left-radius: 9px;
+        -webkit-border-bottom-right-radius: 9px;
+
+
       }
       
     </style>
@@ -1329,7 +1335,7 @@
       <!-- header -->
       <tr class="header_custom">
         <xsl:for-each select="header/item">
-          <td><xsl:value-of select="."/></td>
+          <td class="header_custom"><xsl:value-of select="."/></td>
         </xsl:for-each>
       </tr>
           
