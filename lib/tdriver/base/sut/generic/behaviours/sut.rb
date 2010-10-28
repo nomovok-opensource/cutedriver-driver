@@ -68,7 +68,10 @@ module MobyBehaviour
 
 		)
 
-    #TODO: document
+    
+    # == description
+    # Connects selected SUT according to configuration in tdriver_parameters.xml.
+    #
     def connect( id )
 
       @_sutController.connect( id )
@@ -957,6 +960,18 @@ module MobyBehaviour
 
     end
 
+    # == description
+    # Clears all verification blocks added to the sut through verify_always() method and
+    # verify_blocks configuration parameter in the tdriver parameters file
+    #
+    # == arguments
+    #
+    # == returns
+    # Array
+    #  description: Now empty array of verification blocks
+    #
+    # == exceptions
+    #
     def clear_verify_blocks
 
       @verify_blocks = []
