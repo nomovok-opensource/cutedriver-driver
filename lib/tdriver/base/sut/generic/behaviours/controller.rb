@@ -25,12 +25,14 @@ module MobyBehaviour
 
 		include MobyBehaviour::Behaviour
 
+    # == nodoc
 		def execution_order
 
 			@_sutController.execution_order
 
 		end
 
+    # == nodoc
 		def execution_order=( order )
 
 			@_sutController.execution_order = order

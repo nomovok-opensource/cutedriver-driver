@@ -42,6 +42,7 @@ module MobyBehaviour
   #
   module TestObject
 
+    # == nodoc
     # == description
     # attr_accessor
     # == returns
@@ -78,6 +79,7 @@ module MobyBehaviour
 
     end
 
+    # == nodoc
     # == description
     # Changes the status of the test object to active
     # == returns 
@@ -91,6 +93,7 @@ module MobyBehaviour
 
     end
 
+    # == nodoc
     # Changes the status of the test object to inactive, also deactivating all children
     # Removes reference from @parent TestObject or SUT to this TestObject so that 
     # @parent.refresh does not refresh currrent TestObject
@@ -210,6 +213,7 @@ module MobyBehaviour
 
     end
     
+    # == nodoc
     # Updates this test object to match the data in the provided xml document
     # Propagates updating to all child TestObjects
     # If TestObject is not identified, then current TO is deactivated, as is all the Child objects, as defined in TestObject#deactivate.
@@ -237,6 +241,7 @@ module MobyBehaviour
 
     end 
 
+    # == nodoc
     # Function refreshes test objects to correspond with the current state of the device.
     # 
     # NOTE:
@@ -247,13 +252,14 @@ module MobyBehaviour
     # TestObjectNotFoundError:: if TestObject is not identified within synch timeout.
     def refresh( refresh_args = {} )
 
-	  object_search_params = @test_object_factory.make_object_search_params(@creation_attributes)
-	  search_params = @test_object_factory.get_parent_params(parent)
-	  search_params.push(object_search_params)	    
+	    object_search_params = @test_object_factory.make_object_search_params(@creation_attributes)
+	    search_params = @test_object_factory.get_parent_params(parent)
+	    search_params.push(object_search_params)	    
       @sut.refresh( refresh_args, search_params )
 
     end
 
+    # == nodoc
     # Function refreshes test objects to correspond with the current state of the device, forcing
     # the sut to request a new XML dump from the device.
     # 
@@ -310,6 +316,7 @@ module MobyBehaviour
 
     end
 
+    # == nodoc
     def set_application_id( application_id )
 
       @_application_id = application_id
@@ -334,16 +341,16 @@ module MobyBehaviour
 
     end
 
-	# Function for translating all symbol values into strings using sut's translate method
-	# Goes through all items in a hash and if a value is symbol then uses that symbol as a logical
-	# name and tries to find a translation for that.
-	# === params
-	# hash:: Hash containing key, value pairs. The parameter will get modified if symbols are found from values
-	# === raises
-	# LanguageNotFoundError:: In case of language is not found
-	# LogicalNameNotFoundError:: In case of logical name is not found for current language
-	# MySqlConnectError:: In case problems with the db connectivity
-	def translate!( hash, file_name = nil, plurality = nil, numerus = nil, lengthvariant = nil )
+	  # Function for translating all symbol values into strings using sut's translate method
+	  # Goes through all items in a hash and if a value is symbol then uses that symbol as a logical
+	  # name and tries to find a translation for that.
+	  # === params
+	  # hash:: Hash containing key, value pairs. The parameter will get modified if symbols are found from values
+	  # === raises
+	  # LanguageNotFoundError:: In case of language is not found
+	  # LogicalNameNotFoundError:: In case of logical name is not found for current language
+	  # MySqlConnectError:: In case problems with the db connectivity
+	  def translate!( hash, file_name = nil, plurality = nil, numerus = nil, lengthvariant = nil )
 
       hash.each_pair do | _key, _value |
 
@@ -710,11 +717,12 @@ module MobyBehaviour
 
   public
 
+    # This method is deprecated, please use [link="#GenericTestObject:parent"]TestObject#parent[/link] instead.
     # == deprecated
     # 0.8.x
     #
     # == description
-    # This method is deprecated, please use [link="#parent"]TestObject#parent[/link] instead.
+    # This method is deprecated, please use TestObject#parent
     #
     def parent_object()
 

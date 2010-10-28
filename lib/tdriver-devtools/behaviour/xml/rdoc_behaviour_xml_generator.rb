@@ -1293,8 +1293,12 @@ EXAMPLE
     def apply_macros!( source, macros )
         
       macros.each_pair{ | key, value |
-                  
-        source.gsub!( /(\$#{ key })\b/, ( value || "" ).to_s )
+
+        while result = /(\$#{ key }\b)/.match( source )
+
+          source = source[0..result.begin(0)-1] + value.to_s + source[result.end(0)..-1]
+
+        end
       
       }
       

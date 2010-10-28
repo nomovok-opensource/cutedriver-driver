@@ -52,6 +52,7 @@ module MobyBehaviour
 		  
 		#end
 
+    # == nodoc
 		# Adds a object as a parent of this object
 		# === params
 		# parent_object Object to be added
@@ -64,6 +65,7 @@ module MobyBehaviour
 
 		end
 
+    # == nodoc
 		# removes association to parent object from self
 		# === params
 		# none
@@ -75,6 +77,7 @@ module MobyBehaviour
 
 		end
 
+    # == nodoc
 		# Adds a test object as a child of this object
 		# === params
 		# new_child_object:: Object to be added
@@ -87,6 +90,7 @@ module MobyBehaviour
 
 		end
 
+    # == nodoc
 		# Removes target_child_object from the Set of child objects
 		# === params
 		# target_test_object:: TestObject to be removed

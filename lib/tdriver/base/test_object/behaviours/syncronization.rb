@@ -19,8 +19,27 @@
 
 module MobyBehaviour
 
-	# TDriver synchronization functionality. These methods make it possible to wait until the SUT is in 
-	# some user defined state
+  # == description
+  # TDriver synchronization functionality. These methods make it possible to wait until the SUT is in some user defined state
+  #
+  # == behaviour
+  # GenericTestObjectSynchronization
+  #
+  # == requires
+  # *
+  #
+  # == input_type
+  # *
+  #
+  # == sut_type
+  # *
+  #
+  # == sut_version
+  # *
+  #
+  # == objects
+  # *;sut
+  #
 	module TestObjectSynchronization
 
 		include MobyBehaviour::Behaviour

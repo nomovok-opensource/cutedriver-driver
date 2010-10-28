@@ -18,11 +18,39 @@
 ## 
 ############################################################################
 
+def safe_require( *paths )
+
+  found = false
+
+  paths.each{ | path |
+
+    begin
+
+      require path
+
+      found = true
+
+      break
+
+    rescue LoadError
+
+      #puts "path #{ path } not found"
+
+    end
+
+  }
+
+  abort("Unable to load one of files: %s" % paths.inspect ) unless found
+
+end
+
 require 'rubygems'
 require 'rdoc/rdoc'
 require 'optparse'
-require 'tdriver/version.rb'
-require 'tdriver/util/common/loader.rb'
+
+safe_require('tdriver/version.rb',  File.expand_path( File.join( File.dirname( __FILE__ ), '../tdriver/version.rb' ) ) )
+safe_require('tdriver/util/common/loader.rb',  File.expand_path( File.join( File.dirname( __FILE__ ), '../tdriver/util/common/loader.rb' ) ) )
+
 require 'tmpdir'
 require 'fileutils'
 
