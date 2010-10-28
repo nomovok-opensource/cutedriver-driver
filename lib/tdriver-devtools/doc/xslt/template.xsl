@@ -34,11 +34,17 @@
 
       span.feature_title_text, a.feature_name_link
       {
-        text-decoration: none; //underline;
-        #border-bottom: 1px dotted #404040;
+        text-decoration: none;
         font-size: 14px; 
-        color: #404040;
+        color: #606060;
         font-weight: bold;
+      }
+  
+      span.feature_title_text:hover
+      { 
+
+        color: #404040; 
+
       }
 
       div.feature_section_title
@@ -1452,7 +1458,7 @@
     <pre class="{@status}">
       <!-- show status only if other than 'passed' -->
       <xsl:if test="string(@status)!='passed'" >
-        <xsl:text># scenario </xsl:text><xsl:value-of select="@status" /><br />
+        <xsl:text># [!!] scenario </xsl:text><xsl:value-of select="@status" /><br />
       </xsl:if>
 
       <xsl:for-each select="str:split(example,'\n')">
