@@ -672,23 +672,29 @@ module MobyBehaviour
     # == description
     # Wrapper function to access sut specific parameters.
     # Parameters for each sut are stored in the parameters xml file under group tag with name attribute matching the SUT id
-    # ==params
+    #
+    # == arguments
     # *arguments
-    #	String
+    #	 String
     #   description: Optional argument which is the name of parameter.
     #   example: 'new_parameter'
-    # 	Symbol
-    # 	description: Optional argument which is the name of parameter.
-    #	example: :product
-    # ==return
-    #String
-    #	description: Value matching the parameter name given as argument
-    #	example: 'testability-driver-qt-sut-plugin'
+    #  Symbol
+    #   description: Optional argument which is the name of parameter.
+    #	  example: :product
+    #
+    # == returns
+    # String
+    #	 description: Value matching the parameter name given as argument
+    #	 example: 'testability-driver-qt-sut-plugin'
+    #
     # MobyUtil::ParameterHash
-    # 	description:: Hash of values, if no arguments is specified
+    # 	description: Hash of values, if no arguments is specified
+    #   example: { :value => '1', :inner_hash => { :another_value => 100 } }
+    #
     # == exceptions
     # ParameterNotFoundError
-    #	description: If the parameter with the given name does not exist
+    #	 description: If the parameter with the given name does not exist
+    #
     # == example
     # parameter_hash = @sut.parameter	 #returns the hash of all sut parameters
     # value = @sut.parameter[:product] 	#returns the value for parameter 'product' for this particular sut
