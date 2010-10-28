@@ -931,10 +931,32 @@
 
   <tr valign="top" class="{ $class }">
     <td class="{ $class }"><xsl:value-of select="$type/@name"/></td>
-    <td class="{ $class }"><xsl:for-each select="str:split($type/description,'\n')">
-      <xsl:value-of select="text()" /><br />
-    </xsl:for-each>
-    </td>
+
+
+    <xsl:choose>
+
+
+
+      <xsl:when test="string-length($type/description)=0">
+
+        <xsl:call-template name="col_warning" >
+          <xsl:with-param name="text">Exception description not defined</xsl:with-param>
+        </xsl:call-template>       
+
+      </xsl:when>
+
+      <xsl:otherwise>
+        <td class="{ $class }"><xsl:for-each select="str:split($type/description,'\n')"><xsl:value-of select="text()" /><br /></xsl:for-each></td>
+      </xsl:otherwise>
+
+    </xsl:choose>
+<!--
+
+    <td class="{ $class }"><xsl:for-each select="str:split($type/description,'\n')"><xsl:value-of select="text()" /><br /></xsl:for-each></td>
+-->
+
+
+
   </tr>
 
 </xsl:template>
