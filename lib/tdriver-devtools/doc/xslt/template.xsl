@@ -22,7 +22,7 @@
          color: black;
          font-size: 13px;
          cursor: default;
-         text-shadow: #909090 1px 2px 4px;
+         text-shadow: #909090 1px 1px 4px;
        }
      
       div.feature_title
@@ -49,7 +49,7 @@
         font-size: 14px; 
         color: #606060;
 
-        text-shadow: gray 1px 2px 3px;
+        text-shadow: gray 2px 2px 3px;
         font-weight: bold;
       }
   
@@ -67,7 +67,7 @@
         font-size: 13px;
         font-weight: bold;
         color: #000000;
-        text-shadow: #909090 1px 2px 3px;
+        text-shadow: #909090 1px 1px 4px;
 
       }
       
@@ -183,7 +183,7 @@
 
         background: #a11010;
         color: #ffff00;
-        text-shadow: #666600 1px 2px 6px;
+        text-shadow: #666600 1px 1px 4px;
 
       }
 
@@ -212,7 +212,7 @@
       div.warning
       {
         color: #ffff00;
-        text-shadow: #666600 1px 2px 6px;
+        text-shadow: #666600 1px 1px 4px;
 
         font-family: arial;
         font-size: 11px;      
@@ -338,7 +338,7 @@
         text-decoration: none;
 
         color: #d15131;
-        text-shadow: #ff8f6f 1px 2px 3px;
+        text-shadow: #ff8f6f 1px 1px 4px;
 
         border-bottom: 1px dotted #515151;
         font-weight: bold;
