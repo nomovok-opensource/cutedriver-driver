@@ -13,6 +13,17 @@
 <html>
   <head>
     <style  TYPE="text/css">
+
+     body
+       {
+         padding: 10px;
+         border: #e7e7e7 1px solid;
+         background: #ffffff;
+         color: black;
+         font-size: 13px;
+         cursor: default;
+         text-shadow: #909090 2px 2px 3px;
+       }
      
       div.feature_title
       {
@@ -37,6 +48,8 @@
         text-decoration: none;
         font-size: 14px; 
         color: #606060;
+
+        text-shadow: gray 1px 1px 3px;
         font-weight: bold;
       }
   
@@ -54,7 +67,8 @@
         font-size: 13px;
         font-weight: bold;
         color: #000000;
-      
+        text-shadow: #909090 1px 1px 3px;
+
       }
       
       div.feature_description, div.feature_call_sequence, div.scenario_description, div.feature_deprecated_version
@@ -169,6 +183,7 @@
 
         background: #a11010;
         color: #ffff00;
+        text-shadow: #666600 2px 2px 6px;
 
       }
 
@@ -197,6 +212,7 @@
       div.warning
       {
         color: #ffff00;
+        text-shadow: #666600 2px 2px 6px;
 
         font-family: arial;
         font-size: 11px;      
@@ -207,16 +223,6 @@
       span.optional_argument
       {
         font-style: italic;
-      }
-
-      body
-      {
-        padding: 10px;
-        border: #e7e7e7 1px solid;
-        background: #ffffff;
-        color: black;
-        font-size: 13px;
-        cursor:default;
       }
 
       pre
@@ -330,8 +336,11 @@
       {
       
         text-decoration: none;
-        border-bottom: 1px dotted #515151;
+
         color: #d15131;
+        text-shadow: #ff8f6f 2px 2px 3px;
+
+        border-bottom: 1px dotted #515151;
         font-weight: bold;
 
       }
