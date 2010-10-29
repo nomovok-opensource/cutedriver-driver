@@ -34,11 +34,17 @@
 
       span.feature_title_text, a.feature_name_link
       {
-        text-decoration: none; //underline;
-        #border-bottom: 1px dotted #404040;
+        text-decoration: none;
         font-size: 14px; 
-        color: #404040;
+        color: #606060;
         font-weight: bold;
+      }
+  
+      span.feature_title_text:hover
+      { 
+
+        color: #404040; 
+
       }
 
       div.feature_section_title
@@ -931,10 +937,32 @@
 
   <tr valign="top" class="{ $class }">
     <td class="{ $class }"><xsl:value-of select="$type/@name"/></td>
-    <td class="{ $class }"><xsl:for-each select="str:split($type/description,'\n')">
-      <xsl:value-of select="text()" /><br />
-    </xsl:for-each>
-    </td>
+
+
+    <xsl:choose>
+
+
+
+      <xsl:when test="string-length($type/description)=0">
+
+        <xsl:call-template name="col_warning" >
+          <xsl:with-param name="text">Exception description not defined</xsl:with-param>
+        </xsl:call-template>       
+
+      </xsl:when>
+
+      <xsl:otherwise>
+        <td class="{ $class }"><xsl:for-each select="str:split($type/description,'\n')"><xsl:value-of select="text()" /><br /></xsl:for-each></td>
+      </xsl:otherwise>
+
+    </xsl:choose>
+<!--
+
+    <td class="{ $class }"><xsl:for-each select="str:split($type/description,'\n')"><xsl:value-of select="text()" /><br /></xsl:for-each></td>
+-->
+
+
+
   </tr>
 
 </xsl:template>
@@ -1430,7 +1458,7 @@
     <pre class="{@status}">
       <!-- show status only if other than 'passed' -->
       <xsl:if test="string(@status)!='passed'" >
-        <xsl:text># scenario </xsl:text><xsl:value-of select="@status" /><br />
+        <xsl:text># [!!] scenario </xsl:text><xsl:value-of select="@status" /><br />
       </xsl:if>
 
       <xsl:for-each select="str:split(example,'\n')">
