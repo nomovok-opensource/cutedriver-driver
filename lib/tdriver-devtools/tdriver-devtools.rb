@@ -314,7 +314,7 @@ def execute_tdriver_devtools
           if @options[ :delete ] == true
             Dir.glob( File.join( destination_folder, '*.xml' ) ) do |entry|
               begin
-                puts "Delete #{ entry }"
+                #puts "Delete #{ entry }"
                 File.delete( entry )
               rescue Exception => exception
                 warn("Unable to delete file %s (%s: %s)" % [ entry, exception.class, exception.message ] )

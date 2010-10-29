@@ -116,6 +116,219 @@ task :default do | task |
 
 end
 
+
+
+
+
+
+
+
+
+
+def delete_folder( folder )
+
+  folder = File.expand_path( folder )
+
+  if File.directory?( folder )
+
+    puts "Deleting folder #{ folder }"
+
+    begin
+
+      FileUtils.rm_r( folder )
+
+    rescue Exception => exception
+
+      abort("Error while deleting folder (%s: %s)" % [ exception.class, exception.message ] )
+
+    end
+
+  end
+  
+end
+
+def create_folder( folder )
+
+  folder = File.expand_path( folder )
+
+  unless File.directory?( folder )
+
+    puts "Creating folder #{ folder }"
+
+    begin
+
+      FileUtils.mkdir_p( folder )
+
+    rescue Exception => exception 
+
+      abort("Error while creating folder (%s: %s)" % [ exception.class, exception.message ] )
+
+    end
+
+  end
+
+end
+
+def copy_files( source, destination )
+  
+  destination = File.expand_path( destination )
+
+  source = File.expand_path( source )
+
+  create_folder( destination )
+
+  puts "Copying #{ File.dirname( source ) } to #{ File.join( destination ) }"
+
+  Dir.glob( source ) do | entry |
+
+    begin
+
+
+      FileUtils.cp( entry, destination )
+
+    rescue Exception => exception
+
+      abort("Error while copying file (%s: %s)" % [ exception.class, exception.message ] )
+
+    end
+
+  end
+
+end
+
+def run_tdriver_devtools( params, tests )
+
+  begin
+
+    command = "ruby #{ File.expand_path( File.join( File.dirname( __FILE__ ), '../driver/lib/tdriver-devtools/tdriver-devtools.rb' ) ) } #{ params } -t #{ tests }"
+
+    puts command
+
+    system( command )
+
+  rescue LoadError
+
+    begin
+
+      require('tdriver/env')
+        
+      command = "ruby #{ File.join( ENV['TDRIVER_PATH'], 'lib/tdriver-devtools/tdriver-devtools.rb' ) } #{ params } -t #{ tests }"
+
+      puts command
+
+      system( command )
+
+    rescue LoadError
+
+      abort("Unable to proceed due to TDriver not found or is too old! (required 0.9.2 or later)")
+
+    end
+
+  end
+  
+end
+
+task :behaviours do | task |
+
+  puts "\nGenerating behaviour XML files from implementation... "   
+
+  run_tdriver_devtools( '-g behaviours lib/tdriver behaviours', nil )
+
+end
+
+def doc_tasks( tasks, test_results_folder, tests_path_defined )
+  
+  #test_results_folder = File.expand_path( test_results_folder )
+
+  if tests_path_defined == false
+    puts "\nWarning: Test results folder not given, using default location (#{ test_results_folder })"
+    puts "\nSame as executing:\nrake doc[#{ test_results_folder }]\n\n"
+    sleep 1  
+  else
+    puts "Using given test results from #{ test_results_folder }"
+  end
+
+  # delete possibly existing output folder
+  delete_folder( './doc/output/' )
+
+  # create it again
+  create_folder( './doc/output/' )
+
+  # start generating documentation
+  puts "\nGenerating documentation XML file..."
+
+  tasks.each{ | task |
+
+    case task[0]
+
+        when :copy
+          copy_files( *task[ 1 ] )
+
+        when :generate
+          run_tdriver_devtools( *task[ 1 ] )
+ 
+        when :render
+          run_tdriver_devtools( *task[ 1 ] )
+
+    else
+
+       abort("Unknown task: #{ task[0] }")
+
+    end
+
+  }
+
+  puts "Done\n"
+
+end
+
+task :doc, :tests do | task, args |
+
+  test_results_folder = args[ :tests ] || "../tests/test/feature_xml"
+
+  doc_tasks( 
+    [ 
+      [ :generate, [ '-d -r -g both lib/tdriver doc/output/document.xml', test_results_folder ] ], 
+      [ :copy, [ './doc/images/*', './doc/output/images' ] ] 
+    ],
+    test_results_folder, 
+    args[:tests].nil? 
+  )
+
+end
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+=begin
+
 task :behaviours do | task |
 
   # reset arguments constant without warnings
@@ -153,6 +366,8 @@ task :doc, :tests do | task, args |
   require File.expand_path( File.join( File.dirname( __FILE__ ), 'lib/tdriver-devtools/tdriver-devtools.rb' ) )
 
 end
+
+=end
 
 Rake::GemPackageTask.new( spec ) do | pkg |
   pkg.gem_spec = spec
