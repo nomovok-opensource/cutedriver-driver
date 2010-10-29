@@ -257,8 +257,12 @@ def process_behaviour_file( content )
                                 when /^title$/i
                                 
                                   table[ "title" ] = child.inner_text
+
+                                when /^description$/i
+                                
+                                  table[ "description" ] = child.inner_text
                               
-                                when /^header$/i, /^row$/i, /^title$/
+                                when /^header$/i, /^row$/i #, /^title$/, /^description$/
                                   
                                   table[ child.name.to_s ] << child.children.select{ | node |                                  
                                     node.kind_of?( Nokogiri::XML::Element ) }.collect{ | child |                                  
@@ -734,6 +738,7 @@ def generate_document_xml
               xml.table( :name => table[ "name" ] ){
               
                 xml.title( table[ "title" ].to_s )
+                xml.description( table[ "description" ].to_s )
 
                 xml.header{                                
                   ( table[ "header" ] || [[]] ).first.each{ | item |
