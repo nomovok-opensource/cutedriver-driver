@@ -22,7 +22,7 @@ module MobyBehaviour
   # This module contains implementation to control device flashing
   #
   # == behaviour
-  # FlashBehaviour
+  # GenericFlashBehaviour
   #
   # == requires
   # *
