@@ -356,16 +356,23 @@ module MobyBehaviour
 
     end
 
-    # Returns the current foreground application
+    # == description
+    # Returns the current foreground application or one which matches with given attributes rules.
     #
-    # === params
-    # attributes:: (optional) Hash defining required expected attributes of the application
-    # === returns
-    # TestObject:: Current foreground application
-    # === raises
-    # ArgumentError:: The attributes argument was not a Hash
-    # === examples
-    #  fg_app = @sut.application # retrieves foreground application info and stores it in fg_app-object
+    # == arguments
+    # attributes
+    #  Hash
+    #   description: Hash defining required expected attributes of the application
+    #   example: { :name => 'testapp' }
+    #
+    # == returns
+    # MobyBase::TestObject
+    #  description: Current foreground application or one that meets hash rules
+    #  example: -
+    #
+    # == exceptions
+    # ArgumentError
+    #   description: The attributes argument was not a Hash
     def application( attributes = {} )
 
       begin
@@ -617,23 +624,46 @@ module MobyBehaviour
     end
 
     # == description
-    # Press_key function to pass symbol or sequence to the assosiacted SUT controllers
-    # execute_cmd function.
+    # Performs a key press or key press sequence to SUT. Key press sequence can contain more complex operations such as holding multiple keys down at the same. Key map file is provided by SUT plugin and is configured in TDriver parameters and/or SUT template XML file (tdriver_parameters.xml).\n
+    # \n
+    # [b]Note for Qt users:[/b]\n
+    # If the focus is not currently on target object you need to use the it's own press_key method or tap it before sending any key press events.
     #
-    # === arguments
-    # keypress
+    # == tables
+    # press_key_sequences
+    #  title: Keypress sequence types
+    #  description: Describes different types of keypresses. All types are symbols. The amount of time each key are held and time between presses can be specified in tdriver_parameters.xml: short_press are for "normal" keypresses, while long_press are for keypresses of type :LongPress
+    #  |Type|Description|Example|
+    #  |:KeyDown|Holds key down on SUT until it is released|MobyCommand::KeySequence.new(:kShift, :KeyDown)|
+    #  |:KeyUp|Releases a key that was held down on SUT|MobyCommand::KeySequence.new(:kShift, :KeyUp)|
+    #  |:LongPress|Holds a key as long_press_timeout specifies in tdriver_parameters.xml. Please note also long_press_interval (Only for S60)|MobyCommand::KeySequence.new( :kApp, :LongPress )|
+    #
+    # == tables
+    # press_key_sequences_methods
+    #  title: Keypress sequence methods
+    #  description: Specifies possible altering methods for keysequnces. All keysequences are created with MobyCommand::KeySequence.new
+    #  |Type|Description|Example|
+    #  |:KeyDown|Holds key down on SUT until it is released|MobyCommand::KeySequence.new(:kShift, :KeyDown)|
+    #  |:KeyUp|Releases a key that was held down on SUT|MobyCommand::KeySequence.new(:kShift, :KeyUp)|
+    #  |:LongPress|Holds a key as long_press_timeout specifies in tdriver_parameters.xml. Please note also long_press_interval (Only for S60)|MobyCommand::KeySequence.new( :kApp, :LongPress )|
+    #
+    # == arguments
+    # symbol_or_sequence
     #  Symbol
     #   description: one of the key symbols defined in /tdriver/keymaps/
     #   example: @sut.press_key(:kDown)
-    #  MobyController::KeySequence
+    #  MobyCommand::KeySequence
     #   description: a KeySequence object of key symbols
-    #   example: @sut.press_key( MobyCommand::KeySequence.new(:kDown).times!(3) )
+    #   example: @sut.press_key( MobyCommand::KeySequence.new(:kDown).times!(3).append!(:kLeft) )
     # 
-    # === returns
-    # nil
+    # == returns
+    # NilClass
+    #  description: -
+    #  example: -
     #
-    # === exceptions
-    # ArgumentError:: if input not a symbol or not of type MobyCommand::KeySequence
+    # == exceptions
+    # ArgumentError
+    #  description: if input not a symbol or not of type MobyCommand::KeySequence
     #
     def press_key( symbol_or_sequence )
 
