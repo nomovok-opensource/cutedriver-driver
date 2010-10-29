@@ -696,6 +696,8 @@ EXAMPLE
 
     def process_table( source )
     
+      p source
+
       result = []
     
       table_name = nil
@@ -718,6 +720,9 @@ EXAMPLE
 
         # new table
         if nesting == 0
+
+          # break if for some reason first character is "="
+          return result if line[0].chr == "=" 
 
           unless line.empty?
           
@@ -1578,8 +1583,13 @@ EXAMPLE
     def generate_tables_element( header, features )
     
       tables = []
-    
+
       unless features.last[:tables].nil? #[:tables]
+
+        p features.last[:tables]
+        #p features.last[:tables]["content"]
+
+        #return "" if features.last[:tables]["content"] == []
         
         tables = features.last[:tables].collect{ | table |
 
@@ -1609,10 +1619,10 @@ EXAMPLE
                         
           }
 
-
           apply_macros!( @templates["behaviour.xml.table"].clone, {
               "TABLE_NAME" => encode_string( table[ "name" ] ),
-              "TABLE_TITLE" => encode_string( table[ "title" ] ),
+              "TABLE_TITLE" => encode_string( table[ "title" ] || "" ),
+              "TABLE_DESCRIPTION" => encode_string( table[ "description" ] || "" ),
               "TABLE_HEADER_ITEMS" => header.join(""),
               "TABLE_ROWS" => rows.join("")
             }

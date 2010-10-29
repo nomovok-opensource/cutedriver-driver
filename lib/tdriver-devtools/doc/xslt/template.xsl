@@ -1367,6 +1367,14 @@
   <xsl:for-each select="tables/table">
   
     <div class="feature_section_title"><a name="{ @name }"><xsl:value-of select="title/text()" />:</a></div>
+
+    <xsl:if test="string-length(description/text())>0">
+      <div class="feature_description">
+        <xsl:call-template name="formatted_content">
+          <xsl:with-param name="text" select="description/text()"/> 
+        </xsl:call-template><br />
+      </div>
+    </xsl:if>
     
     <table class="default">
       <!-- header -->
