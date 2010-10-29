@@ -285,7 +285,9 @@ module MobyBehaviour
     # == description
     # Function for finding out the application this test ojbect
     # == returns
-    #TestObject:: Application test object that the test object belongs to, or nil, if no parent of type application can be found.
+    # MobyBase::TestObject
+    #  description: Application test object that the test object belongs to, or nil, if no parent of type application can be found.
+    #  example: -
     # == example
     # parent_app = @app.Node( :name => 'Node1' ).get_application() #get application for some test object, this should return @app.
     def get_application
