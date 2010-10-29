@@ -1,6 +1,7 @@
 
           <table name="$TABLE_NAME">
             <title>$TABLE_TITLE</title>
+            <description>$TABLE_DESCRIPTION</description>
             <header>
 $TABLE_HEADER_ITEMS            </header>
 $TABLE_ROWS          </table>
