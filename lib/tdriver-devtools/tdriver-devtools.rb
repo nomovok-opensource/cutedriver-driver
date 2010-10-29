@@ -18,6 +18,8 @@
 ## 
 ############################################################################
 
+$tdriver_devtools_initialized = true
+
 def safe_require( *paths )
 
   found = false
@@ -47,6 +49,7 @@ end
 require 'rubygems'
 require 'rdoc/rdoc'
 require 'optparse'
+require 'nokogiri'
 
 safe_require('tdriver/version.rb',  File.expand_path( File.join( File.dirname( __FILE__ ), '../tdriver/version.rb' ) ) )
 safe_require('tdriver/util/common/loader.rb',  File.expand_path( File.join( File.dirname( __FILE__ ), '../tdriver/util/common/loader.rb' ) ) )
@@ -55,7 +58,7 @@ require 'tmpdir'
 require 'fileutils'
 
 # default options
-options = { 
+@options = { 
  
   :verbose => false,
   :tests => '.',
@@ -63,7 +66,7 @@ options = {
 
 }
 
-optparse = OptionParser.new do | opts |
+@optparse = OptionParser.new do | opts |
 
   # Set a banner, displayed at the top of the help screen.
   opts.banner = "Usage: #{ $0 } [options] [source] [destination]"
@@ -93,7 +96,7 @@ optparse = OptionParser.new do | opts |
       '  both       : Generate behaviour XML files and documentation',
       '               Behaviour XML files are saved to temp. folder and deleted',
       '               after documentation XML is saved. Copies also all XSLT ',
-      '               templates to destination folder.', 
+      '               templates to destination folder. See -r flag also.', 
       ' ',
       '               Default source folder (implementation) is current folder.',
       '               Default destination folder is "doc/document.xml"',
@@ -104,20 +107,20 @@ optparse = OptionParser.new do | opts |
     case mode.downcase.to_s
     
       when 'doc'
-        options[ :generate ] = mode.to_sym
-        options[ :source ] ||= 'behaviours/'
-        options[ :destination ] ||= 'doc/document.xml'
+        @options[ :generate ] = mode.to_sym
+        @options[ :source ] ||= 'behaviours/'
+        @options[ :destination ] ||= 'doc/document.xml'
 
       when 'behaviours'
-        options[ :generate ] = mode.to_sym
-        options[ :source ] ||= '.'
-        options[ :destination ] ||= 'behaviours/'
+        @options[ :generate ] = mode.to_sym
+        @options[ :source ] ||= '.'
+        @options[ :destination ] ||= 'behaviours/'
             
       when 'both'
-        options[ :generate ] = mode.to_sym
-        options[ :source ] ||= '.'
-        options[ :destination_behaviours ] = File.expand_path( File.join( Dir.tmpdir, "tdriver-devtools-behaviours" ) ) 
-        options[ :destination ] ||= 'doc/document.xml'
+        @options[ :generate ] = mode.to_sym
+        @options[ :source ] ||= '.'
+        @options[ :destination_behaviours ] = File.expand_path( File.join( Dir.tmpdir, "tdriver-devtools-behaviours" ) ) 
+        @options[ :destination ] ||= 'doc/document.xml'
             
     else
 
@@ -153,7 +156,7 @@ optparse = OptionParser.new do | opts |
     'Source folder for feature test result files', ' ' 
   ) do | folder |
 
-    options[ :tests ] = folder
+    @options[ :tests ] = folder
   
   end
 
@@ -171,12 +174,21 @@ optparse = OptionParser.new do | opts |
 =end
 
   opts.on( 
+    '-r', 
+    '--render',
+    'Render also HTML output when generating documentation' ) do
+
+    @options[:render] = true
+
+  end
+
+  opts.on( 
     '-d', 
     '--delete', 
     'Delete all existing behaviour XML files from output folder before generating new.', 
     'Warning! Please option use this option with caution' ) do 
     
-    options[:delete] = true
+    @options[:delete] = true
     
   end
 
@@ -192,7 +204,7 @@ optparse = OptionParser.new do | opts |
 
   opts.on( '-V', '--verbose', 'Output more information' ) do
 
-    options[ :verbose ] = true
+    @options[ :verbose ] = true
 
   end
 
@@ -215,155 +227,178 @@ optparse = OptionParser.new do | opts |
 
 end
 
-# Parse the command-line. Remember there are two forms
-# of the parse method. The 'parse' method simply parses
-# ARGV, while the 'parse!' method parses ARGV and removes
-# any options found there, as well as any parameters for
-# the options. What's left is the list of files to resize.
-optparse.parse!
+def execute_tdriver_devtools
 
-case options[ :generate ]
+  @optparse.parse!
 
-  when :behaviours
+  case @options[ :generate ]
 
-    $source = File.expand_path( ARGV[ 0 ] || options[ :source ] )
-    $destination = File.expand_path( ARGV[ 1 ] || options[ :destination ] )
+    when :behaviours
 
-    destination_folder = File.expand_path( $destination )
+      $source = File.expand_path( ARGV[ 0 ] || @options[ :source ] )
+      $destination = File.expand_path( ARGV[ 1 ] || @options[ :destination ] )
 
-    if MobyUtil::FileHelper.folder_exist?( destination_folder )
+      destination_folder = File.expand_path( $destination )
 
-        if options[ :delete ] == true
+      if MobyUtil::FileHelper.folder_exist?( destination_folder )
 
-          Dir.glob( File.join( destination_folder, '**', '**', '*.xml' ) ) do |entry|
+          if @options[ :delete ] == true
 
-            begin
-            
-              File.delete( entry )
+            Dir.glob( File.join( destination_folder, '**', '**', '*.xml' ) ) do |entry|
 
-            rescue Exception => exception
-            
-              warn("Unable to delete file %s (%s: %s)" % [ entry, exception.class, exception.message ] )
-            
+              begin
+              
+                File.delete( entry )
+
+              rescue Exception => exception
+              
+                warn("Unable to delete file %s (%s: %s)" % [ entry, exception.class, exception.message ] )
+              
+              end
+    
             end
-  
+          
           end
+      
+      else
+          
+        begin
+
+          MobyUtil::FileHelper.mkdir_path( destination_folder )        
+
+        rescue Exception => exception
+        
+          raise RuntimeError.new("Unable to create destination folder %s (%s: %s)" % [ destination_folder, exception.class, exception.message ])
         
         end
-    
-    else
-        
+      
+      end
+
+      # run behaviour xml generator
+      require File.expand_path( File.join( File.dirname( __FILE__ ), 'behaviour/xml/generate.rb' ) )
+
+      puts ''
+
+    when :doc
+
+      $source = File.expand_path( ARGV[0] || @options[ :source ] )
+      $tests = File.expand_path( @options[ :tests ] )
+      $destination = File.expand_path( ARGV[1] || @options[ :destination ] )
+
+      destination_folder = File.dirname( $destination )
+
       begin
 
-        MobyUtil::FileHelper.mkdir_path( destination_folder )        
+        unless MobyUtil::FileHelper.folder_exist?( destination_folder )
+
+          MobyUtil::FileHelper.mkdir_path( destination_folder )        
+        
+        end
 
       rescue Exception => exception
       
         raise RuntimeError.new("Unable to create destination folder %s (%s: %s)" % [ destination_folder, exception.class, exception.message ])
       
       end
+
+      require File.expand_path( File.join( File.dirname( __FILE__ ), 'doc/generate.rb' ) ) #'lib/tdriver-devtools/behaviour/xml/generate.rb'
+
+    when :both
     
-    end
+      destination_folder = @options[ :destination_behaviours ]
 
-    # run behaviour xml generator
-    require File.expand_path( File.join( File.dirname( __FILE__ ), 'behaviour/xml/generate.rb' ) )
+      begin
+        unless MobyUtil::FileHelper.folder_exist?( destination_folder )
+          MobyUtil::FileHelper.mkdir_path( destination_folder )        
+        else
+          if @options[ :delete ] == true
+            Dir.glob( File.join( destination_folder, '*.xml' ) ) do |entry|
+              begin
+                puts "Delete #{ entry }"
+                File.delete( entry )
+              rescue Exception => exception
+                warn("Unable to delete file %s (%s: %s)" % [ entry, exception.class, exception.message ] )
+              end
+            end
+          end
+        end
+      rescue Exception => exception
+        raise RuntimeError.new("Unable to create destination folder %s (%s: %s)" % [ destination_folder, exception.class, exception.message ])
+      end
 
-    puts ''
+      $source = File.expand_path( ARGV[ 0 ] || @options[ :source ] )
+      $destination = destination_folder
 
-  when :doc
+      # run 'implementation to behaviour xml' generator
+      require File.expand_path( File.join( File.dirname( __FILE__ ), 'behaviour/xml/generate.rb' ) )
 
-    $source = File.expand_path( ARGV[0] || options[ :source ] )
-    $tests = File.expand_path( options[ :tests ] )
-    $destination = File.expand_path( ARGV[1] || options[ :destination ] )
+      # documentation
+      $source = destination_folder
+      $tests = File.expand_path( @options[ :tests ] )
+      $destination = File.expand_path( ARGV[1] || @options[ :destination ] )
+      destination_folder = File.dirname( $destination )
 
-    destination_folder = File.dirname( $destination )
+      begin
+        unless MobyUtil::FileHelper.folder_exist?( destination_folder )
+          MobyUtil::FileHelper.mkdir_path( destination_folder )        
+        end
+      rescue Exception => exception
+        raise RuntimeError.new("Unable to create destination folder %s (%s: %s)" % [ destination_folder, exception.class, exception.message ])
+      end
 
-    begin
+      require File.expand_path( File.join( File.dirname( __FILE__ ), 'doc/generate.rb' ) )
 
-      unless MobyUtil::FileHelper.folder_exist?( destination_folder )
+      begin
+          
+        FileUtils.cp( Dir.glob( File.expand_path( File.join( File.dirname( __FILE__ ), 'doc/xslt/*.xsl' ) ) ), destination_folder )
 
-        MobyUtil::FileHelper.mkdir_path( destination_folder )        
+        puts "Template XSLT file(s) copied to destination folder succesfully\n\n"
+
+      rescue Exception => exception
+      
+        warn("Error while copying template xslt files to destination due to %s (%s)" % [ exception.message, exception.class ] )
       
       end
 
-    rescue Exception => exception
-    
-      raise RuntimeError.new("Unable to create destination folder %s (%s: %s)" % [ destination_folder, exception.class, exception.message ])
-    
-    end
+      if @options[:render] == true
 
-    require File.expand_path( File.join( File.dirname( __FILE__ ), 'doc/generate.rb' ) ) #'lib/tdriver-devtools/behaviour/xml/generate.rb'
+        begin
 
+          doc = Nokogiri::XML( open( $destination , 'r' ).read )
 
-  when :both
-  
-    destination_folder = options[ :destination_behaviours ]
+          puts "Generating HTML output file(s) of documentation"
 
-    begin
-      unless MobyUtil::FileHelper.folder_exist?( destination_folder )
-        MobyUtil::FileHelper.mkdir_path( destination_folder )        
-      else
-        Dir.glob( File.join( destination_folder, '*.xml' ) ) do |entry|
-          begin
-            File.delete( entry )
-          rescue Exception => exception
-            warn("Unable to delete file %s (%s: %s)" % [ entry, exception.class, exception.message ] )
+          Dir.glob( File.expand_path( File.join( destination_folder, '*.xsl' ) ) ) do | template |
+
+            File.open( 
+              File.join( 
+                destination_folder, 
+                "#{ File.basename( $destination ).gsub( File.extname( $destination ), '' ) }_#{ File.basename( template ).gsub( File.extname( template ), '' ) }.html" 
+              ), 
+              'w' 
+            ){ | file | 
+
+                file << Nokogiri::XSLT( open( template, 'r' ).read ).transform( doc ) 
+
+            }
+
           end
-        end
-      end
-    rescue Exception => exception
-      raise RuntimeError.new("Unable to create destination folder %s (%s: %s)" % [ destination_folder, exception.class, exception.message ])
-    end
 
-    $source = File.expand_path( ARGV[ 0 ] || options[ :source ] )
-    $destination = destination_folder
-
-    # run 'implementation to behaviour xml' generator
-    require File.expand_path( File.join( File.dirname( __FILE__ ), 'behaviour/xml/generate.rb' ) )
-
-    # documentation
-    $source = destination_folder
-    $tests = File.expand_path( options[ :tests ] )
-    $destination = File.expand_path( ARGV[1] || options[ :destination ] )
-    destination_folder = File.dirname( $destination )
-
-    begin
-      unless MobyUtil::FileHelper.folder_exist?( destination_folder )
-        MobyUtil::FileHelper.mkdir_path( destination_folder )        
-      end
-    rescue Exception => exception
-      raise RuntimeError.new("Unable to create destination folder %s (%s: %s)" % [ destination_folder, exception.class, exception.message ])
-    end
-
-    require File.expand_path( File.join( File.dirname( __FILE__ ), 'doc/generate.rb' ) )
-
-    begin
+        rescue Exception => exception
         
-      FileUtils.cp( Dir.glob( File.expand_path( File.join( File.dirname( __FILE__ ), 'doc/xslt/*.xsl' ) ) ), destination_folder )
+          warn("Error while geneating HTML files from template(s) due to %s (%s)" % [ exception.message, exception.class ] )
 
-      puts "Template XSLT file(s) copied to destination folder succesfully\n\n"
+        end
 
-    rescue Exception => exception
-    
-      warn("Error while copying template xslt files to destination due to %s (%s)" % [ exception.message, exception.class ] )
-    
-    end
+      end
 
-else
+  else
 
-  puts '', optparse, ''
+    puts '', @optparse, ''
+
+  end
 
 end
 
-=begin
+execute_tdriver_devtools
 
-  puts "Being verbose" if options[:verbose]
-  puts "Being quick" if options[:quick]
-  puts "Logging to file #{options[:logfile]}" if options[:logfile]
-
-  ARGV.each do|f|
-   puts "Resizing image #{f}..."
-   sleep 0.5
-  end
-
-=end
