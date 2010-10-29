@@ -176,41 +176,48 @@ module MobyBehaviour
 
       return self if application?
 
+	  @sut.refresh if disable_optimizer
+
       #find parent id
       #element_set = @sut.xml_data.xpath( "//object/objects/object[@id='%s']/../.." % @id )
       element_set = @sut.xml_data.xpath( "//object/objects/object[@id='#{ @id }']/../.." )
 
-      return self if( element_set == nil or element_set.size == 0 )
+	  kid = nil 	  
+	  if( element_set == nil or element_set.size == 0 )
+		kid = self 
+	  else
+		element = element_set.first
 
-      element = element_set.first
+		#if app set look for the item under the app to make sure app id is available
 
-      #if app set look for the item under the app to make sure app id is available
-      if self.get_application_id && element.attribute( "type" ) != 'application'
+		if self.get_application_id && element.attribute( "type" ) != 'application'
 
-        @sut.child( 
+		  kid = @sut.child( 
 
-          :id => get_application_id, 
-          :type => 'application' 
+						   :id => get_application_id, 
+						   :type => 'application' 
 
-        ).child( 
+						   ).child( 
 
-          :id => element.attribute( "id" ), 
-          :name => element.attribute( "name" ), 
-          :type => element.attribute( "type" ),
-          :__index => 0 # there was a case when the same parent was included twice in the ui dump
+								   :id => element.attribute( "id" ), 
+								   :name => element.attribute( "name" ), 
+								   :type => element.attribute( "type" ),
+								   :__index => 0 # there was a case when the same parent was included twice in the ui dump
 
-        )
+								   )
 
-      else
+		else
 
-        @sut.child( 
-          :id => element.attribute( "id" ), 
-          :name => element.attribute( "name" ), 
-          :type => element.attribute( "type" ) 
-        )
+		  kid = @sut.child( 
+						   :id => element.attribute( "id" ), 
+						   :name => element.attribute( "name" ), 
+						   :type => element.attribute( "type" ) 
+						   )
 
-      end
-
+		end
+	  end
+	  enable_optimizer
+	  kid
     end
     
     # == nodoc
@@ -433,7 +440,7 @@ module MobyBehaviour
     #
     # TestObjectNotVisibleError
     #  description: rasied if the parent test object is no longer visible
-		def children( attributes, find_all_children = true )
+	def children( attributes, find_all_children = true )
 
       # verify attributes argument format
       raise TypeError.new( 'Unexpected argument type (%s) for attributes, expecting %s' % [ attributes.class, "Hash" ] ) unless attributes.kind_of?( Hash ) 
@@ -447,12 +454,33 @@ module MobyBehaviour
       # children method specific settings
       creation_attributes.merge!( :__multiple_objects => true, :__find_all_children => find_all_children )
 
+
+	  disable_optimizer
       # retrieve child objects
-      get_child_objects( creation_attributes )
+      kids = get_child_objects( creation_attributes )
+	  enable_optimizer
+
+
+	  kids
 
     end
 
   private
+
+	def disable_optimizer
+	  #disable optimizer for this call since it will not work
+	  @_enable_optimizer = false
+	  if MobyUtil::Parameter[ @sut.id ][ :use_find_object, 'false' ] == 'true' and @sut.methods.include?('find_object')
+		MobyUtil::Parameter[ @sut.id ][ :use_find_object] = 'false'
+		@_enable_optimizer = true
+	  end	  
+	  @_enable_optimizer
+	end
+
+	def enable_optimizer
+	  MobyUtil::Parameter[ @sut.id ][ :use_find_object] = 'true' if @_enable_optimizer
+	  @_enable_optimizer = false
+	end
 
     # Tries to use the missing method id as a child object type and find an object based on it
     def method_missing( method_id, *method_arguments )
