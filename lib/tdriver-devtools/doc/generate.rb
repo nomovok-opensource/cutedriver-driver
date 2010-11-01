@@ -462,8 +462,6 @@ def collect_feature_tests
   
   @feature_tests.collect{ | feature |
 
-    p feature
-
     result[ ( feature["description"] || ["no feature test description"] ).first ] = 
 
       ( feature["scenarios"] || [] ).collect{ | scenario |
