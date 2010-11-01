@@ -477,30 +477,40 @@ def collect_feature_tests
         
         ( scenario["example_step"] || [] ).collect{ | example |
 
-          code = /\"(.*)\"/.match( example ).captures.first
+          begin
 
-          status = ( /^.*\s{1}(\w+)$/.match( example ).captures || [] )      
-          
-          if status.first.to_s.downcase == 'passed'
+            code = /\"(.*)\"/m.match( example ).captures.first
 
-            if ( step_results - status ).count > 0 
-              status_literal = "failed"
-              $failed += 1
-            else
-              status_literal = "passed"
-              $passed += 1
-            end
-          
-          else
-                    
-            if status.first.to_s.empty?
-              status_literal = "unknown"
-              $unknown += 1
-            else
-              status_literal = "failed"            
-              $failed += 1
-            end
+            status = /^.*\s{1}(\w+)$/m.match( example ).captures.first
+
+            if status.first.to_s.downcase == 'passed'
+
+              if ( step_results - status ).count > 0 
+                status_literal = "failed"
+                $failed += 1
+              else
+                status_literal = "passed"
+                $passed += 1
+              end
             
+            else
+                      
+              if status.first.to_s.empty?
+                status_literal = "unknown"
+                $unknown += 1
+              else
+                status_literal = "failed"
+                $failed += 1
+              end
+              
+            end
+
+          rescue
+
+            code = "Error while extracting the code from test"
+            status_literal = "unknown"
+            $unknown += 1
+
           end
 
           [ 

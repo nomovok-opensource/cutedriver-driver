@@ -1584,7 +1584,7 @@ EXAMPLE
 
       unless features.last[:tables].nil? #[:tables]
 
-        p features.last[:tables]
+        #p features.last[:tables]
         #p features.last[:tables]["content"]
 
         #return "" if features.last[:tables]["content"] == []
