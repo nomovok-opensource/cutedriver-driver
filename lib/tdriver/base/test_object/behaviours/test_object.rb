@@ -125,7 +125,7 @@ module MobyBehaviour
     # == description
     # Function returns a attribute of test object 
     #
-    # == params
+    # == arguments
     # name
     #  String
     #   description: String definig the name of the attribute to get
