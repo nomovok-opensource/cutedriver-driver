@@ -481,12 +481,12 @@ module MobyBehaviour
     # == arguments
     # target
     #  Hash
-    #   description: used to indetify the application to be executed. All symbols defined in the hash must match with the launched application. See application [link="#run_hash_arguments"]run argument keys[/link] table.
+    #   description: used to indetify the application to be executed. All symbols defined in the hash must match with the launched application. See application [link="#run_hash_arguments"]run argument hash keys[/link] table.
     #   example: { :name => 'calculator' }
     #
     # == tables
     # run_hash_arguments
-    #  title: Run argument keys
+    #  title: Run argument hash keys
     #  description: The following symbols can be defined in the hash, at least one them must be defined.
     #  |Key|Type|Description|Example|
     #  |:uid|String or Integer|Unique ID of the application|{ :uid => 268458181 }|
