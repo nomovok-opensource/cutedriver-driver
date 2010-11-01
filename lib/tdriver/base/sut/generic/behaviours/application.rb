@@ -222,6 +222,8 @@ module MobyBehaviour
 
 		end
 		
+    # == nodoc
+    # TODO: to be removed?
 		# == description
 		# Indicates whether this application can be closed with the ApplicationBehaviour::close method. Note: at the moment
 		# it always returns true!
@@ -230,6 +232,9 @@ module MobyBehaviour
 		# === example
 		#  puts @sut.application.closable #prints foreground application closable status to console (at the moment always true)
 		def closable?
+
+      #file, line = caller.first.split(":")
+      #$stderr.puts "%s:%s warning: TestObject#closable? is deprecated" % [ file, line ]
 
 			true
 

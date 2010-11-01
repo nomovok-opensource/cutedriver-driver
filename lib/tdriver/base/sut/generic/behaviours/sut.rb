@@ -78,6 +78,7 @@ module MobyBehaviour
 
     end
 
+    # == description
     # Retrieves the total amount of data sent in bytes
     # == examples
     #  @sut.disconnect
@@ -87,6 +88,7 @@ module MobyBehaviour
 
     end
 
+    # == description
     # Retrieves the total amount of data received in bytes
     # == examples
     #  @sut.disconnect
@@ -96,6 +98,7 @@ module MobyBehaviour
 
     end
 
+    # == description
     # Retrieves the total amount of data sent in bytes
     # == examples
     #  @sut.sent_data
@@ -105,6 +108,7 @@ module MobyBehaviour
 
     end
 
+    # == description
     # function to disable taking ui dumps from target for a moment
     # user must remember to enable ui dumps again using unfreeze
     def freeze
@@ -113,6 +117,7 @@ module MobyBehaviour
 
     end
 
+    # == description
     # function to enable taking ui dumps from target
     def unfreeze
 
@@ -131,17 +136,29 @@ module MobyBehaviour
 
     end
 
-    # Force to use user defined ui state (e.g. for debugging purposes)
+    # == description
+    # Force to use user defined ui state (e.g. for debugging purposes). Freezes the SUT xml_data, until unfreezed or set to nil. 
     #
-    # Freezes the SUT xml_data, until unfreezed or set to nil. 
-    # == params
-    # xml:: String, MobyUtil::XML::Element or NilClass
-    # == examples
-    #  @sut.xml_data = "<tasMessage>.....</tasMessage>"
-    #  @sut.xml_data = xml_element
-  	#  @sut.xml_data = nil
-    # == raises
-    # ArgumentError:: Unexpected argument type (%s) for xml, expected: %s
+    # == arguments
+    # xml
+    #  String
+    #   description: Freeze SUT XML data with given XML string
+    #   example: "<tasMessage>.....</tasMessage>"
+    #  MobyUtil::XML::Element
+    #   description: Freeze SUT XML data with given XML element
+    #   example: -
+    #  NilClass
+    #   description: Unfreeze SUT XML data
+    #   example: nil
+    #
+    # == returns
+    # NilClass
+    #  description: This method doesn't return anything
+    #  example: -
+    #
+    # == exception
+    # ArgumentError
+    #  description: Unexpected argument type (%s) for xml, expected: %s
     def xml_data=( xml )
 
       if xml.kind_of?( MobyUtil::XML::Element )
@@ -166,6 +183,8 @@ module MobyBehaviour
 	  
       # freeze sut - xml won't be updated unless unfreezed first
       @frozen = true unless xml.nil?
+
+      nil
 
     end
 
@@ -233,10 +252,8 @@ module MobyBehaviour
       
     end
 
-    # Creates a test object that belongs to this SUT.
-    # Usually it is 'Application' TestObject
-    # Associates child object as current object's child.
-    # and associates self as child object's parent.
+    # == description
+    # Creates a test object that belongs to this SUT. Usually it is 'Application' TestObject. Associates child object as current object's child and associates self as child object's parent.
     #
     # NOTE:
     # Subsequent calls to SUT#child(rule) always returns reference to same Testobject:
@@ -330,12 +347,12 @@ module MobyBehaviour
     # Returns a StateObject containing the current state of this test object as XML.
     # The state object is static and thus is not refreshed or synchronized etc.
     # == returns
-    # StateObject:: State of this test object
+    # StateObject
+    #  description: State of this test object
+    #  example: -
     # == exceptions
     # RuntimeError
-    # description: If the xml source for the object is not in initialized
-    # == example
-    # sut_state = @sut.state #get the state object for the sut
+    #  description: If the xml source for the object is not in initialized
     def state
 
       # refresh if xml data is empty
@@ -457,24 +474,37 @@ module MobyBehaviour
 
     end
 
+    # == description
     # Instructs the SUT to start the specified application if it is not currenly being executed
     # The application will also be brought to the foregound.
-    # === params
-    # target:: Hash, used to indetify the application to be executed. All symbols defined in the hash
-    # must match with the launched application.
-    # The following symbols can be defined in the hash, at least one them must be included:
-    # [:uid] = String or Integer, uid of the application (268458181)
-    # [:name] = String, executable name of the application ('Mce.exe')
-    # [:arguments] = Comma separated list of arguments passed to application when starting. ('--nogui,-v')
-    # Examples:
-    #  @sut.run(:name => 'Mce.exe')
-    #  @sut.run(:name => 'Mce.exe', :uid => 268458181)
-    #  @sut.run(:name => 'demoapp.exe', :arguments => '--nogui')
-    # === returns
-    # TestObject:: Test object of the started application
-    # === raises
-    # ArgumentError:: If no Hash is provided as argument or the Hash does not contain at least a valid :uid or :name
-    # VerificationError:: If no application test object can be found after starting the application, or the found object does not match the launched application
+    #
+    # == arguments
+    # target
+    #  Hash
+    #   description: used to indetify the application to be executed. All symbols defined in the hash must match with the launched application. See application [link="#run_hash_arguments"]run argument keys[/link] table.
+    #   example: { :name => 'calculator' }
+    #
+    # == tables
+    # run_hash_arguments
+    #  title: Run argument keys
+    #  description: The following symbols can be defined in the hash, at least one them must be defined.
+    #  |Key|Type|Description|Example|
+    #  |:uid|String or Integer|Unique ID of the application|{ :uid => 268458181 }|
+    #  |:name|String|Executable name of the application|{ :name => 'calculator' }|
+    #  |:arguments|String|Comma separated list of arguments passed to application when starting|{ :arguments => '--nogui,-v' }|
+    #
+    # == returns
+    # TestObject
+    #  description: Test object of the started application
+    #  example: -
+    #
+    # == exceptions
+    # ArgumentError
+    #  description: If no Hash is provided as argument or the Hash does not contain at least a valid :uid or :name
+    #
+    # VerificationError
+    #  description: If no application test object can be found after starting the application, or the found object does not match the launched application
+    #
     def run( target )
 
       begin
@@ -1001,20 +1031,18 @@ module MobyBehaviour
 
       @verify_blocks << MobyUtil::VerifyBlock.new( block,expected, message, 0, MobyUtil::KernelHelper.find_source( caller( 3 ).first.to_s ) )
 
+      nil
+
     end
 
     # == description
     # Clears all verification blocks added to the sut through verify_always() method and
     # verify_blocks configuration parameter in the tdriver parameters file
     #
-    # == arguments
-    #
     # == returns
     # Array
-    #  description: Now empty array of verification blocks
-    #
-    # == exceptions
-    #
+    #  description: Empty array
+    #  example: []
     def clear_verify_blocks
 
       @verify_blocks = []
