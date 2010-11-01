@@ -1064,7 +1064,8 @@
             </xsl:when>
 
             <xsl:when test="string(example/text())='-'">
-              <td class="tablebg_disabled" rowspan="{ $argument_types }"><xsl:value-of select="$default"/></td>
+              <!-- <td class="tablebg_disabled" rowspan="{ $argument_types }"><xsl:value-of select="$default"/></td> -->
+              <td class="tablebg_disabled"><xsl:value-of select="$default"/></td>
             </xsl:when>
 
             <xsl:when test="string-length(example/text())>0">
