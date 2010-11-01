@@ -696,8 +696,6 @@ EXAMPLE
 
     def process_table( source )
     
-      p source
-
       result = []
     
       table_name = nil
