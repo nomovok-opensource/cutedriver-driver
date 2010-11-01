@@ -67,8 +67,10 @@ module MobyBehaviour
 
     # == description
     # Return all test object attributes
-    # === returns
-    # Hash:: Test object attributes
+    # == returns
+    # Hash
+    #  description: Test object attributes
+    #  example: {"localeLanguage"=>"English", "startDragDistance"=>"4", "windowIcon"=>"", "memUsage"=>"25669"}
     # == example
     # @test_app = @sut.run(:name => 'testapp') # launches testapp 
     # attributes_hash = @test_app.Triangle( :name => 'Triangle1' ).attributes # retrieve all attribute for triangle object
@@ -122,13 +124,25 @@ module MobyBehaviour
 
     # == description
     # Function returns a attribute of test object 
+    #
     # == params
-    # name:: String definig the name of the attribute to get
+    # name
+    #  String
+    #   description: String definig the name of the attribute to get
+    #   example: "name"
+    #
     # == returns
-    # String:: Value of the attribute as a string
+    # String
+    #   description: Value of the attribute as a string
+    #   example: "value"
+    #
     # == exceptions
-    # TestObjectNotInitializedError:: if the test object xml data has not been initialized
-    # AttributeNotFoundError:: if the requested attribute can not be found in the xml data of the object
+    # TestObjectNotInitializedError
+    #  description: if the test object xml data has not been initialized
+    #
+    # AttributeNotFoundError
+    #   description: if the requested attribute can not be found in the xml data of the object
+    #
     # == example
     # @test_app = @sut.run(:name => 'testapp') # launches testapp 
     # puts @test_app.Triangle( :name => 'Triangle1' ).attribute('color') # prints color of triangle object
@@ -168,7 +182,9 @@ module MobyBehaviour
     # Returns the parent test object for the current object in question, according to the UI object hierarchy. For getting the test object that was actually used 
     # as the parent when the test object instance was created, see parent_object.
     # == returns
-    # TestObject:: test object that is parent of this test object, self if no parent (ie. application objects)
+    # TestObject
+    #   description: test object that is parent of this test object, self if no parent (ie. application objects)
+    #   example: -
     # == example
     # @app = @sut.run(:name => 'testapp') # launches testapp 
     # parent_test_object = @app.Node( :name => 'Node1' ).get_parent() #get parent for some test object
@@ -336,10 +352,12 @@ module MobyBehaviour
     # Returns a StateObject containing the current state of this test object as XML.
     # The state object is static and thus is not refreshed or synchronized etc.
     # == returns
-    # StateObject:: State of this test object
+    # StateObject
+    #  description: State of this test object
+    #  example: -
     # == exceptions
     # ArgumentError
-    # description: If the xml source for the object cannot be read
+    #  description: If the xml source for the object cannot be read
     # == example
     # app_state = @sut.application( :name => "calculator" ).state #get the state object for the app
     # button_state = app_state.Button( :text => "Backspace" ) #get the state for test object button
@@ -350,15 +368,27 @@ module MobyBehaviour
 
     end
 
+    # == description
 	  # Function for translating all symbol values into strings using sut's translate method
 	  # Goes through all items in a hash and if a value is symbol then uses that symbol as a logical
 	  # name and tries to find a translation for that.
-	  # === params
-	  # hash:: Hash containing key, value pairs. The parameter will get modified if symbols are found from values
-	  # === raises
-	  # LanguageNotFoundError:: In case of language is not found
-	  # LogicalNameNotFoundError:: In case of logical name is not found for current language
-	  # MySqlConnectError:: In case problems with the db connectivity
+    #
+	  # === arguments
+	  # hash
+    #  Hash
+    #   description: containing key, value pairs. The parameter will get modified if symbols are found from values
+    #   example: 
+    #
+	  # === exceptions
+	  # LanguageNotFoundError
+    #   description: In case of language is not found
+    #
+	  # LogicalNameNotFoundError
+    #  description: In case of logical name is not found for current language
+    #
+	  # MySqlConnectError
+    #  description: In case problems with the db connectivity
+    #
 	  def translate!( hash, file_name = nil, plurality = nil, numerus = nil, lengthvariant = nil )
 
       hash.each_pair do | _key, _value |
@@ -442,7 +472,7 @@ module MobyBehaviour
     #
     # TestObjectNotVisibleError
     #  description: rasied if the parent test object is no longer visible
-	def children( attributes, find_all_children = true )
+	  def children( attributes, find_all_children = true )
 
       # verify attributes argument format
       raise TypeError.new( 'Unexpected argument type (%s) for attributes, expecting %s' % [ attributes.class, "Hash" ] ) unless attributes.kind_of?( Hash ) 
@@ -456,33 +486,31 @@ module MobyBehaviour
       # children method specific settings
       creation_attributes.merge!( :__multiple_objects => true, :__find_all_children => find_all_children )
 
-
-	  disable_optimizer
+	    disable_optimizer
       # retrieve child objects
       kids = get_child_objects( creation_attributes )
-	  enable_optimizer
+	    enable_optimizer
 
-
-	  kids
+	    kids
 
     end
 
   private
 
-	def disable_optimizer
-	  #disable optimizer for this call since it will not work
-	  @_enable_optimizer = false
-	  if MobyUtil::Parameter[ @sut.id ][ :use_find_object, 'false' ] == 'true' and @sut.methods.include?('find_object')
-		MobyUtil::Parameter[ @sut.id ][ :use_find_object] = 'false'
-		@_enable_optimizer = true
-	  end	  
-	  @_enable_optimizer
-	end
+	  def disable_optimizer
+	    #disable optimizer for this call since it will not work
+	    @_enable_optimizer = false
+	    if MobyUtil::Parameter[ @sut.id ][ :use_find_object, 'false' ] == 'true' and @sut.methods.include?('find_object')
+		  MobyUtil::Parameter[ @sut.id ][ :use_find_object] = 'false'
+		  @_enable_optimizer = true
+	    end	  
+	    @_enable_optimizer
+	  end
 
-	def enable_optimizer
-	  MobyUtil::Parameter[ @sut.id ][ :use_find_object] = 'true' if @_enable_optimizer
-	  @_enable_optimizer = false
-	end
+	  def enable_optimizer
+	    MobyUtil::Parameter[ @sut.id ][ :use_find_object] = 'true' if @_enable_optimizer
+	    @_enable_optimizer = false
+	  end
 
     # Tries to use the missing method id as a child object type and find an object based on it
     def method_missing( method_id, *method_arguments )
