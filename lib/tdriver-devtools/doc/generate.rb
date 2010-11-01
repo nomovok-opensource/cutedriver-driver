@@ -15,7 +15,7 @@ def process_result_file( content )
   result = { "__file" => @current_file }
   
   # convert linefeeds to whitespace
-  content.gsub!( "\n", ' ' )
+  #content.gsub!( "\n", ' ' )
 
   # convert double whitespaces to one whitespace
   content.gsub!( '  ', ' ' )
@@ -87,9 +87,17 @@ def process_behaviour_file( content )
 
   # TODO: recursive method to parse documentation?
 
-  doc = Nokogiri::XML::parse( content )
+  begin
 
-  behaviour_config = Hash[ doc.root.attributes.collect{ | attribute | [ attribute.first, attribute.last.value ] } ] # ] = attribute.last.value.split(";") }          
+    doc = Nokogiri::XML::parse( content )
+
+    behaviour_config = Hash[ doc.root.attributes.collect{ | attribute | [ attribute.first, attribute.last.value ] } ] # ] = attribute.last.value.split(";") }          
+
+  rescue Exception => exception 
+
+    abort("Error while parsing behaviour:\n#{ content }")
+
+  end
 
   result = { "behaviours" => [], "__config" => behaviour_config }
 
@@ -342,6 +350,8 @@ def read_test_result_files( folder )
 
     @current_file = file
 
+    
+
     @feature_tests << process_result_file( open( file, 'r' ).read )
 
   }
@@ -475,13 +485,19 @@ def collect_feature_tests
         
         }
         
+        unless scenario["example_step"].nil?
+
+          scenario["example_step"] = [ scenario["example_step"].join( "\n" ) ]
+
+        end
+
         ( scenario["example_step"] || [] ).collect{ | example |
 
           begin
 
             code = /\"(.*)\"/m.match( example ).captures.first
 
-            status = /^.*\s{1}(\w+)$/m.match( example ).captures.first
+            status = /^.*\s{1}(\w+)$/m.match( example ).captures.to_a
 
             if status.first.to_s.downcase == 'passed'
 
@@ -505,7 +521,9 @@ def collect_feature_tests
               
             end
 
-          rescue
+          rescue Exception => exception
+
+            warn("Ambiguous 'example_step': %s (%s: %s)" % [ example.inspect, exception.class, exception.message ])
 
             code = "Error while extracting the code from test"
             status_literal = "unknown"
