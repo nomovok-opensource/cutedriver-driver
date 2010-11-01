@@ -462,6 +462,8 @@ def collect_feature_tests
   
   @feature_tests.collect{ | feature |
 
+    p feature
+
     result[ ( feature["description"] || ["no feature test description"] ).first ] = 
 
       ( feature["scenarios"] || [] ).collect{ | scenario |
@@ -495,7 +497,8 @@ def collect_feature_tests
 
           begin
 
-            code = /\"(.*)\"/m.match( example ).captures.first
+
+            code = /\"(.*)\"\s/m.match( example ).captures.first
 
             status = /^.*\s{1}(\w+)$/m.match( example ).captures.to_a
 
