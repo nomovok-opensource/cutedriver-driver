@@ -719,11 +719,11 @@ EXAMPLE
         # new table
         if nesting == 0
 
-          # break if for some reason first character is "="
-          return result if line[0].chr == "=" 
-
           unless line.empty?
           
+            # break if for some reason first character is "="            
+            return result if line[0].chr == "=" 
+            
             line =~ /^(\w+)/i
 
             result << { "name" => $1, "content" => [] }
