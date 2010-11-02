@@ -76,6 +76,9 @@ module MobyBehaviour
     # <parameter name="switchbox_commands_after_flash" value="" /> 
     # == arguments
     # == returns
+    # Boolean
+    #  description: Indicating that did flashing success
+    #  example: true
     # == exceptions
     # BehaviourError
     #  description: If mandatory parameters are missing
@@ -230,7 +233,7 @@ module MobyBehaviour
 
     end
 
-    private
+  private
 
     def execute_command_sequence(command_sequence)
 

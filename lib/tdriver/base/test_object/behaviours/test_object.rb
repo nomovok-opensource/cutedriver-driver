@@ -404,7 +404,7 @@ module MobyBehaviour
     end
 
     # == description
-    # Creates a test object for a child object of this test object. Caller test object will be result (child) object's parent object.\n
+    # Creates a child test object of this test object. Caller object will be associated as child test objects parent.\n
     # \n
     # [b]NOTE:[/b] Subsequent calls to TestObject#child( rule ) always returns reference to same Testobject:\n
     # [code]a = to.child( :type => 'Button', :text => '1' )

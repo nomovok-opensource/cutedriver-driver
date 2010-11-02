@@ -285,18 +285,25 @@ module MobyBehaviour
       
     end
 
+    # TODO: merge TestObject#child and SUT#child 
     # == description
-    # Creates a test object that belongs to this SUT. Usually it is 'Application' TestObject. Associates child object as current object's child and associates self as child object's parent.
+    # Creates a child test object from this SUT. SUT object will be associated as child test objects parent.\n
     #
-    # NOTE:
-    # Subsequent calls to SUT#child(rule) always returns reference to same Testobject:
-    # a = sut.child(rule) ; b = sut.child(rule) ; a.equal?( b ); # => true
-    # note the usage of equal? above instead of normally used eql?. Please refer to Ruby manual for more information.
+    # [b]NOTE:[/b] Subsequent calls to TestObject#child( rule ) always returns reference to same Testobject:\n
+    # [code]a = sut.child( :type => 'Button', :text => '1' )
+    # b = sut.child( :type => 'Button', :text => '1' )
+    # a.eql?( b ) # => true[/code]
     #
     # == params
-    # hash_rule:: Hash object holding information for identifying which child to create, eg. :type => :application
+    # hash_rule
+    #  Hash
+    #   description: Hash object holding information for identifying which child to create
+    #   example: { :type => "application" }
+    #
     # == returns
-    # TestObject:: new child test object or reference to existing child
+    # TestObject
+    #  description: New child test object or reference to existing child
+    #  example: -
     def child( hash_rule )
 
       creation_hash = hash_rule.clone
