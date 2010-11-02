@@ -374,7 +374,7 @@ module MobyBehaviour
     #  example: -
     # == exceptions
     # RuntimeError
-    #  description: If the xml source for the object is not in initialized
+    #  description: If the XML source for the object is not in initialized
     def state
 
       # refresh if xml data is empty
