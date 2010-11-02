@@ -373,13 +373,15 @@ module MobyBehaviour
 	  # Goes through all items in a hash and if a value is symbol then uses that symbol as a logical
 	  # name and tries to find a translation for that.
     #
-	  # === arguments
+	  # == arguments
 	  # hash
     #  Hash
     #   description: containing key, value pairs. The parameter will get modified if symbols are found from values
     #   example: 
     #
-	  # === exceptions
+    # == returns
+    #
+	  # == exceptions
 	  # LanguageNotFoundError
     #   description: In case of language is not found
     #
