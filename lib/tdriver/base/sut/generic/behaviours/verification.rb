@@ -51,7 +51,7 @@ module MobyBehaviour
 		# type
 		#  String
 		#   description: String defining the type of the object
-		#   example: 
+		#   example: "Button"
 		#
 		# attributes
 		#  Hash
