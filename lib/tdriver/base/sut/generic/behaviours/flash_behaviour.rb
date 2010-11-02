@@ -126,12 +126,15 @@ module MobyBehaviour
     #  description: The location of the software image file
     #  example: "C:/images/flash_image.img"
     # == returns
+    # Boolean
+    #  description: Indicating that did flashing success
+    #  example: true
     # == raises
     # BehaviourError If mandatory parameters are missing
     # BehaviourError If flashing is failed
     # === examples
     # @sut.flash_images("C:/path/image_file.img")
-    def flash_images(flash_files=nil)
+    def flash_images(flash_files = nil)
       file, line = caller.first.split(":")
 
       begin
@@ -221,7 +224,8 @@ module MobyBehaviour
       flash_command="#{str_flash_command} #{flash_files} #{str_optional_parameters}"
 
       #start flashing
-      result=start_flashing(flash_command)
+      result = start_flashing( flash_command )
+      
       Kernel::raise MobyBase::BehaviourError.new("flash_images", "Flashing failed") if result.to_s == 'false'
 
     end

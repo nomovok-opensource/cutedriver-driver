@@ -325,6 +325,7 @@ module MobyBehaviour
 
     end
 
+    # == nodoc
     # == description
     # Function for finding out the application id for this test object
     # == returns
