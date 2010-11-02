@@ -1,5 +1,4 @@
 <?xml version="1.0" encoding="ISO-8859-1"?>
-
 <xsl:stylesheet version="1.0" 
   xmlns:xsl="http://www.w3.org/1999/XSL/Transform" 
   xmlns:str="http://exslt.org/strings" 
@@ -1065,7 +1064,7 @@
 
             <xsl:when test="string(example/text())='-'">
               <!-- <td class="tablebg_disabled" rowspan="{ $argument_types }"><xsl:value-of select="$default"/></td> -->
-              <td class="tablebg_disabled"><xsl:value-of select="$default"/></td>
+              <td class="tablebg_disabled"><xsl:value-of select="example/text()"/></td>
             </xsl:when>
 
             <xsl:when test="string-length(example/text())>0">
