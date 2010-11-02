@@ -45,26 +45,49 @@ module MobyBehaviour
 		include MobyBehaviour::Behaviour
 
 		# == description
-		# Closes the application whether or not it is on foreground. Note: this will currently always try to close applications, also
-		# privilegied applications
+		# Closes application and optionally verifies that it is closed. A Hash argument can be used to set any of the optional parameters. Keys not set in the hash will use default values. Close can be set to force kill the application process if close fails. It can also be set to not check if the application process is terminated, in which case close is considered to be successful if the application is no longer in the foreground.\n
+		# \n
+		# [b]NOTE:[/b] this will currently always try to close applications, also privilegied applications. \n
+		# \n
+		# [b]For backwards compatibility:[/b] Instead of using a Hash as argument, the value can also be true, false or nil which will be taken as the value of :force_kill
+		#		
+		# == arguments
+		# options_hash
+		#  Hash
+		#   description: See supported hash keys from [link="#close_hash_keys"]close application options hash keys table[/link] 
+    #   example: {:force_kill => true, :check_process => false}
+    #  TrueClass
+		#   description: For backwards compatibility: same as :force_kill => true   
+    #   example: true
+    #  FalseClass
+		#   description: For backwards compatibility: same as :force_kill => false 
+    #   example: false
+    #  NilClass
+		#   description: For backwards compatibility: same as :force_kill => nil (uses 'application_close_kill' from TDriver parameters file)
+    #   example: nil
+    #
+    # == tables
+    # close_hash_keys
+    #  title: Close application options hash keys
+    #  |Key|Type|Description|Default|Required|
+    #  |:force_kill|TrueClass, FalseClass|If this options is set to true, the application process is killed if close fails. Setting this option to nil (default value), will cause close to use the value defined in the 'application_close_kill' parameter as defined in the TDriver parameter file.|nil|No|
+    #  |:check_process|TrueClass, FalseClass|If this options is set to true, success of the close method is verified by checking if the process is still active. If it is set to false, TDriver will only check that the application is no longer in the foreground.|true|No|
 		#
-		# == params
-		#options_hash:: Hash, possible keys :force_kill (default nil) and :check_proces (default true). 
-		#For backwards compatibility: instead of a Hash, the value can also be true, false or nil, in which case it is taken as the value of :force_kill
-		#:force_kill:: If key is set to true, the application process is killed if close fails.  If set to nil, value of key will be  taken  as defined 
-		#by 'application_close_kill' parameter in the TDriver parameter file.
-		#:check_process:: If key is set to true, success of the close method is verified by checking if the process is still active. If set to false, 
-		#TDriver will only check that the application is no longer in the foreground.	  
+		# == exceptions
+		# TestObjectNotFoundError
+		#  description: If this application is not the foreground application on the device under test.
+    #
+		# VerificationError
+		#  description: If no application test object is found after close or if this application is still in the foreground after the close.
 		#
-		# === raises
-		# TestObjectNotFoundError:: If this application is not the foreground application on the device under test.
-		# VerificationError:: If no application test object is found after close or if this application is still in the foreground after the close.
-		# ArgumentError:: Options_hash was not a Hash or one of the keys had an invalid type.
+		# ArgumentError
+		#  description: Options_hash was not a Hash or one of the keys had an invalid type.
+		#
 		# === example
-		#  @sut.application.close #closes anonymous foreground application
+		# @sut.application.close #closes anonymous foreground application
 		#
-		#  @mce_app = @sut.run(:name => 'Mce.exe') # launches mce app
-		#  @mce_app.close # closes above launched mce-application and verifies that correct application was closed
+		# @mce_app = @sut.run(:name => 'Mce.exe') # launches mce app
+		# @mce_app.close # closes above launched mce-application and verifies that correct application was closed
 		def close( options_hash = {} )
 
 			begin
@@ -178,11 +201,13 @@ module MobyBehaviour
 
 		# == description
 		# Returns executable name (exe) of foreground application
-		# === returns
-		# String:: Name(exe) of the application.
-		# === raises
-		# RuntimeError:: No executable name has been defined for this application.
-		# === example
+		# == returns
+		# String
+		#  description: Application's executable name
+		# == exceptions
+		# RuntimeError
+		#  description: No executable name has been defined for this application.
+		# == example
 		#  puts @sut.application.executable_name #prints foreground executable name to console
 		def executable_name
 
@@ -212,9 +237,11 @@ module MobyBehaviour
 
 		# == description
 		# Returns uid of foreground application
-		# === returns
-		# String:: UID of the application.		
-		# === example
+		# == returns
+		# String
+		#  description: Unique ID of the application.
+		#  example: "2197"
+		# == example
 		#  puts @sut.application.uid #prints foreground executable uid to console
 		def uid
 
