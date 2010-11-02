@@ -44,10 +44,25 @@ module MobyBehaviour
 
     include MobyBehaviour::Behaviour
 
+    # == description
     # Instructs the SUT to reboot
-    # === params
-    # === returns
-    # === raises
+    # == returns
+    # NilClass
+    #  description: -
+    #  example: -
+    # == exceptions
+    # BehaviourError
+    #  description: switchbox_sleep_before_powerup_in_reboot not defined for sut in tdriver_parameters.xml
+    # BehaviourError
+    #  description: switchbox_sleep_after_powerup_in_reboot not defined for sut in tdriver_parameters.xml
+    # BehaviourError
+    #  description: switchbox_sleep_before_powerup_in_reboot need to be non-negative integer smaller than 50 seconds
+    # BehaviourError
+    #  description: switchbox_sleep_in_reboot could not be converted to integer
+    # BehaviourError
+    #  description: switchbox_sleep_after_powerup_in_reboot need to be non-negative integer smaller than 500 seconds
+    # BehaviourError
+    #  description: switchbox_sleep_after_powerup_in_reboot could not be converted to integer
     def reset
       str_sleep_time_before_powerup = parameter(:switchbox_sleep_before_powerup_in_reboot)
       Kernel::raise BehaviourError.new("reboot", "switchbox_sleep_before_powerup_in_reboot not defined for sut in tdriver_parameters.xml") if str_sleep_time_before_powerup == nil
@@ -72,8 +87,6 @@ module MobyBehaviour
       rescue
         Kernel::raise BehaviourError.new("reboot", "switchbox_sleep_after_powerup_in_reboot could not be converted to integer")
       end
-
-      
       
       power_down
       begin
@@ -97,10 +110,15 @@ module MobyBehaviour
       }
     end
 
+    # == description
     # Instructs the switchbox to power down the sut
-    # === params
-    # === returns
-    # === raises
+    # == returns
+    # Boolean
+    #  description: Current power status
+    #  example: false
+    # == exceptions
+    # BehaviourError
+    #  description: Failed to power down    
     def power_down
       str_command_arr = []
 
@@ -129,10 +147,16 @@ module MobyBehaviour
       @switch_box_power_status = false
     end
 
+
+    # == description
     # Instructs the switchbox to power up the sut
-    # === params
-    # === returns
-    # === raises
+    # == returns
+    # Boolean
+    #  description: Current power status
+    #  example: true
+    # == exceptions
+    # BehaviourError
+    #  description: Failed to power up    
     def power_up
       str_command_arr = []
 
@@ -161,10 +185,12 @@ module MobyBehaviour
       @switch_box_power_status = true
     end
 
+    # == description
     # Gets the current power status of the switchbox
-    # === params
-    # === returns
-    # === raises
+    # == returns
+    # Boolean
+    #  description: Current power status
+    #  example: true
     def power_status
       if @switch_box_power_status == nil
         false
