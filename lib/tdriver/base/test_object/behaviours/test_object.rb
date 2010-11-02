@@ -51,14 +51,12 @@ module MobyBehaviour
     #  example: { :name => 'Triangle1', :type => :Triangle }
     attr_accessor :creation_attributes
 
-    # === description
+    # == description
     # Determines if the current test object is of type 'application'
-    # === returns
-    # TrueClass:: 
-    # FalseClass:: 
-    #  == example
-    # @test_app = @sut.run(:name => 'testapp') # launches testapp    
-    # isApplication = @test_app.application?
+    # == returns
+    # Boolean
+    #  description: Determines is test object type of application 
+    #  example: false
     def application?
 
       @type == 'application'
