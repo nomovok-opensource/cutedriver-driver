@@ -1071,6 +1071,7 @@ module MobyBehaviour
 
     end
 
+    # == nodoc
     def get_application_id
       
       orig_frozen = @frozen;
