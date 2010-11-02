@@ -204,6 +204,7 @@ module MobyBehaviour
 		# == returns
 		# String
 		#  description: Application's executable name
+		#  example: "calculator"
 		# == exceptions
 		# RuntimeError
 		#  description: No executable name has been defined for this application.
