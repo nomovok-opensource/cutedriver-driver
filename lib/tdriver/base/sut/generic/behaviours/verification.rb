@@ -45,19 +45,32 @@ module MobyBehaviour
 		include MobyBehaviour::Behaviour
 
 		# == description
-		# Checks if a child test object matching the given criteria can be found on the sut   
-		# === params
-		# type:: String defining the type of the object
-		# attributes:: (optional) Hash containing attributes that the object must have
-		# === returns
-		# Boolean:: true if the object exists on the sut display
-		# === raises
-		# ArgumentError:: The type argument was not a non-empty String or attributes argument (if provided) was not a Hash
-		# === example
-		# @calc = @sut.run(:name => 'calculator') # launches calculator  
-		# testobj_exists =  @calc.test_object_exists?('Button',{:text => '+',:objectName => 'plusButton'} # check if  test object  with given criteria exists in calculator
-		
-		def test_object_exists?(type, attributes = Hash.new)
+		# Checks if a child test object matching the given criteria can be found on the sut
+		#
+		# == arguments
+		# type
+		#  String
+		#   description: String defining the type of the object
+		#   example: 
+		#
+		# attributes
+		#  Hash
+		#   description: Optional hash containing attributes that the object must have
+		#   example: {}
+		#
+		# == returns
+		# TrueClass
+		#   description: if the object exists on the sut display
+		#   example: true
+		# FalseClass
+		#   description: if the object exists on the sut display
+		#   example: false
+    #
+		# == exceptions
+		# ArgumentError
+		#  description: The type argument was not a non-empty String or attributes argument (if provided) was not a Hash
+		#
+		def test_object_exists?(type, attributes = {} )
 
 			Kernel::raise ArgumentError.new "The type argument must be a non empty String." unless (type.kind_of? String and !type.empty?) 
 			Kernel::raise ArgumentError.new "The attributes argument must be a Hash." unless attributes.kind_of? Hash
