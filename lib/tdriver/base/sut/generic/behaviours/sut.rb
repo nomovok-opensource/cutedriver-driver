@@ -68,10 +68,17 @@ module MobyBehaviour
 
 		)
 
-    
     # == description
     # Connects selected SUT according to configuration in tdriver_parameters.xml.
-    #
+    # == arguments
+    # id
+    #  Symbol
+    #   description: SUT id
+    #   example: :sut_qt
+    # == returns
+    # Boolean
+    #  description: Determines if SUT is connected
+    #  example: true
     def connect( id )
 
       @_sutController.connect( id )
@@ -80,6 +87,10 @@ module MobyBehaviour
 
     # == description
     # Retrieves the total amount of data sent in bytes
+    # == returns
+    # Boolean
+    #  description: Determines if SUT is connected
+    #  example: false
     # == examples
     #  @sut.disconnect
     def disconnect
@@ -382,16 +393,12 @@ module MobyBehaviour
 
       Kernel::raise RuntimeError.new( "Can not create state object of SUT with id '%s', no XML content or SUT not initialized properly." % @id ) if @xml_data.empty?
 
-      MobyBase::StateObject.new( 
-
-								MobyUtil::XML.parse_string( 
-
-														   "<sut name='sut' type='sut' id='%s'><objects>%s</objects></sut>" % [ @id, xml_data.xpath("tasInfo/object").collect{ | element | element.to_s }.join ]
-
-														   ).root, 
-								self 
-
-								)
+      MobyBase::StateObject.new(
+        MobyUtil::XML.parse_string( 
+          "<sut name='sut' type='sut' id='%s'><objects>%s</objects></sut>" % [ @id, xml_data.xpath("tasInfo/object").collect{ | element | element.to_s }.join ]
+        ).root, 
+        self 
+      )
 
     end
 
