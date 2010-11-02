@@ -90,6 +90,10 @@ module MobyBehaviour
 
     # == description
     # Retrieves the total amount of data received in bytes
+    # == returns
+    # Fixnum
+    #  description: Total amount of data received in bytes
+    #  example: 65535
     # == examples
     #  @sut.disconnect
     def received_data
@@ -100,6 +104,10 @@ module MobyBehaviour
 
     # == description
     # Retrieves the total amount of data sent in bytes
+    # == returns
+    # Fixnum
+    #  description: Total amount of data sent in bytes
+    #  example: 65535
     # == examples
     #  @sut.sent_data
     def sent_data
