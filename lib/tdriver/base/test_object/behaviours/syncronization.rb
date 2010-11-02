@@ -44,22 +44,51 @@ module MobyBehaviour
 
 		include MobyBehaviour::Behaviour
 
-		# Wait until this test object has a child test object of the specified type and matching the given attributes.
-		# The child being waited for must be identifiable by the provided constraints. The call terminates 
-		# only when exactly a single child matches the criteria.
+    # == description
+		# Wait until this test object has a child test object matching the given attributes or timeout exceeds. An exception will be raised if test object was not found in the specified timeout.
 		#
-		# === params
-		# type:: String defining the type of the child test object, eg. "list", "softkey"
-		# attributes:: (optional) Hash defining the set of attributes that the child test object must possess.
-		# timeout:: (optional) Integer overriding the default synchronization timeout.
-		# === raises
-		# ArgumentError:: One of the arguments was not of a valid format.
-		# SyncTimeoutError:: The timeout has passed without synchronization success.
+		# == arguments
+		# attributes
+		#  Hash
+		#   description: Hash defining the set of attributes that the child test object must possess.
+		#   example: {:text=>'1'}
+		#
+		# timeout_secs
+		#  Fixnum
+		#   description: Overriding the default synchronization timeout
+		#   example: 30
+		#
+		# retry_interval
+		#  Fixnum
+		#   description: Time used before retrying to find test object 
+		#   example: 1
+		#
+		# == returns
+		# MobyBase::TestObject
+		#  description: Returns self
+		#  example: - 
+		#
+		# == exceptions
+		# ArgumentError
+		#  description: Argument type was not a valid. Expected: String
+		#
+		# ArgumentError
+		#  description: Argument attributes was not a valid. Expected: Hash
+		#
+		# ArgumentError
+		#  description: Argument timeout_secs was not a valid. Expected: Integer, Fixnum or Float
+		#
+		# ArgumentError
+		#  description: Argument retry_interval was not a valid. Expected: Integer, Fixnum or Float
+		#
+		# MobyBase::SyncTimeoutError
+		#  description: Synchronization timed out (%i) before the defined child object could be found
+		#
 		def wait_child( attributes = {}, timeout_secs = 10, retry_interval = 0.5 )
 
-			Kernel::raise ArgumentError.new( "Argument type was not a valid. Expected: String" ) unless attributes[ :type ].kind_of?( String ) && attributes[ :type ].length > 0
-
 			Kernel::raise ArgumentError.new( "Argument attributes was not a valid. Expected: Hash" ) unless attributes.kind_of?( Hash )
+
+			Kernel::raise ArgumentError.new( "Argument type was not a valid. Expected: String" ) unless attributes[ :type ].kind_of?( String ) && attributes[ :type ].length > 0
 
 			Kernel::raise ArgumentError.new( "Argument timeout_secs was not a valid. Expected: Integer, Fixnum or Float" ) unless [ Integer, Fixnum, Float ].include? timeout_secs.class
 

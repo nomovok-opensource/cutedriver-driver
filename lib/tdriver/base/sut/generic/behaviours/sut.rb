@@ -117,19 +117,33 @@ module MobyBehaviour
     end
 
     # == description
-    # function to disable taking ui dumps from target for a moment
-    # user must remember to enable ui dumps again using unfreeze
+    # Function to disable taking UI dumps from target for a moment. This method might be deprecated in future release.\n
+    # \n
+    # [b]NOTE:[/b] Remember to enable ui dumps again using unfreeze! 
+    # == returns
+    # NilClass
+    #  description: -
+    #  example: -
     def freeze
 
       @frozen = true
 
+      nil
+
     end
 
     # == description
-    # function to enable taking ui dumps from target
+    # Function to enable taking ui dumps from target. This method might be deprecated in future release.\n
+    # \n
+    # == returns
+    # NilClass
+    #  description: -
+    #  example: -
     def unfreeze
 
       @frozen = false
+
+      nil
 
     end
 
