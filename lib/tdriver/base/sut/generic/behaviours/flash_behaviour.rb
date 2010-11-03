@@ -43,37 +43,52 @@ module MobyBehaviour
     include MobyBehaviour::Behaviour
 
     # == description
-    # Instructs the sut to start the flash operation with default TDriver parameters for sut that are:
+    # Instructs the sut to start the flash operation with default TDriver parameters for sut that are:\n\n
     # how many times TDriver will attempt to flash the device:
     # [code]<parameter name="flash_attempts" value="2" />[/code]
+    #
     # timeout in seconds between the switchbox commands:
     # [code]<parameter name="timeout_between_command_sequence" value="25" />[/code]
+    #
     # commands you want to be executed before flash:
     # [code]<parameter name="switchbox_commands_before_flash" value="" />[/code]
+    #
     # flash commands before flash:
     # [code]<parameter name="commands_before_flash" value="" />[/code]
+    #
     # intial flash command:
     # [code]<parameter name="flash_command" value="" />[/code]
+    #
     # timeout in seconds before executing the commands during flash:
-    # <parameter name="timeout_before_executing_commands_during_flash" value="20" />
+    # [code]<parameter name="timeout_before_executing_commands_during_flash" value="20" />[/code]
+    #
     # commands you want to be executed during flash:
-    # <parameter name="switchbox_commands_during_flash" value="" />
+    # [code]<parameter name="switchbox_commands_during_flash" value="" />[/code]
+    #
     # optional flash parameters:
-    # <parameter name="optional_parameters_after_flashing" value="" />
+    # [code]<parameter name="optional_parameters_after_flashing" value="" />[/code]
+    #
     # images to flash:
-    # <parameter name="flash_images" value="" />
+    # [code]<parameter name="flash_images" value="" />[/code]
+    #
     # need to wait for the flash process to finish:
-    # <parameter name="sleep_time_after_flash_command" value="70" />
+    # [code]<parameter name="sleep_time_after_flash_command" value="70" />[/code]
+    #
     # flash command after flash:
-    # <parameter name="command_after_flash" value="" />
+    # [code]<parameter name="command_after_flash" value="" />[/code]
+    #
     # commands for switchbox after failed flash:
-    # <parameter name="switchbox_commands_after_failed_flash" value="" />
+    # [code]<parameter name="switchbox_commands_after_failed_flash" value="" />[/code]
+    #
     # commands after failed flash:
-    # <parameter name="commands_after_failed_flash" value="" />
+    # [code]<parameter name="commands_after_failed_flash" value="" />[/code]
+    #
     # If no error then no string is displayed:
-    # <parameter name="flash_command_success_string" value="" />
+    # [code]<parameter name="flash_command_success_string" value="" />[/code]
+    #
     # commands you want to be executed after flash:
-    # <parameter name="switchbox_commands_after_flash" value="" /> 
+    # [code]<parameter name="switchbox_commands_after_flash" value="" /> [/code]
+    #
     # == arguments
     # == returns
     # Boolean
@@ -84,7 +99,7 @@ module MobyBehaviour
     #  description: If mandatory parameters are missing
     # BehaviourError
     #  description: If flashing is failed
-    # === info
+    #
     def flash()
 
       flash_images
@@ -92,37 +107,53 @@ module MobyBehaviour
     end
 
     # == description
-    # Instructs the sut to start the flash operation with default TDriver parameters for sut that are:
+    # Instructs the sut to start the flash operation with default TDriver parameters for sut that are:\n\n
+    #
     # how many times TDriver will attempt to flash the device:
-    # <parameter name="flash_attempts" value="2" />
+    # [code]<parameter name="flash_attempts" value="2" />[/code]
+    #
     # timeout in seconds between the switchbox commands:
-    # <parameter name="timeout_between_command_sequence" value="25" />
+    # [code]<parameter name="timeout_between_command_sequence" value="25" />[/code]
+    #
     # commands you want to be executed before flash:
-    # <parameter name="switchbox_commands_before_flash" value="" />
+    # [code]<parameter name="switchbox_commands_before_flash" value="" />[/code]
+    #
     # flash commands before flash:
-    # <parameter name="commands_before_flash" value="" />
+    # [code]<parameter name="commands_before_flash" value="" />[/code]
+    #
     # intial flash command:
-    # <parameter name="flash_command" value="" />
+    # [code]<parameter name="flash_command" value="" />[/code]
+    #
     # timeout in seconds before executing the commands during flash:
-    # <parameter name="timeout_before_executing_commands_during_flash" value="20" />
+    # [code]<parameter name="timeout_before_executing_commands_during_flash" value="20" />[/code]
+    #
     # commands you want to be executed during flash:
-    # <parameter name="switchbox_commands_during_flash" value="" />
+    # [code]<parameter name="switchbox_commands_during_flash" value="" />[/code]
+    #
     # optional flash parameters:
-    # <parameter name="optional_parameters_after_flashing" value="" />
+    # [code]<parameter name="optional_parameters_after_flashing" value="" />[/code]
+    #
     # images to flash:
-    # <parameter name="flash_images" value="" />
+    # [code]<parameter name="flash_images" value="" />[/code]
+    #
     # need to wait for the flash process to finish:
-    # <parameter name="sleep_time_after_flash_command" value="70" />
+    # [code]<parameter name="sleep_time_after_flash_command" value="70" />[/code]
+    #
     # flash command after flash:
-    # <parameter name="command_after_flash" value="" />
+    # [code]<parameter name="command_after_flash" value="" />[/code]
+    #
     # commands for switchbox after failed flash:
-    # <parameter name="switchbox_commands_after_failed_flash" value="" />
+    # [code]<parameter name="switchbox_commands_after_failed_flash" value="" />[/code]
+    #
     # commands after failed flash:
-    # <parameter name="commands_after_failed_flash" value="" />
+    # [code]<parameter name="commands_after_failed_flash" value="" />[/code]
+    #
     # If no error then no string is displayed:
-    # <parameter name="flash_command_success_string" value="" />
+    # [code]<parameter name="flash_command_success_string" value="" />[/code]
+    #
     # commands you want to be executed after flash:
-    # <parameter name="switchbox_commands_after_flash" value="" />
+    # [code]<parameter name="switchbox_commands_after_flash" value="" />[/code]
+    #
     # == arguments
     # flash_files
     #  String
