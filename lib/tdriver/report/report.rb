@@ -22,6 +22,7 @@ require File.expand_path( File.join( File.dirname( __FILE__ ), 'error_recovery/t
 require File.expand_path( File.join( File.dirname( __FILE__ ), 'error_recovery/tdriver_custom_error_recovery' ) )
 require File.expand_path( File.join( File.dirname( __FILE__ ), 'report_file_capture' ) )
 require File.expand_path( File.join( File.dirname( __FILE__ ), 'report_crash_file_capture' ) )
+require File.expand_path( File.join( File.dirname( __FILE__ ), 'report_javascript' ) )
 require File.expand_path( File.join( File.dirname( __FILE__ ), 'report_writer' ) )
 require File.expand_path( File.join( File.dirname( __FILE__ ), 'report_combine' ) )
 require File.expand_path( File.join( File.dirname( __FILE__ ), 'report_data_table' ) )
@@ -38,6 +39,7 @@ require File.expand_path( File.join( File.dirname( __FILE__ ), 'report_test_unit
 require File.expand_path( File.join( File.dirname( __FILE__ ), 'report_grouping' ) )
 require File.expand_path( File.join( File.dirname( __FILE__ ), 'report_execution_statistics' ) )
 require File.expand_path( File.join( File.dirname( __FILE__ ), 'report_data_presentation' ) )
+
 
 if MobyUtil::Parameter[ :custom_error_recovery_module, nil ]!=nil
   require MobyUtil::Parameter[ :custom_error_recovery_module ]

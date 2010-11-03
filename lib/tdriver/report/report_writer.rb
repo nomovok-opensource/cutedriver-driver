@@ -17,8 +17,10 @@
 ##
 ############################################################################
 
+include TDriverReportJavascript
 
 module TDriverReportWriter
+  
   def write_style_sheet(page)
     css='body
 {
@@ -586,7 +588,7 @@ display: none;
       '<html xmlns="http://www.w3.org/1999/xhtml">'<<
       '<head><meta http-equiv="Content-Type" content="text/html; charset=utf-8"><META HTTP-EQUIV="CACHE-CONTROL" CONTENT="NO-CACHE"><META HTTP-EQUIV="PRAGMA" CONTENT="NO-CACHE">'<<
       stylesheet<<
-      get_java_script()<<
+      get_expand_collapse_java_script()<<
       '<title>'+title+'</title>'<<
       '</head><body>'
     File.open(page, 'w') do |f2|
@@ -1350,21 +1352,7 @@ display: none;
     page_ready
   end
   def get_java_script()
-    java_script='<script type="text/javascript">'<<
-      '/* Only set closed if JS-enabled */'<<
-      "document.getElementsByTagName('html')[0].className = 'isJS';"<<
-      'function tog(dt)'<<
-      '{'<<
-      'var display, dd=dt;'<<
-      '/* get dd */'<<
-      "do{ dd = dd.nextSibling } while(dd.tagName!='DD');"<<
-      'toOpen =!dd.style.display;'<<
-      "dd.style.display = toOpen? 'block':'';"<<
-      "dt.getElementsByTagName('span')[0].innerHTML"<<
-      "= toOpen? '<input id=\"Button1\" type=\"button\" value=\"Close\" class=\"btn\" style=\"background-color: #FFFFFF\" />':'<input id=\"Button1\" type=\"button\" value=\"Open\" class=\"btn\" />' ;"<<
-      '}'<<
-      '</script>'
-    java_script
+    get_expand_collapse_java_script()
   end
   def format_user_log_table(user_data_rows,user_data_columns)
     begin

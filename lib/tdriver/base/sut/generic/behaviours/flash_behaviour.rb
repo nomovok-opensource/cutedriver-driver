@@ -43,51 +43,8 @@ module MobyBehaviour
     include MobyBehaviour::Behaviour
 
     # == description
-    # Instructs the sut to start the flash operation with default TDriver parameters for sut that are:\n\n
-    # how many times TDriver will attempt to flash the device:
-    # [code]<parameter name="flash_attempts" value="2" />[/code]
+    # Instructs the sut to start the flash operation with default TDriver parameters  
     #
-    # timeout in seconds between the switchbox commands:
-    # [code]<parameter name="timeout_between_command_sequence" value="25" />[/code]
-    #
-    # commands you want to be executed before flash:
-    # [code]<parameter name="switchbox_commands_before_flash" value="" />[/code]
-    #
-    # flash commands before flash:
-    # [code]<parameter name="commands_before_flash" value="" />[/code]
-    #
-    # intial flash command:
-    # [code]<parameter name="flash_command" value="" />[/code]
-    #
-    # timeout in seconds before executing the commands during flash:
-    # [code]<parameter name="timeout_before_executing_commands_during_flash" value="20" />[/code]
-    #
-    # commands you want to be executed during flash:
-    # [code]<parameter name="switchbox_commands_during_flash" value="" />[/code]
-    #
-    # optional flash parameters:
-    # [code]<parameter name="optional_parameters_after_flashing" value="" />[/code]
-    #
-    # images to flash:
-    # [code]<parameter name="flash_images" value="" />[/code]
-    #
-    # need to wait for the flash process to finish:
-    # [code]<parameter name="sleep_time_after_flash_command" value="70" />[/code]
-    #
-    # flash command after flash:
-    # [code]<parameter name="command_after_flash" value="" />[/code]
-    #
-    # commands for switchbox after failed flash:
-    # [code]<parameter name="switchbox_commands_after_failed_flash" value="" />[/code]
-    #
-    # commands after failed flash:
-    # [code]<parameter name="commands_after_failed_flash" value="" />[/code]
-    #
-    # If no error then no string is displayed:
-    # [code]<parameter name="flash_command_success_string" value="" />[/code]
-    #
-    # commands you want to be executed after flash:
-    # [code]<parameter name="switchbox_commands_after_flash" value="" /> [/code]
     #
     # == arguments
     # == returns
@@ -100,6 +57,27 @@ module MobyBehaviour
     # BehaviourError
     #  description: If flashing is failed
     #
+    # == tables
+    # flash_prameters
+    #  title: Flash parameters
+    #  description: Flash parameters for sut
+    #  |Parameter|Description|Example|
+    #  |:flash_attempts|How many times TDriver will attempt to flash the device|<parameter name="flash_attempts" value="2" />|
+    #  |:timeout_between_command_sequence|Timeout in seconds between the switchbox commands|<parameter name="timeout_between_command_sequence" value="25" />|
+    #  |:switchbox_commands_before_flash|Commands you want to be executed before flash|<parameter name="switchbox_commands_before_flash" value="" />|
+    #  |:commands_before_flash|Flash commands before flash|<parameter name="commands_before_flash" value="" />|
+    #  |:flash_command|Intial flash command|<parameter name="flash_command" value="" />|
+    #  |:timeout_before_executing_commands_during_flash|Timeout in seconds before executing the commands during flash|<parameter name="timeout_before_executing_commands_during_flash" value="20" />|
+    #  |:switchbox_commands_during_flash|Commands you want to be executed during flash|<parameter name="switchbox_commands_during_flash" value="" />|
+    #  |:optional_parameters_after_flashing|Optional flash parameters|<parameter name="optional_parameters_after_flashing" value="" />|
+    #  |:flash_images|Images to flash|<parameter name="flash_images" value="" />|
+    #  |:sleep_time_after_flash_command|Wait time for the flash process to finish|<parameter name="sleep_time_after_flash_command" value="70" />|
+    #  |:command_after_flash|Flash command after flash|<parameter name="command_after_flash" value="" />|
+    #  |:switchbox_commands_after_failed_flash|Commands for switchbox after failed flash|<parameter name="switchbox_commands_after_failed_flash" value="" />|
+    #  |:commands_after_failed_flash|Commands after failed flash|<parameter name="commands_after_failed_flash" value="" />|
+    #  |:flash_command_success_string|If no error then no string is displayed|<parameter name="flash_command_success_string" value="" />|
+    #  |:switchbox_commands_after_flash|Commands you want to be executed after flash|<parameter name="switchbox_commands_after_flash" value="" />|
+
     def flash()
 
       flash_images
@@ -107,52 +85,7 @@ module MobyBehaviour
     end
 
     # == description
-    # Instructs the sut to start the flash operation with default TDriver parameters for sut that are:\n\n
-    #
-    # how many times TDriver will attempt to flash the device:
-    # [code]<parameter name="flash_attempts" value="2" />[/code]
-    #
-    # timeout in seconds between the switchbox commands:
-    # [code]<parameter name="timeout_between_command_sequence" value="25" />[/code]
-    #
-    # commands you want to be executed before flash:
-    # [code]<parameter name="switchbox_commands_before_flash" value="" />[/code]
-    #
-    # flash commands before flash:
-    # [code]<parameter name="commands_before_flash" value="" />[/code]
-    #
-    # intial flash command:
-    # [code]<parameter name="flash_command" value="" />[/code]
-    #
-    # timeout in seconds before executing the commands during flash:
-    # [code]<parameter name="timeout_before_executing_commands_during_flash" value="20" />[/code]
-    #
-    # commands you want to be executed during flash:
-    # [code]<parameter name="switchbox_commands_during_flash" value="" />[/code]
-    #
-    # optional flash parameters:
-    # [code]<parameter name="optional_parameters_after_flashing" value="" />[/code]
-    #
-    # images to flash:
-    # [code]<parameter name="flash_images" value="" />[/code]
-    #
-    # need to wait for the flash process to finish:
-    # [code]<parameter name="sleep_time_after_flash_command" value="70" />[/code]
-    #
-    # flash command after flash:
-    # [code]<parameter name="command_after_flash" value="" />[/code]
-    #
-    # commands for switchbox after failed flash:
-    # [code]<parameter name="switchbox_commands_after_failed_flash" value="" />[/code]
-    #
-    # commands after failed flash:
-    # [code]<parameter name="commands_after_failed_flash" value="" />[/code]
-    #
-    # If no error then no string is displayed:
-    # [code]<parameter name="flash_command_success_string" value="" />[/code]
-    #
-    # commands you want to be executed after flash:
-    # [code]<parameter name="switchbox_commands_after_flash" value="" />[/code]
+    # Instructs the sut to start the flash operation with the configured flash files
     #
     # == arguments
     # flash_files
@@ -168,6 +101,26 @@ module MobyBehaviour
     # BehaviourError If flashing is failed
     # === examples
     # @sut.flash_images("C:/path/image_file.img")
+    # == tables
+    # flash_prameters
+    #  title: Flash parameters
+    #  description: Flash parameters for sut
+    #  |Parameter|Description|Example|
+    #  |:flash_attempts|How many times TDriver will attempt to flash the device|<parameter name="flash_attempts" value="2" />|
+    #  |:timeout_between_command_sequence|Timeout in seconds between the switchbox commands|<parameter name="timeout_between_command_sequence" value="25" />|
+    #  |:switchbox_commands_before_flash|Commands you want to be executed before flash|<parameter name="switchbox_commands_before_flash" value="" />|
+    #  |:commands_before_flash|Flash commands before flash|<parameter name="commands_before_flash" value="" />|
+    #  |:flash_command|Intial flash command|<parameter name="flash_command" value="" />|
+    #  |:timeout_before_executing_commands_during_flash|Timeout in seconds before executing the commands during flash|<parameter name="timeout_before_executing_commands_during_flash" value="20" />|
+    #  |:switchbox_commands_during_flash|Commands you want to be executed during flash|<parameter name="switchbox_commands_during_flash" value="" />|
+    #  |:optional_parameters_after_flashing|Optional flash parameters|<parameter name="optional_parameters_after_flashing" value="" />|
+    #  |:flash_images|Images to flash|<parameter name="flash_images" value="" />|
+    #  |:sleep_time_after_flash_command|Wait time for the flash process to finish|<parameter name="sleep_time_after_flash_command" value="70" />|
+    #  |:command_after_flash|Flash command after flash|<parameter name="command_after_flash" value="" />|
+    #  |:switchbox_commands_after_failed_flash|Commands for switchbox after failed flash|<parameter name="switchbox_commands_after_failed_flash" value="" />|
+    #  |:commands_after_failed_flash|Commands after failed flash|<parameter name="commands_after_failed_flash" value="" />|
+    #  |:flash_command_success_string|If no error then no string is displayed|<parameter name="flash_command_success_string" value="" />|
+    #  |:switchbox_commands_after_flash|Commands you want to be executed after flash|<parameter name="switchbox_commands_after_flash" value="" />|
     def flash_images(flash_files = nil)
       file, line = caller.first.split(":")
 
