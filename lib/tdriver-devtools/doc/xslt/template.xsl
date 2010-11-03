@@ -229,6 +229,10 @@
       
         font-family: monospace;
         font-size: 11px;
+
+        white-space: pre-wrap;       
+        word-wrap: break-word;
+        break-word: break-all;
       
       }
 

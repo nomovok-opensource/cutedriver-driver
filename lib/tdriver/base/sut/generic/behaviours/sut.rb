@@ -68,10 +68,17 @@ module MobyBehaviour
 
 		)
 
-    
     # == description
     # Connects selected SUT according to configuration in tdriver_parameters.xml.
-    #
+    # == arguments
+    # id
+    #  Symbol
+    #   description: SUT id
+    #   example: :sut_qt
+    # == returns
+    # Boolean
+    #  description: Determines if SUT is connected
+    #  example: true
     def connect( id )
 
       @_sutController.connect( id )
@@ -80,6 +87,10 @@ module MobyBehaviour
 
     # == description
     # Retrieves the total amount of data sent in bytes
+    # == returns
+    # Boolean
+    #  description: Determines if SUT is connected
+    #  example: false
     # == examples
     #  @sut.disconnect
     def disconnect
@@ -274,18 +285,25 @@ module MobyBehaviour
       
     end
 
+    # TODO: merge TestObject#child and SUT#child 
     # == description
-    # Creates a test object that belongs to this SUT. Usually it is 'Application' TestObject. Associates child object as current object's child and associates self as child object's parent.
+    # Creates a child test object from this SUT. SUT object will be associated as child test objects parent.\n
     #
-    # NOTE:
-    # Subsequent calls to SUT#child(rule) always returns reference to same Testobject:
-    # a = sut.child(rule) ; b = sut.child(rule) ; a.equal?( b ); # => true
-    # note the usage of equal? above instead of normally used eql?. Please refer to Ruby manual for more information.
+    # [b]NOTE:[/b] Subsequent calls to TestObject#child( rule ) always returns reference to same Testobject:\n
+    # [code]a = sut.child( :type => 'Button', :text => '1' )
+    # b = sut.child( :type => 'Button', :text => '1' )
+    # a.eql?( b ) # => true[/code]
     #
     # == params
-    # hash_rule:: Hash object holding information for identifying which child to create, eg. :type => :application
+    # hash_rule
+    #  Hash
+    #   description: Hash object holding information for identifying which child to create
+    #   example: { :type => "application" }
+    #
     # == returns
-    # TestObject:: new child test object or reference to existing child
+    # TestObject
+    #  description: New child test object or reference to existing child
+    #  example: -
     def child( hash_rule )
 
       creation_hash = hash_rule.clone
@@ -382,16 +400,12 @@ module MobyBehaviour
 
       Kernel::raise RuntimeError.new( "Can not create state object of SUT with id '%s', no XML content or SUT not initialized properly." % @id ) if @xml_data.empty?
 
-      MobyBase::StateObject.new( 
-
-								MobyUtil::XML.parse_string( 
-
-														   "<sut name='sut' type='sut' id='%s'><objects>%s</objects></sut>" % [ @id, xml_data.xpath("tasInfo/object").collect{ | element | element.to_s }.join ]
-
-														   ).root, 
-								self 
-
-								)
+      MobyBase::StateObject.new(
+        MobyUtil::XML.parse_string( 
+          "<sut name='sut' type='sut' id='%s'><objects>%s</objects></sut>" % [ @id, xml_data.xpath("tasInfo/object").collect{ | element | element.to_s }.join ]
+        ).root, 
+        self 
+      )
 
     end
 

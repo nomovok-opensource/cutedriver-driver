@@ -325,6 +325,7 @@ module MobyBehaviour
 
     end
 
+    # == nodoc
     # == description
     # Function for finding out the application id for this test object
     # == returns
@@ -366,19 +367,20 @@ module MobyBehaviour
 
     end
 
+    # == nodoc
     # == description
-	  # Function for translating all symbol values into strings using sut's translate method
-	  # Goes through all items in a hash and if a value is symbol then uses that symbol as a logical
-	  # name and tries to find a translation for that.
+	  # Translates all symbol values in hash using SUT's translate method.
     #
 	  # == arguments
 	  # hash
     #  Hash
-    #   description: containing key, value pairs. The parameter will get modified if symbols are found from values
-    #   example: 
+    #   description: containing key and value pairs. The hash will get modified if symbols are found from values
+    #   example: {:text=>:translate_me}
     #
     # == returns
-    #
+    # Hash
+    #  description: Translated hash
+    #  example: {:text=>'translated_text'}
 	  # == exceptions
 	  # LanguageNotFoundError
     #   description: In case of language is not found
@@ -402,7 +404,7 @@ module MobyBehaviour
     end
 
     # == description
-    # Creates a test object for a child object of this test object. Caller test object will be result (child) object's parent object.\n
+    # Creates a child test object of this test object. Caller object will be associated as child test objects parent.\n
     # \n
     # [b]NOTE:[/b] Subsequent calls to TestObject#child( rule ) always returns reference to same Testobject:\n
     # [code]a = to.child( :type => 'Button', :text => '1' )
