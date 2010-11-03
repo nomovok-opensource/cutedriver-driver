@@ -353,7 +353,7 @@ module MobyBehaviour
           # Update the attributes that were used to create the child object.
           #_child.creation_attributes = creation_hash
 
-      d    _child.instance_eval("@creation_attributes = #{ creation_hash.inspect }")
+          _child.instance_eval("@creation_attributes = #{ creation_hash.inspect }")
 
           return _child
 
