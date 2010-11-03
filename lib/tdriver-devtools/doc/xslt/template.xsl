@@ -13,8 +13,8 @@
   <head>
     <style  TYPE="text/css">
 
-     body
-       {
+      body
+      {
          padding: 10px;
          border: #e7e7e7 1px solid;
          background: #ffffff;
@@ -22,12 +22,13 @@
          font-size: 13px;
          cursor: default;
          text-shadow: #909090 1px 1px 4px;
-       }
+      }
      
       div.feature_title
       {
 
-        background: #c1c1c1;
+        #background: #c1c1c1;
+        background: #404040;
 
         border-top: 1px solid #c9c9c9;
         border-left: 1px solid #c9c9c9;
@@ -45,8 +46,10 @@
       span.feature_title_text, a.feature_name_link
       {
         text-decoration: none;
-        font-size: 14px; 
-        color: #606060;
+        #font-size: 14px; 
+        font-size: 20px; 
+        #color: #606060;
+        color: #FFFFFF;
 
         text-shadow: gray 2px 2px 3px;
         font-weight: bold;
@@ -55,7 +58,7 @@
       span.feature_title_text:hover
       { 
 
-        color: #404040; 
+        color: #f0e0e0; 
 
       }
 
