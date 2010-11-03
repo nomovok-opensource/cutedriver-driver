@@ -294,7 +294,7 @@ module MobyBehaviour
     # b = sut.child( :type => 'Button', :text => '1' )
     # a.eql?( b ) # => true[/code]
     #
-    # == params
+    # == arguments
     # hash_rule
     #  Hash
     #   description: Hash object holding information for identifying which child to create
@@ -353,7 +353,7 @@ module MobyBehaviour
           # Update the attributes that were used to create the child object.
           #_child.creation_attributes = creation_hash
 
-          _child.instance_eval("@creation_attributes = #{ creation_hash.inspect }")
+      d    _child.instance_eval("@creation_attributes = #{ creation_hash.inspect }")
 
           return _child
 
