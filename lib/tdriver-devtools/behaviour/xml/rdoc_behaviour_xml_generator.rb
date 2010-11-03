@@ -1590,41 +1590,57 @@ EXAMPLE
         #return "" if features.last[:tables]["content"] == []
         
         tables = features.last[:tables].collect{ | table |
+  
+          if table["content"] == []
 
-          header = table[ "content" ].first.collect{ | header_item |
-            apply_macros!( @templates["behaviour.xml.table.item"].clone, {
-                "ITEM" => encode_string( header_item )
+            raise_error("Warning: Table format incorrect in '#{ features.first }' ($MODULE)", 'table_format')
+
+            apply_macros!( @templates["behaviour.xml.table"].clone, {
+                "TABLE_NAME" => encode_string( '[!!] ERROR' ),
+                "TABLE_TITLE" => encode_string( '[!!] ERROR' || "" ),
+                "TABLE_DESCRIPTION" => encode_string( '[!!] ERROR' || "" )
               }
             )
-          }
 
-          rows = table[ "content" ][ 1 .. -1 ].collect{ | row |
+          else          
 
-            row_items = row.collect{ | row_item |
-            
+            header = table[ "content" ].first.collect{ | header_item |
               apply_macros!( @templates["behaviour.xml.table.item"].clone, {
-                  "ITEM" => encode_string( row_item )
+                  "ITEM" => encode_string( header_item )
                 }
               )
             }
 
-            apply_macros!( @templates["behaviour.xml.table.row"].clone, {
+            rows = table[ "content" ][ 1 .. -1 ].collect{ | row |
 
-              "TABLE_ROW_ITEMS" => row_items.join("") 
-            
+              row_items = row.collect{ | row_item |
+              
+                apply_macros!( @templates["behaviour.xml.table.item"].clone, {
+                    "ITEM" => encode_string( row_item )
+                  }
+                )
+              }
+
+              apply_macros!( @templates["behaviour.xml.table.row"].clone, {
+
+                "TABLE_ROW_ITEMS" => row_items.join("") 
+              
+                }
+              )
+                          
+            }
+
+            apply_macros!( @templates["behaviour.xml.table"].clone, {
+                "TABLE_NAME" => encode_string( table[ "name" ] ),
+                "TABLE_TITLE" => encode_string( table[ "title" ] || "" ),
+                "TABLE_DESCRIPTION" => encode_string( table[ "description" ] || "" ),
+                "TABLE_HEADER_ITEMS" => header.join(""),
+                "TABLE_ROWS" => rows.join("")
               }
             )
-                        
-          }
 
-          apply_macros!( @templates["behaviour.xml.table"].clone, {
-              "TABLE_NAME" => encode_string( table[ "name" ] ),
-              "TABLE_TITLE" => encode_string( table[ "title" ] || "" ),
-              "TABLE_DESCRIPTION" => encode_string( table[ "description" ] || "" ),
-              "TABLE_HEADER_ITEMS" => header.join(""),
-              "TABLE_ROWS" => rows.join("")
-            }
-          )
+          end
+
         }
 
       end
