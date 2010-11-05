@@ -4,10 +4,9 @@
   <version>0.1</version>
 
   <!--
- 
-    *** DO NOT MODIFY THIS FILE - Use TDriver parameters XML to configure your environment ***
 
     Notice:
+    *** DO NOT MODIFY THIS FILE - Use TDriver parameters XML to configure your environment ***
 
     Due to this file will be updated by TDriver development team, please use TDriver parameters XML file instead.
     See TDriver parameters example XML (../tdriver_parameters.xml) for how to configure TDriver using templates.
@@ -34,14 +33,14 @@
     <parameter name="version" value="0" />
     <parameter name="language" value="English-GB" />
     <parameter name="read_lang_from_app" value="false" /> 
-	
-	<!-- default dbaccess sut-specific values -->
-	<parameter name="localisation_server_database_tablename" value="default_localization_tablename" />
+
+    <!-- default dbaccess sut-specific values -->
+    <parameter name="localisation_server_database_tablename" value="default_localization_tablename" />
     <parameter name="user_data_server_database_tablename" value="default_userinputs_tablename" />
     <parameter name="operator_data_server_database_tablename" value="default_operatorimputs_tablename" />
     <parameter name="operator_selected" value="orange" /> <!-- vodafone, etc... -->
 
-	<!-- default sut specific localisation table name -->
+    <!-- default sut specific localisation table name -->
     <parameter name="localisation_server_database_tablename" value="TB10_1_week16_loc" />
 
     <!-- default device input type (e.g. key, touch) -->
@@ -74,8 +73,7 @@
 
     <parameter name="verify_blocks" value="" />
 
-	<parameter name="use_find_object" value="false" />
-	
+    <parameter name="use_find_object" value="false" />
 
   </template>
 
@@ -88,20 +86,20 @@
     <parameter name="localisation_server_username" value="root" /> <!--valid only for mysql! -->
     <parameter name="localisation_server_password" value="" /> <!--valid only for mysql! -->
     <parameter name="localisation_server_database_name" value="default_tdriver_db" /> <!--path to the file for sqlite -->
-  
-	<!-- default parameters for user data settings -->
+
+    <!-- default parameters for user data settings -->
     <parameter name="user_data_db_type" value="mysql" />
     <parameter name="user_data_server_ip" value="127.0.0.1" /> <!--valid only for mysql! -->
     <parameter name="user_data_server_username" value="root" /> <!--valid only for mysql! -->
     <parameter name="user_data_server_password" value="" /> <!--valid only for mysql! -->
     <parameter name="user_data_server_database_name" value="default_tdriver_db" /> <!--path to the file for sqlite -->
 
-	<!-- default parameters for operator data settings -->
-	<parameter name="operator_data_db_type" value="sqlite" />
-	<parameter name="operator_data_server_ip" value="127.0.0.1" /> <!--valid only for mysql! -->
-	<parameter name="operator_data_server_username" value="root" /> <!--valid only for mysql! -->
-	<parameter name="operator_data_server_password" value="" /> <!--valid only for mysql! -->
-	<parameter name="operator_data_server_database_name" value="c:\operator_data.sqlite" /> <!--path to the file for sqlite -->
+    <!-- default parameters for operator data settings -->
+    <parameter name="operator_data_db_type" value="sqlite" />
+    <parameter name="operator_data_server_ip" value="127.0.0.1" /> <!--valid only for mysql! -->
+    <parameter name="operator_data_server_username" value="root" /> <!--valid only for mysql! -->
+    <parameter name="operator_data_server_password" value="" /> <!--valid only for mysql! -->
+    <parameter name="operator_data_server_database_name" value="c:\operator_data.sqlite" /> <!--path to the file for sqlite -->
 
   </template>
 
@@ -112,7 +110,7 @@
 
       Logging levels:
       0 = DISABLED    No logging done (default)
-      1 = DEBUG	Debug level logging
+      1 = DEBUG  Debug level logging
       2 = BEHAVIOUR   Behaviour logging enabled (including all levels below)
       2 = INFO        All levels below (suitable for most cases)
       3 = WARNING     Warnings and all errors (not implemented)
