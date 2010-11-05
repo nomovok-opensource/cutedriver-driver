@@ -160,7 +160,7 @@
     <!-- Parameters for report details -->
     <parameter name="report_outputter_path" value="tdriver_reports/" />
     <parameter name="behaviour_logging" value="true" />
-    <parameter name="realtime_status_page_update" value="true" />
+    <parameter name="realtime_status_page_update" value="false" />
 
     <parameter name="report_passed_statuses" value="passed" /> <!-- Different statuses can be separated with | -->
     <parameter name="report_failed_statuses" value="failed" /> <!-- Different statuses can be separated with | -->
@@ -170,6 +170,9 @@
     <parameter name="report_trace_capture" value="false" /> <!-- capture traces to test case -->
     <parameter name="report_trace_folder" value="C:/my_trace_folder/" /> <!-- Folder that contains the trace files that are attached to test case -->
     <parameter name="report_trace_capture_only_in_failed_case" value="true" /> <!-- capture trace files only when test case fails -->
+
+    <parameter name="report_monitor_memory" value="false" /> <!-- monitor memory consumption in test cases if set to true -->
+    <parameter name="report_collect_environment_data_from_sut" value="false" /> <!-- collect enviroment data from sut -->
 
     <!-- Parameters for generic file capturing -->
     <parameter name="report_file_monitor" value="false" />
