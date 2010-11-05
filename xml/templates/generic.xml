@@ -99,7 +99,7 @@
     <parameter name="operator_data_server_ip" value="127.0.0.1" /> <!--valid only for mysql! -->
     <parameter name="operator_data_server_username" value="root" /> <!--valid only for mysql! -->
     <parameter name="operator_data_server_password" value="" /> <!--valid only for mysql! -->
-    <parameter name="operator_data_server_database_name" value="c:\operator_data.sqlite" /> <!--path to the file for sqlite -->
+    <parameter name="operator_data_server_database_name" value="c:\operator_data.sqlite" /> <!--path to the file for sqlite --> <!-- posix="..." -->
 
   </template>
 
@@ -122,7 +122,10 @@
     <parameter name="logging_level" value="0" />
 
     <parameter name="logging_outputter_enabled" value="false" />
-    <parameter name="logging_outputter_path" value="logfiles/" />
+
+    <!-- default path: /logs/testability/tdriver, windows: logfiles/ under TDriver home folder -->
+    <parameter name="logging_outputter_path" value="/logs/testability/tdriver" windows="logfiles/" /> 
+
     <parameter name="logging_outputter_unique_filename" value="false" />
     <parameter name="logging_outputter_append" value="false" />
 
@@ -140,7 +143,7 @@
     <parameter name="logging_xml_parse_error_dump" value="true" />
 
     <!-- where to store errorneous xml dump -->
-    <parameter name="logging_xml_parse_error_dump_path" value="logfiles/" />
+    <parameter name="logging_xml_parse_error_dump_path" value="/logs/testability/tdriver" windows="logfiles/" />
 
     <!-- use static or unique filename for xml dump -->
     <parameter name="logging_xml_parse_error_dump_overwrite" value="false" />
@@ -153,7 +156,7 @@
     <!-- Parameters for report crash file monitoring -->
     <parameter name="report_crash_file_monitor" value="false" />
     <parameter name="report_crash_file_monitored_sut_ids" value="s60,qt_sut" />
-    <parameter name="report_crash_file_locations" value="C:,c:\data,E:,F:" />
+    <parameter name="report_crash_file_locations" value="C:,c:\data,E:,F:" /> <!-- posix="..." -->
     <parameter name="report_crash_file_names" value="MobileCrash" />
     <parameter name="report_disconnect_connected_devices" value="false" />
 
@@ -168,7 +171,7 @@
     <parameter name="report_editable" value="false" /> <!-- Set to true to make report editable -->
 
     <parameter name="report_trace_capture" value="false" /> <!-- capture traces to test case -->
-    <parameter name="report_trace_folder" value="C:/my_trace_folder/" /> <!-- Folder that contains the trace files that are attached to test case -->
+    <parameter name="report_trace_folder" value="C:/my_trace_folder/" /> <!-- Folder that contains the trace files that are attached to test case --> <!-- posix="..." -->
     <parameter name="report_trace_capture_only_in_failed_case" value="true" /> <!-- capture trace files only when test case fails -->
 
     <parameter name="report_monitor_memory" value="false" /> <!-- monitor memory consumption in test cases if set to true -->
@@ -177,7 +180,7 @@
     <!-- Parameters for generic file capturing -->
     <parameter name="report_file_monitor" value="false" />
     <parameter name="report_file_monitored_sut_ids" value="sut_s60_qt,qt_sut" />
-    <parameter name="report_file_locations" value="C:\logs,E:\logs" />
+    <parameter name="report_file_locations" value="C:\logs,E:\logs" /> <!-- posix="..." -->
     <parameter name="report_file_names" value="*.log" />
     <parameter name="report_clean_files_from_sut_after_capture" value="true" />
     <parameter name="report_fail_test_if_files_found" value="true" />        
