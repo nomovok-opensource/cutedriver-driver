@@ -61,7 +61,14 @@ module MobyUtil
       # default results 
       results = ParameterHash.new()
 
+      # retrieve platform name
+      platform = MobyUtil::EnvironmentHelper.platform
+
+      # detect is posix platform
+      is_posix = MobyUtil::EnvironmentHelper.posix?
+
       begin
+
         # create new xml document
         document = MobyUtil::XML::parse_string( xml )
 
@@ -77,7 +84,15 @@ module MobyUtil
         attribute = element.attributes.to_hash
 
         name = attribute[ "name" ].to_s
+
+        # default value
         value = attribute[ "value" ].to_s
+
+        # generic posix value - overwrites attribute["value"] if found
+        value = attribute["posix"].to_s unless attribute[ "posix" ].nil? if is_posix
+
+        # platform specific value - overwrites existing value
+        value = attribute[ platform.to_s ].to_s unless attribute[ platform.to_s ].nil?
 
         case element.name
             

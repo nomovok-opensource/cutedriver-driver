@@ -79,21 +79,27 @@ module MobyUtil
         dump_location = ""
 
         # check if xml parse error logging is enabled
-        if MobyUtil::KernelHelper.to_boolean( MobyUtil::Parameter[ :logging_xml_parse_error_dump, 'true' ] )
+        if MobyUtil::KernelHelper.to_boolean( MobyUtil::Parameter[ :logging_xml_parse_error_dump ] )
 
           # generate filename for xml dump
-          filename = MobyUtil::KernelHelper.to_boolean( MobyUtil::Parameter[ :logging_xml_parse_error_dump_overwrite, 'false' ] ) ? 'xml_error_dump.xml' : 'xml_error_dump_%i.xml' % Time.now
+          filename = MobyUtil::KernelHelper.to_boolean( MobyUtil::Parameter[ :logging_xml_parse_error_dump_overwrite ] ) ? 'xml_error_dump.xml' : 'xml_error_dump_%i.xml' % Time.now
 
           # ... join filename with xml dump output path 
-          path = File.join( MobyUtil::FileHelper.expand_path( MobyUtil::Parameter[ :logging_xml_parse_error_dump_path, 'logfiles/' ] ), filename )
+          path = File.join( MobyUtil::FileHelper.expand_path( MobyUtil::Parameter[ :logging_xml_parse_error_dump_path ] ), filename )
 
-          # create error dump folder if not exist, used e.g. when xml parse error
-          MobyUtil::FileHelper.mkdir_path( File.dirname( path ) )
+          begin
 
-          # write xml string to file
-          File.open( path, "w" ){ | file | file << xml_string }
+            # write xml string to file
+            File.open( path, "w" ){ | file | file << xml_string }
 
-          dump_location = ". Saved to %s" % path
+            dump_location = ". Saved to %s" % path
+
+          rescue
+
+            dump_location = ". Error while saving to file %s" % path
+
+          end
+
 
         end
 

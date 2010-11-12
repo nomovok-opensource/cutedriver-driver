@@ -27,38 +27,34 @@
       div.feature_title
       {
 
-        #background: #c1c1c1;
-        background: #404040;
-
-        border-top: 1px solid #c9c9c9;
-        border-left: 1px solid #c9c9c9;
-
-        border-bottom: 1px solid #aaaaaa;
-        border-right: 1px solid #aaaaaa;
-
         padding: 8px;
 
-        -moz-box-shadow: 1px 1px 4px #818181;
-        -webkit-box-shadow: 1px 1px 4px #818181;
+        background: #404040;
+
+        border-top: 1px solid #484848;
+        border-left: 1px solid #484848;
+
+        border-bottom: 1px solid #2a2a2a;
+        border-right: 1px solid #2a2a2a;
+
+        -moz-box-shadow: 1px 1px 4px #010101;
+        -webkit-box-shadow: 1px 1px 4px #010101;
  
       }
 
       span.feature_title_text, a.feature_name_link
       {
         text-decoration: none;
-        #font-size: 14px; 
         font-size: 20px; 
-        #color: #606060;
         color: #FFFFFF;
-
-        text-shadow: gray 2px 2px 3px;
+        text-shadow: #101010 2px 2px 3px;
         font-weight: bold;
       }
   
       span.feature_title_text:hover
       { 
 
-        color: #f0e0e0; 
+
 
       }
 

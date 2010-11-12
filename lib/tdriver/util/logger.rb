@@ -258,9 +258,63 @@ module MobyUtil
 
 			@include_behaviour_info = ( MobyUtil::Parameter[ :logging_include_behaviour_info, 'false' ].downcase == 'true' )
 
-			# create error dump folder if not exist, used e.g. when xml parse error
-			MobyUtil::FileHelper.mkdir_path( MobyUtil::FileHelper.expand_path( MobyUtil::Parameter[ :logging_xml_parse_error_dump_path ] ) )
+      # UI state XML parse error logging - verify that all required parameters are configured and output folder is created succesfully
+      if MobyUtil::KernelHelper.to_boolean( MobyUtil::Parameter[ :logging_xml_parse_error_dump, 'false' ] ) == true
 
+        begin
+
+          if MobyUtil::Parameter[ :logging_xml_parse_error_dump_path, nil ].nil?
+
+            warn("Warning: Configuration parameter :logging_xml_parse_error_dump_path missing, disabling the feature...") 
+
+            # disable feature
+            raise ArgumentError
+
+          else
+
+            begin
+
+			        # create error dump folder if not exist, used e.g. when xml parse error
+			        MobyUtil::FileHelper.mkdir_path( MobyUtil::FileHelper.expand_path( $last_parameter ) )
+
+            rescue Exception
+
+              warn("Warning: Unable to create output folder %s for corrupted UI state XML dumps" % [ MobyUtil::Parameter[ :logging_xml_parse_error_dump_path ] ] )
+
+              # disable feature
+              raise ArgumentError
+
+            end
+
+          end
+
+          if MobyUtil::Parameter[ :logging_xml_parse_error_dump_overwrite, nil ].nil?
+
+            warn("Warning: Configuration parameter :logging_xml_parse_error_dump_overwrite missing, using default value: false")
+
+            MobyUtil::Parameter[ :logging_xml_parse_error_dump_overwrite ] = 'false'
+
+          end
+
+        rescue ArgumentError => exception
+
+          MobyUtil::Parameter[ :logging_xml_parse_error_dump ] = 'false'
+
+        rescue Exception => exception
+
+          warn("Warning: Disabling logging due to failure (%s: %s)" % [ exception.class, exception.message ] )
+
+          MobyUtil::Parameter[ :logging_xml_parse_error_dump ] = 'false'
+
+        end
+
+      else
+
+        warn("Warning: Configuration parameter :logging_xml_parse_error_dump missing, disabling the feature...") 
+        MobyUtil::Parameter[ :logging_xml_parse_error_dump ] = 'false'
+
+      end
+      
 			unless logging_level.zero?
 
 				# create new logger instance
