@@ -17,7 +17,7 @@
   <!-- this template will be loaded automatically as global parameters; usage example: value = MobyUtil::Parameter[:app_path] -->
   <template name="global" inherits="logging;dbaccess;reporting">
 
-    <!-- orbit test application path -->
+    <!-- test application path -->
     <parameter name="app_path" value="" />
 
     <!-- default behaviours file -->
