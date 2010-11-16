@@ -20,8 +20,8 @@
 # extend Ruby Hash class functionality
 class Hash
 
-  # Verify that received object contains given key. Raises exception is key not found.
-  def require_key( keys, message = "Required key(s) $1 not found from hash" )
+  # Verify that received object contains one of given keys. Raises exception is key not found.
+  def require_key( keys, message = "None of key(s) $1 found from hash" )
 
     # create array of types
     keys_array = keys.kind_of?( Array ) ? keys : [ keys ]    
@@ -31,6 +31,38 @@ class Hash
     verbose_keys_list = keys_array.each_with_index.collect{ | key, index | 
 
       found = true if self.has_key?( key )
+
+      # result string, separate types if multiple types given
+      "#{ ( ( index > 0 ) ? ( index + 1 < keys_array.count ? ", " : " or " ) : "" ) }#{ key.inspect }"
+          
+    }.join
+
+    # raise exception if type did not match
+    unless found
+
+      # convert macros
+      [ verbose_keys_list ].each_with_index{ | param, index | message.gsub!( "$#{ index + 1 }", param.to_s ) }
+
+      # raise the exception
+      raise ArgumentError.new( message )
+
+    end
+
+    self
+
+  end
+
+  # Verify that received object contains all of given keys. Raises exception is key not found.
+  def require_keys( keys, message = "Required key(s) $1 not found from hash" )
+
+    # create array of types
+    keys_array = keys.kind_of?( Array ) ? keys : [ keys ]    
+
+    found = true
+
+    verbose_keys_list = keys_array.each_with_index.collect{ | key, index | 
+
+      found = false unless self.has_key?( key )
 
       # result string, separate types if multiple types given
       "#{ ( ( index > 0 ) ? ( index + 1 < keys_array.count ? ", " : " and " ) : "" ) }#{ key.inspect }"
