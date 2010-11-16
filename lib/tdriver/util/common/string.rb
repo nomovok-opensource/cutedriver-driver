@@ -25,6 +25,47 @@ class String
 
   end
 
+  # Function determines if string is "true" or "false"
+  # == params
+  # string:: String
+  # == returns
+  # TrueClass/FalseClass 
+  def self.boolean?
+
+    /^(true|false)$/i.match( self ).kind_of?( MatchData )
+
+  end    
+
+  # Function determines if string is numeric
+  # == params
+  # string:: Numeric string
+  # == returns
+  # TrueClass/FalseClass 
+  def self.numeric?
+
+    /[0-9]+/.match( self ).kind_of?( MatchData )
+
+  end  
+
+  # Function converts "true" or "false" to boolean 
+  # == params
+  # string:: String
+  # == returns
+  # TrueClass/FalseClass 
+  def self.to_boolean
+
+    if boolean?
+
+      /true/i.match( string ).kind_of?( MatchData )
+
+    else
+
+      Kernel::raise TypeError.new( "Unable convert '#{ self.inspect }' to boolean (Expected 'true' or 'false')" )
+
+    end      
+
+  end    
+
 end
 
 module MobyUtil

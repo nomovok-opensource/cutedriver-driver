@@ -27,11 +27,11 @@ module MobyBase
 		# == params
 		# sut_adapter:: MobyController::SutAdapter descendant, e.g. MobyController::QT::SutAdapter
 		# == raises
-    # TypeError:: Wrong argument type $1 for SUT controller (Expecting $2)
+    # TypeError:: Wrong argument type $1 for SUT controller (expected $2)
 		# NameError:: No SUT controller found for %s (%s)
 		def initialize( sut_controllers, sut_adapter )
 
-      sut_controllers.check_type( String, "Wrong argument type $1 for SUT controller (Expecting $2)" )
+      sut_controllers.check_type( String, "Wrong argument type $1 for SUT controller (expected $2)" )
 
 			@sut_adapter = sut_adapter
 
@@ -81,11 +81,11 @@ module MobyBase
 		# == returns
 		# command_data implementation specific return value
 		# == raises
-		# TypeError:: Wrong argument type $1 for command_data (Expecting $2)
+		# TypeError:: Wrong argument type $1 for command_data (expected $2)
 		# MobyBase::CommandNotFoundError:: if no implementation is found for the CommandData object
 		def execute_command( command_data )
 
-      command_data.check_type( MobyCommand::CommandData, "Wrong argument type $1 for command_data (Expecting $2)" )
+      command_data.check_type( MobyCommand::CommandData, "Wrong argument type $1 for command_data (expected $2)" )
 
 			@execution_order.each{ | controller |
 

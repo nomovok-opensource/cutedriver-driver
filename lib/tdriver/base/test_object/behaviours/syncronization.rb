@@ -69,14 +69,14 @@ module MobyBehaviour
 		#  example: - 
 		#
 		# == exceptions
-		# ArgumentError
-		#  description: Argument type was not a valid. Expected: String
+		# TypeError
+		#  description: Wrong argument type %s for attributes (expected Hash)
 		#
-		# ArgumentError
-		#  description: Argument attributes was not a valid. Expected: Hash
+		# TypeError
+		#  description: Wrong argument type %s for attribute :type (expected String)
 		#
-		# ArgumentError
-		#  description: Argument timeout_secs was not a valid. Expected: Integer, Fixnum or Float
+		# TypeError
+		#  description: Wrong argument type %s for timeout (expected Integer, Fixnum or Float)
 		#
 		# ArgumentError
 		#  description: Argument retry_interval was not a valid. Expected: Integer, Fixnum or Float
@@ -86,13 +86,26 @@ module MobyBehaviour
 		#
 		def wait_child( attributes = {}, timeout_secs = 10, retry_interval = 0.5 )
 
-			Kernel::raise ArgumentError.new( "Argument attributes was not a valid. Expected: Hash" ) unless attributes.kind_of?( Hash )
+			#Kernel::raise ArgumentError.new( "Argument attributes was not a valid. Expected: Hash" ) unless attributes.kind_of?( Hash )
+			#Kernel::raise ArgumentError.new( "Argument type was not a valid. Expected: String" ) unless attributes[ :type ].kind_of?( String ) && attributes[ :type ].length > 0
+			#Kernel::raise ArgumentError.new( "Argument timeout_secs was not a valid. Expected: Integer, Fixnum or Float" ) unless [ Integer, Fixnum, Float ].include? timeout_secs.class
+			#Kernel::raise ArgumentError.new( "Argument retry_interval was not a valid. Expected: Integer, Fixnum or Float" ) unless [ Integer, Fixnum, Float ].include? retry_interval.class
 
-			Kernel::raise ArgumentError.new( "Argument type was not a valid. Expected: String" ) unless attributes[ :type ].kind_of?( String ) && attributes[ :type ].length > 0
 
-			Kernel::raise ArgumentError.new( "Argument timeout_secs was not a valid. Expected: Integer, Fixnum or Float" ) unless [ Integer, Fixnum, Float ].include? timeout_secs.class
+      # verify that attributes is type of Hash
+      attributes.check_type( Hash, "Wrong argument type $1 for attributes (expected $2)" )
+  
+      # verify that :type is type of String
+      attributes[ :type ].check_type( String, "Wrong argument type $1 for attribute :type (expected $2)" )
 
-			Kernel::raise ArgumentError.new( "Argument retry_interval was not a valid. Expected: Integer, Fixnum or Float" ) unless [ Integer, Fixnum, Float ].include? retry_interval.class
+      # verify that :type is not empty string
+      attributes[ :type ].not_empty( "Attribute :type must not be empty" )
+
+      # verify timeout type is numeric
+      timeout_secs.check_type( [ Integer, Fixnum, Float ], "Wrong argument type $1 for timeout (expected $2)" )
+
+      # verify timeout type is numeric
+      retry_interval.check_type( [ Integer, Fixnum, Float ], "Wrong argument type $1 for retry interval (expected $2)" )
 
 			begin
 

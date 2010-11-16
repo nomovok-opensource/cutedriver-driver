@@ -191,10 +191,10 @@ module MobyBehaviour
     #
     # == exception
     # TypeError
-    #  description: "Wrong argument type %s for XML (Expected MobyUtil::XML::Element, String or NilClass)
+    #  description: Wrong argument type %s for XML (expected MobyUtil::XML::Element, String or NilClass)
     def xml_data=( xml )
 
-      xml.check_type( [ MobyUtil::XML::Element, String, NilClass ], "Wrong argument type $1 for XML (Expected $2)" )
+      xml.check_type( [ MobyUtil::XML::Element, String, NilClass ], "Wrong argument type $1 for XML (expected $2)" )
 
       case xml.class
 
@@ -420,13 +420,13 @@ module MobyBehaviour
     #
     # == exceptions
     # TypeError
-    #  description: Wrong argument type %s for attributes (Expected Hash)
+    #  description: Wrong argument type %s for attributes (expected Hash)
     #
     def application( attributes = {} )
 
       begin
 
-        attributes.check_type( Hash, "Wrong argument type $1 for attributes (Expected $2)" )
+        attributes.check_type( Hash, "Wrong argument type $1 for attributes (expected $2)" )
 
         get_default_app = attributes.empty?
 
@@ -472,7 +472,7 @@ module MobyBehaviour
     #
     # == exceptions
     # TypeError
-    #   description: Wrong argument type %s (Expected Hash)
+    #   description: Wrong argument type %s (expected Hash)
     #
     # ArgumentError
     #   description: Output filename (:filename) not defined in argument hash
@@ -554,7 +554,7 @@ module MobyBehaviour
     #
     # == exceptions
     # TypeError
-    #  description: Wrong argument type %s for run method (Expected Hash)
+    #  description: Wrong argument type %s for run method (expected Hash)
     #  
     # ArgumentError
     #  description: Required key :uid or :name not found from argument hash
@@ -571,7 +571,7 @@ module MobyBehaviour
         #MobyUtil::Parameter[ @id ][ :refresh_interval ] = '0'
 
         # raise exception if argument type other than hash
-        target.check_type( Hash, "Wrong argument type $1 for run method (Expected $2)" )
+        target.check_type( Hash, "Wrong argument type $1 for run method (expected $2)" )
 
         # default value for missing keys
         target.default = nil
@@ -754,13 +754,13 @@ module MobyBehaviour
     #
     # == exceptions
     # TypeError
-    #  description: Wrong argument type $1 for press_key (Expected $2)
+    #  description: Wrong argument type $1 for press_key (expected $2)
     #
     def press_key( value )
 
       begin
 
-        value.check_type( [ Symbol, MobyCommand::KeySequence ], "Wrong argument type $1 for press_key (Expected $2)" )
+        value.check_type( [ Symbol, MobyCommand::KeySequence ], "Wrong argument type $1 for press_key (expected $2)" )
 
         sequence = value.kind_of?( Symbol ) ? MobyCommand::KeySequence.new( value ) : value
 

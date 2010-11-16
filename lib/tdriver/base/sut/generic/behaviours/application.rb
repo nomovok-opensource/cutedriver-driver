@@ -81,13 +81,13 @@ module MobyBehaviour
     #  description: If no application test object is found after close or if this application is still in the foreground after the close.
     #
     # TypeError
-    #  description: Wrong argument type %s for options_hash (Expecting a Hash, TrueClass or FalseClass)
+    #  description: Wrong argument type %s for options_hash (expected a Hash, TrueClass or FalseClass)
     #
     # TypeError
-    #  description: Wrong argument type %s for :force_kill (Expecting NilClass, TrueClass or FalseClass)
+    #  description: Wrong argument type %s for :force_kill (expected NilClass, TrueClass or FalseClass)
     #
     # TypeError
-    #  description: Wrong argument type %s for :check_process (Expecting TrueClass or FalseClass)
+    #  description: Wrong argument type %s for :check_process (expected TrueClass or FalseClass)
     #
     def close( options_hash = {} )
 
@@ -110,7 +110,7 @@ module MobyBehaviour
           if options_hash != nil
 
             # verify options_hash value
-            options_hash.check_type( [ Hash, FalseClass, TrueClass ], "Wrong argument type $1 for options_hash (Expecting $2)" )
+            options_hash.check_type( [ Hash, FalseClass, TrueClass ], "Wrong argument type $1 for options_hash (expected $2)" )
 
             close_options[ :force_kill ] = options_hash
 
@@ -119,10 +119,10 @@ module MobyBehaviour
         end
         
         # verify :force_kill variable type
-        close_options[ :force_kill ].check_type( [ NilClass, TrueClass, FalseClass ], "Wrong argument type $1 for :force_kill (Expecting $2)" )
+        close_options[ :force_kill ].check_type( [ NilClass, TrueClass, FalseClass ], "Wrong argument type $1 for :force_kill (expected $2)" )
 
         # verify :check_process variable type
-        close_options[ :check_process ].check_type( [ TrueClass, FalseClass ], "Wrong argument type $1 for :check_process (Expecting $2)" )
+        close_options[ :check_process ].check_type( [ TrueClass, FalseClass ], "Wrong argument type $1 for :check_process (expected $2)" )
         
         if close_options[ :force_kill ] != nil                
 

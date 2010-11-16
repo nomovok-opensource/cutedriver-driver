@@ -17,7 +17,6 @@
 ## 
 ############################################################################
 
-
 # Find behaviour 
 # Methods for finding test objects on the suttest objet state
 module MobyBehaviour
@@ -50,7 +49,7 @@ module MobyBehaviour
 		# Finds a child test_object given its name and type and returns it as a reference 
 		#
 		# == arguments
-		# find_hash
+		# attributes
 		#  Hash
 		#   description: one or more attributes defining the rules for the test object search. Must not be empty.
 		#   example: { :name => 'oneButton' }
@@ -63,27 +62,32 @@ module MobyBehaviour
 		#
 		# == exceptions
 		# TypeError
-		#  description: raised if agument is not a Hash or is an emtpy Hash
-		#    
+		#  description: Wrong argument type %s for attributes (expected Hash)
+		# 
+		# ArgumentError
+		#  description: Attributes hash must not be empty
+		# 
 		# == info
 		#  Same as calling child method.
-		def find ( find_hash = {} )
+		def find ( attributes = {} )
 
 			begin
 
-				raise TypeError.new( 'Input parameter not of Type: Hash or empty.\nIt is: ' + find_hash.class.to_s ) unless find_hash.kind_of?( Hash ) and !find_hash.empty?
-
-				search_result = child(find_hash)
+        attributes.check_type( Hash, "Wrong argument type $1 for attributes (expected $2)" )
+        
+				raise ArgumentError.new( 'Attributes hash must not be empty' ) if attributes.empty?
+        
+				search_result = child( attributes )
 
 			rescue Exception => e
 
-				MobyUtil::Logger.instance.log "behaviour" , "FAIL;Failed to find test object.;#{id.to_s};sut;{};find;" << ( find_hash.kind_of?( Hash ) ? find_hash.inspect : find_hash.class.to_s )
+				MobyUtil::Logger.instance.log "behaviour" , "FAIL;Failed to find test object.;#{id.to_s};sut;{};find;" << ( attributes.kind_of?( Hash ) ? attributes.inspect : attributes.class.to_s )
 
 				Kernel::raise e
 
 			end
 
-			MobyUtil::Logger.instance.log "behaviour" , "PASS;Test object found.;#{id.to_s};sut;{};application;" << find_hash.inspect 
+			MobyUtil::Logger.instance.log "behaviour" , "PASS;Test object found.;#{id.to_s};sut;{};application;" << attributes.inspect 
 
 			search_result
 		end

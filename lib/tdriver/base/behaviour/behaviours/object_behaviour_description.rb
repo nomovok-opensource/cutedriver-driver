@@ -125,17 +125,23 @@ module MobyBehaviour
     #  description: When 'return_result' is false
     #  example: nil
     #
-    # == footer
+    # == exceptions
+    # TypeError
+    #  description: Wrong argument type %s for method name (expected Symbol or String)
+    #
+    # ArgumentError
+    #  description: Test object type of %s does not have method %s
     #
 		def describe_method( method_name, print = true, return_result = false )
 			
+      # verify that method_name is type of Symbol or String 
+      method_name.check_type( [ Symbol, String ], "Wrong argument type $1 for method name (expected $2)" )
+
 			# convert to symbol if method_name is a string
 			method_name = method_name.to_sym if method_name.kind_of?( String )
 
-			Kernel::raise ArgumentError.new("Wrong argument type for method name. (Actual: #{ method_name.class }, Expected: Symbol)") unless method_name.kind_of?( Symbol )
-
 			# print result to stdout if argument not boolean
-			print = true unless [ TrueClass, FalseClass ].include? print.class
+			print = true unless [ TrueClass, FalseClass ].include?( print.class )
 
 			# return result not printed out to stdout 
 			return_result = true unless print
@@ -154,7 +160,7 @@ module MobyBehaviour
 				
 			}
 
-			Kernel::raise RuntimeError.new("No such method for object type of #{ self.type }") if result_hash.nil?
+			Kernel::raise ArgumentError.new( "Test object type of %s does not have method %s" % [ self.type, method_name ] ) if result_hash.nil?
 
 			if print
 
@@ -209,8 +215,6 @@ module MobyBehaviour
     # NilClass
     #  description: When 'return_result' is false
     #  example: nil
-    #
-    # == footer
     #
 		def describe( print = true, return_result = false )
 

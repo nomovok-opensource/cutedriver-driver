@@ -223,7 +223,7 @@ module MobyBase
 		  sut_attributes = { :id => sut_attributes.to_sym } if [ String, Symbol ].include?( sut_attributes.class )
 
       # verify that sut_attributes is type of Hash
-      sut_attributes.check_type( [ Hash, Symbol, String ], "Wrong argument type $1 for 'sut_attributes' (Expected $2)" )
+      sut_attributes.check_type( [ Hash, Symbol, String ], "Wrong argument type $1 for 'sut_attributes' (expected $2)" )
 
       # legacy support: support also :Id
       sut_attributes[ :id ] = sut_attributes.delete( :Id ) if sut_attributes.has_key?( :Id )
@@ -256,19 +256,21 @@ module MobyBase
 		# Finds the sut definition matching the id, either directly or via a mapping
 		#
 		# === params
-		# id:: Symbol defining the id of the sut to search for
+		# sut_id:: Symbol defining the id of the sut to search for
 		# === returns
 		# Symbol:: Either id if it was found in the parameter file or the id of a sut mapped to this id, or nil if no direct or mapped match was found
 		# === raises
 		# ArgumentError:: The id argument was not a Symbol
-		def find_sut_or_mapping( id )
+		def find_sut_or_mapping( sut_id )
 
-			Kernel::raise ArgumentError.new( "The id argument was not a Symbol." ) unless id.kind_of?( Symbol )
+      sut_id.check_type( Symbol, "Wrong argument type $1 for SUT id (expected $2)" )
+      
+			#Kernel::raise ArgumentError.new( "The id argument was not a Symbol." ) unless sut_id.kind_of?( Symbol )
 
 			begin
 
 				# check if direct match exists
-				return id if MobyUtil::Parameter[ id ]
+				return sut_id if MobyUtil::Parameter[ sut_id ]
 
 			rescue MobyUtil::ParameterNotFoundError
 
@@ -276,7 +278,7 @@ module MobyBase
 				begin        
 
 					# return nil if no mapping exists
-					return nil if ( mapped_id = MobyUtil::Parameter[ :mappings ][ id ] ).nil?                
+					return nil if ( mapped_id = MobyUtil::Parameter[ :mappings ][ sut_id ] ).nil?                
 
 					# check if the mapped to sut id exists
 					return mapped_id if MobyUtil::Parameter[ ( mapped_id = mapped_id.to_sym ) ]
