@@ -380,7 +380,7 @@ module MobyUtil
                       begin
 
 											  # call original method
-											  result = method(:#{ original_method_name }).call( *args, &block )
+											  result = send(:#{ original_method_name }, *args, &block )
 
                       rescue Exception => exception
 
@@ -408,7 +408,7 @@ module MobyUtil
 										else
 
 											"# call original method
-											result = self.method(:#{ original_method_name }).call( *args, &block )"
+  									  result = send(:#{ original_method_name }, *args, &block )"
 
 										end
 
