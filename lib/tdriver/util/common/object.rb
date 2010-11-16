@@ -48,7 +48,7 @@ class Object
     unless found
 
       # convert macros
-      [ self.class, verbose_type_list ].each_with_index{ | param, index | message.gsub!( "$#{ index + 1 }", param.to_s ) }
+      [ self.class, verbose_type_list, self.inspect ].each_with_index{ | param, index | message.gsub!( "$#{ index + 1 }", param.to_s ) }
 
       # raise the exception
       raise TypeError.new( message )
