@@ -17,6 +17,16 @@
 ## 
 ############################################################################
 
+class String
+
+  def not_empty( message = "Empty string given" )
+
+    raise ArgumentError.new( message ) if self.empty? 
+
+  end
+
+end
+
 module MobyUtil
 
   class StringHelper    
