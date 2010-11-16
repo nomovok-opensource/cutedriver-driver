@@ -17,7 +17,6 @@
 ## 
 ############################################################################
 
-
 module MobyBase
 
 	class SutController
@@ -28,10 +27,11 @@ module MobyBase
 		# == params
 		# sut_adapter:: MobyController::SutAdapter descendant, e.g. MobyController::QT::SutAdapter
 		# == raises
+    # TypeError:: Wrong argument type $1 for SUT controller (Expecting $2)
 		# NameError:: No SUT controller found for %s (%s)
 		def initialize( sut_controllers, sut_adapter )
 
-			Kernel::raise ArgumentError.new( "SUT Controller(s) must be given in String format, got #{ sut_controllers.class }" ) unless sut_controllers.kind_of? String
+      sut_controllers.check_type( String, "Wrong argument type $1 for SUT controller (Expecting $2)" )
 
 			@sut_adapter = sut_adapter
 
@@ -81,11 +81,11 @@ module MobyBase
 		# == returns
 		# command_data implementation specific return value
 		# == raises
-		# ArgumentError:: if command_data is not kind of MobyController::CommandData
+		# TypeError:: Wrong argument type $1 for command_data (Expecting $2)
 		# MobyBase::CommandNotFoundError:: if no implementation is found for the CommandData object
 		def execute_command( command_data )
 
-			Kernel::raise ArgumentError.new( 'Data not of type MobyController::CommandData' ) unless command_data.kind_of?( MobyCommand::CommandData )
+      command_data.check_type( MobyCommand::CommandData, "Wrong argument type $1 for command_data (Expecting $2)" )
 
 			@execution_order.each{ | controller |
 
