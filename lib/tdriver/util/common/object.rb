@@ -17,7 +17,7 @@
 ## 
 ############################################################################
 
-# extend Ruby Object class behaviour 
+# extend Ruby Object class functionality
 class Object
 
   # Compare receiver object type with given types. Raises exception is class name does not equal.
@@ -55,7 +55,8 @@ class Object
 
     end
 
-    true
+    # pass self as return value
+    self
 
   end
 
