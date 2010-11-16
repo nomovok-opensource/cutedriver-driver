@@ -43,6 +43,7 @@ module MobyBase
 		def mapped_sut?( sut_id )
 
 			MobyUtil::Parameter[ :mappings, {} ].has_key?( sut_id.to_sym )
+
 		end
 
 
@@ -60,23 +61,14 @@ module MobyBase
 		# return:: SUT object
 		# raise:: 
 		# ArgumentError:: SUT ID '%s' not found from tdriver_parameters.xml
-		def make( sut_id )
+		def make( sut_attributes )
 
-			# cast into symbol just in case string was passed
-			sut_id = sut_id.to_sym
+      sut_id = retrieve_sut_id_from_hash( sut_attributes )
 
 			sut_id = get_mapped_sut( sut_id ) if mapped_sut?( sut_id )
 
 			# if sut is already connected, return existing sut
 			return get_sut_from_list( sut_id ) if sut_exists?( sut_id )
-
-			#mapped_id = MobyUtil::Parameter[ sut_id, nil ].to_sym
-
-			# check if the sut or an alias exists in tdriver_parameters.xml
-			#mapped_id = find_sut_or_mapping( sut_id )
-
-			# if sut is already connected, return existing sut
-			#return get_sut_from_list( mapped_id ) if (mapped_id != sut_id and sut_exists?( mapped_id ))
 
 			Kernel::raise ArgumentError.new( "The SUT '#{ sut_id }' was not defined in TDriver parameters XML" ) if MobyUtil::Parameter[ sut_id, nil ].nil?
 
@@ -193,24 +185,28 @@ module MobyBase
 
 		end
 
-		def disconnect_sut( id )
+		def disconnect_sut( sut_attributes )
 
-			#cast into symbol just in case string was passed
-			id = id.to_sym
+      id = retrieve_sut_id_from_hash( sut_attributes )
+
 			Kernel::raise RuntimeError.new( "Not connected to device: #{ id  }" ) unless sut_exists?( id ) && @_sut_list[ id ][ :is_connected ] 
 
 			@_sut_list[ id ][ :sut ].disconnect
+
 			@_sut_list[ id ][ :is_connected ] = false
 
 		end 
 
-		def reboot_sut( id )
+		def reboot_sut( sut_attributes )
 
-			id = id.to_sym
+      id = retrieve_sut_id_from_hash( sut_attributes )
+
 			Kernel::raise RuntimeError.new( "Not connected to device: #{ id }" ) unless sut_exists?( id ) && @_sut_list[ id ][ :is_connected ]
 			
 			@_sut_list[ id ][ :sut ].reboot
+
 			disconnect_sut( id )
+
 		end
 
 		def connected_suts
@@ -220,6 +216,23 @@ module MobyBase
 		end
 
 	private
+
+    def retrieve_sut_id_from_hash( sut_attributes )
+
+		  # usability improvement: threat sut_attribute as SUT id if it is type of Symbol or String
+		  sut_attributes = { :id => sut_attributes.to_sym } if [ String, Symbol ].include?( sut_attributes.class )
+
+      # verify that sut_attributes is type of Hash
+      sut_attributes.check_type( [ Hash, Symbol, String ], "Wrong argument type $1 for 'sut_attributes' (Expected $2)" )
+
+      # legacy support: support also :Id
+      sut_attributes[ :id ] = sut_attributes.delete( :Id ) if sut_attributes.has_key?( :Id )
+
+      sut_attributes.require_key( :id, "Required SUT identification key $1 not defined in 'sut_attributes'" )
+      
+      sut_attributes[ :id ].to_sym
+
+    end
 
 		# gets sut from sut-factorys list - if not connected tries to reconnect first
 		def get_sut_from_list( id )

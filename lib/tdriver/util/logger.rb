@@ -243,8 +243,31 @@ module MobyUtil
 
 		end
 
+    def set_debug_exceptions
+
+      if ARGV.include?( '--debug_exceptions' ) || TDriver.parameter[ :debug_exceptions, 'false' ].to_s.downcase == 'true'
+
+	      # for debugging to see every occured exception
+	      def Kernel::raise( *args )
+
+		      exception = args.first || $!
+
+		      backtrace = caller.collect{ | line | "  %s" % line }.join("\n")
+
+		      puts "%s: %s\nBacktrace: \n%s\n\n" % [ exception.class, exception.message, backtrace ]
+
+		      super
+
+	      end
+
+      end
+
+    end
+
 		# TODO: add documentation
 		def enable_logging
+
+      set_debug_exceptions # if enabled
 
 			logging_level = Parameter[ :logging_level, nil ]
 
