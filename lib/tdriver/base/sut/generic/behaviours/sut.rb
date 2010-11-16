@@ -459,13 +459,13 @@ module MobyBehaviour
     #  Hash
     #   description: 
     #    Options to be used for screen capture. See [link="#capture_options_table"]Options table[/link] for valid keys
-    #   example: ( :Filename => "c:/screen_shot.png" )
+    #   example: ( :filename => "output.png" )
     #
     # == tables
     # capture_options_table
     #  title: Options table
     #  |Key|Type|Description|Example|Required|
-    #  |:Filename|String|Filename where file is stored: either absolute path or if no path given uses working directory|:Filename => "c:/screen_shot.png"|Yes|
+    #  |:filename|String|Store output binary to this file. Absolute or relative path supported.|:filename => "screen_shots/output.png"|Yes|
     #
     # == returns
     # NilClass
@@ -473,33 +473,53 @@ module MobyBehaviour
     #   example: -    
     #
     # == exceptions
-    # ArgumentError
+    # TypeError
     #   description: Wrong argument type %s (Expected Hash)
     #
     # ArgumentError
-    #   description: Symbol %s expected in argument(s)
+    #   description: Output filename (:filename) not defined in argument hash
+    #
+    # ArgumentError
+    #  description: Wrong argument type %s for output filename (expected String)
     #
     # ArgumentError 
-    #   description: Invalid string length for output filename: '%s'
+    #   description: Output filename must not be empty string
     # 
     def capture_screen( arguments )
 
       begin
 
-        MobyBase::Error.raise( :WrongArgumentType, arguments.class, "Hash" ) unless arguments.kind_of?( Hash )
-        MobyBase::Error.raise( :ArgumentSymbolExpected, ":Filename" ) unless arguments.include?( :Filename )
-        MobyBase::Error.raise( :WrongArgumentTypeFor, arguments[ :Filename ].class, "output filename", "String" ) unless arguments[:Filename].kind_of?( String )
-        MobyBase::Error.raise( :InvalidStringLengthFor, arguments[ :Filename ].length, "output filename", ">=1" ) unless arguments[:Filename].length > 0
+        # raise exception with default message if wrong argument type given
+        arguments.check_type( Hash, "Wrong argument type $1 (expected $2)" )
 
-        screen_capture_command_object = MobyCommand::ScreenCapture.new()
-        screen_capture_command_object.redraw = arguments[ :Redraw ] if arguments[ :Redraw ]
-        image_binary = execute_command( screen_capture_command_object )
+        # legacy support: support also :Filename
+        arguments[ :filename ] = arguments.delete( :Filename ) if arguments.has_key?( :Filename )
 
-        File.open( arguments[ :Filename ], 'wb:binary'){ | image_file | image_file << image_binary }
+        # raise exception with default message if hash doesn't contain required key
+        arguments.require_key( :filename, "Output filename ($1) not defined in argument hash" )
+
+        # verify that filename is type of String
+        arguments[ :filename ].check_type( String, "Wrong argument type $1 for output filename (expected $2)" )
+
+        # verify that filename is not empty string
+        arguments[ :filename ].not_empty( "Output filename must not be empty string" )
+
+        # create screen capture command object
+        command = MobyCommand::ScreenCapture.new()
+
+        command.redraw = arguments[ :Redraw ] if arguments[ :Redraw ]
+
+        # execute command and write binary to file
+        File.open( File.expand_path( arguments[ :filename ] ), 'wb:binary' ){ | file | 
+
+          file << execute_command( command ) 
+
+        }
 
       rescue Exception => e
 
-        MobyUtil::Logger.instance.log "behaviour" , "FAIL;Failed to capture screen.;#{id.to_s};sut;{};capture_screen;" << (arguments.kind_of?( Hash ) ? arguments.inspect : arguments.class.to_s )
+        MobyUtil::Logger.instance.log "behaviour" , "FAIL;Failed to capture screen.;#{id.to_s};sut;{};capture_screen;" << ( arguments.kind_of?( Hash ) ? arguments.inspect : arguments.class.to_s )
+
         Kernel::raise e
 
       end
