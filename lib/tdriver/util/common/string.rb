@@ -54,15 +54,16 @@ class String
   # TrueClass/FalseClass 
   def to_boolean
 
-    if boolean?
-
-      /true/i.match( self ).kind_of?( MatchData )
-
+    if /^(true|false)$/i.match( value.to_s )
+    
+      $1.downcase == 'true'
+      
     else
+    
+      #default
+      Kernel::raise TypeError.new( "Unable to convert string \"#{ self }\" to boolean (Expected \”true\" or \"false\")" )
 
-      Kernel::raise TypeError.new( "Unable convert string '#{ self }' to boolean (Expected 'true' or 'false')" )
-
-    end      
+    end
 
   end    
 
