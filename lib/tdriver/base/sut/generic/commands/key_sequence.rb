@@ -53,9 +53,9 @@ module MobyCommand
 		# == returns
 		# self
 		# == raises
-		# ArgumentError:: Fixnum expected as argument
-		# ArgumentError:: Positive value expected as argument
-		# IndexError:: Not allowed when empty key sequence
+		# TypeError:: Wrong argument type %s for times count (expected Fixnum)
+		# ArgumentError:: Positive value expected for times count (got %i)
+		# IndexError:: Unable to multiply last given key due to key sequence is empty
 		def times!( count = 1 )
 
       # verify count argument type
