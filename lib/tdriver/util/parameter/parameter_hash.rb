@@ -23,7 +23,8 @@ module MobyUtil
 
     def initialize( hash = {} )
 
-      Kernel::raise ArgumentError.new( "Unexpected argument type %s, expecting Hash or ParameterHash" % [ hash.class ] ) unless [ Hash, ParameterHash ].include?( hash.class )
+      #Kernel::raise ArgumentError.new( "Unexpected argument type %s, expecting Hash or ParameterHash" % [ hash.class ] ) unless [ Hash, ParameterHash ].include?( hash.class )
+      hash.check_type( [ Hash, ParameterHash ], "Wrong argument type $1 for hash (expected $2)" )
 
       merge!( 
 
@@ -72,13 +73,15 @@ module MobyUtil
     end
 
     # Merge this Hash with another, primary Hash. Any values found in the other hash will overwrite local values and any Hash values will be recursively merged.
-    def merge_with_hash!( primary_hash )
+    def merge_with_hash!( other_hash )
 
-      raise ArgumentError.new( "Unable to merge, the other Hash was not a Hash, it was of type \"" + primary_hash.class.to_s + "\"." ) unless primary_hash.kind_of?( Hash )
+      #raise ArgumentError.new( "Unable to merge, the other Hash was not a Hash, it was of type \"" + other_hash.class.to_s + "\"." ) unless other_hash.kind_of?( Hash )
 
-      primary_hash.each_pair do | key, value |
+      other_hash.check_type( Hash, "Wrong argument type $1 for hash (expected $2)" )
 
-        if ( self.has_key?( key ) && self[ key ].kind_of?( Hash ) ) and primary_hash[ key ].kind_of?( Hash )
+      other_hash.each_pair do | key, value |
+
+        if ( self.has_key?( key ) && self[ key ].kind_of?( Hash ) ) and other_hash[ key ].kind_of?( Hash )
 
           self[ key ].merge_with_hash!( value )
 

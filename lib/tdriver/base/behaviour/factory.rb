@@ -120,7 +120,7 @@ module MobyBase
 
       rules.default = ['*']
 
-			Kernel::raise ArgumentError.new( "No target object defined in rules hash" ) if rules[ :object ].nil?			
+			Kernel::raise ArgumentError.new( "Target object not defined in rules hash" ) if rules[ :object ].nil?			
 
 			# apply behaviours to target object
 			( get_object_behaviours( rules ) ).each{ | behaviour_index |
