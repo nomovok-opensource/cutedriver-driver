@@ -16,8 +16,6 @@
 ## of this file. 
 ## 
 ############################################################################
-
-
  
 # Class for recording scripts from qt applications.
 # Complete test script recording not supported. 
@@ -29,26 +27,33 @@ module MobyUtil
 	class Recorder
 
 		#TODO detect app start for later versions...
-		def self.start_rec(app)
+		def self.start_rec( app )
 
-			Kernel::raise ArgumentError.new("Application must be defined.") unless app
+			#Kernel::raise ArgumentError.new("Application must be defined.") unless app
+			app.check_type( MobyBase::TestObject, "Wrong argument type $1 for application object (expected $2)" )
+
 			app.start_recording
 
 		end
 
 		# Prints the recorded events as an tdriver script fragment.
-		def self.print_script(sut, app, object_identificators = ['text','icontext','label'])
+		def self.print_script( sut, app, object_identificators = ['text','icontext','label'] )
 
-			Kernel::raise ArgumentError.new("Sut must be defined.") unless sut
-			Kernel::raise ArgumentError.new("Application must be defined.") unless app
-			Kernel::raise ArgumentError.new("Object identificators must be set, use defaults if not sure what the use.") unless object_identificators
+      # verify that sut type is type of MobyBase::SUT
+			#Kernel::raise ArgumentError.new("Sut must be defined.") unless sut
+      sut.check_type( MobyBase::SUT, "Wrong argument type $1 for SUT (expected $2)" )
 
+			#Kernel::raise ArgumentError.new("Application must be defined.") unless app
+      app.check_type( MobyBase::TestObject, "Wrong argument type $1 for application object (expected $2)" )
+
+			#Kernel::raise ArgumentError.new("Object identificators must be set, use defaults if not sure what the use.") unless object_identificators
+      object_identificators.check_type( Array, "Wrong argument type $1 for object identificators (expected $2)" )
+      
 			xml_source = app.print_recordings
-			app.stop_recording
-			xml_as_object = MobyBase::StateObject.new( xml_source )
-			scripter = Scripter.new(sut.id, object_identificators)
 
-			scripter.write_fragment(xml_as_object, app.name)
+			app.stop_recording
+			
+			Scripter.new( sut.id, object_identificators ).write_fragment( MobyBase::StateObject.new( xml_source ), app.name )
 
 		end
 

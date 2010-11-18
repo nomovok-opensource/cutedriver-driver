@@ -60,7 +60,7 @@ module MobyUtil
 
         require_files = Dir.glob( MobyUtil::FileHelper.fix_path( path ) )
 
-        Kernel::raise ArgumentError.new( "File not found %s" % [ path ] ) if !File.directory?( path ) && !File.file?( path ) && require_files.empty?
+        Kernel::raise RuntimeError.new( "File not found %s" % [ path ] ) if !File.directory?( path ) && !File.file?( path ) && require_files.empty?
 
         # load each module found from given folder
         require_files.each { | module_name | 
@@ -81,7 +81,8 @@ module MobyUtil
     # String:: String presentation of fixed path
     def self.fix_path( path )      
 
-      Kernel::raise ArgumentError.new( "Invalid argument format %s (Expected: %s)" % [ path.class, "String" ] ) unless path.kind_of?( String )      
+      #Kernel::raise ArgumentError.new( "Invalid argument format %s (Expected: %s)" % [ path.class, "String" ] ) unless path.kind_of?( String )      
+      path.check_type( String, "Wrong argument type $1 for file path (expected $2)" )
 
       # replace back-/slashes to File::SEPARATOR
       path.gsub( /[\\\/]/, File::SEPARATOR ).to_s
@@ -113,8 +114,11 @@ module MobyUtil
     # ArgumentError:: Given path is empty
     def self.is_relative_path?( path )  
 
-      Kernel::raise ArgumentError.new("Unexpected argument type '%s' for path (Expected: %s)" % [ path.class, 'String' ] ) unless path.kind_of?( String )
-      Kernel::raise ArgumentError.new("Given path is empty") if path.empty?
+      #Kernel::raise ArgumentError.new("Unexpected argument type '%s' for path (Expected: %s)" % [ path.class, 'String' ] ) unless path.kind_of?( String )
+      path.check_type( String, "Wrong argument type $1 for file path (expected $2)" )
+
+      #Kernel::raise ArgumentError.new("Given path is empty") if path.empty?
+      path.not_empty( "Filepath must not be empty string" )
 
       dirname =  File.dirname( path )
 
@@ -236,7 +240,10 @@ module MobyUtil
     # IOError:: Error occured while creating folder
     def self.copy_file( source, destination, verbose = false, overwrite = true, create_folders = true, &block )
 
-      Kernel::raise ArgumentError.new( "Source and destination argument must be type of String" ) unless source.kind_of?( String ) && destination.kind_of?( String )
+      #Kernel::raise ArgumentError.new( "Source and destination argument must be type of String" ) unless source.kind_of?( String ) && destination.kind_of?( String )
+
+      source.check_type( String, "Wrong argument type $1 for source file (expected $2)" )
+      destination.check_type( String, "Wrong argument type $1 for destination file (expected $2)" )
 
       sources = []
 

@@ -30,7 +30,7 @@ class String
   # string:: String
   # == returns
   # TrueClass/FalseClass 
-  def self.boolean?
+  def boolean?
 
     /^(true|false)$/i.match( self ).kind_of?( MatchData )
 
@@ -41,7 +41,7 @@ class String
   # string:: Numeric string
   # == returns
   # TrueClass/FalseClass 
-  def self.numeric?
+  def numeric?
 
     /[0-9]+/.match( self ).kind_of?( MatchData )
 
@@ -52,15 +52,15 @@ class String
   # string:: String
   # == returns
   # TrueClass/FalseClass 
-  def self.to_boolean
+  def to_boolean
 
     if boolean?
 
-      /true/i.match( string ).kind_of?( MatchData )
+      /true/i.match( self ).kind_of?( MatchData )
 
     else
 
-      Kernel::raise TypeError.new( "Unable convert '#{ self.inspect }' to boolean (Expected 'true' or 'false')" )
+      Kernel::raise TypeError.new( "Unable convert string '#{ self }' to boolean (Expected 'true' or 'false')" )
 
     end      
 
@@ -80,7 +80,8 @@ module MobyUtil
     def self.boolean?( string )
 
       # raise exception if argument type other than String
-      Kernel::raise ArgumentError.new("Invalid argument format %s (Expected: %s)" % [ string.class, "String" ]) unless string.kind_of?( String )
+      #Kernel::raise ArgumentError.new("Invalid argument format %s (Expected: %s)" % [ string.class, "String" ]) unless string.kind_of?( String )
+      check_type( String, "Wrong argument type $1 (Expected $2)" )
 
       /^(true|false)$/i.match( string ).kind_of?( MatchData )
 
