@@ -21,24 +21,16 @@ require 'rbconfig'  # ??
 
 # common modules - should be generic and runnable as standalone
 require File.expand_path( File.join( File.dirname( __FILE__ ), 'object.rb' ) )
-
+require File.expand_path( File.join( File.dirname( __FILE__ ), 'numeric.rb' ) )
 require File.expand_path( File.join( File.dirname( __FILE__ ), 'hash.rb' ) )
 
 require File.expand_path( File.join( File.dirname( __FILE__ ), 'error.rb' ) )
-
 require File.expand_path( File.join( File.dirname( __FILE__ ), 'array.rb' ) )
-
 require File.expand_path( File.join( File.dirname( __FILE__ ), 'crc16.rb' ) )
-
 require File.expand_path( File.join( File.dirname( __FILE__ ), 'environment.rb' ) )
-
 require File.expand_path( File.join( File.dirname( __FILE__ ), 'file.rb' ) )
-
 require File.expand_path( File.join( File.dirname( __FILE__ ), 'gem.rb' ) )
-
 require File.expand_path( File.join( File.dirname( __FILE__ ), 'kernel.rb' ) )
-
 require File.expand_path( File.join( File.dirname( __FILE__ ), 'retryable.rb' ) )
-
 require File.expand_path( File.join( File.dirname( __FILE__ ), 'string.rb' ) )
 

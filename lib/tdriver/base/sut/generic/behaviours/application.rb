@@ -110,7 +110,7 @@ module MobyBehaviour
           if options_hash != nil
 
             # verify options_hash value
-            options_hash.check_type( [ Hash, FalseClass, TrueClass ], "Wrong argument type $1 for options_hash (expected $2)" )
+            options_hash.check_type( [ Hash, FalseClass, TrueClass ], "Wrong argument type $1 for options hash (expected $2)" )
 
             close_options[ :force_kill ] = options_hash
 
