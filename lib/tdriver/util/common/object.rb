@@ -60,4 +60,43 @@ class Object
 
   end
 
+  def validate( values, message = "Unexpected value $3 for $1 (expected $2)" )
+
+    # raise exception if message is not type of String
+    raise TypeError.new( "wrong argument type %s for message (expected String)" % [ message.class ] ) unless message.kind_of?( String )
+
+    # create array of values
+    values_array = values.kind_of?( Array ) ? values : [ values ]
+
+    # default result value
+    found = false
+
+    # collect verbose type list
+    verbose_values_list = values_array.each_with_index.collect{ | value, index | 
+
+      raise TypeError.new( "Invalid argument type #{ value.class } for value (expected #{ self.class })" ) unless value.kind_of?( self.class )
+
+      found = true if self == value
+
+      # result string, separate types if multiple types given
+      "#{ ( ( index > 0 ) ? ( index + 1 < values_array.count ? ", " : " or " ) : "" ) }#{ value.inspect }"
+          
+    }.join
+
+    # raise exception if value was not found
+    unless found
+
+      # convert macros
+      [ self.class, verbose_values_list, self.inspect ].each_with_index{ | param, index | message.gsub!( "$#{ index + 1 }", param.to_s ) }
+
+      # raise the exception
+      raise ArgumentError.new( message )
+
+    end
+
+    # pass self as return value
+    self
+        
+  end
+
 end
