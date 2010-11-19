@@ -39,9 +39,13 @@ module TDriverReportDataPresentation
 			puts e.inspect
 		end
 		begin
-			raise ArgumentError, "ERROR create_graph_image: Data argument is either nil or not a Hash" if ( data.nil? or !data.kind_of? Hash )
+     
+			raise TypeError, "ERROR create_graph_image: Data argument is either nil or not a Hash" if ( data.nil? or !data.kind_of? Hash )
+
 			raise ArgumentError, "ERROR create_graph_image: Values of the data Hash need to be arrays of minimum length 2" if ( !data.values[0].kind_of? Array or data.values[0].length < 2 )
-			raise ArgumentError, "ERROR create_graph_image: Filename argument is either missing or not a String" if ( filename.nil? or !filename.kind_of? String )
+
+			raise TypeError, "ERROR create_graph_image: Filename argument is either missing or not a String" if ( filename.nil? or !filename.kind_of? String )
+
 			g = Gruff::Line.new
 			g.title = title unless title.nil?
 			data.each_key do |signal|
