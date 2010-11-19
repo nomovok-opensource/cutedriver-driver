@@ -887,56 +887,59 @@ module MobyBehaviour
   #  description: In case there are problems with the database connectivity
   #
   def translate( logical_name, file_name = nil, plurality = nil, numerus = nil, lengthvariant = nil )
-    
     Kernel::raise LogicalNameNotFoundError.new("Logical name is nil") if logical_name.nil?
-    
     translation_type = "localisation"
     
     # Check for User Information prefix( "uif_...")
     MobyUtil::Parameter[ :user_data_logical_string_identifier, 'uif_' ].split('|').each do |identifier|
-    if logical_name.to_s.index(identifier)==0
-      translation_type="user_data"
-    end
+      if logical_name.to_s.index(identifier)==0
+        translation_type="user_data"
+      end
     end
     
     # Check for Operator Data prefix( "operator_...")
     MobyUtil::Parameter[ :operator_data_logical_string_identifier, 'operator_' ].split('|').each do |identifier|
-    if logical_name.to_s.index(identifier)==0
-      translation_type="operator_data"
-    end
+      if logical_name.to_s.index(identifier)==0
+        translation_type="operator_data"
+      end
     end
     
     case translation_type
+      when "user_data"
+        get_user_information( logical_name )
     
-    when "user_data"
-    get_user_information( logical_name )
+      when "operator_data"
+        get_operator_data( logical_name )
     
-    when "operator_data"
-    get_operator_data( logical_name )
-    
-    when "localisation"
-    language=nil
-    if ( MobyUtil::Parameter[ self.id ][:read_lang_from_app]=='true')
-      #read localeName app
-      language=self.application.attribute("localeName")
-      #determine the language from the locale
-      language=language.split('_')[0].to_s if (language!=nil && !language.empty?)
-    else
-      language=MobyUtil::Parameter[ self.id ][ :language ]
-    end
-    Kernel::raise LanguageNotFoundError.new("Language cannot be determind to perform translation") if (language==nil || language.empty?)
-    translation = MobyUtil::Localisation.translation( logical_name, language,
-      MobyUtil::Parameter[ self.id ][ :localisation_server_database_tablename ], file_name,
-      plurality, lengthvariant )
-
-    if translation.kind_of? String and !numerus.nil?
-      translation.gsub!(/%(Ln|1)/){|s| numerus} 
-    elsif translation.kind_of? Array and !numerus.nil?
-      translation.each do |trans|
-      trans.gsub!(/%(Ln|1)/){|s| numerus}
-      end
-    end
-    translation
+      when "localisation"
+        language=nil
+        if ( MobyUtil::Parameter[ self.id ][:read_lang_from_app]=='true')
+          #read localeName app
+          language=self.application.attribute("localeName")
+          #determine the language from the locale
+          language=language.split('_')[0].to_s if (language!=nil && !language.empty?)
+        else
+          language=MobyUtil::Parameter[ self.id ][ :language ]
+        end
+        Kernel::raise LanguageNotFoundError.new("Language cannot be determind to perform translation") if (language==nil || language.empty?)
+        translation = MobyUtil::Localisation.translation( logical_name, language,
+        MobyUtil::Parameter[ self.id ][ :localisation_server_database_tablename ], file_name, plurality, lengthvariant )        
+        if translation.kind_of? String and !numerus.nil?
+          if numerus.kind_of? Array
+            translation.gsub!(/%([1-9])/){|s| numerus[($1.to_i) -1] }
+          elsif numerus.kind_of String
+            translation.gsub!(/%(Ln|1)/){|s| numerus} 
+          end
+        elsif translation.kind_of? Array and !numerus.nil?
+          translation.each do |trans|
+            if numerus.kind_of? Array
+              trans.gsub!(/%([1-9])/){|s| numerus[($1.to_i) -1] }
+            elsif numerus.kind_of String
+              trans.gsub!(/%(Ln|1)/){|s| numerus} 
+            end
+          end
+        end
+        translation
     end
   end
   
