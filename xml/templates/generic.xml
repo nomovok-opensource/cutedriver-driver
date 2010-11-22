@@ -21,7 +21,10 @@
 
     <!-- default behaviours file -->
     <parameter name="behaviours" value="behaviours.xml" />
-
+    
+    <!-- synchronization timeout for verify when used as a global method -->
+    <parameter name="synchronization_timeout" value="10" />
+    
   </template>
 
   <!-- default values for each SUT. Usage example: value = MobyUtil::Parameter[sut_id][:type]-->
