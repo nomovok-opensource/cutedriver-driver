@@ -27,7 +27,7 @@ module MobyBase
 
   include Singleton
 
-  attr_accessor :timeout
+  attr_reader :timeout
 
     # TODO: Document me (TestObjectFactory::check_verify_always_reporting_settings)
     def check_verify_always_reporting_settings()
