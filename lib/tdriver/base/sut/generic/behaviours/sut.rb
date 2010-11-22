@@ -855,12 +855,15 @@ module MobyBehaviour
   #
   # numerus
   #  String
-  #   description: Optional numeral replacement of '%Ln' tags on translation strings
+  #   description: Optional numeral replacement of an '%Ln | %1' tag on the translated string
   #   example: "1"
   #   default: nil
   #  Integer
-  #   description: Optional numeral replacement of '%Ln' tags on translation strings
+  #   description: Optional numeral replacement of an '%Ln | %1' tag on the translated string
   #   example: 1
+  #  Array
+  #   description: Optional numeral replacements for multiple '%L1 | %1, %L2 | %2, ...' tags on the translated string
+  #   example: [ 3, 2]
   # 
   # lengthvariant
   #  String
@@ -926,16 +929,16 @@ module MobyBehaviour
         MobyUtil::Parameter[ self.id ][ :localisation_server_database_tablename ], file_name, plurality, lengthvariant )        
         if translation.kind_of? String and !numerus.nil?
           if numerus.kind_of? Array
-            translation.gsub!(/%([1-9])/){|s| numerus[($1.to_i) -1] }
-          elsif numerus.kind_of String
-            translation.gsub!(/%(Ln|1)/){|s| numerus} 
+            translation.gsub!(/%[L]?(\d)/){|s| numerus[($1.to_i) -1] }
+          elsif numerus.kind_of? String or numerus.kind_of? Integer
+            translation.gsub!(/%(Ln|1)/){|s| numerus.to_s} 
           end
         elsif translation.kind_of? Array and !numerus.nil?
           translation.each do |trans|
             if numerus.kind_of? Array
-              trans.gsub!(/%([1-9])/){|s| numerus[($1.to_i) -1] }
-            elsif numerus.kind_of String
-              trans.gsub!(/%(Ln|1)/){|s| numerus} 
+              trans.gsub!(/%[L]?(\d)/){|s| numerus[($1.to_i) -1] }
+            elsif numerus.kind_of? String or numerus.kind_of? Integer
+              trans.gsub!(/%(Ln|1)/){|s| numerus.to_s} 
             end
           end
         end
