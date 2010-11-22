@@ -452,7 +452,7 @@ module MobyBase
           
             "Multiple test objects found with rule: %s\nMatching objects:\n%s\n" % [ 
               creation_attributes.merge( dynamic_attributes ).inspect,
-              list_matching_test_objects( matches ).each_with_index.collect{ | object, index | "%3s) %s" % [ index, object ] }.join( "\n" )
+              list_matching_test_objects( matches ).each_with_index.collect{ | object, index | "%3s) %s" % [ index+1, object ] }.join( "\n" )
             ]
           ) 
             
