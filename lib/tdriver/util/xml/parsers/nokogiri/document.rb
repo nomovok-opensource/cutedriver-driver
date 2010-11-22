@@ -30,7 +30,7 @@ module MobyUtil
 
         def parse( xml_string )
 
-          ::Nokogiri::XML.parse( xml_string, '', 'UTF8', 0 )
+          ::Nokogiri::XML.parse( xml_string, nil, 'UTF8', ::Nokogiri::XML::ParseOptions::STRICT )
 
         end
 

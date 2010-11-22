@@ -74,7 +74,7 @@ module MobyUtil
 
       rescue Exception => exception
 
-        Kernel::raise ParameterFileParseError.new( "Error occured while parsing XML. Reason %s (%s)" % [ exception.message, exception.class ] )
+        Kernel::raise ParameterFileParseError.new( "Error occured while parsing XML. Reason: %s (%s)" % [ exception.message, exception.class ] )
 
       end
 

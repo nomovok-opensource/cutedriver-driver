@@ -25,6 +25,9 @@
 #
 # Please see class documentation for more info
 
+# initializing TDriver
+$TDRIVER_INITIALIZED = false
+
 # unicode support
 $KCODE = 'u'
 
@@ -121,5 +124,8 @@ module TDriver
 
 end # TDriver
 
-# Enable logging engine
+# enable logging engine
 MobyUtil::Logger.instance.enable_logging()
+
+# initialization done, everything is ready
+$TDRIVER_INITIALIZED = true
