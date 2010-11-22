@@ -135,6 +135,12 @@ module MobyUtil
 
         end
 
+        def parent
+        
+          element_object( @xml.parent )
+        
+        end
+
         # enable hooking for performance measurement & debug logging
         MobyUtil::Hooking.instance.hook_methods( self ) if defined?( MobyUtil::Hooking )
 
