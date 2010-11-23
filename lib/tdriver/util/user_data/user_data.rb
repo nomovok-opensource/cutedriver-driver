@@ -39,7 +39,7 @@ module MobyUtil
 		#
 		# table_name
 		#  String
-		#   description: String containing the name of table to be used when user information, if empty the parameter user_data_server_database_tablename will be used
+		#   description: Optional string containing the name of table to be used when user information, if empty the parameter user_data_server_database_tablename will be used
 		#   example: "user_data_week201042"
 		#
 		# == returns
@@ -59,7 +59,7 @@ module MobyUtil
 		# SqlError
 		#  description: If there is and sql error while executing the query
 		#
-		def self.retrieve( user_data_lname, language, table_name )
+		def self.retrieve( user_data_lname, language, table_name = nil )
 			
 			Kernel::raise UserDataNotFoundError.new( "User data logical name can't be empty" ) if user_data_lname == nil
 
