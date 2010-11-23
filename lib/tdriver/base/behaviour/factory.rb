@@ -203,7 +203,7 @@ module MobyBase
 
 			rescue MobyUtil::EmptyFilenameError
 
-				Kernel::raise EmptyFilenameError.new( "Unable to load behaviours xml file due to filename is empty or nil" )
+				Kernel::raise MobyUtil::EmptyFilenameError.new( "Unable to load behaviours xml file due to filename is empty or nil" )
 
 			rescue MobyUtil::FileNotFoundError => ex
 
@@ -249,6 +249,8 @@ module MobyBase
 					# retrieve behaviour attributes & module node
 					attributes = node.attributes
 
+					module_node = node.xpath( 'module' ).first
+
 					name = attributes[ "name" ].to_s
 					object_type = attributes[ "object_type" ].to_s
 					input_type = attributes[ "input_type" ].to_s
@@ -256,15 +258,23 @@ module MobyBase
 					version = attributes[ "version" ].to_s
 
 					# verify that all required attributes and nodes are found in behaviour xml node
-					Kernel::raise RuntimeError.new("Behaviour does not have a name, please see behaviour XML files") if name.empty?
-					Kernel::raise RuntimeError.new("Behaviour target object type not defined for #{ name } in XML") if object_type.empty?
-					Kernel::raise RuntimeError.new("Behaviour target object input type not defined for #{ name } in XML") if input_type.empty?
-					Kernel::raise RuntimeError.new("Behaviour target object sut type not defined for #{ name } in XML") if sut_type.empty?
-					Kernel::raise RuntimeError.new("Behaviour target object sut version not defined for #{ name } in XML") if version.empty?
+					#Kernel::raise RuntimeError.new("Behaviour does not have a name, please see behaviour XML files") if name.empty?
+					name.not_empty("Behaviour element does not have name (name) attribute defined, please see behaviour XML files", RuntimeError)
 
-					module_node = node.xpath( 'module' ).first
+					#Kernel::raise RuntimeError.new("Behaviour target object type not defined for #{ name } in XML") if object_type.empty?
+					object_type.not_empty("Behaviour element does not have target object type (object_type) attribute defined, please see #{ name } in behaviour XML files", RuntimeError)
 
-					Kernel::raise RuntimeError.new("Behaviour implementation module not defined for #{ name } in XML") if module_node.nil?
+					#Kernel::raise RuntimeError.new("Behaviour target object input type not defined for #{ name } in XML") if input_type.empty?
+					input_type.not_empty("Behaviour element does not have target object input type (input_type) attribute defined, please see #{ name } in behaviour XML files", RuntimeError)
+
+					#Kernel::raise RuntimeError.new("Behaviour target object sut type not defined for #{ name } in XML") if sut_type.empty?
+					sut_type.not_empty("Behaviour element does not have target object sut type (sut_type) attribute defined, please see #{ name } in behaviour XML files", RuntimeError)
+
+					#Kernel::raise RuntimeError.new("Behaviour target object sut version not defined for #{ name } in XML") if version.empty?
+					version.not_empty("Behaviour element does not have target object SUT version (version) attribute defined, please see #{ name } in behaviour XML files", RuntimeError)
+
+					#Kernel::raise RuntimeError.new("Behaviour implementation module not defined for #{ name } in XML") if module_node.nil?
+					module_node.not_nil("Behaviour does not have implementation module element defined, please see #{ name } in behaviour XML files", RuntimeError)
 
 					# retrieve module name & implementation filename
 					module_attributes = module_node.attributes
@@ -272,7 +282,8 @@ module MobyBase
 					module_file = module_attributes[ "file" ].to_s # optional
 					module_name = module_attributes[ "name" ].to_s 
 
-					Kernel::raise RuntimeError.new( "Behaviour implementation module name not defined for #{ name } in XML") if module_name.empty?
+					#Kernel::raise RuntimeError.new( "Behaviour implementation module name not defined for #{ name } in XML") if module_name.empty?
+          module_name.not_empty("Behaviour does not have implementation module name defined, please see #{ name } in behaviour XML files", RuntimeError)
 
 					methods_hash = {}
 
