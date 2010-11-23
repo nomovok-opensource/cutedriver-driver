@@ -60,6 +60,12 @@ class Object
 
   end
 
+  def not_nil( message = "Value must not be nil", exception = ArgumentError )
+
+    raise exception.new( message ) if self.nil? 
+
+  end
+
   def validate( values, message = "Unexpected value $3 for $1 (expected $2)" )
 
     # raise exception if message is not type of String
