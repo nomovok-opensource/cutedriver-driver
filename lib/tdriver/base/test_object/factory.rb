@@ -516,7 +516,8 @@ module MobyBase
         :object_type  => [ '*', object_type ],
         :sut_type     => [ '*', sut.ui_type ],
         :input_type   => [ '*', sut.input.to_s ],
-        :version      => [ '*', sut.ui_version ]
+        :env          => [ '*', 'symbian' ],								   
+        :version      => [ '*', sut.ui_version ]								   
       )
       
 =begin

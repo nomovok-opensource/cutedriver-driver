@@ -250,7 +250,7 @@ module MobyBase
 		  input_type = attributes[ "input_type" ].to_s
 		  sut_type = attributes[ "sut_type" ].to_s
 		  version = attributes[ "version" ].to_s
-		  environment = attributes["environment"].to_s 
+		  env = attributes["env"].to_s 
 
 		  # verify that all required attributes and nodes are found in behaviour xml node
 		  Kernel::raise RuntimeError.new("Behaviour does not have a name, please see behaviour XML files") if name.empty?
@@ -295,7 +295,7 @@ module MobyBase
 			:input_type => input_type.split(";"),
 			:sut_type => sut_type.split(";"),
 			:version => version.split(";"),
-			:environment => environment,
+			:env => env,
 			:module => { 
 			  :file => module_file, 
 			  :name => module_name 
@@ -336,7 +336,7 @@ module MobyBase
 			   ( !( rules[ :sut_type ] & behaviour[ :sut_type ] ).empty? ) && 
 			   ( !( rules[ :object_type ] & behaviour[ :object_type ] ).empty? ) &&
 			   ( !( rules[ :input_type ] & behaviour[ :input_type ] ).empty? ) &&
-			   ( !( rules[ :environment ] & behaviour[ :environment ] ).empty? ) &&
+			   ( !( rules[ :env ] & behaviour[ :env ] ).empty? ) &&
 			   ( !( rules[ :version ] & behaviour[ :version ] ).empty? ) ) )
 
 			# retrieve list of extended modules
