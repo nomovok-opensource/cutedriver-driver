@@ -82,7 +82,7 @@ module MobyUtil
 
       # raise exception if argument type other than String
       #Kernel::raise ArgumentError.new("Invalid argument format %s (Expected: %s)" % [ string.class, "String" ]) unless string.kind_of?( String )
-      check_type( String, "Wrong argument type $1 (Expected $2)" )
+      string.check_type( String, "Wrong argument type $1 (Expected $2)" )
 
       /^(true|false)$/i.match( string ).kind_of?( MatchData )
 
