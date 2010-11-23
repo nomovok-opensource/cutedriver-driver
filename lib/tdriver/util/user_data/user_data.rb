@@ -39,7 +39,7 @@ module MobyUtil
 		#
 		# table_name
 		#  String
-		#   description: String containing the name of table to be used when user information
+		#   description: String containing the name of table to be used when user information, if empty the parameter user_data_server_database_tablename will be used
 		#   example: "user_data_week201042"
 		#
 		# == returns
@@ -69,6 +69,7 @@ module MobyUtil
 			username = MobyUtil::Parameter[ :user_data_server_username ]
 			password = MobyUtil::Parameter[ :user_data_server_password ]
 			database_name = MobyUtil::Parameter[ :user_data_server_database_name ]
+      table_name = MobyUtil::Parameter[:user_data_server_database_tablename] if table_name.nil? or table_name.empty?
 			
 			db_connection = DBConnection.new(  db_type, host, database_name, username, password )
 
