@@ -261,4 +261,85 @@ module MobyUtil
 		end		
 		
 	end #TDriverLinuxCam
+  
+  def video_alive?( target_video, in_fps = 1, in_change = 0.07, in_treshold = 34, in_debug = true )
+  
+    alive_temp_folder = "temp_target_alive"
+    
+    require 'rmagick'
+    
+    raise ArgumentError.new( "The FPS argument must be an Interger or a Float, it was a #{ in_fps.class }." ) unless in_fps.kind_of? Numeric
+    raise ArgumentError.new( "The same frame treshold argument must be an Interger or a Float, it was a #{ in_change.class }." ) unless in_change.kind_of? Numeric
+    raise ArgumentError.new( "The changed frames treshold argument must be an Interger or a Float, it was a #{ in_treshold.class }." ) unless in_treshold.kind_of? Numeric
+     
+    ts = Time.now if in_debug 
+
+    begin
+      FileUtils.remove_dir alive_temp_folder
+    rescue 
+      # failed to remove dir, do nothing
+    end
+    
+    begin
+      FileUtils.mkdir_p alive_temp_folder  
+    rescue
+    
+    end
+    
+    system('ffmpeg.exe -i '+target_video.to_s+' -y -f image2 -r '+in_fps.to_s+' '+alive_temp_folder+'/frame-%05d.png')
+
+    puts "TIME: " << (Time.now - ts).to_s if in_debug
+
+    t_start = Time.now
+    
+    im_files = Dir.glob( alive_temp_folder + '/frame-*.png' )
+
+    raise RuntimeError.new( "No video frames found for analysis." ) if im_files.size == 0
+    
+    d_max = 0.0
+    d_min = 1.0
+
+    d_sum = 0.0
+    
+    dif_count = 0
+
+    pre_obj = Magick::ImageList.new(im_files[0])
+
+    (im_files.size-1).times do | im_index |
+
+      im_file = Magick::ImageList.new(im_files[ im_index ])
+      pre_file = pre_obj
+       
+      dif = pre_file.compare_channel(im_file, Magick::RootMeanSquaredErrorMetric)[1]
+      if in_debug
+        d_min = dif unless dif >= d_min
+        d_max = dif unless dif <= d_max
+        d_sum += dif
+      end
+      dif_count += 1 if dif > in_change
+      puts "IF: " << im_file.to_s << " I: " << (im_index+1).to_s  << " C: " << dif.to_s if in_debug
+      
+      pre_obj = im_file
+           
+    end
+        
+    if in_debug
+      puts "MAX: " << d_max.to_s << "\nMIN: " << d_min.to_s << "\n"
+      puts "MEA: " << (d_sum/im_files.size).to_s unless im_files.size == 0
+      puts "DIF: " << dif_count.to_s
+
+      puts "PER: " << (dif_count.to_f/im_files.size).to_s unless im_files.size == 0
+      puts "DUR: " << (Time.now - t_start).to_s    
+    end
+
+    begin
+      FileUtils.remove_dir alive_temp_folder
+    rescue 
+    end
+    
+    # Check if enough frames were changed
+    return (dif_count.to_f/im_files.size)*100 < in_treshold
+      
+  end  
+  
 end

@@ -31,23 +31,29 @@ module MobyCommand
 
 		# Constructor to ScreenCapture
 		# == params
-		# hash:: (optional) Hash of image related attributes
+		# attributes:: (optional) Hash of image related attributes
 		# == returns
 		# Instance of ScreenCapture
-		def initialize( hash = {} )
+		def initialize( attributes = {} )
 
-			# Default values
-			@command = hash[ :type ] ||= :Screen
-			@image_mime_type = hash[ :mime_type ] ||= :PNG
-			@color_depth = hash[ :color_depth ] ||= :Color4K
-			@redraw = hash[ :redraw ] ||= false
+      # verify that attributes argument is type of Hash
+      attributes.check_type( Hash, "Wrong argument type $1 for screen capture command attributes (expected $2)" )
 
-			Kernel::raise ArgumentError.new("Wrong argument type %s for command type (expected Symbol)" % hash[ :type ].class ) unless hash[ :type ].kind_of? Symbol
+      # set default values unless already defined in attributes hash
+      attributes.default_values( :type => :Screen, :mime_type => :PNG, :color_depth => :Color4K, :redraw => false )
 
-			Kernel::raise ArgumentError.new("Wrong argument type %s for image MIME type (expected Symbol)" % hash[ :mime_type ].class ) unless hash[ :mime_type ].kind_of? Symbol
+      # verify that value of :type is type of Symbol
+      ( @command = attributes[ :type ] ).check_type( Symbol, "Wrong argument type $1 for screen capture command type (expected $2)" )
 
-			Kernel::raise ArgumentError.new("Wrong argument type %s for image color depth type (expected Symbol)" % hash[ :color_depth ].class ) unless hash[ :color_depth ].kind_of? Symbol
+      # verify that value of :mime_type is type of Symbol
+      ( @image_mime_type = attributes[ :mime_type ] ).check_type( Symbol, "Wrong argument type $1 for screen capture command mime type (expected $2)" )
 
+      # verify that value of :color_depth is type of Symbol
+      ( @color_depth = attributes[ :color_depth ] ).check_type( Symbol, "Wrong argument type $1 for screen capture command image color depth type (expected $2)" )
+
+      # verify that value of :redraw is type of Symbol
+      ( @redraw = attributes[ :redraw ] ).check_type( [ TrueClass, FalseClass ], "Wrong argument type $1 for screen capture command redraw flag (expected $2)" )
+    
 		end
 
 		# enable hooking for performance measurement & debug logging

@@ -25,11 +25,16 @@
 #
 # Please see class documentation for more info
 
+# initializing TDriver
+$TDRIVER_INITIALIZED = false
+
+# unicode support
 $KCODE = 'u'
 
-# Following line to prevent Object#id Warnings
+# prevent Object#id Warnings
 Object.send( :undef_method, :id ) if Object.respond_to?( :id )
 
+# load all required components
 require File.expand_path( File.join( File.dirname( __FILE__ ), 'loader' ) )
 
 module TDriver
@@ -49,15 +54,10 @@ module TDriver
 	# Object:: Object that SutFactory returns 
 	# === example
 	#  @sut = TDriver.connect_sut(:Id =>'sut_qt') # for qt, id in configuration file sut_qt
-	def self.connect_sut( sut_attributes = {} )    
+	def self.connect_sut( sut_attributes = {} )
 
-		# if given arguments is type of Symbol expect is as SUT id
-		sut_attributes = { :Id => sut_attributes } if sut_attributes.kind_of? Symbol
+		MobyBase::SUTFactory.instance.make( sut_attributes )
 
-		Kernel::raise ArgumentError.new( "Wrong argument type '%s' (Expected Hash)" % sut_attributes.class ) unless sut_attributes.kind_of?( Hash )
-		Kernel::raise ArgumentError.new( "Sut id not given!" ) unless sut_attributes.has_key?( :Id )
-
-		MobyBase::SUTFactory.instance.make( sut_attributes[ :Id ] )
 	end
 
 	# Function to disconnect SUT object.  
@@ -73,13 +73,7 @@ module TDriver
 	#  @sut = TDriver.disconnect_sut(:Id =>'sut_qt') # for qt, should be connected already
 	def self.disconnect_sut( sut_attributes = {} )
 
-		# if given arguments is type of Symbol expect is as SUT id
-		sut_attributes = { :Id => sut_attributes } if sut_attributes.kind_of? Symbol
-
-		Kernel::raise ArgumentError.new( "Wrong argument type '%s' (Expected Hash)" % sut_attributes.class ) unless sut_attributes.kind_of?( Hash )
-		Kernel::raise ArgumentError.new( "Sut id not given!" ) unless sut_attributes.has_key?( :Id )
-
-		MobyBase::SUTFactory.instance.disconnect_sut( sut_attributes[ :Id ] )
+		MobyBase::SUTFactory.instance.disconnect_sut( sut_attributes )
 
 	end
 
@@ -94,13 +88,7 @@ module TDriver
 	#  @sut = TDriver.reboot_sut(:Id =>'sut_qt') # for Qt, should be connected already   
 	def self.reboot_sut( sut_attributes = {} )
 
-		# if given arguments is type of Symbol expect is as SUT id
-		sut_attributes = { :Id => sut_attributes } if sut_attributes.kind_of? Symbol
-
-		Kernel::raise ArgumentError.new( "Wrong argument type '%s' (Expected Hash)" % sut_attributes.class ) unless sut_attributes.kind_of?( Hash )
-		Kernel::raise ArgumentError.new( "Sut id not given!" ) unless sut_attributes.has_key?( :Id )
-
-		MobyBase::SUTFactory.instance.reboot_sut( sut_attributes[ :Id ] )
+		MobyBase::SUTFactory.instance.reboot_sut( sut_attributes )
 
 	end
 
@@ -134,25 +122,10 @@ module TDriver
 	# enable hooking for performance measurement & debug logging
 	MobyUtil::Hooking.instance.hook_methods( self ) if defined?( MobyUtil::Hooking )
 
-
 end # TDriver
 
-if ARGV.include?( '--debug_exceptions' ) || TDriver.parameter[ :debug_exceptions, 'false' ].to_s.downcase == 'true'
-
-	# for debugging to see every occured exception
-	def Kernel::raise( *args )
-
-		exception = args.first || $!
-
-		backtrace = caller.collect{ | line | "  %s" % line }.join("\n")
-
-		puts "%s: %s\nBacktrace: \n%s\n\n" % [ exception.class, exception.message, backtrace ]
-
-		super
-
-	end
-
-end
-
-# Enable logging engine
+# enable logging engine
 MobyUtil::Logger.instance.enable_logging()
+
+# initialization done, everything is ready
+$TDRIVER_INITIALIZED = true

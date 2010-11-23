@@ -423,7 +423,7 @@ module MobyBehaviour
     #
     # == exceptions
     # TypeError
-    #  description: raised if agument is not a Hash
+    #  description: Wrong argument type %s for attributes (expected Hash)
     #
     # MultipleTestObjectsIdentifiedError
     #  description:  raised if multiple objects found that match the given attributes
@@ -436,8 +436,9 @@ module MobyBehaviour
     def child( attributes )
 
       # verify attributes argument format
-      raise TypeError.new( 'Unexpected argument type (%s) for attributes, expecting %s' % [ attributes.class, "Hash" ] ) unless attributes.kind_of?( Hash ) 
-
+      #raise TypeError.new( 'Unexpected argument type (%s) for attributes, expecting %s' % [ attributes.class, "Hash" ] ) unless attributes.kind_of?( Hash ) 
+      attributes.check_type( Hash, "Wrong argument type $1 for attributes (expected $2)" )
+  
       # retrieve child object
       get_child_objects( attributes )
 
@@ -477,7 +478,10 @@ module MobyBehaviour
 	  def children( attributes, find_all_children = true )
 
       # verify attributes argument format
-      raise TypeError.new( 'Unexpected argument type (%s) for attributes, expecting %s' % [ attributes.class, "Hash" ] ) unless attributes.kind_of?( Hash ) 
+      #raise TypeError.new( 'Unexpected argument type (%s) for attributes, expecting %s' % [ attributes.class, "Hash" ] ) unless attributes.kind_of?( Hash ) 
+      attributes.check_type( Hash, "Wrong argument type $1 for attributes (expected $2)" )
+
+      # verify attributes argument format
 
       # respect the original attributes variable value
       creation_attributes = attributes.clone
@@ -727,23 +731,30 @@ module MobyBehaviour
 
     def find_attribute( name )
 
-      # store xml data to variable, due to xml_data is a function that returns result of xpath to sut.xml_data
-	  _xml_data = nil
-	  begin
-		_xml_data = xml_data
-	  rescue MobyBase::TestObjectNotFoundError		
-		#lets refresh if not found initially
-		refresh_args = ( @creation_attributes[ :type ] == 'application' ? { :name => @creation_attributes[ :name ], :id => @creation_attributes[ :id ] } : { :id => get_application_id } )
-		
-		refresh( refresh_args)
-		_xml_data = xml_data
-	  end
+      # raise exception if attribute name variable type is other than string
+      #Kernel::raise ArgumentError.new( "Wrong argument type %s for attribute argument (expected String)" % name.class ) unless name.kind_of?( String )
+      name.check_type( [ String, Symbol ], "Wrong argument type %s for attribute (expected $2)" )
 
       # convert name to string if variable type is symbol
       name = name.to_s if name.kind_of?( Symbol )
 
-      # raise exception if attribute name variable type is other than string
-      Kernel::raise ArgumentError.new( "Wrong argument type %s for attribute argument (expected String)" % name.class ) unless name.kind_of?( String )
+      # store xml data to variable, due to xml_data is a function that returns result of xpath to sut.xml_data
+      _xml_data = nil
+
+      begin
+
+        _xml_data = xml_data
+
+      rescue MobyBase::TestObjectNotFoundError		
+
+        #lets refresh if not found initially
+        refresh_args = ( @creation_attributes[ :type ] == 'application' ? { :name => @creation_attributes[ :name ], :id => @creation_attributes[ :id ] } : { :id => get_application_id } )
+
+        refresh( refresh_args)
+
+        _xml_data = xml_data
+
+      end
 
       # raise eception if xml data is empty or nil
       Kernel::raise MobyBase::TestObjectNotInitializedError.new if _xml_data.nil? || _xml_data.to_s.empty?

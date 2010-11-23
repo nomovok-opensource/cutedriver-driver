@@ -439,7 +439,9 @@ module MobyBase
 		# ArgumentError:: if 'from_xml_element' is not of type MobyUtil::XML::Element
 		def find_object_data( from_xml_element, layout_direction = nil )
 
-			Kernel::raise ArgumentError.new( "Wrong argument type %s for argument 'xml_element' (expected MobyUtil::XML::Element)" % from_xml_element.class ) unless from_xml_element.kind_of?( MobyUtil::XML::Element )
+      from_xml_element.check_type( MobyUtil::XML::Element, "Wrong argument type $1 for XML element (expected $2)" )
+
+			#Kernel::raise ArgumentError.new( "Wrong argument type %s for argument 'xml_element' (expected MobyUtil::XML::Element)" % from_xml_element.class ) unless from_xml_element.kind_of?( MobyUtil::XML::Element )
 
 			xpath = get_xpath_to_identify( from_xml_element )
 
@@ -475,7 +477,10 @@ module MobyBase
 		# TestObjectNotFoundError:: if no TestObject can be identified
 		# ArgumentError:: if 'from_xml_element' is not of type MobyUtil::XML::Element
 		def find_multiple_object_data( from_xml_element, find_all_children, layout_direction = nil )
-			Kernel::raise ArgumentError.new( "Wrong argument type %s for argument 'xml_element' (expected MobyUtil::XML::Element)" % from_xml_element.class ) unless from_xml_element.kind_of?( MobyUtil::XML::Element )
+
+      from_xml_element.check_type( MobyUtil::XML::Element, "Wrong argument type $1 for XML element (expected $2)" )
+
+			#Kernel::raise ArgumentError.new( "Wrong argument type %s for argument 'xml_element' (expected MobyUtil::XML::Element)" % from_xml_element.class ) unless from_xml_element.kind_of?( MobyUtil::XML::Element )
 				
 			element_set = from_xml_element.xpath( xpath = get_xpath_to_identify( from_xml_element ,nil,find_all_children) )  
 			ret = Array.new

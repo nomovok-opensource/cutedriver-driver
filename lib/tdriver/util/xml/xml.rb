@@ -75,36 +75,45 @@ module MobyUtil
 
       rescue Exception => exception
 
-        # string for exception message
-        dump_location = ""
+        if $TDRIVER_INITIALIZED == true
+        
+          # string for exception message
+          dump_location = ""
 
-        # check if xml parse error logging is enabled
-        if MobyUtil::KernelHelper.to_boolean( MobyUtil::Parameter[ :logging_xml_parse_error_dump ] )
+          # check if xml parse error logging is enabled
+          if MobyUtil::KernelHelper.to_boolean( MobyUtil::Parameter[ :logging_xml_parse_error_dump ] )
 
-          # generate filename for xml dump
-          filename = MobyUtil::KernelHelper.to_boolean( MobyUtil::Parameter[ :logging_xml_parse_error_dump_overwrite ] ) ? 'xml_error_dump.xml' : 'xml_error_dump_%i.xml' % Time.now
+            # generate filename for xml dump
+            filename = MobyUtil::KernelHelper.to_boolean( MobyUtil::Parameter[ :logging_xml_parse_error_dump_overwrite ] ) ? 'xml_error_dump.xml' : 'xml_error_dump_%i.xml' % Time.now
 
-          # ... join filename with xml dump output path 
-          path = File.join( MobyUtil::FileHelper.expand_path( MobyUtil::Parameter[ :logging_xml_parse_error_dump_path ] ), filename )
+            # ... join filename with xml dump output path 
+            path = File.join( MobyUtil::FileHelper.expand_path( MobyUtil::Parameter[ :logging_xml_parse_error_dump_path ] ), filename )
 
-          begin
+            begin
 
-            # write xml string to file
-            File.open( path, "w" ){ | file | file << xml_string }
+              # write xml string to file
+              File.open( path, "w" ){ | file | file << xml_string }
 
-            dump_location = ". Saved to %s" % path
+              dump_location = ". Saved to %s" % path
 
-          rescue
+            rescue
 
-            dump_location = ". Error while saving to file %s" % path
+              dump_location = ". Error while saving to file %s" % path
+
+            end
+
 
           end
 
+          # raise exception
+          Kernel::raise MobyUtil::XML::ParseError.new( "%s (%s)%s" % [ exception.message.gsub("\n", ''), exception.class, dump_location ] )
 
+        else
+        
+          # raise exception
+          Kernel::raise MobyUtil::XML::ParseError.new( "%s (%s)" % [ exception.message.gsub("\n", ''), exception.class ] )
+        
         end
-
-        # raise exception
-        Kernel::raise MobyUtil::XML::ParseError.new( "%s (%s)%s" % [ exception.message.gsub("\n", ''), exception.class, dump_location ] )
 
       end
 

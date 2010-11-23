@@ -17,6 +17,58 @@
 ## 
 ############################################################################
 
+class String
+
+  def not_empty( message = "Empty string given" )
+
+    raise ArgumentError.new( message ) if self.empty? 
+
+  end
+
+  # Function determines if string is "true" or "false"
+  # == params
+  # string:: String
+  # == returns
+  # TrueClass/FalseClass 
+  def boolean?
+
+    /^(true|false)$/i.match( self ).kind_of?( MatchData )
+
+  end    
+
+  # Function determines if string is numeric
+  # == params
+  # string:: Numeric string
+  # == returns
+  # TrueClass/FalseClass 
+  def numeric?
+
+    /[0-9]+/.match( self ).kind_of?( MatchData )
+
+  end  
+
+  # Function converts "true" or "false" to boolean 
+  # == params
+  # string:: String
+  # == returns
+  # TrueClass/FalseClass 
+  def to_boolean
+
+    if /^(true|false)$/i.match( value.to_s )
+    
+      $1.downcase == 'true'
+      
+    else
+    
+      #default
+      Kernel::raise TypeError.new( "Unable to convert string \"#{ self }\" to boolean (Expected \”true\" or \"false\")" )
+
+    end
+
+  end    
+
+end
+
 module MobyUtil
 
   class StringHelper    
@@ -29,7 +81,8 @@ module MobyUtil
     def self.boolean?( string )
 
       # raise exception if argument type other than String
-      Kernel::raise ArgumentError.new("Invalid argument format %s (Expected: %s)" % [ string.class, "String" ]) unless string.kind_of?( String )
+      #Kernel::raise ArgumentError.new("Invalid argument format %s (Expected: %s)" % [ string.class, "String" ]) unless string.kind_of?( String )
+      check_type( String, "Wrong argument type $1 (Expected $2)" )
 
       /^(true|false)$/i.match( string ).kind_of?( MatchData )
 

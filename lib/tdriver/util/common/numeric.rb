@@ -17,20 +17,23 @@
 ## 
 ############################################################################
 
-# load globally used external modules
-require 'singleton'
-require 'set'
+# extend Ruby Numeric class functionality
+class Numeric
 
-# load native extensions if available
-begin; require File.expand_path( File.join( File.dirname( __FILE__ ), 'native_extensions' ) ); rescue LoadError; end
+  def positive?
+    self > 0
+  end
+  
+  def non_negative?
+    self >= 0
+  end
+  
+  def non_positive?
+    self <= 0  
+  end
+  
+  def negative?
+    self < 0
+  end
 
-# generic utility modules
-require File.expand_path( File.join( File.dirname( __FILE__ ), 'util/loader' ) )
-
-# base modules
-require File.expand_path( File.join( File.dirname( __FILE__ ), 'base/loader' ) )
-
-# misc modules
-require File.expand_path( File.join( File.dirname( __FILE__ ), 'report/report' ) )
-require File.expand_path( File.join( File.dirname( __FILE__ ), 'verify/verify' ) )
-
+end

@@ -21,7 +21,7 @@
 module TDriverReportAPI
 
   def tdriver_log_data(data)
-    Kernel::raise ArgumentError.new("Argument to method cannot be nil.") if data.nil?
+    Kernel::raise TypeError.new("Argument to method cannot be nil.") if data.nil?
     if $tdriver_reporter!=nil
       $tdriver_reporter.set_user_data(data)
     end
@@ -34,21 +34,21 @@ module TDriverReportAPI
   end
   
   def tdriver_log_data_in_total_run_table(column_name,value)
-    Kernel::raise ArgumentError.new("Argument to method cannot be nil.") if column_name.nil? || value.nil?
+    Kernel::raise TypeError.new("Argument to method cannot be nil.") if column_name.nil? || value.nil?
     if $tdriver_reporter!=nil
       $tdriver_reporter.set_user_table_data(column_name,value)
     end
   end
   
   def tdriver_report_log(message)
-  	Kernel::raise ArgumentError.new("Argument message was not a String.") unless message.nil? or message.kind_of?(String)
+  	Kernel::raise TypeError.new("Argument message was not a String.") unless message.nil? or message.kind_of?(String)
     if $tdriver_reporter
       $new_test_case.set_test_case_execution_log(message) if $new_test_case
     end
   end
 
   def tdriver_report_set_test_case_status(status)
-  	Kernel::raise ArgumentError.new("Argument status was not a String.") unless status.nil? or status.kind_of?(String)
+  	Kernel::raise TypeError.new("Argument status was not a String.") unless status.nil? or status.kind_of?(String)
     if $tdriver_reporter!=nil
       $tdriver_reporter.set_test_case_user_defined_status(status)
     end

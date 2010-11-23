@@ -17,7 +17,6 @@
 ## 
 ############################################################################
 
-
 module MobyCommand
 
 	class KeySequence < MobyCommand::CommandData
@@ -32,9 +31,9 @@ module MobyCommand
 		# Instance of KeySequence
 		def initialize( key_symbol = nil, type_symbol = :ShortPress )
 			#TODO: Review comment (OR): @sequence -> @_sequence?
-			@sequence = Array.new( 0 )
+			@sequence = [] # Array.new( 0 )
 			#@_sut = sut
-			self.append!( key_symbol, type_symbol ) unless key_symbol == nil
+			self.append!( key_symbol, type_symbol ) unless key_symbol.nil?
 		end
 
 		# Function to append a keypress with type to KeySequence.sequence array
@@ -50,28 +49,41 @@ module MobyCommand
 
 		# Function to repeat last added keypress in sequence unless count is less than one or keypress sequence is empty  
 		# == params
-		# int:: times of key repeated, default is one   
+		# count:: times of key repeated, default is one   
 		# == returns
 		# self
 		# == raises
-		# ArgumentError:: Fixnum expected as argument
-		# ArgumentError:: Positive value expected as argument
-		# IndexError:: Not allowed when empty key sequence
-		def times!( int = 1 )
-			Kernel::raise ArgumentError.new("Fixnum expected as argument") if int.class != Fixnum
-			Kernel::raise ArgumentError.new("Positive value expected as argument") if int < 0
-			Kernel::raise IndexError.new("Not allowed when empty key sequence") if @sequence.size == 0
-			int.times do | iteration |
+		# TypeError:: Wrong argument type %s for times count (expected Fixnum)
+		# ArgumentError:: Positive value expected for times count (got %i)
+		# IndexError:: Unable to multiply last given key due to key sequence is empty
+		def times!( count = 1 )
+
+      # verify count argument type
+			#Kernel::raise ArgumentError.new("Fixnum expected as argument") if count.class != Fixnum
+      count.check_type( Fixnum, "Wrong argument type $1 for times count (expected $2)" )
+
+      # verify that count is positive number
+			Kernel::raise ArgumentError.new( "Positive value expected for times count (got #{ count })" ) if count.negative?
+
+      # verify that @sequence is not empty
+			#Kernel::raise IndexError.new( "Not allowed when empty key sequence" ) if @sequence.size == 0
+			Kernel::raise IndexError.new( "Unable to multiply last given key due to key sequence is empty" ) if @sequence.empty?
+
+			count.times do | iteration |
+			
 				@sequence.push @sequence.fetch( -1 ) unless iteration == 0 
+
 			end
+
 			self
+			
 		end
 				
 		# Returns the stored sequence as an Array with Hash elements having :value and :type keys for each press.
 		# == returns
 		# Array:: Stored key sequence
 		def get_sequence
-		  return @sequence
+		  @sequence
 		end
 
 		# enable hooking for performance measurement & debug logging

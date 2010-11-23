@@ -290,18 +290,24 @@ module MobyUtil
 					# Parse Numerus(LengthVar), or Numerus or LengthVar or translation direclty
 					if ! node.xpath('.//translation/numerusform').empty?
 						# puts ">>> Numerusform"
+            plurality = 1
 						node.xpath('.//translation/numerusform').each do |numerus|
 							nodePlurality = numerus.xpath('@plurality').inner_text()
+              nodePlurality = plurality.to_s if nodePlurality.empty?
 							if ! numerus.xpath('.//lengthvariant').empty?
 								# puts "  >>> Lengthvar"
+                priority = 1
 								numerus.xpath('.//lengthvariant').each do |lenghtvar|
 									nodeLengthVar = lenghtvar.xpath('@priority').inner_text()
+                  nodeLengthVar = priority.to_s if nodeLengthVar.empty?
 									nodeTranslation = lenghtvar.inner_text()
 									data << [ fname, nodeId, nodeTranslation, nodePlurality, nodeLengthVar ]
+                  priority += 1
 								end
 							else
 								nodeTranslation = numerus.inner_text()
 								data << [ fname, nodeId, nodeTranslation, nodePlurality, nodeLengthVar ]
+                plurality += 1
 							end
 						end			
 					elsif ! node.xpath('.//translation/lengthvariant').empty?

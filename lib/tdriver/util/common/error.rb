@@ -17,6 +17,7 @@
 ## 
 ############################################################################
 
+# TODO: move custom errors to exceptions.rb
 module MobyUtil
 
   # template for custom error classes

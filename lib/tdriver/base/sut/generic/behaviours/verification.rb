@@ -67,13 +67,26 @@ module MobyBehaviour
 		#   example: false
     #
 		# == exceptions
-		# ArgumentError
-		#  description: The type argument was not a non-empty String or attributes argument (if provided) was not a Hash
+		# TypeError
+		#  description: Wrong argument type %s for test object type (expected String)
 		#
+		# ArgumentError
+		#  description: The test object type argument must not be empty
+		#
+		# TypeError
+		#  description: Wrong argument type %s for test object attributes (expected Hash)
 		def test_object_exists?(type, attributes = {} )
 
-			Kernel::raise ArgumentError.new "The type argument must be a non empty String." unless (type.kind_of? String and !type.empty?) 
-			Kernel::raise ArgumentError.new "The attributes argument must be a Hash." unless attributes.kind_of? Hash
+      # verify type
+			#Kernel::raise ArgumentError.new "The type argument must be a non empty String." unless (type.kind_of? String and !type.empty?) 
+      type.check_type( String, "Wrong argument type $1 for test object type (expected $2)" )
+
+      # verify that type is not empty string
+      type.not_empty( "The test object type argument must not be empty" )
+
+      # verify type
+			#Kernel::raise ArgumentError.new "The attributes argument must be a Hash." unless attributes.kind_of?( Hash )
+      attributes.check_type( Hash, "Wrong argument type $1 for test object attributes (expected $2)")
 
 			#attributes_with_type = {}.merge attributes
 			attributes_with_type = attributes.clone

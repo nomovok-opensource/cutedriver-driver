@@ -20,20 +20,24 @@
 require 'rbconfig'  # ??
 
 # common modules - should be generic and runnable as standalone
-require File.expand_path( File.join( File.dirname( __FILE__ ), 'error.rb' ) )
+[ 
+  # Ruby object extensions
+  'object.rb', 
+  'numeric.rb', 
+  'hash.rb', 
+  'string.rb',
+  
+  'exceptions.rb', 
+  'error.rb', # TODO: move custom exceptions to exceptions.rb
+  
+  'array.rb', 
+  'crc16.rb', 
+  'environment.rb', 
+  'file.rb', 
+  'gem.rb', 
+  'kernel.rb', 
+  'retryable.rb' ].each{ | filename |
 
-require File.expand_path( File.join( File.dirname( __FILE__ ), 'array.rb' ) )
+  require File.expand_path( File.join( File.dirname( __FILE__ ), filename ) )  
 
-require File.expand_path( File.join( File.dirname( __FILE__ ), 'crc16.rb' ) )
-
-require File.expand_path( File.join( File.dirname( __FILE__ ), 'environment.rb' ) )
-
-require File.expand_path( File.join( File.dirname( __FILE__ ), 'file.rb' ) )
-
-require File.expand_path( File.join( File.dirname( __FILE__ ), 'gem.rb' ) )
-
-require File.expand_path( File.join( File.dirname( __FILE__ ), 'kernel.rb' ) )
-
-require File.expand_path( File.join( File.dirname( __FILE__ ), 'retryable.rb' ) )
-
-require File.expand_path( File.join( File.dirname( __FILE__ ), 'string.rb' ) )
+}

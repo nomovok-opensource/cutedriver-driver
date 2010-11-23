@@ -57,6 +57,18 @@ module MobyUtil
 
         end
 
+        def each_with_index( &block )
+
+          @xml.each_with_index{ | element, index | 
+
+            yield( element_object( element ), index ) 
+
+          }
+
+          self
+
+        end
+
         def collect( &block )
 
           _collect( &block )
