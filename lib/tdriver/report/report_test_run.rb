@@ -500,7 +500,7 @@ module TDriverReportCreator
           write_page_end(@report_folder+'/index.html')
         end
       rescue Exception => e
-        Kernel::raise e, "Unable to update summary page", caller
+        Kernel::raise e, "Unable to update summary page", e.backtrace
       end
       return nil
     end
@@ -760,6 +760,14 @@ module TDriverReportCreator
       @total_sent_data[sut_id.to_sym]=data
       @total_sent_data
     end
+
+    def calculate_total_values_from_hash(values)
+      total=0
+      values.each_value do |val|
+        total+=val
+      end
+      total
+    end
     
     def write_to_result_storage(status,
         testcase,
@@ -774,9 +782,9 @@ module TDriverReportCreator
         log='',
         comment='',
         link='',
-        total_dump=nil,
-        total_sent=nil,
-        total_received=nil )
+        total_dump=0,
+        total_sent=0,
+        total_received=0 )
       while $result_storage_in_use==true
         sleep 1
       end
@@ -817,12 +825,12 @@ module TDriverReportCreator
           test_comment.content = comment
           test_link = Nokogiri::XML::Node.new("link",test)
           test_link.content = html_link
-          test_dump_count = Nokogiri::XML::Node.new("dump_count",test)
-          test_dump_count.content = total_dump
+          test_dump_count = Nokogiri::XML::Node.new("dump_count",test)          
+          test_dump_count.content = calculate_total_values_from_hash(total_dump)
           test_sent_bytes = Nokogiri::XML::Node.new("sent_bytes",test)
-          test_sent_bytes.content = total_sent
+          test_sent_bytes.content = calculate_total_values_from_hash(total_sent)
           test_received_bytes = Nokogiri::XML::Node.new("received_bytes",test)
-          test_received_bytes.content = total_received
+          test_received_bytes.content = calculate_total_values_from_hash(total_received)
       
           test << test_name
           test << test_group
@@ -878,9 +886,9 @@ module TDriverReportCreator
                 xml.log log
                 xml.comment comment
                 xml.link html_link
-                xml.dump_count total_dump
-                xml.sent_bytes total_sent
-                xml.received_bytes total_received
+                xml.dump_count calculate_total_values_from_hash(total_dump)
+                xml.sent_bytes calculate_total_values_from_hash(total_sent)
+                xml.received_bytes calculate_total_values_from_hash(total_received)
                 if user_data!=nil && !user_data.empty?
                   xml.user_display_data {
                     (0..counter).each { |i|
@@ -931,11 +939,10 @@ module TDriverReportCreator
             index=node.search("index").text #8
             log=node.search("log").text #9
             comment=node.search("comment").text #10
-            link=node.search("link").text #11
-            dump_count=node.search("dump_count").text #12
+            link=node.search("link").text #11            
+            dump_count=node.search("dump_count").text #12            
             sent_bytes=node.search("sent_bytes").text #13
-            received_bytes=node.search("received_bytes").text #14
-            
+            received_bytes=node.search("received_bytes").text #14            
             user_data = Hash.new
             node.xpath("user_display_data/data").each do |data_node|
               value_name =  data_node.get_attribute("id")  
