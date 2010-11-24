@@ -117,67 +117,82 @@ module MobyUtil
     # RuntimeError:: from_file is not correctly formed, the file cannot be loaded or the line cannot be found.
     def self.find_source( backtrace )
 
-      ret_str = "\n"
+      result = "\n"
 
       begin
 
+        # split with colon 
         call_stack = backtrace.to_s.split(':')
-        #puts "call_stack:" << backtrace.to_s
-
-        line_number = 0
-        if (call_stack.size() == 2)
-          line_number = call_stack[1].to_i
-
-        else
-          line_number = call_stack[call_stack.size()-2].to_i
-        end
-        #puts "line number: " << line_number.to_s
+          
+        # TODO: document me      
+        line_number = ( call_stack.size == 2 ? call_stack[ 1 ].to_i : call_stack[ call_stack.size - 2 ] ).to_i
 
         file_path = ""
-        if (call_stack.size() == 2)
-          file_path = call_stack[0]
+        
+        # TODO: document me      
+        if ( call_stack.size == 2 )
+        
+          file_path = call_stack[ 0 ]
+          
         else
-          (call_stack.size()-2).times do |index|
-            file_path << call_stack[index].to_s << ":"
+        
+          # TODO: document me      
+          ( call_stack.size - 2 ).times do | index |
+          
+            file_path << "%s:" % call_stack[ index ]
+            
           end
-          file_path.slice!(file_path.size()-1) # remove the trailing colon
+          
+          # remove the trailing colon
+          file_path.slice!(-1)
+          
         end
-        #puts "file path: " << file_path.to_s
-
+        
+        # TODO: document me      
         lines_to_read = line_number >= 2 ? 3 : line_number
         #puts "lines to read: " << lines_to_read.to_s
 
+        # TODO: document me      
         start_line = line_number #- (lines_to_read <= 1 ? 0 : 1)
         #puts "start line:" << start_line.to_s
 
-        File.open(File.expand_path(file_path.to_s), "r") { |source|
+        # expand file path and name 
+        filename = File.expand_path( file_path.to_s )
 
+        # open source file
+        File.open( filename, "r") { | source |
+
+          # read lines
           lines = source.readlines
-          #puts "lines.size:" << lines.size
-          Kernel::raise RuntimeError.new("Only \"#{lines.size.to_s}\" lines exist in the source file.")if start_line > lines.size
+          
+          # raise exception if line number is larger than total number of lines
+          Kernel::raise RuntimeError.new(
+          
+            "Unable to fetch line %s from source file %s due to it is out of range (total lines: %s)" %  [ start_line, filename, lines.size ]
+            
+          ) if start_line > lines.size
 
-          lines_to_read = (lines.size - start_line + 1) < 3 ? (lines.size - start_line + 1) : lines_to_read
-
+          # TODO: document me
+          lines_to_read = ( lines.size - start_line + 1 ) < 3 ? ( lines.size - start_line + 1 ) : lines_to_read
+          
           # the array is zero based, first line is at position 0
-          lines_to_read.times do |index|
-            if (line_number == (start_line + index))
-              ret_str << "=> "
-            else
-              ret_str << "   "
-            end
-            ret_str << lines[start_line + index - 1]
+          lines_to_read.times do | index |
+
+            # add "=>" to line which failed                       
+            result << ( ( line_number == ( start_line + index ) ) ? "=> " : "   " ) + lines[ start_line + index - 1 ]
+            
           end
 
         }
 
       rescue Exception => e
 
-        #puts "exception:" << e.inspect
-        ret_str << "Unable to load source lines.\n" << e.inspect
+        result << "Unable to load source lines.\n#{ e.inspect }"
 
       end
 
-      return ret_str
+      # return result string
+      result
 
     end
 

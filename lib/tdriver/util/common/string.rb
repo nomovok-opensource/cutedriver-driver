@@ -43,7 +43,7 @@ class String
   # TrueClass/FalseClass 
   def numeric?
 
-    /[0-9]+/.match( self ).kind_of?( MatchData )
+    /^[0-9]+$/.match( self ).kind_of?( MatchData )
 
   end  
 
@@ -99,7 +99,7 @@ module MobyUtil
 
       Kernel::raise ArgumentError.new("Invalid argument format %s (Expected: %s)" % [ string.class, "String" ]) unless string.kind_of?( String )
 
-      /[0-9]+/.match( string ).kind_of?( MatchData )
+      /^[0-9]+$/.match( string ).kind_of?( MatchData )
 
     end  
 
