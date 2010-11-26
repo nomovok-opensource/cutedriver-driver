@@ -196,19 +196,20 @@ module MobyBehaviour
 
       xml.check_type( [ MobyUtil::XML::Element, String, NilClass ], "Wrong argument type $1 for XML (expected $2)" )
 
-      case xml.class
+      if xml.kind_of?( MobyUtil::XML::Element )
 
-        when MobyUtil::XML::Element
-          @xml_data = xml
-          @frozen = true
+        @xml_data = xml
+        @frozen = true
 
-        when String
-          @xml_data = MobyUtil::XML.parse_string( xml ).root
-          @frozen = true
+      elsif xml.kind_of?( String )
 
-        when NilClass
-          @xml_data = nil
-          @frozen = false
+        @xml_data = MobyUtil::XML.parse_string( xml ).root
+        @frozen = true
+
+      elsif xml.kind_of?( NilClass )
+
+        @xml_data = nil
+        @frozen = false
 
       end
 
