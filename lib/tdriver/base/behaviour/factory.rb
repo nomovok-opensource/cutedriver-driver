@@ -250,8 +250,8 @@ module MobyBase
 		  input_type = attributes[ "input_type" ].to_s
 		  sut_type = attributes[ "sut_type" ].to_s
 		  version = attributes[ "version" ].to_s
-		  env = attributes["env"].to_s 
-		  env = "*" if env.empty?
+
+		  env = ( attributes[ "env" ] || '*' ).to_s 
 
 		  # verify that all required attributes and nodes are found in behaviour xml node
 		  Kernel::raise RuntimeError.new("Behaviour does not have a name, please see behaviour XML files") if name.empty?
@@ -283,7 +283,7 @@ module MobyBase
 			  :description => ( method.xpath( 'description' ).first.content rescue "" ), 
 			  :example => ( method.xpath( 'example' ).first.content rescue "" )
 
-			}
+  			}
 
 		  }
 
@@ -297,6 +297,7 @@ module MobyBase
 			:sut_type => sut_type.split(";"),
 			:version => version.split(";"),
 			:env => env.split(";"),
+
 			:module => { 
 			  :file => module_file, 
 			  :name => module_name 
