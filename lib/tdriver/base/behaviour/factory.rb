@@ -251,6 +251,7 @@ module MobyBase
 		  sut_type = attributes[ "sut_type" ].to_s
 		  version = attributes[ "version" ].to_s
 		  env = attributes["env"].to_s 
+		  env = "*" if env.empty?
 
 		  # verify that all required attributes and nodes are found in behaviour xml node
 		  Kernel::raise RuntimeError.new("Behaviour does not have a name, please see behaviour XML files") if name.empty?
@@ -295,7 +296,7 @@ module MobyBase
 			:input_type => input_type.split(";"),
 			:sut_type => sut_type.split(";"),
 			:version => version.split(";"),
-			:env => env,
+			:env => env.split(";"),
 			:module => { 
 			  :file => module_file, 
 			  :name => module_name 
