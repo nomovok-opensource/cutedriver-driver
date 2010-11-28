@@ -15,7 +15,7 @@ module TDriver
       @timeout = MobyUtil::Parameter[ :synchronization_timeout, "20" ].to_f
 
       @retry_interval = MobyUtil::Parameter[ :synchronization_retry_interval, "1" ].to_f
-        
+                
     end # initialize
         
     def get_objects( source_data, rules, &block )
@@ -27,7 +27,12 @@ module TDriver
       #TDriver::TestObjectIdentificator.new( creation_hash )
       # {:type=>"application", :name=>"calculator"}
 
-      dynamic_attributes = strip_dynamic_attributes!( rules )
+      test_object_attributes = rules[ :attributes ]
+
+      dynamic_attributes = strip_dynamic_attributes!( test_object_attributes )
+
+      # add keys from rules to dynamic attribute filter list -- to avoid IRB bug
+      MobyUtil::DynamicAttributeFilter.instance.add_attributes( rules.keys )
 
       #p dynamic_attributes
       #p rules
@@ -48,17 +53,17 @@ module TDriver
         # set refresh flag to true 
         refresh = true    
 
-        matches, rule = @test_object_adapter.get_objects( source_data, rules )
+        matches, rule = @test_object_adapter.get_objects( source_data, test_object_attributes )
    
         # create string representation of hash merged with and dynamic attributes 
-        rules_string = rules.merge( dynamic_attributes ).inspect
-        
+        rules_string = test_object_attributes.merge( dynamic_attributes ).inspect
+                
         # raise exception if multiple matches found
         Kernel::raise MobyBase::MultipleTestObjectsIdentifiedError.new(
         
           "Multiple test objects found with rule: #{ rules_string }"
           
-        ) if !dynamic_attributes.has_key?( :__index ) and (!( dynamic_attributes[ :__multiple ] || false ) and matches.size > 1)
+        ) if !dynamic_attributes.has_key?( :__index ) and (!( rules[ :multiple_objects ] || false ) and matches.size > 1)
         
         # raise exception if no matches found
 			  Kernel::raise MobyBase::TestObjectNotFoundError.new(
@@ -76,7 +81,7 @@ module TDriver
         matches = [ matches[ dynamic_attributes[ :__index ] ] ] if dynamic_attributes.has_key?( :__index )
         
         # return array of matching test object(s)
-        make_test_objects( matches, dynamic_attributes )
+        make_test_objects( matches, rules )
 
       }
       
@@ -88,7 +93,7 @@ module TDriver
 
       #p rules
     
-      sut = rules[ :__sut ]
+      sut = rules[ :sut ]
     
       # return array of matching test object(s)
       matches.collect{ | source_data |
@@ -106,7 +111,7 @@ module TDriver
           sut,    
 
           # associated parent object; either test object, application or sut
-          rules[ :__parent_object ], 
+          rules[ :parent_object ], 
 
           # test object xml data
           source_data
