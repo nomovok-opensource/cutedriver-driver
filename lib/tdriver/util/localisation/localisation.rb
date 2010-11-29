@@ -186,14 +186,19 @@ module MobyUtil
 				
 				db_connection = DBConnection.new(  db_type, host, database_name, username, password )
 			end
-			# Check File and convert to TS File if needed
-			tsFile = MobyUtil::Localisation.convert_to_ts( file )
-			Kernel::raise Exception.new("Failed to convert #{file} to .ts") if tsFile == nil	
-			# Collect data for INSERT query from TS File
-			language, data = MobyUtil::Localisation.parse_ts_file( tsFile, column_names_map )
-			Kernel::raise Exception.new("Error while parsing #{file}.") if language == nil or data == ""
-			# Upload language data to DB for current language file
-			MobyUtil::Localisation.upload_ts_data( language, data, table_name, db_connection, record_sql )
+      if file.match(/.*\.ts/) or file.match(/.*\.qm/)
+        # Check File and convert to TS File if needed
+        tsFile = MobyUtil::Localisation.convert_to_ts( file )
+        Kernel::raise Exception.new("Failed to convert #{file} to .ts") if tsFile == nil	
+        # Collect data for INSERT query from TS File
+        language, data = MobyUtil::Localisation.parse_ts_file( tsFile, column_names_map )
+        Kernel::raise Exception.new("Error while parsing #{file}.") if language == nil or data == ""
+			elsif file.match(/.*\.loc/)
+        language, data = MobyUtil::Localisation.parse_loc_file( file, column_names_map )
+        Kernel::raise Exception.new("Error while parsing #{file}. The file might have no translations.") if language.nil? or language.empty? or data.nil? or data.empty?
+      end
+      # Upload language data to DB for current language file
+			MobyUtil::Localisation.upload_data( language, data, table_name, db_connection, record_sql )
 		end
 		
 		
@@ -332,11 +337,54 @@ module MobyUtil
 			return language, data
 		end
 		
+    def self.parse_loc_file(file, column_names_map = {})
+    begin
+      # This language code table has been taken from 
+      # http://developer.symbian.org/main/documentation/reference/s3/pdk/GUID-31C133DE-F245-5992-9A41-20A99291E72A.html
+      # Its also enumerated by TLanguage in e32lang.h in the Symbian code.
+      language_code_map = {
+        "01" => "EN", "02" => "FR", "03" => "GE", "04" => "SP", "05" => "IT", "06" => "SW", "07" => "DA", "08" => "NO", "09" => "FI", 
+        "10" => "AM", "11" => "SF", "12" => "SG", "13" => "PO", "14" => "TU", "15" => "IC", "16" => "RU", "17" => "HU", "18" => "DU", "19" => "BL", 
+        "20" => "AU", "21" => "BF", "22" => "AS", "23" => "NZ", "24" => "IR", "25" => "CS", "26" => "SK", "27" => "PL", "28" => "SL", "29" => "TC", 
+        "30" => "HK", "31" => "ZH", "32" => "JA", "33" => "TH", "34" => "AF", "35" => "SQ", "36" => "AH", "37" => "AR", "38" => "HY", "39" => "TL", 
+        "40" => "BE", "41" => "BN", "42" => "BG", "43" => "MY", "44" => "CA", "45" => "HR", "46" => "CE", "47" => "IE", "48" => "SA", "49" => "ET", 
+        "50" => "FA", "51" => "CF", "52" => "GD", "53" => "KA", "54" => "EL", "55" => "CG", "56" => "GU", "57" => "HE", "58" => "HI", "59" => "IN", 
+        "60" => "GA", "61" => "SZ", "62" => "KN", "63" => "KK", "64" => "KM", "65" => "KO", "66" => "LO", "67" => "LV", "68" => "LT", "69" => "MK", 
+        "70" => "MS", "71" => "ML", "72" => "MR", "73" => "MO", "74" => "MN", "75" => "NN", "76" => "BP", "77" => "PA", "78" => "RO",  "79" => "SR",
+        "80" => "SI", "81" => "SO", "82" => "OS", "83" => "LS", "84" => "SH", "85" => "FS", "87" => "TA",   "88" => "TE", "89" => "BO", "90" => "TI",
+        "91" => "CT", "92" => "TK", "93" => "UK", "94" => "UR", "96" => "VI", "97" => "CY", "98" => "ZU", "100" => "ME", "101" => "ST", "129" => "EA",
+        "157" => "YW", "158" => "YH", "159" => "YP", "160" => "YJ", "161" => "YT", "326" => "MA"
+      }
+      
+      data = []
+      file.split('/').last.match(/(.*)_(\w{2,3}).loc/)
+      fname = $1
+      language_code = $2
+      language = language_code.to_s #language = language_code_map[ language_code ]
+			language = column_names_map[ language_code ] if !column_names_map.empty? and column_names_map.key?( language_code )
+      
+      io = open(file)
+      while line = io.gets
+        if line.match(/#define ([a-zA-Z1-9\_]*) \"(.*)\"/)
+          lname = $1
+          translation = $2 
+          data <<  [ fname, lname, translation, plurality = "", lengthvariant = "" ]
+        end
+      end
+      io.close
+      #puts language
+      #p data
+      return language, data
+    rescue Exception => e
+      puts e.message
+      puts e.backtrace
+    end
+    end
 		
 		# == description
 		# Uploads language data to Localisation DB and optionally records the sql queries on a file
 		#
-		def self.upload_ts_data( language, data, table_name, db_connection, record_sql = false )
+		def self.upload_data( language, data, table_name, db_connection, record_sql = false )
 			
 			raise Exception.new("Language not provided.") if language.nil? or language.to_s.empty?
 			raise Exception.new("No data povided. Please make sure the source of your data is valid.") if data.nil? or data.empty?
