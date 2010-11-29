@@ -370,6 +370,28 @@ module TDriverReportCreator
 		
     end
 	  
+    def target_video_alive
+   
+      ret = ""
+      each_video_device do | video_device, device_index |
+     
+        check_fps = MobyUtil::Parameter[:report_activity_fps, '3']
+        check_frame_min = MobyUtil::Parameter[:report_activity_frame_treshold, '8']
+        check_video_min = MobyUtil::Parameter[:report_activity_video_treshold, '29']
+        
+        ret_n = MobyUtil.video_alive? "cam_" + device_index + "_" + @tc_video_filename, check_fps.to_f, check_frame_min.to_f, check_video_min.to_f, false
+        
+        if !ret_n
+          ret += ", " if !ret.empty?
+          ret += "cam_" + device_index + "_" + @tc_video_filename
+        end
+                
+      end   
+      
+      return ret
+    
+    end
+    
     def stop_video_recording()
 	
 

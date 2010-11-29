@@ -271,7 +271,7 @@ module MobyUtil
   # in_change: (optional) Numeric, minimum change between two frames for them to be considered different
   # in_treshold: (optional) Numeric, Minimum percentage of frames with changes for the video to be considered alive.
   # in_debug: (optional) Boolean, True for verbose output including taret video statistics
-  def self.video_alive?( in_target_video, in_fps = 2, in_image_treshold = 8, in_video_treshold = 25, in_debug = true )
+  def self.video_alive?( in_target_video, in_fps = 2, in_image_treshold = 8, in_video_treshold = 25, in_debug = false )
   
     puts "In fps: " << in_fps.inspect << " frame: " << in_image_treshold.inspect << " video: "  << in_video_treshold.inspect
     in_change = in_image_treshold / 100.0

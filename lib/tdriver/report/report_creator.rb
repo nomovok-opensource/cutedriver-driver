@@ -475,7 +475,10 @@ module TDriverReportCreator
           status='failed' if MobyUtil::Parameter[:report_fail_test_if_files_found]=='true'
         end
       end
-      if $new_test_case.video_recording?
+      
+      temp_rec = $new_test_case.video_recording?
+      
+      if temp_rec
         $new_test_case.stop_video_recording
       end
       if $tdriver_reporter.test_case_user_defined_status!=nil
@@ -490,8 +493,31 @@ module TDriverReportCreator
         end
       end
       if(status=='passed')
-        $new_test_case.set_test_case_status($tdriver_reporter.pass_statuses.first)
-        create_test_case_folder($tdriver_reporter.pass_statuses.first)
+  
+        no_activity_videos = ""
+        if MobyUtil::Parameter[:report_check_device_active, 'false']=='true'          
+          if temp_rec            
+            no_activity_videos = $new_test_case.target_video_alive                                  
+          end                    
+        end        
+        
+        if no_activity_videos == "" 
+          $new_test_case.set_test_case_status($tdriver_reporter.pass_statuses.first)
+          create_test_case_folder($tdriver_reporter.pass_statuses.first)
+        else
+          # switch case to failed status
+          status='failed'         
+          $new_test_case.copy_video_capture
+          $new_test_case.update_test_case "The case failed due to video analysis (#{no_activity_videos}) indicating that the target is no longer responding."
+         
+          $new_test_case.set_test_case_status($tdriver_reporter.fail_statuses.first)
+          create_test_case_folder($tdriver_reporter.fail_statuses.first)
+          if found_crash_files.to_i > 0
+            $new_test_case.capture_crash_files()
+          end
+          
+        end
+        
       end
       if(status!='passed' && status!='failed')
         $new_test_case.set_test_case_status($tdriver_reporter.not_run_statuses.first)
