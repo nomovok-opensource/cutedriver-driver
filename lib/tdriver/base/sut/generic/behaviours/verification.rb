@@ -38,7 +38,7 @@ module MobyBehaviour
   # *
   #
   # == objects
-  # *;sut
+  # *
   #
 	module Verification
 

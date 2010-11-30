@@ -240,9 +240,8 @@ module MobyUtil
     # IOError:: Error occured while creating folder
     def self.copy_file( source, destination, verbose = false, overwrite = true, create_folders = true, &block )
 
-      #Kernel::raise ArgumentError.new( "Source and destination argument must be type of String" ) unless source.kind_of?( String ) && destination.kind_of?( String )
-
       source.check_type( String, "Wrong argument type $1 for source file (expected $2)" )
+      
       destination.check_type( String, "Wrong argument type $1 for destination file (expected $2)" )
 
       sources = []
@@ -280,7 +279,7 @@ module MobyUtil
         # create destination folder if it doesn't exist and create_folders flag is enabled
         MobyUtil::FileHelper.mkdir_path( destination_folder ) if create_folders
 
-        Kernel::raise RuntimeError.new( "Source file does not exist (#{ source })" ) unless File.exist?( source )
+        Kernel::raise RuntimeError.new( "Unable to copy %s to %s due to source file does not exist" % [ source, destination ] ) unless File.exist?( source )
 
         File.copy( 
 

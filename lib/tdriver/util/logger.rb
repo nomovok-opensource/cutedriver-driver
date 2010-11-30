@@ -198,7 +198,6 @@ module MobyUtil
 					# do not add caller info if called from self
 					include_behaviour_info = false
 
-
 				else
 
 					# normal logging, e.g. behaviour logging from method etc
@@ -208,8 +207,6 @@ module MobyUtil
 
 				# log text to given level if logging enabled
 				text_array.each{ | text |
-
-					
 
 					@logger_instance.send( level, ( include_behaviour_info && !text.empty? ) ? ( "%s in %s" % [ text, log_caller ] ) : ( "%s" % text ) ) 
 
@@ -269,15 +266,28 @@ module MobyUtil
 
       set_debug_exceptions # if enabled
 
+      # returns logging level as string
 			logging_level = Parameter[ :logging_level, nil ]
 
+      # do not enable logging if no logging level is not defined
 			return nil if logging_level.nil?
 
-			Kernel::raise RuntimeError.new( "Wrong logging level format '%s' (Expected: %s)" % [ logging_level, "Numeric string"] ) unless MobyUtil::StringHelper.numeric?( logging_level )      
+      # raise exception if wrong format for logging level
+			Kernel::raise RuntimeError.new( 
+			
+			  "Wrong logging level format '%s' defined in TDriver parameter/template XML (expected %s)" % [ logging_level, "numeric string"]
+			  
+		  ) unless logging_level.numeric? #MobyUtil::StringHelper.numeric?( logging_level )      
 
+      # convert to integer
 			logging_level = logging_level.to_i
 
-			Kernel::raise RuntimeError.new( "Invalid logging level '%s' (Expected: %s)" % [ logging_level, "0..5"] ) unless (0..5).include?( logging_level.to_i )
+      # raise exception if unsupported logging level
+			Kernel::raise RuntimeError.new( 
+			
+			  "Unsupported logging level '%s' defined in TDriver parameter/template XML (expected %s)" % [ logging_level, "0..5"] 
+			  
+		  ) unless (0..5).include?( logging_level )
 
 			@include_behaviour_info = ( MobyUtil::Parameter[ :logging_include_behaviour_info, 'false' ].downcase == 'true' )
 
@@ -302,7 +312,7 @@ module MobyUtil
 
             rescue Exception
 
-              warn("Warning: Unable to create output folder %s for corrupted UI state XML dumps" % [ MobyUtil::Parameter[ :logging_xml_parse_error_dump_path ] ] )
+              warn("Warning: Unable to create log folder %s for corrupted XML UI state files" % [ MobyUtil::Parameter[ :logging_xml_parse_error_dump_path ] ] )
 
               # disable feature
               raise ArgumentError
@@ -313,7 +323,7 @@ module MobyUtil
 
           if MobyUtil::Parameter[ :logging_xml_parse_error_dump_overwrite, nil ].nil?
 
-            warn("Warning: Configuration parameter :logging_xml_parse_error_dump_overwrite missing, using default value: false")
+            warn("Warning: Configuration parameter :logging_xml_parse_error_dump_overwrite missing, using 'false' as default value")
 
             MobyUtil::Parameter[ :logging_xml_parse_error_dump_overwrite ] = 'false'
 

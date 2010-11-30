@@ -262,7 +262,7 @@ module MobyBehaviour
 
       end
 
-      Kernel::raise RuntimeError.new( "No executable full name has been defined for this application." ) if exe_name.empty?
+      Kernel::raise RuntimeError.new( "Application does not have 'FullName' or 'exepath' attribute defined" ) if exe_name.empty?
 
       File.basename( exe_name.gsub( /\\/, '/' ) )
 
@@ -280,6 +280,12 @@ module MobyBehaviour
 
       id
 
+    end
+    
+    def environment
+    
+      @environment
+      
     end
     
     # == nodoc

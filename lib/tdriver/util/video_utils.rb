@@ -69,7 +69,7 @@ module MobyUtil
 		# Creates a new recroding object witdh the given recording options		
 		# === params
 		# video_file: String, path and name of file where the recorded video is stored
-        # user_options: (optional) Hash, keys :fps, :width, :height can be used to overwrite defaults
+    # user_options: (optional) Hash, keys :fps, :width, :height can be used to overwrite defaults
 		def initialize( video_file, user_options = {} )
 		    
 		    begin
@@ -183,7 +183,7 @@ module MobyUtil
 		# Creates a new recroding object witdh the given recording options		
 		# === params
 		# video_file: String, path and name of file where the recorded video is stored
-        # user_options: (optional) Hash, keys :fps, :width, :height can be used to overwrite defaults
+    # user_options: (optional) Hash, keys :fps, :width, :height can be used to overwrite defaults
 		def initialize( video_file, user_options = {} )	    
 			
 		    @_control_id = nil
@@ -262,15 +262,27 @@ module MobyUtil
 		
 	end #TDriverLinuxCam
   
-  def video_alive?( target_video, in_fps = 1, in_change = 0.07, in_treshold = 34, in_debug = true )
   
+  # Checks if the target video contains enough activity to be considered active or static.
+  #
+	# === params
+	# target_video: String, Name and path of video file to analyze
+  # in_fps: (optional) Numeric, frames to be analyzed per second
+  # in_change: (optional) Numeric, minimum change between two frames for them to be considered different
+  # in_treshold: (optional) Numeric, Minimum percentage of frames with changes for the video to be considered alive.
+  # in_debug: (optional) Boolean, True for verbose output including taret video statistics
+  def self.video_alive?( in_target_video, in_fps = 2, in_image_treshold = 8, in_video_treshold = 25, in_debug = false )
+  
+    puts "In fps: " << in_fps.inspect << " frame: " << in_image_treshold.inspect << " video: "  << in_video_treshold.inspect
+    in_change = in_image_treshold / 100.0
+    
     alive_temp_folder = "temp_target_alive"
     
     require 'rmagick'
     
     raise ArgumentError.new( "The FPS argument must be an Interger or a Float, it was a #{ in_fps.class }." ) unless in_fps.kind_of? Numeric
     raise ArgumentError.new( "The same frame treshold argument must be an Interger or a Float, it was a #{ in_change.class }." ) unless in_change.kind_of? Numeric
-    raise ArgumentError.new( "The changed frames treshold argument must be an Interger or a Float, it was a #{ in_treshold.class }." ) unless in_treshold.kind_of? Numeric
+    raise ArgumentError.new( "The changed frames treshold argument must be an Interger or a Float, it was a #{ in_video_treshold.class }." ) unless in_video_treshold.kind_of? Numeric
      
     ts = Time.now if in_debug 
 
@@ -286,9 +298,9 @@ module MobyUtil
     
     end
     
-    system('ffmpeg.exe -i '+target_video.to_s+' -y -f image2 -r '+in_fps.to_s+' '+alive_temp_folder+'/frame-%05d.png')
+    system('ffmpeg.exe -i '+in_target_video.to_s+' -y -f image2 -r '+in_fps.to_s+' '+alive_temp_folder+'/frame-%05d.png')
 
-    puts "TIME: " << (Time.now - ts).to_s if in_debug
+    puts "Video processing duration: " << (Time.now - ts).to_s if in_debug
 
     t_start = Time.now
     
@@ -317,19 +329,20 @@ module MobyUtil
         d_sum += dif
       end
       dif_count += 1 if dif > in_change
-      puts "IF: " << im_file.to_s << " I: " << (im_index+1).to_s  << " C: " << dif.to_s if in_debug
+      puts "Processing image: " << im_file.to_s << " I: " << (im_index+1).to_s  << " C: " << dif.to_s if in_debug
       
       pre_obj = im_file
            
     end
         
     if in_debug
-      puts "MAX: " << d_max.to_s << "\nMIN: " << d_min.to_s << "\n"
-      puts "MEA: " << (d_sum/im_files.size).to_s unless im_files.size == 0
-      puts "DIF: " << dif_count.to_s
+      puts "Max difference: " << d_max.to_s << "\nMin difference: " << d_min.to_s << "\n"
+      puts "Mean difference: " << (d_sum/im_files.size).to_s unless im_files.size == 0
+      puts "Count of images exceeding difference tolerance: " << dif_count.to_s
 
-      puts "PER: " << (dif_count.to_f/im_files.size).to_s unless im_files.size == 0
-      puts "DUR: " << (Time.now - t_start).to_s    
+      puts "Fraction of images exceeding diffenrence tolerance: " << (dif_count.to_f/im_files.size).to_s unless im_files.size == 0
+      puts "Analysis duration: " << (Time.now - t_start).to_s
+      puts "Total duration: " << (Time.now - ts).to_s
     end
 
     begin
@@ -338,7 +351,7 @@ module MobyUtil
     end
     
     # Check if enough frames were changed
-    return (dif_count.to_f/im_files.size)*100 < in_treshold
+    return (dif_count.to_f/im_files.size)*100 >= in_video_treshold
       
   end  
   
