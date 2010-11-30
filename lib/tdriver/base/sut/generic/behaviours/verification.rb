@@ -20,7 +20,7 @@
 module MobyBehaviour
  
   # == description
-  # Defines methods for verification of sut and test object state 
+  # Defines methods for verification of test object state. These methods can only be called from non-sut objects
   #
   # == behaviour
   # GenericVerification
@@ -45,7 +45,7 @@ module MobyBehaviour
 		include MobyBehaviour::Behaviour
 
 		# == description
-		# Checks if a child test object matching the given criteria can be found on the sut
+		# Checks if a child test object matching the given criteria can be found, under this application object or test object.
 		#
 		# == arguments
 		# type
