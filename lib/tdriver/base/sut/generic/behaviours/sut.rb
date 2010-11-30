@@ -347,9 +347,7 @@ module MobyBehaviour
         if _child.eql?( child_test_object )
 
           # Update the attributes that were used to create the child object.
-          #_child.creation_attributes = creation_hash
-
-          _child.instance_eval("@creation_attributes = #{ creation_hash.inspect }")
+          _child.instance_variable_set( :@creation_attributes, creation_hash )
 
           # return already existing child TestObject so that there is references to only one TestObject
           return _child
@@ -374,7 +372,10 @@ module MobyBehaviour
       # Store the attributes that were used to create the child object.
       child.creation_attributes = creation_hash
 
-      add_child( child_test_object )
+      #add_child( child_test_object )
+
+      # add child directly, trying to get rid of current ObjectCompostionBehaviour
+      @_child_object_cache.merge!( child_test_object.hash => child_test_object )
 
       child_test_object
 
