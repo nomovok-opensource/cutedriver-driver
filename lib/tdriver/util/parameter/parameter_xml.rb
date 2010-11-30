@@ -99,11 +99,12 @@ module MobyUtil
           when 'fixture'
 
             plugin = attribute[ "plugin" ].to_s
+		    env = attribute[ "env" ].to_s unless attribute[ "env" ].nil?
 
             Kernel::raise SyntaxError.new( "No name defined for fixture with value %s" % name ) if name.empty?
             Kernel::raise SyntaxError.new( "No plugin defined for fixture with name %s" % name ) if plugin.empty?
 
-            value = plugin
+   		    value = {:plugin => plugin, :env => env}
 
           when 'parameter'
 
