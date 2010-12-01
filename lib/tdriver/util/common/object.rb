@@ -20,6 +20,13 @@
 # extend Ruby Object class functionality
 class Object
 
+  # define method to class instance
+  def meta_def method_name, &block
+  
+    ( class << self; self; end ).instance_eval{ define_method method_name, &block }
+    
+  end
+
   # Compare receiver object type with given types. Raises exception is class name does not equal.
   def check_type( types, message = "wrong argument type $1 (expected $2)" )
 
@@ -57,6 +64,12 @@ class Object
 
     # pass self as return value
     self
+
+  end
+
+  def not_nil( message = "Value must not be nil", exception = ArgumentError )
+
+    raise exception.new( message ) if self.nil? 
 
   end
 

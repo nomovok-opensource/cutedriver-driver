@@ -154,24 +154,36 @@ module MobyBase
 
       created_accessors = []
 
-      test_object.xml_data.xpath( 'objects/object' ).each{ | objectElement |
+      test_object.xml_data.xpath( 'objects/object' ).each{ | object_element |
 
-        objectElement.attribute( "type" ).tap{ | objType |
+        object_type = object_element.attribute( "type" )
 
-          unless created_accessors.include?( objType ) || objType.empty? then
+        unless created_accessors.include?( object_type ) || object_type.empty? then
 
-          test_object.instance_eval(
+          # define object type accessor method 
+          test_object.meta_def object_type do | *rules |
 
-            "def %s( rules={} ); raise TypeError, 'parameter <rules> should be hash' unless rules.kind_of?( Hash ); rules[:type] = :%s; child( rules ); end;" % [ objType, objType ]
+            #raise ArgumentError, "wrong number of arguments (%s for 1)" % rules.count unless rules.count == 1
+
+            raise TypeError, 'parameter <rules> should be hash' unless rules.first.kind_of?( Hash )
+          
+            rules.first[:type] = object_type
+            
+            child( rules.first )
+          
+          end
+
+=begin
+         test_object.instance_eval(
+
+            "def %s( rules={} ); raise TypeError, 'parameter <rules> should be hash' unless rules.kind_of?( Hash ); rules[:type] = :%s; child( rules ); end;" % [ object_type, object_type ]
 
 
           )
-
-          created_accessors << objType
+=end
+          created_accessors << object_type
 
         end
-
-        }
 
       }
 

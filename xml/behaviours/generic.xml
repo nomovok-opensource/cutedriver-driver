@@ -453,7 +453,7 @@
 
     </behaviour>
 
-    <behaviour name="GenericVerification" object_type="*;sut" sut_type="*" input_type="*" version="*">
+    <behaviour name="GenericVerification" object_type="*" sut_type="*" input_type="*" version="*">
 
         <module name="MobyBehaviour::Verification" />
 

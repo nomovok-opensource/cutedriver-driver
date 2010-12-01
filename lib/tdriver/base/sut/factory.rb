@@ -17,7 +17,6 @@
 ## 
 ############################################################################
 
-
 module MobyBase
 
   # Class to create SUT objects
@@ -70,20 +69,28 @@ module MobyBase
 	  # if sut is already connected, return existing sut
 	  return get_sut_from_list( sut_id ) if sut_exists?( sut_id )
 
-	  Kernel::raise ArgumentError.new( "The SUT '#{ sut_id }' was not defined in TDriver parameters XML" ) if MobyUtil::Parameter[ sut_id, nil ].nil?
 
-	  # retrieve sut type from parameters, raise exception if sut type was not found
-	  Kernel::raise RuntimeError.new( "SUT type not defined for #{ sut_id } in TDriver parameters/templates XML" ) if ( sut_type = MobyUtil::Parameter[ sut_id ][ :type, nil ] ).nil?
+	  # retrieve sut from parameters
+      sut = MobyUtil::Parameter[ sut_id, nil ]
+
+	  # raise exception if sut was not found
+	  Kernel::raise ArgumentError.new( "%s not defined in TDriver parameters XML" % [ sut_id ]) if sut.nil?
+	  
+	  # retrieve sut type from parameters
+	  sut_type = sut[ :type, nil ]
+	  
+	  # raise exception if sut type was not found
+	  Kernel::raise RuntimeError.new( "SUT parameter 'type' not defined for %s in TDriver parameters/templates XML" % [ sut_id ] ) if sut_type.nil?
 
 	  sut_type_symbol = sut_type.downcase.to_sym
 
 	  # retrieve plugin name that implements given sut
-	  sut_plugin = MobyUtil::Parameter[ sut_id ][ :sut_plugin, nil ]
-	  sut_env = MobyUtil::Parameter[ sut_id ][ :env, '*' ]
+	  sut_plugin = sut[ :sut_plugin, nil ]
+	  sut_env = sut[ :env, '*' ]
 
 	  # verify that sut plugin is defined in sut configuration
-	  Kernel::raise RuntimeError.new( "SUT plugin not defined for %s (%s)" % [ sut_id, sut_type ] ) if sut_plugin.nil?
-
+	  Kernel::raise RuntimeError.new( "SUT parameter 'sut_plugin' not defined for %s (%s)" % [ sut_id, sut_type ] ) if sut_plugin.nil?
+	  
 	  # flag to determine that should exception be raised; allow one retry, then set flag to true if error still occures
 	  raise_exception = false
 
@@ -98,7 +105,7 @@ module MobyBase
 		else
 
 		  # raise error if sut was not registered
-		  Kernel::raise NotImplementedError.new( "No plugin/implementation for SUT type: %s" % [ sut_type ] )
+		  Kernel::raise NotImplementedError.new( "No plugin implementation found for SUT type: %s" % [ sut_type ] )
 
 		end
 
@@ -111,6 +118,7 @@ module MobyBase
 
 		  raise_exception = true
 		  retry 
+		  
 		else
 
 		  # still errors, raise original exception
@@ -189,25 +197,33 @@ module MobyBase
 
 	def disconnect_sut( sut_attributes )
 
-      id = retrieve_sut_id_from_hash( sut_attributes )
+      sut_id = retrieve_sut_id_from_hash( sut_attributes )
 
-	  Kernel::raise RuntimeError.new( "Not connected to device: #{ id  }" ) unless sut_exists?( id ) && @_sut_list[ id ][ :is_connected ] 
-
-	  @_sut_list[ id ][ :sut ].disconnect
-
-	  @_sut_list[ id ][ :is_connected ] = false
+	  Kernel::raise RuntimeError.new( 
+									 
+									 "Unable disconnect SUT due to %s is not connected" % [ sut_id ] 
+									 
+									 ) unless sut_exists?( sut_id ) && @_sut_list[ sut_id ][ :is_connected ] 
+	  
+	  @_sut_list[ sut_id ][ :sut ].disconnect
+	  
+	  @_sut_list[ sut_id ][ :is_connected ] = false
 
 	end 
 
 	def reboot_sut( sut_attributes )
 
-      id = retrieve_sut_id_from_hash( sut_attributes )
+      sut_id = retrieve_sut_id_from_hash( sut_attributes )
 
-	  Kernel::raise RuntimeError.new( "Not connected to device: #{ id }" ) unless sut_exists?( id ) && @_sut_list[ id ][ :is_connected ]
+	  Kernel::raise RuntimeError.new( 
+									 
+									 "Unable to reboot SUT due to %s is not connected" % [ sut_id ] 
+									 
+									 ) unless sut_exists?( sut_id ) && @_sut_list[ sut_id ][ :is_connected ]
 	  
-	  @_sut_list[ id ][ :sut ].reboot
+	  @_sut_list[ sut_id ][ :sut ].reboot
 
-	  disconnect_sut( id )
+	  disconnect_sut( sut_id )
 
 	end
 
