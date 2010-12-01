@@ -107,16 +107,19 @@ module MobyBehaviour
 
       @_active = false
 
-      @_child_object_cache.each_value{ | test_object | 
-
+      # iterate through all test objects child test objects
+      @child_object_cache.each_object{ | test_object |
+      
         # deactivate test object
-        test_object.deactivate  
-
+        test_object.deactivate
+              
       }
 
-      @_child_object_cache.clear
+      # remove test objects from children objects cache
+      @child_object_cache.remove_objects
 
-      @parent.remove_child( self )
+      # remove from parent objects children objects cache
+      @parent.instance_variable_get( :@child_object_cache ).remove_object( self )
 
     end
 
@@ -591,11 +594,9 @@ module MobyBehaviour
 
     def get_cached_test_object!( object )
 
-      object_hash = object.hash
+      if @child_object_cache.has_object?( object ) 
 
-      if @_child_object_cache.has_key?( object_hash ) 
-
-        object = @_child_object_cache[ object_hash ]
+        object = @child_object_cache[ object ]
 
         true
 
@@ -663,6 +664,9 @@ module MobyBehaviour
         # Type information is stored in a separate member, not in the Hash
         #creation_data.delete( :type )
 
+        
+
+
         child_objects.each do | child_object |
 
           # use cached test object if once already retrieved
@@ -672,7 +676,9 @@ module MobyBehaviour
             child_object.creation_attributes = creation_data
 
             # add child to objects cache 
-            add_child( child_object ) unless found_in_cache
+            #add_child( child_object ) unless found_in_cache
+
+            @child_object_cache.add_object( child_object ) unless found_in_cache
 
           }
 
@@ -776,21 +782,17 @@ module MobyBehaviour
     # this method will be automatically invoked after module is extended to sut object  
     def self.extended( target_object )
 
-      target_object.instance_exec{
-
-        initialize_settings
-
-      }
+      target_object.instance_exec{ initialize_settings }
 
     end
 
     def initialize_settings
 
+      @child_object_cache = TDriver::TestObjectCache.new
+    
       # defaults
       @_application_id = nil
       @creation_attributes = nil
-
-      @_child_object_cache = {}
 
       activate
 

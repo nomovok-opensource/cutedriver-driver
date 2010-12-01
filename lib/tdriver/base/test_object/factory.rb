@@ -139,7 +139,7 @@ module MobyBase
         _make_xml( sut, test_object_identificator ) 
       )
 
-      sut.add_child( test_object )
+      sut.instance_variable_get( :@child_object_cache ).add_object( test_object ) 
 
       test_object
 
