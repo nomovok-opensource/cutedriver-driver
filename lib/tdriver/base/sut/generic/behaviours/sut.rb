@@ -342,7 +342,7 @@ module MobyBehaviour
       # Type information is stored in a separate member, not in the Hash
       creation_hash.delete( :type )
 
-      @_child_object_cache.each_value do | _child |
+      @child_object_cache.each_object do  | _child |
 
         if _child.eql?( child_test_object )
 
@@ -374,8 +374,8 @@ module MobyBehaviour
 
       #add_child( child_test_object )
 
-      # add child directly, trying to get rid of current ObjectCompostionBehaviour
-      @_child_object_cache.merge!( child_test_object.hash => child_test_object )
+      # add test object to child objects cache
+      @child_object_cache.add_object( child_test_object )
 
       child_test_object
 
@@ -1031,12 +1031,11 @@ module MobyBehaviour
 
       unless @childs_updated
 
-        @_child_object_cache.each_value{ | test_object | 
+        @child_object_cache.each_object{ | test_object | 
 
           test_object.update( @xml_data ) 
 
         }
-
 
       end
 
@@ -1283,7 +1282,7 @@ module MobyBehaviour
 
       @frozen = false
 
-      @_child_object_cache = {}
+      @child_object_cache = TDriver::TestObjectCache.new
 
       @current_application_id = nil
 

@@ -24,69 +24,95 @@ module TDriver
   class TestObjectCache
 
     # TODO: document me  
-    @@cache = {}
+    def initialize()
 
-    # TODO: document me  
-    def initialize
-    
-      # raise exception if instance of this class is initialized
-      raise RuntimeError.new("TDriver::TestObjectCache cannot be initialized due to it is a static class")
-    
-    end # initialize
+      @objects = {}
 
+    end
+    
     # TODO: document me  
-    def self.object_keys( parent )
+    def each_object( &block )
     
-      ( @@cache[ parent.hash ] || {} ).keys
+      @objects.each_value{ | object | yield( object ) }
     
-    end # self.object_keys
+    end
+    
+    # TODO: document me  
+    def objects
+    
+      @objects
+    
+    end
+    
+    # TODO: document me  
+    def has_object?( test_object )
+    
+      @objects.has_key?( test_object.hash )
+    
+    end
+    
+    # TODO: document me  
+    def object_keys
+    
+      @objects.keys
+    
+    end
+    
+    # TODO: document me  
+    def object_values
+    
+      @objects.values
+        
+    end
+    
+    # TODO: document me  
+    def []( value )
+    
+      @objects.fetch( value.hash ){ raise ArgumentError, "Test object (#{ value.hash }) not found from cache" }
+    
+    end
+    
+    # TODO: document me  
+    def add_object( test_object )
 
-    # TODO: document me  
-    def self.object_values( parent )
-    
-      ( @@cache[ parent.hash ] || {} ).values
-    
-    end # self.object_values
-    
-    # TODO: document me  
-    def self.object_exists?( parent, test_object )
-    
-      ( @@cache[ parent.hash ] || {} ).has_key?( test_object.hash ) 
-    
-    end # self.object_exists?
-
-    # TODO: document me  
-    def self.add_object( parent, test_object )
-      
-      # add test object to parent hash
-      ( @@cache[ parent.hash ] ||= {} ).merge!( test_object.hash => test_object )
-      
-    end # self.add_object
-  
-    # TODO: document me  
-    def self.remove_object( parent, test_object )
-
-      # calculate hash only once, used multiple times below
-      parent_hash = parent.hash
-      
-      # calculate hash only once, used multiple times below
       test_object_hash = test_object.hash
 
-      # verify that key is found from hash
-      if ( @@cache[ parent_hash ] || {} ).has_key?( test_object_hash )
-      
-        # remove test object from parent object hash
-        @@cache[ parent_hash ].delete( test_object_hash )
-      
-      else
-      
-        # raise exception if key not found from hash
-        raise RuntimeError.new("Test object not found from cache")
-      
+      if @objects.has_key?( test_object_hash )
+        warn( "Warning: Test object (#{ test_object_hash }) already exists in cache" )
+        p test_object.name
+        
+        p @objects[ test_object_hash ].name
       end
     
-    end # self.remove_object
-      
+      @objects[ test_object_hash ] = test_object
+    
+      test_object
+    
+    end
+
+    # TODO: document me  
+    def remove_object( test_object )
+    
+      test_object_hash = test_object.hash
+    
+      raise ArgumentError, "Test object (#{ value.hash }) not found from cache" unless @objects.has_key?( test_object_hash )
+    
+      @objects.delete( test_object_hash )
+    
+      self
+    
+    end
+
+    # TODO: document me  
+    def remove_objects
+    
+      @objects.clear
+    
+    end
+
+		# enable hooking for performance measurement & debug logging
+		MobyUtil::Hooking.instance.hook_methods( self ) if defined?( MobyUtil::Hooking )
+
   end # TestObjectCache
 
 end # TDriver
