@@ -504,6 +504,8 @@ module MobyBase
       # retrieve test object type from xml
       object_type = xml_object.kind_of?( MobyUtil::XML::Element ) ? xml_object.attribute( 'type' ) : nil
       
+	  env = xml_object.attribute( 'env' )
+
       #if !@test_object_cache.has_key?( object_type )
 
       test_object = MobyBase::TestObject.new( test_object_factory, sut, parent, xml_object )
@@ -516,7 +518,7 @@ module MobyBase
         :object_type  => [ '*', object_type ],
         :sut_type     => [ '*', sut.ui_type ],
         :input_type   => [ '*', sut.input.to_s ],
-        :env          => [ '*', 'symbian' ],								   
+        :env          => [ '*', env.to_s ],								   
         :version      => [ '*', sut.ui_version ]								   
       )
       
