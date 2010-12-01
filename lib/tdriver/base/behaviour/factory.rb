@@ -279,12 +279,16 @@ module MobyBase
 
 		  #Kernel::raise RuntimeError.new("Behaviour implementation module not defined for #{ name } in XML") if module_node.nil?
 		  module_node.not_nil("Behaviour does not have implementation module element defined, please see #{ name } in behaviour XML files", RuntimeError)
-
-
-		  methods_hash = {}
-
+		  
+		  # retrieve module name & implementation filename
+		  module_attributes = module_node.attributes
+		  module_file = module_attributes[ "file" ].to_s # optional
+		  module_name = module_attributes[ "name" ].to_s 
+		  
 		  #Kernel::raise RuntimeError.new( "Behaviour implementation module name not defined for #{ name } in XML") if module_name.empty?
           module_name.not_empty("Behaviour does not have implementation module name defined, please see #{ name } in behaviour XML files", RuntimeError)
+
+		  methods_hash = {}
 
 		  # create hash of methods
 		  node.xpath( 'methods/method' ).each{ | method |
