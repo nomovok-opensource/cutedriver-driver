@@ -64,12 +64,15 @@ module MobyBase
 
 			end
 
-			@parent = nil
-			add_parent( parent ) unless parent.nil?
+			#@parent = nil
+			#add_parent( parent ) unless parent.nil?
+      #@parent = parent unless parent.nil?
+
+      @parent = parent 
 
 			self.xml_data= xml_element
 
-			@_child_object_cache = {}
+      @child_object_cache = TDriver::TestObjectCache.new
 
 			# Create accessor methods for any child state objects.
 			TestObjectFactory.instance.create_child_accessors!( self )
@@ -81,6 +84,7 @@ module MobyBase
 
 			hash_rule = method_arguments.first
 
+=begin
 			# method mapping/aliases
 			case method_id
 
@@ -91,8 +95,10 @@ module MobyBase
 					method_id = [ :QList, :HbListWidgetView, :DuiList ]
 
 			end
+=end
 
 			hash_rule = Hash.new unless hash_rule.kind_of? Hash
+
 			hash_rule[ :type ] = method_id 
 
 			begin
@@ -211,11 +217,9 @@ module MobyBase
 
 		def get_cached_test_object!( object )
 
-			object_hash = object.hash
+			if @child_object_cache.has_object?( object ) 
 
-			if @_child_object_cache.has_key?( object_hash ) 
-
-				object = @_child_object_cache[ object_hash ]
+				object = @child_object_cache[ object ]
 
 				true
 
@@ -247,7 +251,7 @@ module MobyBase
 			get_cached_test_object!( child_object ).tap{ | found_in_cache |
 
 				# add child to objects cache 
-				add_child( child_object ) unless found_in_cache
+        @child_object_cache.add_object( child_object ) unless found_in_cache
 
 			}
 
