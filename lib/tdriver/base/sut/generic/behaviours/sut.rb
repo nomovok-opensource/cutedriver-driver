@@ -336,21 +336,20 @@ module MobyBehaviour
 
       end
 
-      # return already existing child TestObject so that there is references to only one TestObject
-      child_test_object.add_parent( self )
+      # set current test object as parent to child test object    
+      child_test_object.instance_variable_set( :@parent, self )
 
       # Type information is stored in a separate member, not in the Hash
       creation_hash.delete( :type )
 
-      @_child_object_cache.each_value do | _child |
+      @child_object_cache.each_object do  | _child |
 
         if _child.eql?( child_test_object )
 
           # Update the attributes that were used to create the child object.
-          #_child.creation_attributes = creation_hash
+          _child.instance_variable_set( :@creation_attributes, creation_hash )
 
-          _child.instance_eval("@creation_attributes = #{ creation_hash.inspect }")
-
+          # return already existing child TestObject so that there is references to only one TestObject
           return _child
 
         end
@@ -373,7 +372,10 @@ module MobyBehaviour
       # Store the attributes that were used to create the child object.
       child.creation_attributes = creation_hash
 
-      add_child( child_test_object )
+      #add_child( child_test_object )
+
+      # add test object to child objects cache
+      @child_object_cache.add_object( child_test_object )
 
       child_test_object
 
@@ -1029,12 +1031,11 @@ module MobyBehaviour
 
       unless @childs_updated
 
-        @_child_object_cache.each_value{ | test_object | 
+        @child_object_cache.each_object{ | test_object | 
 
           test_object.update( @xml_data ) 
 
         }
-
 
       end
 
@@ -1281,7 +1282,7 @@ module MobyBehaviour
 
       @frozen = false
 
-      @_child_object_cache = {}
+      @child_object_cache = TDriver::TestObjectCache.new
 
       @current_application_id = nil
 

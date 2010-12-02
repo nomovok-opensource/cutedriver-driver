@@ -17,9 +17,6 @@
 ## 
 ############################################################################
 
-
-
-
 # load test object abstract class
 require File.expand_path( File.join( File.dirname( __FILE__ ), 'abstract' ) )
 
@@ -28,6 +25,9 @@ require File.expand_path( File.join( File.dirname( __FILE__ ), 'identificator' )
 
 # load test object factory
 require File.expand_path( File.join( File.dirname( __FILE__ ), 'factory' ) )
+
+# load test object cache
+require File.expand_path( File.join( File.dirname( __FILE__ ), 'cache' ) )
 
 # load test object behaviours
 MobyUtil::FileHelper.load_modules( File.expand_path( File.join( File.dirname( __FILE__ ), 'behaviours' ) ) )

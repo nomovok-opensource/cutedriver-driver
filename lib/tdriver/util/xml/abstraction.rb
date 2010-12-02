@@ -37,6 +37,13 @@ module MobyUtil
 
       end      
 
+      # print only object type and id hex
+      def inspect
+      
+        "#<#{ self.class }:0x#{ ( "%x" % ( self.object_id.to_i << 1 ) )[ 3 .. -1 ] }>"
+            
+      end
+
       # enable hooking for performance measurement & debug logging
       MobyUtil::Hooking.instance.hook_methods( self ) if defined?( MobyUtil::Hooking )
 
