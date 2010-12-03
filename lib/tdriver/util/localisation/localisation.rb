@@ -24,7 +24,222 @@ require 'nokogiri'
 module MobyUtil
 
 	class Localisation
-
+    
+    # == Language maping cross-referenced from Nokia Shared Lancuage Codes and Symbian 
+    # http://developer.symbian.org/main/documentation/reference/s3/pdk/GUID-31C133DE-F245-5992-9A41-20A99291E72A.html
+    # http://www2.connecting.nokia.com/nokia/terminology/terms.nsf/document/ES346PMF37?OpenDocument&ExpandSection=1#_Section1
+    # Its also enumerated by TLanguage in e32lang.h in the Symbian code.
+    # The ones only on e32lang.h are commented out
+    @language_code_map = {
+      "English" => ["en", "01"],
+      "French" => ["fr", "02"],
+      "German" => ["de", "03"],
+      "Spanish" => ["es", "04"],
+      "Italian" => ["it", "05"],
+      "Swedish" => ["sv", "06"],
+      "Danish" => ["da", "07"],
+      "Norwegian" => ["no", "08"], 
+      "Finish" => ["fi", "09"],
+      "English US" => ["en_US", "10"],
+      # "Swiss French" => ["SF", "11"],
+      # "Swiss German" => ["SG", "12"],
+      "Portuguese" => ["pt", "13"],
+      "Turkish" => ["tr", "14"],
+      "Icelandic" => ["is", "15"],
+      "Russian" => ["ru", "16"],  
+      "Hungarian" => ["hu", "17"],  
+      "Dutch" => ["nl", "18"],  
+      # "Belgian Flemish" => ["BL", "19"],  
+      # "Australian" => ["AU", "20"],  
+      # "Belgian French" => ["BF", "21"],  
+      # "Austrian" => ["AS", "22"],  
+      # "New Zealand" => ["NZ", "23"],  
+      # "International French" => ["IR", "24"],  
+      "Czech" => ["cs", "25"],  
+      "Slovak" => ["sk", "26"],  
+      "Polish" => ["pl", "27"],  
+      "Slovenian" => ["sl", "28"],  
+      "Chinese TW" => ["zh_TW", "29"],  
+      "Chinese HK" => ["zh_HK", "30"],  
+      "Chinese" => ["zh", "31"],  
+      "Japanese" => ["ja", "32"],  
+      "Thai" => ["th", "33"],  
+      "Afrikaans" => ["af", "34"],  
+      "Albanian" => ["sq", "35"],  
+      "Amharic" => ["am", "36"],  
+      "Arabic" => ["ar", "37"],  
+      "Armenian" => ["hy", "38"],  
+      "Filipino" => ["tl", "39"],
+      "Belarusian" => ["be", "40"],
+      "Bengali" => ["bn", "41"],
+      "Bulgarian" => ["bg", "42"],  
+      # "Burmese" => ["MY", "43"],  
+      "Catalan" => ["ca", "44"],  
+      "Croatian" => ["hr", "45"],  
+      # "Canadian English" => ["CE", "46"],  
+      # "International English" => ["IE", "47"],  
+      # "South African English" => ["SA", "48"],  
+      "Estonian" => ["et", "49"],  
+      "Persian" => ["fa", "50"],  
+      "French CA" => ["fr_CA", "51"],
+      # "Scots Gaelic" => ["GD", "52"],  
+      "Georgian" => ["ka", "53"],  
+      "Greek" => ["el", "54"],  
+      # "Cyprus Greek" => ["CG", "55"],  
+      "Gujarati" => ["gu", "56"],  
+      "Hebrew" => ["he", "57"],  
+      "Hindi" => ["hi", "58"],  
+      "Indonesian" => ["id", "59"],  
+      # "Irish" => ["GA", "60"],  
+      # "Swiss Italian" => ["SZ", "61"],  
+      "Kannada" => ["kn", "62"],  
+      "Kazakh" => ["kk", "63"],  
+      "Khmer" => ["km", "64"],  
+      "Korean" => ["ko", "65"],  
+      # "Lao" => ["lo", "66"],  
+      "Latvian" => ["lv", "67"],  
+      "Lithuanian" => ["lt", "68"],  
+      "Macedonian" => ["mk", "69"],  
+      "Malay" => ["ms", "70"],  
+      "Malayalam" => ["ml", "71"],  
+      "Marathi" => ["mr", "72"],  
+      # "Moldavian" => ["MO", "73"],  
+      "Mongolian" => ["mn", "74"],  
+      # "Norwegian Nynorsk" => ["nn", "75"],  
+      "Portuguese BR" => ["pt_BP", "76"],  
+      "Punjabi" => ["pa", "77"],  
+      "Romanian" => ["ro", "78"],  
+      "Servian" => ["sr", "79"], 
+      "Sinhala" => ["si", "80"],  
+      # "Somali" => ["SO", "81"],  
+      # "International Spanish" => ["OS", "82"],  
+      "Spanish AM" => ["es_419", "83"],  
+      "Swahili" => ["sw", "84"],  
+      # "Finland Swedish" => ["FS", "85"],  
+      "Tamil" => ["ta", "87"],   
+      "Telugu" => ["te", "88"],  
+      # "Tibetan" => ["BO", "89"],  
+      # "Tigrinya" => ["TI", "90"], 
+      # "Cyprus Turkish" => ["CT", "91"],  
+      "Turkem" => ["tk", "92"],  
+      "Ukranian" => ["uk", "93"],  
+      "Urdu" => ["ur", "94"],  
+      "Vietnamese" => ["vi", "96"],  
+      # "Welsh" => ["CY", "97"],
+      "Zulu" => ["zu", "98"],  
+      # "Manufacturer English" => ["ME", "100"],
+      "Sesotho" => ["st", "101"],
+      "Basque" => ["eu", "102"],
+      "Galician" => ["gl", "103"],
+      # "Javanese" => ["", "104"],
+      # "Maithili" => ["", "105"],
+      # "Azerbaijani Latin" => ["", "106"],
+      "Azerbaijani Cyrillic" => ["az", "107"],
+      "Oriya" => ["or", "108"],
+      # "Bhojpuri" => ["", "109"],
+      # "Sundanese" => ["", "110"],
+      # "Kurdish Latin" => ["", "111"],
+      # "Kurdish Arabic" => ["", "112"],
+      "Pashto" => ["ps", "113"],
+      "Hausa" => ["ha", "114"],
+      #"Oromo" => ["", "115"],
+      # "Uzbek Latin" => [", "116"],
+      "Uzbek Cyrillic" => ["uz", "117"],
+      # "Sindhi Arabic" => ["", "118"],
+      # "Sindhi Devanagari" => ["", "119"],
+      "Yoruba" => ["yo", "120"],
+      # "Cebuano" => ["", "121"],
+      "Igbo" => ["ig", "122"],
+      "Malagasy" => ["mg", "123"],
+      # "Nepali" => ["", "124"],
+      "Assamese" => ["as", "125"],
+      # "Shona" => ["", "126"],
+      # "Zhuang" => ["", "127"],
+      # "Madurese" => ["", "127"],
+      "English Apac" => ["EA", "129"],          # In e32long.h, Pearl script, but not in Nokia Language Codes Standard
+      "English Taiwan" => ["YW", "157"],        # In e32long.h, Pearl script, but not in Nokia Language Codes Standard
+      "English Hong Kong" => ["YH", "158"],     # In e32long.h, Pearl script, but not in Nokia Language Codes Standard
+      "English PRC" => ["YP", "159"],           # In e32long.h, Pearl script, but not in Nokia Language Codes Standard
+      "English Japan" => ["YJ", "160"],         # In e32long.h, Pearl script, but not in Nokia Language Codes Standard
+      "English Thailand" => ["YT", "161"],      # In e32long.h, Pearl script, but not in Nokia Language Codes Standard
+      # "Fulfulde" => ["", "162"], 
+      # "Tamazight" => ["", "163"], 
+      # "BolivianQuechua" => ["", "164"], 
+      # "PeruQuechua" => ["", "165"], 
+      # "EcuadorQuechua" => ["", "166"], 
+      "Tajik_Cyrillic" => ["tg", "167"], 
+      # "Tajik_PersoArabic" => ["", "168"], 
+      # "Nyanja" => ["", "169"], 
+      # "HaitianCreole" => ["", "170"], 
+      # "Lombard" => ["", "171"], 
+      # "Koongo" => ["", "172"],  
+      # "Akan" => ["", "173"], 
+      # "Hmong" => ["", "174"], 
+      # "Yi" => ["", "175"], 
+      # "Tshiluba" => ["", "176"], 
+      # "Ilocano" => ["", "177"], 
+      # "Uyghur" => ["", "178"], 
+      # "Neapolitan" => ["", "179"], 
+      # "Rwanda" => ["", "180"], 
+      "Xhosa" => ["xh", "181"], 
+      # "Balochi" => ["", "182"], 
+      # "Hiligaynon" => {"", "183"],
+      # "Minangkabau" => ["", "184"], 
+      # "Makhuwa" => ["", "185"], 
+      # "Santali" => ["", "186"], 
+      # "Gikuyu" => ["", "187"], 
+      # "Moore" => ["", "188"], 
+      # "Guarani" => ["", "189"],  
+      # "Rundi" => ["", "190"], 
+      # "Romani_Latin" => ["", "191"], 
+      # "Romani_Cyrillic" => ["", "192"], 
+      # "Tswana" => ["", "193"], 
+      # "Kanuri" => ["", "194"], 
+      # "Kashmiri Devanagari" => ["", "195"], 
+      "Kashmiri Perso Arabic" => ["ks", "196"], 
+      # "Umbundu" => ["", "197"], 
+      # "Konkani" => ["", "198"], 
+      # "Balinese" => ["", "199"], 
+      # "Northern Sotho" => ["", "200"], 
+      # "Wolof" => ["", "201"], 
+      # "Bemba" => ["", "202"], 
+      # "Tsonga" => ["", "203"], 
+      # "Yiddish" => ["", "204"], 
+      "Kirghiz" => ["ky", "205"], 
+      # "Ganda" => ["", "206"], 
+      # "Soga" => ["", "207"], 
+      # "Mbundu" => ["", "208"], 
+      # "Bambara" => ["", "209"], 
+      # "Central Aymara" => ["", "210"], 
+      # "Zarma" => ["", "211"], 
+      "Lingala" => ["ln", "212"], 
+      # "Bashkir" => ["", "213"], 
+      # "Chuvash" => ["", "214"], 
+      # "Swati" => ["", "215"], 
+      # "Tatar" => ["", "216"], 
+      # "Southern Ndebele" => ["", "217"], 
+      # "Sardinian" => ["", "218"], 
+      # "Scots" => ["", "219"], 
+      # "Meitei" => ["", "220"], 
+      # "Walloon" => ["", "221"], 
+      # "Kabardian" => ["", "222"], 
+      # "Mazanderani" => ["", "223"], 
+      # "Gilaki" => ["", "224"], 
+      # "Shan" => ["", "225"], 
+      # "Luyia" => ["", "226"], 
+      # "Luo" => ["", "227"], 
+      # "Sukuma" => ["", "228"], 
+      # "Aceh" => ["", "229"], 
+      #"English_India" => ["", "230"],           # In e32long.h, Pearl script, but not in Nokia Language Codes Standard
+      "Malay Apac" => ["MA", "326"],            # In e32long.h, Pearl script, but not in Nokia Language Codes Standard
+      # "Indonesian Apac" =>["", "327"],
+      # "Bengali IN" => ["bn_IN", ""],
+      # "Bosnian" => ["bs", ""],
+    }
+    
+    
+    
+    
 		# == description
 		# Function to fetch a translation for a given logical name from the localisation DB
 		#
@@ -186,14 +401,19 @@ module MobyUtil
 				
 				db_connection = DBConnection.new(  db_type, host, database_name, username, password )
 			end
-			# Check File and convert to TS File if needed
-			tsFile = MobyUtil::Localisation.convert_to_ts( file )
-			Kernel::raise Exception.new("Failed to convert #{file} to .ts") if tsFile == nil	
-			# Collect data for INSERT query from TS File
-			language, data = MobyUtil::Localisation.parse_ts_file( tsFile, column_names_map )
-			Kernel::raise Exception.new("Error while parsing #{file}.") if language == nil or data == ""
-			# Upload language data to DB for current language file
-			MobyUtil::Localisation.upload_ts_data( language, data, table_name, db_connection, record_sql )
+      if file.match(/.*\.ts/) or file.match(/.*\.qm/)
+        # Check File and convert to TS File if needed
+        tsFile = MobyUtil::Localisation.convert_to_ts( file )
+        Kernel::raise Exception.new("Failed to convert #{file} to .ts") if tsFile == nil	
+        # Collect data for INSERT query from TS File
+        language, data = MobyUtil::Localisation.parse_ts_file( tsFile, column_names_map )
+        Kernel::raise Exception.new("Error while parsing #{file}.") if language == nil or data == ""
+			elsif file.match(/.*\.loc/)
+        language, data = MobyUtil::Localisation.parse_loc_file( file, column_names_map )
+        Kernel::raise Exception.new("Error while parsing #{file}. The file might have no translations.") if language.nil? or language.empty? or data.nil? or data.empty?
+      end
+      # Upload language data to DB for current language file
+			MobyUtil::Localisation.upload_data( language, data, table_name, db_connection, record_sql )
 		end
 		
 		
@@ -332,11 +552,43 @@ module MobyUtil
 			return language, data
 		end
 		
+    #
+    # Note: for .loc files the colum mapping is done with the Language code number on the filenames
+    #
+    def self.parse_loc_file(file, column_names_map = {})
+    begin
+    
+      data = []
+      file.split('/').last.match(/(.*)_(\w{2,3}).loc/)
+      fname = $1
+      language_number = $2
+      # select returns an array of [language, codes] that suite the conditional
+      # codes is the array ["NokiaCode(2-leter)", "SymbianCode(number)"]
+      language = @language_code_map.select{|lang,codes| codes[1] == language_number}[0][1][0]   
+			language = column_names_map[ language_number ] if !column_names_map.empty? and column_names_map.key?( language_number )
+      
+      io = open(file)
+      while line = io.gets
+        if line.match(/#define ([a-zA-Z1-9\_]*) \"(.*)\"/)
+          lname = $1
+          translation = $2 
+          data <<  [ fname, lname, translation, plurality = "", lengthvariant = "" ]
+        end
+      end
+      io.close
+      #puts language
+      #p data
+      return language, data
+    rescue Exception => e
+      puts e.message
+      puts e.backtrace
+    end
+    end
 		
 		# == description
 		# Uploads language data to Localisation DB and optionally records the sql queries on a file
 		#
-		def self.upload_ts_data( language, data, table_name, db_connection, record_sql = false )
+		def self.upload_data( language, data, table_name, db_connection, record_sql = false )
 			
 			raise Exception.new("Language not provided.") if language.nil? or language.to_s.empty?
 			raise Exception.new("No data povided. Please make sure the source of your data is valid.") if data.nil? or data.empty?
@@ -389,7 +641,7 @@ module MobyUtil
 			case db_connection.db_type
 				when "mysql"
 					begin
-						query_string = "ALTER TABLE `" + table_name + "` ADD  `" + language + "` VARCHAR(350) NULL DEFAULT NULL COLLATE utf8_general_ci;"
+						query_string = "ALTER TABLE `" + table_name + "` ADD  `" + language + "` TEXT NULL DEFAULT NULL COLLATE utf8_general_ci;"
 						MobyUtil::DBAccess.query( db_connection, query_string )
 						sql_file.write( query_string + "\n" ) if record_sql
 					rescue Mysql::Error # catch if language column already exists
@@ -464,7 +716,7 @@ module MobyUtil
 		
 		# == description
 		# Extracs application name used for FNAME from a given filename (removes language tags and file extension)
-		#
+		# Used only on .ts files
 		def self.parseFName(file)
 			fname = file.split('/').last
 			#(wordlist matching)
