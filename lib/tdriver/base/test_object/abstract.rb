@@ -46,6 +46,8 @@ module MobyBase
 			@parent = parent
 			@sut = sut
 
+      p xml_object.class
+
 			#self.xml_data = xml_object if xml_object
 			method( :xml_data= ).call( xml_object ) if xml_object
 			
@@ -153,6 +155,13 @@ module MobyBase
 			@name, @x_path = xml_object.attribute( 'name' ), "#{ @parent.x_path }/*//object[@type='#{ @type = xml_object.attribute( 'type' ) }' and @id='#{ @id = xml_object.attribute( 'id' ) }']"
 
 		end
+
+    # TODO: document me
+    def inspect
+
+      "#<#{ self.class }:0x#{ ( "%x" % ( self.object_id.to_i << 1 ) )[ 3 .. -1 ] } @id=\"#{ @id }\" @name=\"#{ @name }\" @parent=#{ @parent.inspect } @sut=#{ @sut.inspect } @type=\"#{ @type }\" @x_path=\"#{ @x_path }\">"
+
+    end
 
 		# Returns a XML node representing this test object.
 		#
