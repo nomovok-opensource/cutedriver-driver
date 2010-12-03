@@ -46,8 +46,6 @@ module MobyBase
 			@parent = parent
 			@sut = sut
 
-      p xml_object.class
-
 			#self.xml_data = xml_object if xml_object
 			method( :xml_data= ).call( xml_object ) if xml_object
 			
