@@ -207,7 +207,11 @@
 
       td.tablebg_disabled
       {
-        background: #c5c5c5;
+
+        background: #d5d5d5;
+
+        background-image:url('images/bg_disabled.png');
+        background-repeat: repeat;
 
         border-top: 1px solid #cdcdcd;
         border-left: 1px solid #cdcdcd;
