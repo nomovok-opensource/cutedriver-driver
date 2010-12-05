@@ -106,4 +106,34 @@ class Hash
 
   end
 
+  def strip_dynamic_attributes!
+
+    # remove dynamic attributes from hash and return as result     
+    Hash[ 
+
+      # iterate through each hash key
+      select{ | key, value | 
+
+        # dynamic attribute name has "__" prefix
+        if key.to_s =~ /^__/ 
+
+          # remove dynamic attribute key from hash
+          delete( key )
+
+          # add to hash
+          true
+
+        else
+
+          # do not add to hash
+          false
+
+        end
+
+      } 
+
+    ]
+
+  end # strip_dynamic_attributes!
+
 end
