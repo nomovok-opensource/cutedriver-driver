@@ -75,7 +75,9 @@ module MobyBehaviour
 
         attributes.check_type( Hash, "Wrong argument type $1 for attributes (expected $2)" )
         
-				raise ArgumentError.new( 'Attributes hash must not be empty' ) if attributes.empty?
+        attributes.not_empty( 'Attributes hash must not be empty' )
+
+				#raise ArgumentError.new( 'Attributes hash must not be empty' ) if attributes.empty?
         
 				search_result = child( attributes )
 

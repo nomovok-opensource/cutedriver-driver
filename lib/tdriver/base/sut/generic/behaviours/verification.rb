@@ -89,6 +89,7 @@ module MobyBehaviour
       attributes.check_type( Hash, "Wrong argument type $1 for test object attributes (expected $2)")
 
 			#attributes_with_type = {}.merge attributes
+
 			attributes_with_type = attributes.clone
 			attributes_with_type[:type] = type
 			attributes_with_type.delete(:__logging)
@@ -96,7 +97,8 @@ module MobyBehaviour
 			#translate the symbol values into string using sut's localisation setting
 			translate!( attributes_with_type )
 
-			identificator = MobyBase::TestObjectIdentificator.new( attributes_with_type )
+      # JKo: is there some reason for the line below?
+			#identificator = MobyBase::TestObjectIdentificator.new( attributes_with_type )
 
 			original_logging = MobyUtil::Logger.instance.enabled
 			desired_logging = (attributes[:__logging] == nil || attributes[:__logging] == 'false') ? false : true
@@ -106,6 +108,7 @@ module MobyBehaviour
 			begin
 
 				self.child( attributes_with_type )
+
 				MobyUtil::Logger.instance.enabled = desired_logging
 				MobyUtil::Logger.instance.log "behaviour" , "PASS;Test object of type #{type} with attributes #{attributes.inspect} was found.;#{self.kind_of?(MobyBase::SUT) ? self.id.to_s : ''};test_object_exist;"
 
