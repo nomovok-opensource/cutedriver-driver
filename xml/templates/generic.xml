@@ -32,6 +32,7 @@
 
     <parameter name="type" value="" />
     <parameter name="product" value="" />
+    <parameter name="env" value="" />
 
     <parameter name="version" value="0" />
     <parameter name="language" value="English-GB" />

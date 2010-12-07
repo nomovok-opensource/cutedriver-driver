@@ -512,11 +512,23 @@ module MobyBase
     end
 
     def make_test_object( test_object_factory, sut, parent, xml_object )
+
+      if xml_object.kind_of?( MobyUtil::XML::Element )
+
+        # retrieve test object type from xml
+        object_type = xml_object.attribute( 'type' )
+
+        # retrieve test object type from xml
+    	  env = xml_object.attribute( 'env' ) || MobyUtil::Parameter[ sut.id ][ :env ]
+
+      else
       
-      # retrieve test object type from xml
-      object_type = xml_object.kind_of?( MobyUtil::XML::Element ) ? xml_object.attribute( 'type' ) : nil
-      
-	  env = xml_object.attribute( 'env' )
+        # defaults - refactor this
+        object_type = nil
+
+        env = MobyUtil::Parameter[ sut.id ][ :env ]
+
+      end
 
       #if !@test_object_cache.has_key?( object_type )
 
