@@ -20,6 +20,12 @@
 # extend Ruby Hash class functionality
 class Hash
 
+  def not_empty( message = "Hash must not be empty", exception = ArgumentError )
+
+    raise exception.new( message ) if self.empty? 
+
+  end
+
   # Verify that received object contains one of given keys. Raises exception is key not found.
   def require_key( keys, message = "None of key(s) $1 found from hash" )
 
