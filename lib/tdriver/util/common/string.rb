@@ -54,7 +54,7 @@ class String
   # TrueClass/FalseClass 
   def to_boolean
 
-    if /^(true|false)$/i.match( value.to_s )
+    if /^(true|false)$/i.match( self.to_s )
     
       $1.downcase == 'true'
       

@@ -132,6 +132,14 @@
 
         background: #f0a646;
 
+        border-top: 1px solid #707070;
+        border-left: 1px solid #707070;
+
+        background: #606260;
+
+        border-bottom: 1px solid #595959;
+        border-right: 1px solid #595959;
+
       }
 
       <!-- table-style: cellpadding -->
@@ -147,14 +155,15 @@
       td.header
       {
 
-        background: #96E066;
-
         font-size: 11px;      
-        border-top: 1px solid #a6f076;
-        border-left: 1px solid #a6f076;
+        border-top: 1px solid #a0a0a0;
+        border-left: 1px solid #a0a0a0;
 
-        border-bottom: 1px solid #7fc94f;
-        border-right: 1px solid #7fc94f;
+        background: #909290;
+
+        border-bottom: 1px solid #797979;
+        border-right: 1px solid #797979;
+
 
       }
 
@@ -198,7 +207,11 @@
 
       td.tablebg_disabled
       {
-        background: #c5c5c5;
+
+        background: #d5d5d5;
+
+        background-image:url('images/bg_disabled.png');
+        background-repeat: repeat;
 
         border-top: 1px solid #cdcdcd;
         border-left: 1px solid #cdcdcd;
@@ -340,7 +353,12 @@
         text-decoration: none;
 
         color: #d15131;
+
+        color: #a06060;
+
         text-shadow: #ff8f6f 1px 1px 4px;
+
+        text-shadow: #b0a0a0 1px 1px 4px;
 
         border-bottom: 1px dotted #515151;
         font-weight: bold;

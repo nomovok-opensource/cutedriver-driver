@@ -20,48 +20,55 @@
 # abstract class for SUT - no behaviours
 module MobyBase
 
-	class SUT
+  class SUT
 
-		attr_accessor(
-			:id,		# id of current SUT
-			:ui_type,	# ui type
-			:ui_version,	# ui version
-			:input,		# the input method used for interacting with this sut as a symbol, eg. :key or :touch. 
-			:type		# type of object ("SUT"), used when applying behaviour
-		)
+    attr_accessor(
+      :id,          # id of current SUT
+      :ui_type,     # ui type
+      :ui_version,  # ui version
+      :input,       # the input method used for interacting with this sut as a symbol, eg. :key or :touch. 
+      :type         # type of object ("SUT"), used when applying behaviour
+    )
 
-		# Initialize SUT by giving references to the used controller and test object factory
-		# == params
-		# sut_controller:: Controller object that acts as a facade to the device represented by this SUT
-		# test_object_factory:: TestObjectFactory object, a factory for generating creating test objects for this SUT
-		# sut_id:: String representing the identification of this SUT - the identification will need to match with group id in parameters xml
-		def initialize( sut_controller, test_object_factory, sut_id )
+    # Initialize SUT by giving references to the used controller and test object factory
+    # == params
+    # sut_controller:: Controller object that acts as a facade to the device represented by this SUT
+    # test_object_factory:: TestObjectFactory object, a factory for generating creating test objects for this SUT
+    # sut_id:: String representing the identification of this SUT - the identification will need to match with group id in parameters xml
+    def initialize( sut_controller, test_object_factory, sut_id )
 
-			@_sutController = sut_controller    
-			@test_object_factory = test_object_factory
+      @_sutController = sut_controller    
+      @test_object_factory = test_object_factory
 
-			@id = sut_id
-			@input = :key
-			@type = "sut"
+      @id = sut_id
+      @input = :key
+      @type = "sut"
 
-		end	
+    end  
 
-		# Interface to forward command execution to sut specific controller (SutController#execute_command)
-		# == params
-		# command:: MobyBase::CommandData descendant object defining the command
-		# == raises
-		# ?:: what ever SutController#execute_command( command ) raises
-		# == returns
-		# Boolean:: what ever SutController returns 
-		def execute_command( command )
+    # Interface to forward command execution to sut specific controller (SutController#execute_command)
+    # == params
+    # command:: MobyBase::CommandData descendant object defining the command
+    # == raises
+    # ?:: what ever SutController#execute_command( command ) raises
+    # == returns
+    # Boolean:: what ever SutController returns 
+    def execute_command( command )
 
-			@_sutController.execute_command( command )
+      @_sutController.execute_command( command )
 
-		end
+    end
 
-		# enable hooking for performance measurement & debug logging
-		MobyUtil::Hooking.instance.hook_methods( self ) if defined?( MobyUtil::Hooking )
+    # TODO: document me
+    def inspect
 
-	end # SUT
+      "#<#{ self.class }:0x#{ ( "%x" % ( self.object_id.to_i << 1 ) )[ 3 .. -1 ] } @id=#{ @id.inspect } @input=\"#{ @input }\" @type=\"#{ @type }\" @ui_type=\"#{ @ui_type }\" @ui_version=\"#{ @ui_version }\">"
+
+    end
+
+    # enable hooking for performance measurement & debug logging
+    MobyUtil::Hooking.instance.hook_methods( self ) if defined?( MobyUtil::Hooking )
+
+  end # SUT
  
 end # MobyBase
