@@ -302,81 +302,59 @@ module MobyBehaviour
     #  example: -
     def child( hash_rule )
 
+      ###############################################################################################################
+      #
+      #  NOTICE: Please do not add anything unnessecery to this method, it might cause a major performance impact
+      #
+      
+      # store original hash
       creation_hash = hash_rule.clone
 
-      initial_timeout = @test_object_factory.timeout unless ( custom_timeout = creation_hash.delete( :__timeout ) ).nil?
+      # raise exception if wrong value type given for ;__logging 
+      hash_rule[ :__logging ].check_type( [ TrueClass, FalseClass ], "Wrong value type $1 for :__logging test object creation directive (expected $2)") if hash_rule.has_key?( :__logging )
 
-      logging_enabled = MobyUtil::Logger.instance.enabled
-      MobyUtil::Logger.instance.enabled = false if ( creation_hash.delete( :__logging ) == 'false' )
+      # disable logging if requested, remove pair from creation_hash
+      MobyUtil::Logger.instance.push_enabled( creation_hash.delete( :__logging ) || TDriver.logger.enabled )
 
       begin
 
-        @test_object_factory.timeout = custom_timeout unless custom_timeout.nil?
-        child_test_object = @test_object_factory.make( self, MobyBase::TestObjectIdentificator.new( creation_hash ) )
+        # TODO: refactor me
+        child_test_object = @test_object_factory.make2(
+
+          # current object as parent, can be either TestObject or SUT
+          :parent => self,
+ 
+          # test object identification hash
+          :object_attributes_hash => creation_hash
+
+        )
 
       rescue MobyBase::MultipleTestObjectsIdentifiedError => exception
 
         MobyUtil::Logger.instance.log "behaviour", "FAIL;Multiple child objects matched criteria.;#{ id };sut;{};child;#{ hash_rule.inspect }"
+
         Kernel::raise exception
 
       rescue MobyBase::TestObjectNotFoundError => exception
 
         MobyUtil::Logger.instance.log "behaviour", "FAIL;The child object could not be found.;#{ id };sut;{};child;#{ hash_rule.inspect }"
+
         Kernel::raise exception
 
       rescue Exception => exception
 
         MobyUtil::Logger.instance.log "behaviour", "FAIL;Failed when trying to find child object.;#{ id };sut;{};child;#{ hash_rule.inspect }"
+
         Kernel::raise exception
 
       ensure
 
-        @test_object_factory.timeout = initial_timeout unless custom_timeout.nil?
-        MobyUtil::Logger.instance.enabled = logging_enabled
+        # restore original logger state
+        MobyUtil::Logger.instance.pop_enabled
 
       end
 
-      # set current test object as parent to child test object    
-      child_test_object.instance_variable_set( :@parent, self )
-
-      # Type information is stored in a separate member, not in the Hash
-      creation_hash.delete( :type )
-
-      @child_object_cache.each_object do  | _child |
-
-        if _child.eql?( child_test_object )
-
-          # Update the attributes that were used to create the child object.
-          _child.instance_variable_set( :@creation_attributes, creation_hash )
-
-          # return already existing child TestObject so that there is references to only one TestObject
-          return _child
-
-        end
-
-      end
-
-=begin
-     @_child_objects.each do | _child |
-
-      if _child.eql? child_test_object
-
-      # Update the attributes that were used to create the child object.
-      _child.creation_attributes = creation_hash
-      return _child
-
-      end
-
-    end
-=end
-      # Store the attributes that were used to create the child object.
-      child.creation_attributes = creation_hash
-
-      #add_child( child_test_object )
-
-      # add test object to child objects cache
-      @child_object_cache.add_object( child_test_object )
-
+      # return child test object
       child_test_object
 
     end

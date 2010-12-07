@@ -136,7 +136,7 @@ module MobyBase
         self, 
         sut, 
         sut, 
-        _make_xml( sut, test_object_identificator ) 
+        _make_xml( sut, test_object_identificator, @timeout, @_retry_interval ) 
       )
 
       sut.instance_variable_get( :@child_object_cache ).add_object( test_object ) 
@@ -144,6 +144,70 @@ module MobyBase
       test_object
 
     end
+
+    def make2( rules )
+
+      # get parent object
+      parent = rules[ :parent ]
+
+      # get sut object
+      sut = parent.kind_of?( MobyBase::SUT ) ? parent : parent.sut
+
+      # store rules hash to variable
+      object_attributes_hash = rules[ :object_attributes_hash ]
+
+      # get timeout from rules hash or TestObjectFactory
+      timeout = ( object_attributes_hash.delete( :__timeout ) || @timeout ).to_i
+
+      # get retry interval from rules hash or TestObjectFactory
+      retry_interval = ( object_attributes_hash.delete( :__retry_interval ) || @_retry_interval ).to_i
+
+      # get identificator object
+      test_object_identificator = MobyBase::TestObjectIdentificator.new( object_attributes_hash )
+
+      # !!!!!!!!!!!!!!!!!!!!!
+      # add cache verify here
+      # !!!!!!!!!!!!!!!!!!!!!
+
+      # create new test object
+      test_object = make_test_object( 
+        self, 
+        sut, 
+        parent, 
+        _make_xml( sut, test_object_identificator, timeout, retry_interval ) 
+      )
+
+      # remove object type from object attributes hash_rule
+      object_attributes_hash.delete( :type )
+
+      # get reference to parent objects child objects cache
+      parent_cache = parent.instance_variable_get( :@child_object_cache )
+
+      # get cached test object from parents child objects cache if found; if not found from cache pass newly created object as is
+      if parent_cache.has_object?( test_object )
+
+        # get test object from cache
+        test_object = parent_cache[ test_object ]
+
+      else
+
+        # set given parent in rules hash as parent object to new child test object    
+        test_object.instance_variable_set( :@parent, parent )
+
+        # add created test object to parents child objects cache
+        parent_cache.add_object( test_object ) 
+
+
+      end
+
+      # update test objects creation attributes (either cached object or just newly created child object)
+      test_object.instance_variable_set( :@creation_attributes, object_attributes_hash )
+
+      # return test object; can be reference from cache or created above
+      test_object
+
+    end
+
 
     # Function for dynamically creating methods for accessing child objects of a test object 
     # == params
@@ -160,6 +224,7 @@ module MobyBase
 
         unless created_accessors.include?( object_type ) || object_type.empty? then
 
+=begin
           # define object type accessor method 
           test_object.meta_def object_type do | *rules |
 
@@ -172,15 +237,14 @@ module MobyBase
             child( rules.first )
           
           end
+=end
 
-=begin
          test_object.instance_eval(
 
             "def %s( rules={} ); raise TypeError, 'parameter <rules> should be hash' unless rules.kind_of?( Hash ); rules[:type] = :%s; child( rules ); end;" % [ object_type, object_type ]
 
 
           )
-=end
           created_accessors << object_type
 
         end
@@ -487,25 +551,31 @@ module MobyBase
 
     # Function to get the xml element for a test object
     # TODO: Remove TestObjectFactory::makeXML function & refactor the 'user' of this function!
-    def _make_xml( sut, test_object_identificator )
+    def _make_xml( sut, test_object_identificator, timeout, interval )
 
       attributes = test_object_identificator.get_identification_rules
     
       refresh_args  = nil
       
       if attributes[ :type ] == 'application'
+
         refresh_args = { :name => attributes[ :name ], :id => attributes[ :id ], :applicationUid => attributes[ :applicationUid ] }
+
       else
+
         refresh_args = { :id => sut.current_application_id } 
+
       end
 
       MobyUtil::Retryable.until(
                     
-        :timeout => @timeout, :interval => @_retry_interval, :exception => MobyBase::TestObjectNotFoundError 
+        :timeout => timeout, :interval => interval, :exception => MobyBase::TestObjectNotFoundError 
         
       ) { 
         
-        sut.refresh( refresh_args, [attributes.clone] ); test_object_identificator.find_object_data( sut.xml_data )
+        sut.refresh( refresh_args, [ attributes.clone ] )
+
+        test_object_identificator.find_object_data( sut.xml_data )
 
       }
 
