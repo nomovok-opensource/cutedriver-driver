@@ -419,9 +419,6 @@ EXAMPLE
 
       }
 
-      # TODO: some other format for writing the hash to file...
-      #open("#{ $output_results_name }.hash", "w" ){ | file | file << @found_modules_and_methods.inspect }
-
     end
 
     def process_file( file )
@@ -1069,9 +1066,6 @@ EXAMPLE
 
         method_header = process_comment( method.comment )
 
-        ## TODO: remember to verify that there are documentation for each argument!
-        ## TODO: verify that there is a tag for visualizer example
-
         arguments_found = 0
 
         method_header = Hash[ method_header.collect{ | key, value |
@@ -1706,10 +1700,7 @@ EXAMPLE
         feature_set.collect{ | feature |
                   
           @processing = feature.last[:__type]
-            
-          # TODO: tarkista lähdekoodista että onko argument optional vai ei
-          # TODO: tarkista että onko kaikki argumentit dokumentoitu
-          
+                      
           arguments = generate_arguments_element( header, feature )
 
           returns = generate_return_values_element( header, feature )

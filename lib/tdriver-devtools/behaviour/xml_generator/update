@@ -1,3 +1,0 @@
-#!/usr/bin/env sh
-rm -rf behaviour_xml
-ruby generate.rb tdriver example/flick-example.rb 

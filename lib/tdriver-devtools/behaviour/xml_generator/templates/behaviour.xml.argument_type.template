@@ -1,4 +1,0 @@
-            <type name="$ARGUMENT_TYPE">
-              <description>$ARGUMENT_DESCRIPTION</description>
-              <example>$ARGUMENT_EXAMPLE</example>
-            </type>
