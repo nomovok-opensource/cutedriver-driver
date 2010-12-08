@@ -291,7 +291,7 @@ module MobyBehaviour
     # a.eql?( b ) # => true[/code]
     #
     # == arguments
-    # hash_rule
+    # attributes
     #  Hash
     #   description: Hash object holding information for identifying which child to create
     #   example: { :type => "application" }
@@ -300,39 +300,24 @@ module MobyBehaviour
     # TestObject
     #  description: New child test object or reference to existing child
     #  example: -
-    def child( hash_rule )
+    def child( attributes )
 
       ###############################################################################################################
       #
       #  NOTICE: Please do not add anything unnessecery to this method, it might cause a major performance impact
       #
       
+      # verify attributes argument format
+      attributes.check_type( Hash, "Wrong argument type $1 for attributes (expected $2)" )
+            
       # store original hash
-      creation_hash = hash_rule.clone
+      creation_hash = attributes.clone
 
       # raise exception if wrong value type given for ;__logging 
-      hash_rule[ :__logging ].check_type( [ TrueClass, FalseClass ], "Wrong value type $1 for :__logging test object creation directive (expected $2)") if hash_rule.has_key?( :__logging )
+      attributes[ :__logging ].check_type( [ TrueClass, FalseClass ], "Wrong value type $1 for :__logging test object creation directive (expected $2)") if attributes.has_key?( :__logging )
 
       # disable logging if requested, remove pair from creation_hash
       MobyUtil::Logger.instance.push_enabled( creation_hash.delete( :__logging ) || TDriver.logger.enabled )
-
-      if hash_rule[ :type ] == 'application'
-
-        creation_hash[ :__refresh_args ] = { :name => hash_rule[ :name ], :id => hash_rule[ :id ], :applicationUid => hash_rule[ :applicationUid ] }
-
-      else
-
-        if self.kind_of?( MobyBase::SUT )
-
-          creation_hash[ :__refresh_arguments ] = { :id => self.current_application_id } 
-        
-        else
-
-          creation_hash[ :__refresh_arguments ] = { :id => self.sut.current_application_id } 
-        
-        end
-
-      end
 
       begin
 
@@ -349,19 +334,19 @@ module MobyBehaviour
 
       rescue MobyBase::MultipleTestObjectsIdentifiedError => exception
 
-        MobyUtil::Logger.instance.log "behaviour", "FAIL;Multiple child objects matched criteria.;#{ id };sut;{};child;#{ hash_rule.inspect }"
+        MobyUtil::Logger.instance.log "behaviour", "FAIL;Multiple child objects matched criteria.;#{ id };sut;{};child;#{ attributes.inspect }"
 
         Kernel::raise exception
 
       rescue MobyBase::TestObjectNotFoundError => exception
 
-        MobyUtil::Logger.instance.log "behaviour", "FAIL;The child object could not be found.;#{ id };sut;{};child;#{ hash_rule.inspect }"
+        MobyUtil::Logger.instance.log "behaviour", "FAIL;The child object could not be found.;#{ id };sut;{};child;#{ attributes.inspect }"
 
         Kernel::raise exception
 
       rescue Exception => exception
 
-        MobyUtil::Logger.instance.log "behaviour", "FAIL;Failed when trying to find child object.;#{ id };sut;{};child;#{ hash_rule.inspect }"
+        MobyUtil::Logger.instance.log "behaviour", "FAIL;Failed when trying to find child object.;#{ id };sut;{};child;#{ attributes.inspect }"
 
         Kernel::raise exception
 
