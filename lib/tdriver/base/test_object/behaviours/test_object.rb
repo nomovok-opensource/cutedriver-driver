@@ -496,8 +496,10 @@ module MobyBehaviour
       creation_attributes.merge!( :__multiple_objects => true, :__find_all_children => find_all_children )
 
 	    disable_optimizer
+
       # retrieve child objects
       kids = get_child_objects( creation_attributes )
+
 	    enable_optimizer
 
 	    kids
@@ -624,18 +626,28 @@ module MobyBehaviour
 
       find_all_children = MobyUtil::KernelHelper.to_boolean( dynamic_attributes[ :__find_all_children ], true )
 
-	  # check if the hash contains symbols as values and translate those into strings
-	  file_name = dynamic_attributes[ :__fname ]
-	  plurality = dynamic_attributes[ :__plurality ]
-	  numerus = dynamic_attributes[ :__numerus ]
-	  lengthvariant = dynamic_attributes[ :__lengthvariant ]
-	  translate!( creation_data, file_name, plurality, numerus, lengthvariant )
+	    # check if the hash contains symbols as values and translate those into strings
+	    file_name = dynamic_attributes[ :__fname ]
+	    plurality = dynamic_attributes[ :__plurality ]
+	    numerus = dynamic_attributes[ :__numerus ]
+	    lengthvariant = dynamic_attributes[ :__lengthvariant ]
+	    translate!( creation_data, file_name, plurality, numerus, lengthvariant )
 
       # use custom timeout if defined
       timeout = ( dynamic_attributes[ :__timeout ] || @test_object_factory.timeout ).to_i
 
       # determine which application to refresh
-      application_id_hash = ( creation_data[ :type ] == 'application' ? { :name => creation_data[ :name ], :id => creation_data[ :id ] } : { :id => get_application_id } )
+      #application_id_hash = ( creation_data[ :type ] == 'application' ? { :name => creation_data[ :name ], :id => creation_data[ :id ] } : { :id => get_application_id } )
+      
+      if creation_data[ :type ] == 'application'
+      
+        application_id_hash = { :name => creation_data[ :name ], :id => creation_data[ :id ] }
+      
+      else
+      
+        application_id_hash = { :id => get_application_id }
+      
+      end
 
       # add symbols to dynamic attributes list -- to avoid IRB bug
       MobyUtil::DynamicAttributeFilter.instance.add_attributes( creation_data.keys )

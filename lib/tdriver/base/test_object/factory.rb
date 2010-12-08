@@ -111,100 +111,153 @@ module MobyBase
 
     end
 
-    #TODO: update documetation
-    # Function to make a test object.
-    # Queries from the sut an xml dump which is used to generate TestObjects.
-    # Once XML dump is retrieved, a TestObject is identified by the TestObjectIdentificator.
-    # TestObject is populated with data and activated.
-    # The behaviour is added, as described in BehaviourGenerator#apply_behaviour
-    # Lastly the created TestObject instance is associated to the SUT and vice versa.
-    #
-    # TODO: proper synchronization
-    # 
-    # == params
-    # sut:: SUT object with which the new test object is to be associated 
-    # test_object_identificator:: TestObjectIdentificator which is used to identify the required test object from the xml data
-    # == returns
-    # TestObject new, initialized and ready to use test object with associated data and behaviours
-    # == raises, as defined in TestObjectIdentificator
-    # ArgumentError:: if test_object_identificator is not of type LibXML::XML::Node,
-    # MultipleTestObjectsIdentifiedError:: if multiple TestObjects can be identified using the test_object_identificator
-    # TestObjectNotFoundError:: if no TestObjects are identified using the test_object_identificator
-    def make( sut, test_object_identificator )
+    def identify_object( object_attributes_hash, identification_directives, rules )
+  
+      MobyUtil::Retryable.until( 
 
-      test_object = make_test_object( 
-        self, 
-        sut, 
-        sut, 
-        _make_xml( sut, test_object_identificator, @timeout, @_retry_interval ) 
-      )
+        # maximum time used for retrying, if timeout exceeds pass last raised exception
+        :timeout => identification_directives[ :__timeout ], 
 
-      sut.instance_variable_get( :@child_object_cache ).add_object( test_object ) 
+        # interval used before retrying
+        :interval => identification_directives[ :__retry_interval ],
 
-      test_object
+        # following exceptions are allowed; Retry until timeout exceeds or other exception type is raised
+        :exception => [ MobyBase::TestObjectNotFoundError, MobyBase::MultipleTestObjectsIdentifiedError ] 
 
+      ){
+
+        # refresh sut
+        identification_directives[ :__sut ].refresh( identification_directives[ :__refresh_arguments ], identification_directives[ :__search_params ] )
+
+        matches, rule = identification_directives[ :__test_object_identificator ].find_objects( 
+          identification_directives[ :__parent ].xml_data, 
+          identification_directives[ :__find_all_children ]
+        )
+
+        # raise exception if no matching object(s) found
+        raise MobyBase::TestObjectNotFoundError.new( 
+        
+          "Cannot find object with rule:\n%s" % rules[ :object_attributes_hash ].inspect
+
+        ) if matches.empty?
+
+        # raise exception if multiple matches found and only one expected 
+        if ( !identification_directives[ :__multiple_objects ] ) && ( matches.count > 1 && !identification_directives[ :__index_given ] )
+
+          # raise exception (with list of paths to all matching objects) if multiple objects flag is false and more than one match found
+          raise MobyBase::MultipleTestObjectsIdentifiedError.new( 
+          
+            "Multiple test objects found with rule: %s\nMatching objects:\n%s\n" % [ 
+              rules[ :object_attributes_hash ].inspect,
+              list_matching_test_objects( matches ).each_with_index.collect{ | object, object_index | "%3s) %s" % [ object_index + 1, object ] }.join( "\n" )
+            ]
+          ) 
+            
+        end
+
+        # sort matches
+        if identification_directives[ :__xy_sorting ] == true
+        
+          # sort elements
+          identification_directives[ :__test_object_identificator ].sort_elements_by_xy_layout!( 
+
+            matches, 
+
+            get_layout_direction( identification_directives[ :__sut ] ) 
+            
+          ) 
+
+        end
+
+        # return result
+        if identification_directives[ :__multiple_objects ] && !identification_directives[ :__index_given ]
+
+          # return multiple test objects
+          matches.to_a
+
+        else
+
+          # return only one test object  
+          [ matches[ identification_directives[ :__index ] ] ]
+
+        end
+
+      }
+        
     end
 
-    def make2( rules )
+    # TODO: document me
+    def make_object( rules )
 
       # get parent object
       parent = rules[ :parent ]
-
-      # get sut object
+      
+      # retrieve sut object
       sut = parent.kind_of?( MobyBase::SUT ) ? parent : parent.sut
 
       # store rules hash to variable
-      object_attributes_hash = rules[ :object_attributes_hash ]
+      object_attributes_hash = rules[ :object_attributes_hash ].clone
 
-      # get timeout from rules hash or TestObjectFactory
-      timeout = ( object_attributes_hash.delete( :__timeout ) || @timeout ).to_i
+      # remove test object identification directives for object identification attributes hash (e.g. :__index, :__multiple_objects etc.)
+      identification_directives = object_attributes_hash.strip_dynamic_attributes!
 
-      # get retry interval from rules hash or TestObjectFactory
-      retry_interval = ( object_attributes_hash.delete( :__retry_interval ) || @_retry_interval ).to_i
+      identification_directives.default_values(
+      
+        :__sut => sut,
 
-      # get identificator object
-      test_object_identificator = MobyBase::TestObjectIdentificator.new( object_attributes_hash )
+        :__parent => parent,
+            
+        # get timeout from rules hash or TestObjectFactory
+        :__timeout => @timeout,
 
-      # !!!!!!!!!!!!!!!!!!!!!
-      # add cache verify here
-      # !!!!!!!!!!!!!!!!!!!!!
+        # get retry interval from rules hash or TestObjectFactory
+        :__retry_interval => @_retry_interval,
 
-      # create new test object
-      test_object = make_test_object( 
-        self, 
-        sut, 
-        parent, 
-        _make_xml( sut, test_object_identificator, timeout, retry_interval ) 
+        # determine that are we going to retrieve multiple test objects or just one
+        :__multiple_objects => false,
+
+        # determine that should all child objects childrens be retrieved
+        :__find_all_children => true,
+
+        # determine that did user give index value
+        :__index_given => identification_directives.has_key?( :__index ),
+
+        # determine index of test object to be retrieved
+        :__index => 0,
+        
+        :__refresh_arguments => {},
+        
+        # make search params
+        :__search_params => get_parent_params( parent ).push( make_object_search_params( object_attributes_hash ) ),
+      
+        :__test_object_identificator => MobyBase::TestObjectIdentificator.new( object_attributes_hash )
+      
       )
 
-      # remove object type from object attributes hash_rule
-      object_attributes_hash.delete( :type )
+      child_objects = identify_object( object_attributes_hash, identification_directives, rules ).collect{ | test_object_xml |
+            
+        make_test_object2( 
+        
+          # sut object to t_o
+          :sut => identification_directives[ :__sut ],      
 
-      # get reference to parent objects child objects cache
-      parent_cache = parent.instance_variable_get( :@child_object_cache )
+          # parent object to t_o
+          :parent => identification_directives[ :__parent ],   
 
-      # get cached test object from parents child objects cache if found; if not found from cache pass newly created object as is
-      if parent_cache.has_object?( test_object )
+          # t_o xml
+          :xml_object => test_object_xml,                           
 
-        # get test object from cache
-        test_object = parent_cache[ test_object ]
+          # test object factory
+          :test_object_factory => self,                                     
 
-      else
+          :object_attributes_hash => object_attributes_hash
 
-        # set given parent in rules hash as parent object to new child test object    
-        test_object.instance_variable_set( :@parent, parent )
+        )
+              
+      }
 
-        # add created test object to parents child objects cache
-        parent_cache.add_object( test_object ) 
-
-
-      end
-
-      # update test objects creation attributes (either cached object or just newly created child object)
-      test_object.instance_variable_set( :@creation_attributes, object_attributes_hash )
-
-      # return test object; can be reference from cache or created above
-      test_object
+      # return test object(s)
+      identification_directives[ :__multiple_objects ] ? child_objects : child_objects.first
 
     end
 
@@ -396,27 +449,36 @@ module MobyBase
 
     end
 
-    def make_object_search_params(creation_attributes)
+    def make_object_search_params( creation_attributes )
 
       object_search_params = {}
 
-      if creation_attributes[:type] != 'application'
-        object_search_params.merge!(creation_attributes)
-        object_search_params[:className] = object_search_params.delete(:type) if creation_attributes.has_key?(:type) 
-        object_search_params[:objectName] = object_search_params.delete(:name) if creation_attributes.has_key?(:name)
+      if creation_attributes[ :type ] != 'application'
+      
+        object_search_params.merge!( creation_attributes )
+
+        object_search_params[ :className ] = object_search_params.delete( :type ) if creation_attributes.has_key?( :type )
+
+        object_search_params[ :objectName ] = object_search_params.delete( :name ) if creation_attributes.has_key?( :name )
+
       end    
 
       object_search_params
 
     end
 
-    def get_parent_params(test_object)    
+    def get_parent_params( test_object )
+
+      #p __method__, caller
 
       search_params = []
 
-      if test_object.type != 'application' and test_object.type != 'sut'
-        search_params.concat(get_parent_params(test_object.parent)) if test_object.parent 
-        search_params.concat([{:className => test_object.type, :tasId => test_object.id}]) if test_object
+      unless [ 'application', 'sut' ].include?( test_object.type ) # if test_object.type != 'application' and test_object.type != 'sut'
+      
+        search_params.concat( get_parent_params( test_object.parent ) ) if test_object.parent 
+        
+        search_params.concat( [ { :className => test_object.type, :tasId => test_object.id } ] ) #if test_object
+        
       end
 
       search_params
@@ -490,6 +552,14 @@ module MobyBase
       # create test object identificator object with given creation attributes
       test_object_identificator = MobyBase::TestObjectIdentificator.new( creation_attributes ) 
 
+      # make search params
+      # object_search_params = make_object_search_params( creation_attributes )
+      # search_params = get_parent_params( parent )
+      # search_params.push( object_search_params )
+
+      # make search params
+      search_params = get_parent_params( parent ).push( make_object_search_params( creation_attributes ) )
+
       MobyUtil::Retryable.until( 
 
         # maximum time used for retrying, if timeout exceeds pass last raised exception
@@ -503,25 +573,20 @@ module MobyBase
 
       ){
 
-        #make search params
-        object_search_params = make_object_search_params(creation_attributes)
-        search_params = get_parent_params(parent)
-        search_params.push(object_search_params)
-
         # refresh sut ui state    
         sut.refresh( refresh_arguments, search_params )
 
         # identify test objects from xml
         matches, rule = test_object_identificator.find_objects( parent.xml_data, find_all_children )
 
-        if ( !multiple_objects ) && ( matches.count > 1 && !index_given )
+        # raise exception if no matching object(s) found
+        raise MobyBase::TestObjectNotFoundError.new( 
+        
+          "Cannot find object with rule:\n%s" % creation_attributes.merge( dynamic_attributes ).inspect
 
-          #raise MobyBase::MultipleTestObjectsIdentifiedError.new( 
-          # 
-          #  "Multiple test objects found with rule:\n%s" % [ 
-          #    creation_attributes.merge( dynamic_attributes ).inspect,
-          #  ]
-          #) 
+        ) if matches.empty?
+
+        if ( !multiple_objects ) && ( matches.count > 1 && !index_given )
 
           # raise exception (with list of paths to all matching objects) if multiple objects flag is false and more than one match found
           raise MobyBase::MultipleTestObjectsIdentifiedError.new( 
@@ -534,11 +599,6 @@ module MobyBase
             
         end
 
-        # raise exception if no matching object(s) found
-        raise MobyBase::TestObjectNotFoundError.new( 
-          "Cannot find object with rule:\n%s" % creation_attributes.merge( dynamic_attributes ).inspect 
-        ) if matches.empty?
-
         # sort elements
         test_object_identificator.sort_elements_by_xy_layout!( matches, get_layout_direction( sut ) ) if sorting
 
@@ -549,37 +609,6 @@ module MobyBase
 
     end
 
-    # Function to get the xml element for a test object
-    # TODO: Remove TestObjectFactory::makeXML function & refactor the 'user' of this function!
-    def _make_xml( sut, test_object_identificator, timeout, interval )
-
-      attributes = test_object_identificator.get_identification_rules
-    
-      refresh_args  = nil
-      
-      if attributes[ :type ] == 'application'
-
-        refresh_args = { :name => attributes[ :name ], :id => attributes[ :id ], :applicationUid => attributes[ :applicationUid ] }
-
-      else
-
-        refresh_args = { :id => sut.current_application_id } 
-
-      end
-
-      MobyUtil::Retryable.until(
-                    
-        :timeout => timeout, :interval => interval, :exception => MobyBase::TestObjectNotFoundError 
-        
-      ) { 
-        
-        sut.refresh( refresh_args, [ attributes.clone ] )
-
-        test_object_identificator.find_object_data( sut.xml_data )
-
-      }
-
-    end
 
     def make_test_object( test_object_factory, sut, parent, xml_object )
 
@@ -650,6 +679,103 @@ module MobyBase
       test_object
 
     end
+
+    def make_test_object2( rules )
+
+      # get test object factory object from hash
+      test_object_factory = rules[ :test_object_factory ]
+            
+      # get sut object from hash
+      sut = rules[ :sut ]
+      
+      # get parent object from hash
+      parent = rules[ :parent]
+      
+      xml_object = rules[ :xml_object ]
+
+      if xml_object.kind_of?( MobyUtil::XML::Element )
+
+        # retrieve test object id from xml
+        object_id = xml_object.attribute( 'id' ).to_i
+
+        # retrieve test object name from xml
+        object_name = xml_object.attribute( 'name' ).to_s
+
+        # retrieve test object type from xml
+        object_type = xml_object.attribute( 'type' ).to_s
+
+        # retrieve test object type from xml
+    	  env = ( xml_object.attribute( 'env' ) || MobyUtil::Parameter[ sut.id ][ :env ] ).to_s
+
+      else
+      
+        # defaults - refactor this
+        object_type = ""
+        
+        object_name = ""
+        
+        object_id = 0
+
+        env = MobyUtil::Parameter[ sut.id ][ :env ].to_s
+
+      end
+
+      # calculate object cache hash key
+			hash_key = ( ( ( 17 * 37 + object_id ) * 37 + object_type.hash ) * 37 + object_name.hash )
+
+      # remove object type from object attributes hash_rule
+      rules[ :object_attributes_hash ].delete( :type )
+
+      # get reference to parent objects child objects cache
+      parent_cache = rules[ :parent ].instance_variable_get( :@child_object_cache )
+
+      # get cached test object from parents child objects cache if found; if not found from cache pass newly created object as is
+      if parent_cache.has_object?( hash_key )
+
+        # get test object from cache
+        test_object = parent_cache[ hash_key ]
+
+      else
+      
+        test_object = MobyBase::TestObject.new( test_object_factory, sut, parent, xml_object )
+
+        # apply behaviours to test object
+        test_object.extend( MobyBehaviour::ObjectBehaviourComposition )
+
+        # apply behaviours to test object
+        test_object.apply_behaviour!(
+          :object_type  => [ '*', object_type ],
+          :sut_type     => [ '*', sut.ui_type ],
+          :input_type   => [ '*', sut.input.to_s ],
+          :env          => [ '*', env.to_s ],	   
+          :version      => [ '*', sut.ui_version ]								   
+        )
+
+        create_child_accessors!( test_object )
+
+        # set given parent in rules hash as parent object to new child test object    
+        test_object.instance_variable_set( :@parent, parent )
+
+        # add created test object to parents child objects cache
+        parent_cache.add_object( test_object ) 
+
+      end
+
+      # update test objects creation attributes (either cached object or just newly created child object)
+      test_object.instance_variable_set( :@creation_attributes, rules[ :object_attributes_hash ] )
+  
+      # do not make test object verifications if we are operating on the 
+      # base sut itself (allow run to pass)
+      unless parent.kind_of?( MobyBase::SUT )
+
+        verify_ui_dump( sut ) unless sut.verify_blocks.empty?
+
+      end
+
+      test_object
+
+    end
+
 
   public # deprecated methods
 
@@ -792,6 +918,77 @@ module MobyBase
       warn( "Deprecated method: use timeout instead of TestObjectFactory#get_timeout" )
 
       @timeout
+
+    end
+
+    #TODO: update documetation
+    # Function to make a test object.
+    # Queries from the sut an xml dump which is used to generate TestObjects.
+    # Once XML dump is retrieved, a TestObject is identified by the TestObjectIdentificator.
+    # TestObject is populated with data and activated.
+    # The behaviour is added, as described in BehaviourGenerator#apply_behaviour
+    # Lastly the created TestObject instance is associated to the SUT and vice versa.
+    #
+    # TODO: proper synchronization
+    # 
+    # == params
+    # sut:: SUT object with which the new test object is to be associated 
+    # test_object_identificator:: TestObjectIdentificator which is used to identify the required test object from the xml data
+    # == returns
+    # TestObject new, initialized and ready to use test object with associated data and behaviours
+    # == raises, as defined in TestObjectIdentificator
+    # ArgumentError:: if test_object_identificator is not of type LibXML::XML::Node,
+    # MultipleTestObjectsIdentifiedError:: if multiple TestObjects can be identified using the test_object_identificator
+    # TestObjectNotFoundError:: if no TestObjects are identified using the test_object_identificator
+    def make( sut, test_object_identificator )
+
+      test_object = make_test_object( 
+        self, 
+        sut, 
+        sut, 
+        _make_xml( sut, test_object_identificator, @timeout, @_retry_interval ) 
+      )
+
+      sut.instance_variable_get( :@child_object_cache ).add_object( test_object ) 
+
+      test_object
+
+    end
+
+    # Function to get the xml element for a test object
+    # TODO: Remove TestObjectFactory::makeXML function & refactor the 'user' of this function!
+    def _make_xml( sut, test_object_identificator, timeout, interval )
+
+      attributes = test_object_identificator.get_identification_rules
+          
+      if attributes[ :type ] == 'application'
+
+        refresh_args = { :name => attributes[ :name ], :id => attributes[ :id ], :applicationUid => attributes[ :applicationUid ] }
+
+      else
+    
+        refresh_args = { :id => sut.current_application_id } 
+
+      end
+
+      attributes_clone = attributes.clone
+
+      # add symbols to dynamic attributes list -- to avoid IRB bug
+      MobyUtil::DynamicAttributeFilter.instance.add_attributes( attributes_clone.keys )
+
+      MobyUtil::Retryable.until(
+                    
+        :timeout    => timeout, 
+        :interval   => interval, 
+        :exception  => MobyBase::TestObjectNotFoundError 
+        
+      ) { 
+        
+        sut.refresh( refresh_args, [ attributes_clone ] )
+
+        test_object_identificator.find_object_data( sut.xml_data )
+
+      }
 
     end
 

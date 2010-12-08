@@ -316,10 +316,28 @@ module MobyBehaviour
       # disable logging if requested, remove pair from creation_hash
       MobyUtil::Logger.instance.push_enabled( creation_hash.delete( :__logging ) || TDriver.logger.enabled )
 
+      if hash_rule[ :type ] == 'application'
+
+        creation_hash[ :__refresh_args ] = { :name => hash_rule[ :name ], :id => hash_rule[ :id ], :applicationUid => hash_rule[ :applicationUid ] }
+
+      else
+
+        if self.kind_of?( MobyBase::SUT )
+
+          creation_hash[ :__refresh_arguments ] = { :id => self.current_application_id } 
+        
+        else
+
+          creation_hash[ :__refresh_arguments ] = { :id => self.sut.current_application_id } 
+        
+        end
+
+      end
+
       begin
 
         # TODO: refactor me
-        child_test_object = @test_object_factory.make2(
+        child_test_object = @test_object_factory.make_object(
 
           # current object as parent, can be either TestObject or SUT
           :parent => self,
