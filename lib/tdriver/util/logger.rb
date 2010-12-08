@@ -244,6 +244,8 @@ module MobyUtil
 
       if ARGV.include?( '--debug_exceptions' ) || TDriver.parameter[ :debug_exceptions, 'false' ].to_s.downcase == 'true'
 
+        ARGV.delete('--debug_exceptions')
+
 	      # for debugging to see every occured exception
 	      def Kernel::raise( *args )
 
