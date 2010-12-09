@@ -102,7 +102,7 @@ class Hash
 
     hash.each_pair{ | key, value |
 
-      self[ key ] ||= value
+      self[ key ] = value unless has_key?( key )
 
     }
 
@@ -113,7 +113,7 @@ class Hash
   # store key and avalue to hash if not already defined
   def default_value( key, value )
 
-    self[ key ] ||= value
+    self[ key ] = value unless has_key?( key )
 
     self
 
