@@ -76,7 +76,7 @@ module TDriver
     
     # TODO: document me  
     def []( value )
-    
+        
       if value.kind_of?( Numeric )
 
         @objects.fetch( value ){ raise ArgumentError, "Test object (#{ value }) not found from cache" }
@@ -86,8 +86,7 @@ module TDriver
         @objects.fetch( value.hash ){ raise ArgumentError, "Test object (#{ value.hash }) not found from cache" }
       
       end
-        
-    
+      
     end
     
     # TODO: document me  
@@ -100,7 +99,7 @@ module TDriver
       end
     
       @objects[ test_object_hash ] = test_object
-        
+            
       test_object
     
     end

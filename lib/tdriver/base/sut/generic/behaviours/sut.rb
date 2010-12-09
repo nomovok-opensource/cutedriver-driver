@@ -313,11 +313,19 @@ module MobyBehaviour
       # store original hash
       creation_hash = attributes.clone
 
+      identification_directives = creation_hash.strip_dynamic_attributes!
+
       # raise exception if wrong value type given for ;__logging 
-      attributes[ :__logging ].check_type( [ TrueClass, FalseClass ], "Wrong value type $1 for :__logging test object creation directive (expected $2)") if attributes.has_key?( :__logging )
+      identification_directives[ :__logging ].check_type( 
+      
+        [ TrueClass, FalseClass ], 
+        
+        "Wrong value type $1 for :__logging test object creation directive (expected $2)"
+        
+      ) if identification_directives.has_key?( :__logging )
 
       # disable logging if requested, remove pair from creation_hash
-      MobyUtil::Logger.instance.push_enabled( creation_hash.delete( :__logging ) || TDriver.logger.enabled )
+      MobyUtil::Logger.instance.push_enabled( identification_directives[ :__logging ] || TDriver.logger.enabled )
 
       begin
 
@@ -328,7 +336,9 @@ module MobyBehaviour
           :parent => self,
  
           # test object identification hash
-          :object_attributes_hash => creation_hash
+          :object_attributes_hash => creation_hash,
+          
+          :identification_directives => identification_directives
 
         )
 

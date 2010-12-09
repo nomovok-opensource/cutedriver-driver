@@ -157,7 +157,7 @@ module MobyBase
 
         # sort matches
         if identification_directives[ :__xy_sorting ] == true
-        
+                
           # sort elements
           identification_directives[ :__test_object_identificator ].sort_elements_by_xy_layout!( 
 
@@ -186,6 +186,117 @@ module MobyBase
         
     end
 
+
+
+
+
+
+
+
+    def identify_object2( object_attributes_hash, identification_directives, rules )
+
+      sut = identification_directives[ :__sut ]
+      
+      parent = identification_directives[ :__parent ]
+      
+      refresh_arguments = identification_directives[ :__refresh_arguments ]
+  
+      test_object_identificator = identification_directives[ :__test_object_identificator ]
+  
+      search_params = identification_directives[ :__search_params ]
+  
+      find_all_children = identification_directives[ :__find_all_children ]
+  
+      index_given = identification_directives[ :__index_given ]
+  
+      multiple_objects = identification_directives[ :__multiple_objects ]
+  
+      index = identification_directives[ :__index ]
+  
+      sorting = identification_directives[ :__xy_sorting ]
+  
+      MobyUtil::Retryable.until( 
+
+        # maximum time used for retrying, if timeout exceeds pass last raised exception
+        :timeout => identification_directives[ :__timeout ], 
+
+        # interval used before retrying
+        :interval => identification_directives[ :__retry_interval ],
+
+        # following exceptions are allowed; Retry until timeout exceeds or other exception type is raised
+        :exception => [ MobyBase::TestObjectNotFoundError, MobyBase::MultipleTestObjectsIdentifiedError ] 
+
+      ){
+
+        # refresh sut
+        sut.refresh( refresh_arguments, search_params )
+
+        matches, rule = test_object_identificator.find_objects( 
+          parent.xml_data, 
+          find_all_children
+        )
+
+        # raise exception if no matching object(s) found
+        raise MobyBase::TestObjectNotFoundError.new( 
+        
+          "Cannot find object with rule:\n%s" % rules[ :object_attributes_hash ].inspect
+
+        ) if matches.empty?
+
+        # raise exception if multiple matches found and only one expected 
+        if ( !multiple_objects ) && ( matches.count > 1 && !index_given )
+
+          # raise exception (with list of paths to all matching objects) if multiple objects flag is false and more than one match found
+          raise MobyBase::MultipleTestObjectsIdentifiedError.new( 
+          
+            "Multiple test objects found with rule: %s\nMatching objects:\n%s\n" % [ 
+              rules[ :object_attributes_hash ].inspect,
+              list_matching_test_objects( matches ).each_with_index.collect{ | object, object_index | "%3s) %s" % [ object_index + 1, object ] }.join( "\n" )
+            ]
+          ) 
+            
+        end
+
+        # sort matches
+        if sorting
+                
+          # sort elements
+          test_object_identificator.sort_elements_by_xy_layout!( 
+
+            matches, 
+
+            get_layout_direction( sut ) 
+            
+          ) 
+
+        end
+
+        # return result
+        if multiple_objects && !index_given
+
+          # return multiple test objects
+          matches.to_a
+
+        else
+
+          # return only one test object  
+          [ matches[ index ] ]
+
+        end
+
+      }
+        
+    end
+
+
+
+
+
+
+
+
+
+
     # TODO: document me
     def make_object( rules )
 
@@ -193,7 +304,9 @@ module MobyBase
       object_attributes_hash = rules[ :object_attributes_hash ].clone
 
       # remove test object identification directives for object identification attributes hash (e.g. :__index, :__multiple_objects etc.)
-      identification_directives = object_attributes_hash.strip_dynamic_attributes!
+      identification_directives = rules[ :identification_directives ]
+      
+      #object_attributes_hash.strip_dynamic_attributes!
 
       # get parent object
       parent = rules[ :parent ]
@@ -208,7 +321,7 @@ module MobyBase
         refresh_arguments = object_attributes_hash.collect_keys( :name, :id, :applicationUid )
 
       else
-             
+                          
         if parent.kind_of?( MobyBase::TestObject )
 
           # get current application for test object
@@ -220,9 +333,9 @@ module MobyBase
           refresh_arguments = { :id => sut.current_application_id }
 
         end
-
+        
       end
-      
+            
       # set default values 
       identification_directives.default_values(
       
@@ -259,6 +372,8 @@ module MobyBase
         :__test_object_identificator => MobyBase::TestObjectIdentificator.new( object_attributes_hash )
       
       )
+      
+      identification_directives[ :__index ].check_type( Fixnum, "Wrong value type $1 for :__index test object identification directive (expected $2)" )
 
       # add object identification attribute keys to dynamic attributes white list
       MobyUtil::DynamicAttributeFilter.instance.add_attributes( object_attributes_hash.keys )
@@ -283,7 +398,7 @@ module MobyBase
           :object_attributes_hash => object_attributes_hash
 
         )
-              
+                 
       }
 
       # return test object(s); either one or multiple objects
@@ -471,8 +586,6 @@ module MobyBase
 
     def get_parent_params( test_object )
 
-      #p __method__, caller
-
       search_params = []
 
       unless [ 'application', 'sut' ].include?( test_object.type ) # if test_object.type != 'application' and test_object.type != 'sut'
@@ -560,8 +673,8 @@ module MobyBase
       # calculate object cache hash key
 			hash_key = ( ( ( 17 * 37 + object_id ) * 37 + object_type.hash ) * 37 + object_name.hash )
 
-      # remove object type from object attributes hash_rule
-      rules[ :object_attributes_hash ].delete( :type )
+      # (DO NOT!!) remove object type from object attributes hash_rule
+      #rules[ :object_attributes_hash ].delete( :type )
 
       # get reference to parent objects child objects cache
       parent_cache = rules[ :parent ].instance_variable_get( :@child_object_cache )
@@ -571,6 +684,8 @@ module MobyBase
 
         # get test object from cache
         test_object = parent_cache[ hash_key ]
+
+        test_object.xml_data = xml_object
 
       else
       
@@ -614,128 +729,6 @@ module MobyBase
     end
 
   public # deprecated methods
-
-    # Function for making a child test object (a test object that is not directly a accessible from the sut) 
-    # Creates accessors for children of the new object, applies any behaviours applicable for its type. 
-    # Does not associate child object to parent / vice versa - leaves that to the client. 
-    #
-    # == params
-    # parent_test_object:: TestObject thas is the parent of the child object being created 
-    # test_object_identificator:: TestObjectIdentificator which is used to identify the child object from the xml data
-    # == returns
-    # TestObject:: new child test object, could be eql? to an existing TO
-    # == raises
-    # == raises, as defined in TestObjectIdentificator
-    # ArgumentError:: if test_object_identificator is not of type LibXML::XML::Node,
-    # MultipleTestObjectsIdentifiedError:: if multiple TestObjects can be identified using the test_object_identificator
-    # TestObjectNotFoundError:: The TestObject cannot be found or the parent object is no longer visible on the SUT
-    def make_child( parent_test_object, test_object_identificator )
-
-      identified_object_xml = nil
-      
-      layout_direction = nil
-
-      MobyUtil::Retryable.until( 
-        :timeout => @timeout, 
-        :interval => @_retry_interval,
-        :exception => [ MobyBase::TestObjectNotFoundError, MobyBase::MultipleTestObjectsIdentifiedError ] 
-      ){
-      
-        parent_test_object.refresh( :id => parent_test_object.get_application_id )
-
-        if test_object_identificator.dynamic_attributes.include?( :__xy_sorting )
-
-          begin
-
-            layout_direction = parent_test_object.sut.application( :id => parent_test_object.get_application_id ).attribute("layoutDirection")
-
-          rescue MobyBase::AttributeNotFoundError
-
-            layout_direction = nil
-
-          end
-          
-        end
-
-        identified_object_xml = test_object_identificator.find_object_data( parent_test_object.xml_data, layout_direction )
-
-      }
-
-      make_test_object( 
-        self, 
-        parent_test_object.sut, 
-        parent_test_object, 
-        identified_object_xml 
-      )
-
-    end
-
-
-    # Same as def make_child, but creates an array of test objects 
-    # == params
-    # parent_test_object:: TestObject thas is the parent of the child object being created 
-    # test_object_identificator:: TestObjectIdentificator which is used to identify the child object from the xml data
-    #find_all_children:: Boolean specifying whether all children under the test node or just immediate children should be retreived.
-    # == returns
-    # An array of Test Objects.
-    # == raises
-    # == raises, as defined in TestObjectIdentificator
-    # ArgumentError:: if test_object_identificator is not of type LibXML::XML::Node,
-    # TestObjectNotFoundError:: The TestObject cannot be found or the parent object is no longer visible on the SUT
-    def make_multiple_children( parent_test_object, test_object_identificator, find_all_children)
-
-      identified_object_xml = Array.new
-
-      ret_array = Array.new
-
-      layout_direction = nil
-
-      begin
-
-      MobyUtil::Retryable.until( 
-        :timeout => @timeout, 
-        :interval => @_retry_interval,
-        :exception => [ MobyBase::TestObjectNotFoundError ] 
-      ){
-
-        parent_test_object.refresh( :id => parent_test_object.get_application_id )
-
-        if test_object_identificator.dynamic_attributes.include?( :__xy_sorting )
-
-          begin
-
-            layout_direction = parent_test_object.sut.application( :id => parent_test_object.get_application_id ).attribute("layoutDirection")
-
-          rescue MobyBase::AttributeNotFoundError
-
-            layout_direction = nil
-
-          end
-
-        end
-
-        identified_object_xml = test_object_identificator.find_multiple_object_data( parent_test_object.xml_data, find_all_children, layout_direction )
-
-      }
-
-        rescue MobyBase::TestObjectNotFoundError
-
-          Kernel::raise MobyBase::TestObjectNotFoundError.new(
-            "The parent test object was no available on the SUT.\n" <<
-            "Expected object type: '#{ parent_test_object.type }' id: '#{ parent_test_object.id }'" 
-          )
-
-        end
-
-        identified_object_xml.each do |child_xml|
-
-        ret_array << make_test_object( self, parent_test_object.sut, parent_test_object, child_xml )
-
-      end
-
-      ret_array
-
-    end
 
     def set_timeout( new_timeout )
 
@@ -806,7 +799,7 @@ module MobyBase
         refresh_args = { :id => sut.current_application_id } 
 
       end
-
+      
       attributes_clone = attributes.clone
 
       # add symbols to dynamic attributes list -- to avoid IRB bug
@@ -916,12 +909,14 @@ module MobyBase
 
       # make array of matching child test objects
       get_test_objects( rules ).collect{ | test_object_xml |
+
         make_test_object( 
           self,               # test object factory
           rules[ :sut ],      # sut object to t_o
           rules[ :parent ],   # parent object to t_o
           test_object_xml     # t_o xml
         )
+
       }
 
     end

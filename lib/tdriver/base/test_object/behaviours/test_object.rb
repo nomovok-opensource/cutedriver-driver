@@ -51,6 +51,21 @@ module MobyBehaviour
     #  example: { :name => 'Triangle1', :type => :Triangle }
     attr_accessor :creation_attributes
 
+
+    # == nodoc
+    # == description
+    # Changes the status of the test object to active
+    # == returns 
+    # TrueClass::
+    # == example
+    # @app = @sut.run(:name => 'testapp') # launches testapp 
+    # @app.Node( :name => 'Node1' ).activate() # activate given object
+    def activate
+
+      @_active = true
+
+    end
+
     # == description
     # Determines if the current test object is of type 'application'
     # == returns
@@ -76,50 +91,6 @@ module MobyBehaviour
 
       # return hash of test object attributes
       Hash[ xml_data.xpath( 'attributes/attribute' ).collect{ | test_object | [ test_object.attribute( 'name' ), test_object.content ] } ]
-
-    end
-
-    # == nodoc
-    # == description
-    # Changes the status of the test object to active
-    # == returns 
-    # TrueClass::
-    # == example
-    # @app = @sut.run(:name => 'testapp') # launches testapp 
-    # @app.Node( :name => 'Node1' ).activate() # activate given object
-    def activate
-
-      @_active = true
-
-    end
-
-    # == nodoc
-    # Changes the status of the test object to inactive, also deactivating all children
-    # Removes reference from @parent TestObject or SUT to this TestObject so that 
-    # @parent.refresh does not refresh currrent TestObject
-    #
-    # Does nothing if TestObject is already deactivated
-    # == returns 
-    # ?
-    def deactivate
-
-      return if !@_active
-
-      @_active = false
-
-      # iterate through all test objects child test objects
-      @child_object_cache.each_object{ | test_object |
-      
-        # deactivate test object
-        test_object.deactivate
-              
-      }
-
-      # remove test objects from children objects cache
-      @child_object_cache.remove_objects
-
-      # remove from parent objects children objects cache
-      @parent.instance_variable_get( :@child_object_cache ).remove_object( self )
 
     end
 
@@ -166,7 +137,7 @@ module MobyBehaviour
             MobyUtil::DynamicAttributeFilter.instance.add_attribute( name )
 
             # refresh ui state
-            refresh( :id => get_application_id )
+            refresh #( :id => get_application_id )
 
           end
 
@@ -442,10 +413,131 @@ module MobyBehaviour
       #raise TypeError.new( 'Unexpected argument type (%s) for attributes, expecting %s' % [ attributes.class, "Hash" ] ) unless attributes.kind_of?( Hash ) 
       attributes.check_type( Hash, "Wrong argument type $1 for attributes (expected $2)" )
   
+      
       # retrieve child object
       get_child_objects( attributes )
 
     end
+    
+    def child( attributes )
+
+      ###############################################################################################################
+      #
+      #  NOTICE: Please do not add anything unnessecery to this method, it might cause a major performance impact
+      #
+
+      # verify attributes argument format
+      attributes.check_type( Hash, "Wrong argument type $1 for attributes (expected $2)" )
+            
+      # store original hash
+      creation_hash = attributes.clone
+
+      dynamic_attributes = creation_hash.strip_dynamic_attributes!
+
+      # raise exception if wrong value type given for ;__logging 
+      dynamic_attributes[ :__logging ].check_type( 
+
+        [ TrueClass, FalseClass ], 
+
+        "Wrong value type $1 for :__logging test object creation directive (expected $2)" 
+
+      ) if dynamic_attributes.has_key?( :__logging )
+
+      # disable logging if requested, remove pair from creation_hash
+      MobyUtil::Logger.instance.push_enabled( dynamic_attributes[ :__logging ] || TDriver.logger.enabled )
+
+	    # check if the hash contains symbols as values and translate those into strings
+	    translate!( creation_hash, attributes[ :__fname ], attributes[ :__plurality ], attributes[ :__numerus ], attributes[ :__lengthvariant ] )
+
+      begin
+
+        # TODO: refactor me
+        child_test_object = @test_object_factory.make_object(
+
+          # current object as parent, can be either TestObject or SUT
+          :parent => self,
+ 
+          # test object identification hash
+          :object_attributes_hash => creation_hash, 
+          
+          :identification_directives => dynamic_attributes
+
+        )
+
+
+      rescue Exception => exception
+
+        if exception.kind_of?( MobyBase::MultipleTestObjectsIdentifiedError )
+
+          description = "Multiple child objects matched criteria."
+
+        elsif exception.kind_of?( MobyBase::TestObjectNotFoundError )
+
+          description = "The child object(s) could not be found."
+
+        elsif exception.kind_of?( MobyBase::TestObjectNotVisibleError )
+
+          description = "Parent test object no longer visible."
+
+        else
+
+          description = "Failed when trying to find child object(s)."
+
+        end
+
+        TDriver.logger.behaviour(
+
+          "%s;%s;%s;%s;%s" % [ "FAIL", description, identity, dynamic_attributes[ :__multiple_objects ] ? "children" : "child", attributes.inspect ]
+
+        )
+
+        Kernel::raise exception
+
+=begin
+
+
+      rescue MobyBase::MultipleTestObjectsIdentifiedError => exception
+
+        MobyUtil::Logger.instance.log "behaviour", "FAIL;Multiple child objects matched criteria.;#{ id };sut;{};child;#{ attributes.inspect }"
+
+        Kernel::raise exception
+
+      rescue MobyBase::TestObjectNotFoundError => exception
+
+        MobyUtil::Logger.instance.log "behaviour", "FAIL;The child object could not be found.;#{ id };sut;{};child;#{ attributes.inspect }"
+
+        Kernel::raise exception
+
+      rescue Exception => exception
+
+        MobyUtil::Logger.instance.log "behaviour", "FAIL;Failed when trying to find child object.;#{ id };sut;{};child;#{ attributes.inspect }"
+
+        Kernel::raise exception
+=end
+
+      ensure
+
+        # restore original logger state
+        MobyUtil::Logger.instance.pop_enabled
+
+      end
+
+      # return child test object
+      child_test_object
+
+    end
+   
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
 
     # == description
     # Function similar to child, but returns an array of children test objects that meet the given criteria
@@ -551,9 +643,44 @@ module MobyBehaviour
 
     end
 
+    # == nodoc
+    # Changes the status of the test object to inactive, also deactivating all children
+    # Removes reference from @parent TestObject or SUT to this TestObject so that 
+    # @parent.refresh does not refresh currrent TestObject
+    #
+    # Does nothing if TestObject is already deactivated
+    # == returns 
+    # ?
+    def deactivate
+
+      return if !@_active
+
+      @_active = false
+
+      # iterate through all test objects child test objects
+      @child_object_cache.each_object{ | test_object |
+      
+        # deactivate test object
+        #test_object.deactivate
+ 
+        test_object.instance_exec{ deactivate }
+              
+      }
+
+      # remove test objects from children objects cache
+      @child_object_cache.remove_objects
+
+      # remove from parent objects children objects cache
+      @parent.instance_variable_get( :@child_object_cache ).remove_object( self )
+
+    end
+
+
     # TODO: refactor logging_enabled 
     # try to reactivate test object if currently not active
     def reactivate_test_object( attributes )
+
+      p __method__
 
       refresh_args = ( attributes[ :type ] == 'application' ? { :name => attributes[ :name ], :id => attributes[ :id ] } : { :id => get_application_id } )
 
@@ -631,6 +758,7 @@ module MobyBehaviour
 	    plurality = dynamic_attributes[ :__plurality ]
 	    numerus = dynamic_attributes[ :__numerus ]
 	    lengthvariant = dynamic_attributes[ :__lengthvariant ]
+
 	    translate!( creation_data, file_name, plurality, numerus, lengthvariant )
 
       # use custom timeout if defined
@@ -638,7 +766,7 @@ module MobyBehaviour
 
       # determine which application to refresh
       #application_id_hash = ( creation_data[ :type ] == 'application' ? { :name => creation_data[ :name ], :id => creation_data[ :id ] } : { :id => get_application_id } )
-      
+            
       if creation_data[ :type ] == 'application'
       
         application_id_hash = { :name => creation_data[ :name ], :id => creation_data[ :id ] }
@@ -655,7 +783,7 @@ module MobyBehaviour
       begin
 
         # try to reactivate test object if currently not active
-        reactivate_test_object( creation_data ) unless @_active
+        #reactivate_test_object( creation_data ) unless @_active
 
         # retrieve test objects from xml
         child_objects = @test_object_factory.make_child_objects( 
@@ -675,9 +803,6 @@ module MobyBehaviour
 
         # Type information is stored in a separate member, not in the Hash
         #creation_data.delete( :type )
-
-        
-
 
         child_objects.each do | child_object |
 
@@ -768,7 +893,7 @@ module MobyBehaviour
         #lets refresh if not found initially
         refresh_args = ( @creation_attributes[ :type ] == 'application' ? { :name => @creation_attributes[ :name ], :id => @creation_attributes[ :id ] } : { :id => get_application_id } )
 
-        refresh( refresh_args)
+        refresh( refresh_args )
 
         _xml_data = xml_data
 
@@ -794,19 +919,17 @@ module MobyBehaviour
     # this method will be automatically invoked after module is extended to sut object  
     def self.extended( target_object )
 
-      target_object.instance_exec{ initialize_settings }
-
-    end
-
-    def initialize_settings
-
-      @child_object_cache = TDriver::TestObjectCache.new
-    
-      # defaults
-      @_application_id = nil
-      @creation_attributes = nil
-
-      activate
+      target_object.instance_exec{ 
+      
+        # initialize cache object 
+        @child_object_cache = TDriver::TestObjectCache.new
+      
+        # defaults
+        @_application_id = nil
+        @creation_attributes = nil
+        @_active = true
+        
+      }
 
     end
 
