@@ -201,25 +201,35 @@ module MobyBase
       # retrieve sut object
       sut = parent.kind_of?( MobyBase::SUT ) ? parent : parent.sut
 
+      # create application refresh attributes hash
       if object_attributes_hash[ :type ] == 'application'
 
-        refresh_arguments = { 
-          :name           => object_attributes_hash[ :name ], 
-          :id             => object_attributes_hash[ :id ], 
-          :applicationUid => object_attributes_hash[ :applicationUid ] 
-        }
+        # collect :name, :id and :applicationUid from object_attributes_hash if found
+        refresh_arguments = object_attributes_hash.collect_keys( :name, :id, :applicationUid )
 
       else
+             
+        if parent.kind_of?( MobyBase::TestObject )
 
-        refresh_arguments = { :id => sut.current_application_id }
+          # get current application for test object
+          refresh_arguments = { :id => parent.get_application_id }
+
+        elsif parent.kind_of?( MobyBase::SUT )
+        
+          # get current application for sut
+          refresh_arguments = { :id => sut.current_application_id }
+
+        end
 
       end
-
+      
       # set default values 
       identification_directives.default_values(
       
+        # associated sut
         :__sut => sut,
 
+        # new child objects parent object
         :__parent => parent,
             
         # get timeout from rules hash or TestObjectFactory
@@ -245,12 +255,17 @@ module MobyBase
         # make search params
         :__search_params => get_parent_params( parent ).push( make_object_search_params( object_attributes_hash ) ),
       
+        # test object identificator to be used
         :__test_object_identificator => MobyBase::TestObjectIdentificator.new( object_attributes_hash )
       
       )
 
+      # add object identification attribute keys to dynamic attributes white list
+      MobyUtil::DynamicAttributeFilter.instance.add_attributes( object_attributes_hash.keys )
+
       child_objects = identify_object( object_attributes_hash, identification_directives, rules ).collect{ | test_object_xml |
             
+        # create new test object
         make_test_object2( 
         
           # sut object to t_o
@@ -271,7 +286,7 @@ module MobyBase
               
       }
 
-      # return test object(s)
+      # return test object(s); either one or multiple objects
       identification_directives[ :__multiple_objects ] ? child_objects : child_objects.first
 
     end

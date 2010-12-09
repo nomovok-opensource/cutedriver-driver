@@ -90,6 +90,13 @@ class Hash
 
   end
 
+  # collect given keypairs from hash 
+  def collect_keys( *keys )
+  
+    Hash[ self.select{ | key, value | true if keys.include?( key ) } ]
+  
+  end
+
   # store keys and values to hash if not already defined
   def default_values( hash )
 
