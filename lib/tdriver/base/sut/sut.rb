@@ -37,8 +37,9 @@ module MobyBase
     # sut_id:: String representing the identification of this SUT - the identification will need to match with group id in parameters xml
     def initialize( sut_controller, test_object_factory, sut_id )
 
-      @_sutController = sut_controller    
-      @test_object_factory = test_object_factory
+      @_sutController = sut_controller
+      
+      @test_object_factory = test_object_factory || TDriver::TestObjectFactory.new( :test_object_adapter => TDriver::TestObjectAdapter )
 
       @id = sut_id
       @input = :key

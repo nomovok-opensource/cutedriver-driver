@@ -29,6 +29,12 @@ require File.expand_path( File.join( File.dirname( __FILE__ ), 'factory' ) )
 # load test object cache
 require File.expand_path( File.join( File.dirname( __FILE__ ), 'cache' ) )
 
+# load test object adapter
+require File.expand_path( File.join( File.dirname( __FILE__ ), 'adapter' ) )
+
+# load verify ui module
+require File.expand_path( File.join( File.dirname( __FILE__ ), 'verification' ) )
+
 # load test object behaviours
 MobyUtil::FileHelper.load_modules( File.expand_path( File.join( File.dirname( __FILE__ ), 'behaviours' ) ) )
 
