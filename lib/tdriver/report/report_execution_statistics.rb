@@ -73,7 +73,7 @@ class ReportingStatistics
     status_heads << "<td><b>Dump count</b></td>"
     status_heads << "<td><b>Sent bytes</b></td>"
     status_heads << "<td><b>Received bytes</b></td>"
-    status_heads << "<td><b>Used mem difference</b></td>"
+    status_heads << "<td><b>Used mem</b></td>"
     status_heads
   end
 
@@ -105,7 +105,7 @@ class ReportingStatistics
           @total_statistics_arr[current_index]=["received bytes",total_status[1].to_i+received_bytes.to_i]
         end
         if total_status[0]=="used mem difference"
-          @total_statistics_arr[current_index]=["used mem difference",total_status[1].to_i+memory_usage.to_i]
+          @total_statistics_arr[current_index]=["used mem difference",""]
         end
         current_index+=1
       end
@@ -149,7 +149,7 @@ class ReportingStatistics
         end
         if total_status[1]=="used mem difference" && total_status[0]==tc_name
           b_test_in_statistics=true
-          @statistics_arr[current_index]=[tc_name,"used mem difference",total_status[2].to_i+memory_usage.to_i,tc_execution,tc_link]
+          @statistics_arr[current_index]=[tc_name,"used mem difference",total_status[2].to_i,tc_execution,tc_link]
         end
         current_index+=1
       end

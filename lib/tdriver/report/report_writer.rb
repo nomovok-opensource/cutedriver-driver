@@ -439,8 +439,14 @@ display: none;
     css=nil
   end
   def format_duration(seconds)
-    m, s = seconds.divmod(60)
-    "#{m}m#{'%.3f' % s}s"
+    if Gem.available?('chronic_duration')
+      require 'chronic_duration'
+      duration_str=ChronicDuration.output(seconds)
+    else
+      m, s = seconds.divmod(60)
+      duration_str="#{m}m#{'%.3f' % s}s"
+    end
+    duration_str
   end
   def behaviour_log_summary(log,log_format='string')
     begin
