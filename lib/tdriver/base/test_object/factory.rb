@@ -983,6 +983,8 @@ module MobyBase
     def get_parent_params( test_object )
 
       unless [ 'application', 'sut' ].include?( test_object.type ) 
+
+        search_params = []
       
         search_params.concat( get_parent_params( test_object.parent ) ) if test_object.parent         
         search_params.concat( [ { :className => test_object.type, :tasId => test_object.id } ] ) #if test_object

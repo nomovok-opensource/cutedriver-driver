@@ -69,7 +69,7 @@ module MobyBase
 
 				( rules[ :name ] == [ '*' ] ) &&
 
-				( !( rules[ :sut_type ] & behaviour[ :sut_type ] ).empty? ) && 
+#				( !( rules[ :sut_type ] & behaviour[ :sut_type ] ).empty? ) && 
 				( !( rules[ :input_type ] & behaviour[ :input_type ] ).empty? ) && 
 				( !( rules[ :object_type ] & behaviour[ :object_type ] ).empty? ) && 
 				( !( rules[ :version ] & behaviour[ :version ] ).empty? )
@@ -118,7 +118,7 @@ module MobyBase
 	  # merge user-defined rules on top of default rules set
 	  #rules = { :sut_type => ['*'], :object_type => ['*'], :input_type => ['*'], :version => ['*'] }.merge!( rules )
 
-      rules.default = ['*']
+    rules.default = ['*']
 
 	  Kernel::raise ArgumentError.new( "Target object not defined in rules hash" ) if rules[ :object ].nil?			
 
@@ -310,7 +310,7 @@ module MobyBase
 			:requires => root_attributes[ "plugin" ].to_s.split(";"),
 			:object_type => object_type.split(";"),
 			:input_type => input_type.split(";"),
-			:sut_type => sut_type.split(";"),
+#			:sut_type => sut_type.split(";"),
 			:version => version.split(";"),
 			:env => env.split(";"),
 
@@ -351,7 +351,7 @@ module MobyBase
 
 			  ( rules[ :name ] == [ '*' ] && 
 
-			   ( !( rules[ :sut_type ] & behaviour[ :sut_type ] ).empty? ) && 
+#			   ( !( rules[ :sut_type ] & behaviour[ :sut_type ] ).empty? ) && 
 			   ( !( rules[ :object_type ] & behaviour[ :object_type ] ).empty? ) &&
 			   ( !( rules[ :input_type ] & behaviour[ :input_type ] ).empty? ) &&
 			   ( !( rules[ :env ] & behaviour[ :env ] ).empty? ) &&

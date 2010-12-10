@@ -86,6 +86,7 @@ module MobyBase
 
 	  # retrieve plugin name that implements given sut
 	  sut_plugin = sut[ :sut_plugin, nil ]
+
 	  sut_env = sut[ :env, '*' ]
 
 	  # verify that sut plugin is defined in sut configuration
@@ -184,9 +185,9 @@ module MobyBase
 	  created_sut.apply_behaviour!( 
 								   :object_type => [ 'sut' ], 
 #								   :sut_type => [ '*', sut_type.upcase ], 
-								   :sut_type => [ '*', sut_type ], 
+#								   :sut_type => [ '*', sut_type ], 
 								   :input_type => [ '*', created_sut.input.to_s ],
-								   :env => [ '*', sut_env.to_s ],
+								   :env => [ '*', *sut_env.to_s.split(";") ],
 								   :version => [ '*', created_sut.ui_version.to_s ]
 								   )
 
