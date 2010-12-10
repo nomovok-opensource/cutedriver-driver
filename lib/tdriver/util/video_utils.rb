@@ -72,20 +72,32 @@ module MobyUtil
     # user_options: (optional) Hash, keys :fps, :width, :height can be used to overwrite defaults
 		def initialize( video_file, user_options = {} )
 		    
-		    begin
-		      require 'Win32API'			
-              #OSCARWEBCAMCONTROL_API long OscarWebCamControlStartEx(char* captureFile, double compQuality, DWORD dwBitsPerSec, long lFramesPerSec, long lCapWidth, long lCapHeight, bool bFlipV, bool bFlipH)
-              @_owcc_startex = Win32API.new( 'OscarWebCamControl', 'OscarWebCamControlStartEx', [ 'P', 'N', 'N', 'N', 'L', 'L', 'L', 'I', 'I'  ], 'L' )
-			  #OSCARWEBCAMCONTROL_API void OscarWebCamControlStop(long pTargetMediaControl)
-              @_owcc_stop = Win32API.new( 'OscarWebCamControl', 'OscarWebCamControlStop', [ 'L' ], 'V' )
-            rescue Exception => e
-              raise RuntimeError.new( "Failed to connect to video recording DLL file (OscarWebCamControl.dll). Details:\n" + e.message )
-            end
-		    
-            if user_options.has_key? :device
-              puts "WARNING: TDriverWinCam does not support the :device option. This setting is ignored."
-            end
-			
+      require 'Win32API'			
+
+      begin     
+      
+        @_owcc_startex = Win32API.new( 'TDriverWebCamControl', 'OscarWebCamControlStartEx', [ 'P', 'N', 'N', 'N', 'L', 'L', 'L', 'I', 'I'  ], 'L' )
+        @_owcc_stop = Win32API.new( 'TDriverWebCamControl', 'OscarWebCamControlStop', [ 'L' ], 'V' )
+   
+      rescue Exception => e
+      
+        begin 
+            
+          #OSCARWEBCAMCONTROL_API long OscarWebCamControlStartEx(char* captureFile, double compQuality, DWORD dwBitsPerSec, long lFramesPerSec, long lCapWidth, long lCapHeight, bool bFlipV, bool bFlipH)
+          @_owcc_startex = Win32API.new( 'OscarWebCamControl', 'OscarWebCamControlStartEx', [ 'P', 'N', 'N', 'N', 'L', 'L', 'L', 'I', 'I'  ], 'L' )
+          #OSCARWEBCAMCONTROL_API void OscarWebCamControlStop(long pTargetMediaControl)
+          @_owcc_stop = Win32API.new( 'OscarWebCamControl', 'OscarWebCamControlStop', [ 'L' ], 'V' )
+          
+        rescue Exception => ee
+          raise RuntimeError.new( "Failed to connect to video recording DLL file (TDriverWebCamControl.dll or OscarWebCamControl.dll). Details:\n" + ee.message )
+        end
+        
+      end
+
+      if user_options.has_key? :device
+        puts "WARNING: TDriverWinCam does not support the :device option. This setting is ignored."
+      end
+  
 		    @_control_id = nil
 			@_video_file = video_file
 		    @_rec_options = DEFAULT_OPTIONS.merge user_options
