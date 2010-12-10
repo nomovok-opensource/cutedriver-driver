@@ -57,8 +57,7 @@ module MobyUtil
     #  ==> Returns XML document object; default xml parser will be used. 
     #
     # == params
-    # xml_string:: String containing XML
-    # parser:: XML parser class e.g. MobyUtil::XML::Nokogiri
+    # xml_string:: String containing XML  
     # == return
     # Document:: XML document object
     # == raises
@@ -66,7 +65,7 @@ module MobyUtil
 
       begin
 
-        MobyUtil::XML::Document.new( nil, current_parser ).extend( @@parser::Document ).tap{ | document | 
+        MobyUtil::XML::Document.new( nil, @@parser ).extend( @@parser::Document ).tap{ | document | 
 
           # parse given string
           document.xml = document.parse( xml_string ) 
@@ -125,8 +124,7 @@ module MobyUtil
     #  ==> Returns XML document object; default xml parser will be used. 
     #
     # == params
-    # filename:: String containing path and filename of XML file.
-    # parser:: XML parser class e.g. MobyUtil::XML::Nokogiri
+    # filename:: String containing path and filename of XML file.    
     # == return
     # Document:: XML document object
     # == raises
@@ -136,7 +134,7 @@ module MobyUtil
       # raise exception if file not found
       Kernel::raise IOError.new( "File '%s' not found" % filename ) unless File.exist?( filename )
 
-      self.parse_string( IO.read( filename ), current_parser )
+      self.parse_string( IO.read( filename ) )
 
     end
 
