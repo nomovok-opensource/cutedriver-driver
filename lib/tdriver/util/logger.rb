@@ -218,21 +218,22 @@ module MobyUtil
 
 		def enable_raise_hooking
 
-			def Kernel::raise( exception )
+      # hook Kernel.raise
+			def Kernel::raise( *exception )
 
 				begin
 
-					super( exception )
+					super( *exception )
 
-				rescue => ex
+				rescue => raised_exception
 
-					ex.backtrace.slice!( 0 )
+					raised_exception.backtrace.slice!( 0 )
 
-					warn_array = [ '', "(%s) %s" % [ ex.class, ex.message.split("\n") ], '', ex.backtrace, '' ].flatten
+					warn_array = [ '', "(%s) %s" % [ raised_exception.class, raised_exception.message.split("\n") ], '', raised_exception.backtrace, '' ].flatten
 
 					MobyUtil::Logger.instance.log( 'warning', *warn_array )
 
-					super( ex )
+					super( raised_exception )
 
 				end
 
@@ -245,19 +246,58 @@ module MobyUtil
       if ARGV.include?( '--debug_exceptions' ) || TDriver.parameter[ :debug_exceptions, 'false' ].to_s.downcase == 'true'
 
         ARGV.delete('--debug_exceptions')
-
-	      # for debugging to see every occured exception
-	      def Kernel::raise( *args )
-
-		      exception = args.first || $!
-
-		      backtrace = caller.collect{ | line | "  %s" % line }.join("\n")
-
-		      puts "%s: %s\nBacktrace: \n%s\n\n" % [ exception.class, exception.message, backtrace ]
-
-		      super
-
+ 	      # for debugging to see every occured exception
+	      def Kernel.raise( *args )
+          #begin
+            # raise and catch exception  
+            super( *args )
+          #rescue
+            # remove wrapper call from backtrace 
+           # $!.backtrace.shift
+  		      #puts "%s: %s\nBacktrace: \n%s\n\n" % [ $!.class, $!.message, $!.backtrace.collect{ | line | "  %s" % line }.join("\n") ]
+            # raise exception again
+           # super $!          
+          #end
 	      end
+
+        # hook Object(Kernel)#raise
+        ::Object.class_exec{ 
+
+          ::Kernel.module_exec{
+
+            alias_method :original_raise, :raise
+
+            def raise( *args )
+
+              begin
+
+                # raise and catch exception  
+                original_raise( *args )
+
+              rescue
+
+                # remove wrapper calls from backtrace
+                while $!.backtrace.first =~ /(logger\.rb).*(raise)/
+                
+                  $!.backtrace.shift
+                
+                end
+                
+      		      puts "[debug] %s: %s\n[debug] Backtrace: \n[debug] %s\n\n" % [ 
+      		        $!.class, 
+      		        $!.message, 
+      		        $!.backtrace.collect{ | line | "  ... from %s" % line }.join("\n[debug] ") 
+    		        ]
+    		        
+                # raise exception again
+                original_raise $!
+
+              end            
+
+            end
+            
+          }
+        }
 
       end
 
