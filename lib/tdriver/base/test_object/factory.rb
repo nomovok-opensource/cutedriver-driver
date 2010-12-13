@@ -318,7 +318,7 @@ module TDriver
           :object_type  => [ '*', object_type ],
           :sut_type     => [ '*', sut.ui_type ],
           :input_type   => [ '*', sut.input.to_s ],
-          :env          => [ '*', env.to_s ],	   
+          :env          => [ '*', *env.split(";") ],	   
           :version      => [ '*', sut.ui_version ]								   
         )
 
@@ -1096,9 +1096,9 @@ module MobyBase
         # apply behaviours to test object
         test_object.apply_behaviour!(
           :object_type  => [ '*', object_type ],
-          :sut_type     => [ '*', sut.ui_type ],
+          #:sut_type     => [ '*', sut.ui_type ],
           :input_type   => [ '*', sut.input.to_s ],
-          :env          => [ '*', env.to_s ],	   
+          :env          => [ '*', *env.split(";") ],	   
           :version      => [ '*', sut.ui_version ]								   
         )
 
