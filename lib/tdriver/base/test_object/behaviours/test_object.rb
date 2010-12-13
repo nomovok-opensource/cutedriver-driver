@@ -119,37 +119,18 @@ module MobyBehaviour
     # @test_app = @sut.run(:name => 'testapp') # launches testapp 
     # puts @test_app.Triangle( :name => 'Triangle1' ).attribute('color') # prints color of triangle object
     def attribute( name )
-	  
-      # note: count of tries represents total number of tries
-      MobyUtil::Retryable.while( :tries => 2, :interval => 0 ) { | attempt |
 
-        begin
-  
-          # find attribute from xml
-          find_attribute( name )
+      # raise exception if attribute name variable type is other than string
+      name.check_type( [ String, Symbol ], "Wrong argument type %s for attribute (expected $2)" )
+	  	
+      # convert name to string if variable type is symbol
+      name = name.to_s if name.kind_of?( Symbol )
 
-        rescue MobyBase::AttributeNotFoundError
-
-          # do following actions only once
-          if ( attempt == 1 )
-
-            # add to dynamic attribute filter once
-            MobyUtil::DynamicAttributeFilter.instance.add_attribute( name )
-
-            # refresh ui state
-            refresh #( :id => get_application_id )
-
-          end
-
-          # raise exception and retry if attempts left
-          raise
-
-        end
-
-      }
+      # retrieve attribute value 
+      find_attribute( name )
 
     end
-		
+
     # == description
     # Returns the parent test object for the current object in question, according to the UI object hierarchy. For getting the test object that was actually used 
     # as the parent when the test object instance was created, see parent_object.
@@ -1040,47 +1021,79 @@ module MobyBehaviour
 
     end
 
+    # TODO: document me
     def find_attribute( name )
-
-      # raise exception if attribute name variable type is other than string
-      #Kernel::raise ArgumentError.new( "Wrong argument type %s for attribute argument (expected String)" % name.class ) unless name.kind_of?( String )
-      name.check_type( [ String, Symbol ], "Wrong argument type %s for attribute (expected $2)" )
-
-      # convert name to string if variable type is symbol
-      name = name.to_s if name.kind_of?( Symbol )
 
       # store xml data to variable, due to xml_data is a function that returns result of xpath to sut.xml_data
       _xml_data = nil
 
-      begin
+      # note: tries count represents total number of tries
+      MobyUtil::Retryable.while( :tries => 2, :interval => 0 ) { | attempt |
 
-        _xml_data = xml_data
+        begin
+  
+          begin
 
-      rescue MobyBase::TestObjectNotFoundError		
+            # retrieve xml data, performs xpath to sut xml_data
+            _xml_data = xml_data
 
-        #lets refresh if not found initially
-        refresh_args = ( @creation_attributes[ :type ] == 'application' ? { :name => @creation_attributes[ :name ], :id => @creation_attributes[ :id ] } : { :id => get_application_id } )
+          rescue MobyBase::TestObjectNotFoundError		
 
-        refresh( refresh_args )
+            # attributes used to refresh parent application
+            if @creation_attributes[ :type ] == 'application'
 
-        _xml_data = xml_data
+              # use application name and id attributes
+              refresh_args = { :name => @creation_attributes[ :name ], :id => @creation_attributes[ :id ] }
 
-      end
+            else
 
-      # raise eception if xml data is empty or nil
-      Kernel::raise MobyBase::TestObjectNotInitializedError.new if _xml_data.nil? || _xml_data.to_s.empty?
+              # test object if not type of application
+              refresh_args = { :id => get_application_id }
 
-      # retrieve attribute(s) from xml
-      #nodeset = _xml_data.xpath( "attributes/attribute[translate(@name,'ABCDEFGHIJKLMNOPQRSTUVWXYZ','abcdefghijklmnopqrstuvwxyz')='%s']" % name.downcase )
-      nodeset = _xml_data.xpath( "attributes/attribute[translate(@name,'ABCDEFGHIJKLMNOPQRSTUVWXYZ','abcdefghijklmnopqrstuvwxyz')='#{ name.downcase }']" ) 
+            end
 
-      # raise exception if no such attribute found
-      Kernel::raise MobyBase::AttributeNotFoundError.new( "Could not find attribute '%s' for test object of type '%s'." % [ name, type ] ) if nodeset.empty? 
+            #lets refresh if attribute not found on first attempt
+            refresh( refresh_args )
 
-      # Need to disable this for now #Kernel::raise MobyBase::MultipleAttributesFoundError.new( "Multiple attributes found with name '%s'" % name ) if nodeset.count > 1
+            # retrieve updated xml data
+            _xml_data = xml_data
 
-      # return found attribute
-      nodeset.first.content.strip
+          end
+
+          # raise eception if xml data is empty or nil
+          Kernel::raise MobyBase::TestObjectNotInitializedError.new if _xml_data.nil? || _xml_data.to_s.empty?
+
+          # retrieve attribute(s) from xml
+          #nodeset = _xml_data.xpath( "attributes/attribute[translate(@name,'ABCDEFGHIJKLMNOPQRSTUVWXYZ','abcdefghijklmnopqrstuvwxyz')='%s']" % name.downcase )
+          nodeset = _xml_data.xpath( "attributes/attribute[translate(@name,'ABCDEFGHIJKLMNOPQRSTUVWXYZ','abcdefghijklmnopqrstuvwxyz')='#{ name.downcase }']" ) 
+
+          # raise exception if no such attribute found
+          Kernel::raise MobyBase::AttributeNotFoundError.new( "Could not find attribute '%s' for test object of type '%s'." % [ name, type ] ) if nodeset.empty? 
+
+          # Need to disable this for now #Kernel::raise MobyBase::MultipleAttributesFoundError.new( "Multiple attributes found with name '%s'" % name ) if nodeset.count > 1
+
+          # return found attribute
+          nodeset.first.content.strip
+
+        rescue MobyBase::AttributeNotFoundError
+
+          # add attribute to attribute filter whitelist only once
+          if ( attempt == 1 )
+
+            # add to attribute filter 
+            MobyUtil::DynamicAttributeFilter.instance.add_attribute( name )
+
+            # refresh test object ui state
+            refresh
+
+          end
+
+          # raise exception and retry if attempts left
+          raise
+
+        end
+
+      }
 
     end
 
@@ -1100,7 +1113,6 @@ module MobyBehaviour
       }
 
     end
-
 
   public
 
