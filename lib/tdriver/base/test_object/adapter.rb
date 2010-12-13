@@ -67,6 +67,24 @@ module TDriver
       ]
 
     end
+    
+    def self.parent_test_object_element( test_object )
+
+      # retrieve parent of current xml element; objects/object/objects/object/../..
+      test_object.xml_data.parent.parent
+    
+    end
+
+    # TODO: document me
+    def self.test_object_element_attributes( source_data )
+
+      Hash[
+        source_data.attributes.collect{ | key, value | 
+          [ key.to_s, value.to_s ]
+        }
+      ]
+
+    end
 
     # TODO: document me
     def self.test_object_element_attribute( name, source_data, &block )
