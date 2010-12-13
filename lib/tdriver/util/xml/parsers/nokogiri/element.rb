@@ -115,7 +115,7 @@ module MobyUtil
 
         def at_xpath( xpath_query, *args, &block )
 
-          @xml.at_xpath( xpath_query, *args, &block ).to_s
+          element_object( @xml.at_xpath( xpath_query, *args, &block ) )
 
         end
 

@@ -52,6 +52,23 @@ module TDriver
     end
 
     # TODO: document me
+    def self.test_object_attributes( source_data )
+    
+      # return hash of test object attributes
+      Hash[ 
+
+        # iterate each attribute and collect name and value      
+        source_data.xpath( 'attributes/attribute' ).collect{ | test_object | 
+
+          [ test_object.attribute( 'name' ), test_object.xpath( 'value' ).first.content ]
+
+        } 
+
+      ]
+
+    end
+
+    # TODO: document me
     def self.test_object_element_attribute( name, source_data, &block )
 
       result = source_data.attribute( name )

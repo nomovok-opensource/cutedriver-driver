@@ -89,8 +89,36 @@ module MobyBehaviour
     # attributes_hash = @test_app.Triangle( :name => 'Triangle1' ).attributes # retrieve all attribute for triangle object
     def attributes
 
+      begin
+
+        # retrieve xml data, performs xpath to sut xml_data
+        _xml_data = xml_data
+
+      rescue MobyBase::TestObjectNotFoundError		
+
+        # attributes used to refresh parent application
+        if @creation_attributes[ :type ] == 'application'
+
+          # use application name and id attributes
+          refresh_args = { :name => @creation_attributes[ :name ], :id => @creation_attributes[ :id ] }
+
+        else
+
+          # test object if not type of application
+          refresh_args = { :id => get_application_id }
+
+        end
+
+        #lets refresh if attribute not found on first attempt
+        refresh( refresh_args )
+
+        # retrieve updated xml data
+        _xml_data = xml_data
+
+      end
+
       # return hash of test object attributes
-      Hash[ xml_data.xpath( 'attributes/attribute' ).collect{ | test_object | [ test_object.attribute( 'name' ), test_object.content ] } ]
+      TDriver::TestObjectAdapter.test_object_attributes( _xml_data )
 
     end
 
