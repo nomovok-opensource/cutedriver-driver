@@ -21,11 +21,12 @@ module TDriver
 
   class TestObjectAdapter
 
+    # private methods and variables
     class << self
     
       private
       
-        # private
+        # TODO: document me
         def xpath_to_object( rules )
 
           # object element attribute or attribute element 
@@ -50,17 +51,17 @@ module TDriver
     
     end
 
+    # TODO: document me
     def self.test_object_attribute( name, source_data )
 
       source_data.attribute( name ).to_s
 
     end
 
-    # public
-		# find_all_children:: Boolean specifying whether all children under the test node or just immediate children should be retreived.
+		# TODO: document me
     def self.get_objects( source_data, rules )
 
-	    rule = xpath_to_object( rules ) 
+	    rule = xpath_to_object( rules )
 
 			[ 
 			  # perform xpath to source xml data
@@ -70,27 +71,24 @@ module TDriver
     
     end
 
+    # TODO: document me
     def self.create_child_accessors!( test_object, source_data )
 
-      created_accessors = []
+      # iterate through each child object type and create accessor method  
+      source_data.xpath( 'objects/object/@type' ).each{ | object_type |
 
-      source_data.xpath( 'objects/object' ).each{ | object_element |
+        # object type content as string
+        object_type = object_type.content
 
-        object_element.attribute( 'type' ).tap{ | object_type |
+        # skip if child accessor is already created 
+        next if test_object.respond_to?( object_type ) 
 
-          unless created_accessors.include?( object_type ) || object_type.empty? then
+        # create child accessor method to test object unless already exists
+        test_object.instance_eval(
 
-          test_object.instance_eval(
+          "def #{object_type}(rules={}); raise TypeError,'parameter <rules> should be hash' unless rules.kind_of?(Hash); rules[:type]=:#{object_type}; child(rules); end;"
 
-            "def %s( rules={} ); raise TypeError, 'parameter <rules> should be hash' unless rules.kind_of?( Hash ); rules[:type] = :%s; child( rules ); end;" % [ object_type, object_type ]
-
-          )
-
-          created_accessors << object_type
-
-        end
-
-        }
+        ) unless object_type.empty?
 
       }
 

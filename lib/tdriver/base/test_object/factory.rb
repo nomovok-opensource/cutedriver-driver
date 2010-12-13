@@ -1102,7 +1102,10 @@ module MobyBase
           :version      => [ '*', sut.ui_version ]								   
         )
 
-        create_child_accessors!( test_object )
+        #create_child_accessors!( test_object )
+
+        TDriver::TestObjectAdapter.create_child_accessors!( test_object, xml_object )
+
 
         # set given parent in rules hash as parent object to new child test object    
         test_object.instance_variable_set( :@parent, parent )
