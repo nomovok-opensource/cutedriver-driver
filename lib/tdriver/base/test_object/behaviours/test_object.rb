@@ -377,6 +377,7 @@ module MobyBehaviour
 
     end
 
+=begin
     # == description
     # Creates a child test object of this test object. Caller object will be associated as child test objects parent.\n
     # \n
@@ -493,27 +494,6 @@ module MobyBehaviour
 
         Kernel::raise exception
 
-=begin
-
-
-      rescue MobyBase::MultipleTestObjectsIdentifiedError => exception
-
-        MobyUtil::Logger.instance.log "behaviour", "FAIL;Multiple child objects matched criteria.;#{ id };sut;{};child;#{ attributes.inspect }"
-
-        Kernel::raise exception
-
-      rescue MobyBase::TestObjectNotFoundError => exception
-
-        MobyUtil::Logger.instance.log "behaviour", "FAIL;The child object could not be found.;#{ id };sut;{};child;#{ attributes.inspect }"
-
-        Kernel::raise exception
-
-      rescue Exception => exception
-
-        MobyUtil::Logger.instance.log "behaviour", "FAIL;Failed when trying to find child object.;#{ id };sut;{};child;#{ attributes.inspect }"
-
-        Kernel::raise exception
-=end
 
       ensure
 
@@ -527,7 +507,105 @@ module MobyBehaviour
 
     end
    
+=end
+
+    # == description
+    # Creates a child test object of this test object. Caller object will be associated as child test objects parent.\n
+    # \n
+    # [b]NOTE:[/b] Subsequent calls to TestObject#child( rule ) always returns reference to same Testobject:\n
+    # [code]a = to.child( :type => 'Button', :text => '1' )
+    # b = to.child( :type => 'Button', :text => '1' )
+    # a.eql?( b ) # => true[/code]
+    # == arguments
+    # attributes
+    #  Hash
+    #   description: Hash object holding information for identifying which child to create
+    #   example: { :type => :slider }
+    #
+    # == returns
+    # MobyBase::TestObject
+    #  description: new child test object or reference to existing child
+    #  example: -
+    #
+    # == exceptions
+    # TypeError
+    #  description: Wrong argument type %s for attributes (expected Hash)
+    #
+    # MultipleTestObjectsIdentifiedError
+    #  description:  raised if multiple objects found that match the given attributes
+    #
+    # TestObjectNotFoundError
+    #  description:  raised if the child object could not be found
+    #
+    # TestObjectNotVisibleError
+    #  description: rasied if the parent test object is no longer visible
+    def child( attributes )
+
+      # verify attributes argument format
+      attributes.check_type( Hash, "Wrong argument type $1 for attributes (expected $2)" )
     
+      get_child_objects( attributes )
+    
+    end
+    
+    # == description
+    # Function similar to child, but returns an array of children test objects that meet the given criteria
+    #
+    # == arguments
+    # attributes
+    #  Hash
+    #   description: object holding information for identifying which child to create
+    #   example: { :type => :slider }
+    #  
+    # find_all_children
+    #  TrueClass
+    #   description: Boolean specifying whether all children under the test node or just immediate children should be retreived
+    #   example: true
+    #  FalseClass
+    #   description: Boolean specifying whether all children under the test node or just immediate children should be retreived
+    #   example: false
+    #   
+    # == returns
+    # Array
+    #   description: An array of test objects
+    #   example: [ MobyBase::TestObject, MobyBase::TestObject, MobyBase::TestObject, ... ]
+    #
+    # == exceptions
+    # TypeError
+    #  description: raised if agument is not a Hash
+    #
+    # TestObjectNotFoundError
+    #  description: raised if the child object could not be found
+    #
+    # TestObjectNotVisibleError
+    #  description: rasied if the parent test object is no longer visible
+    def children( attributes, find_all_children = true )
+
+      # verify attributes argument format
+      attributes.check_type( Hash, "Wrong argument type $1 for attributes (expected $2)" )
+
+      # verify find_all_children argument format
+      find_all_children.check_type( [ TrueClass, FalseClass ], "Wrong argument type $1 for find_all_children (expected $2)" )
+
+      # If empty or only special attributes then add :type => "any" to search all
+      attributes.merge!( :type => "any" ) if creation_attributes.select{ | key, value | key.to_s !~ /^__/ ? true : false }.empty?
+
+      # children method specific settings
+      attributes.merge!( :__multiple_objects => true, :__find_all_children => find_all_children )
+
+      # disable optimizer state if enabled
+	    disable_optimizer
+
+      # retrieve child objects
+      result = get_child_objects( attributes )
+
+      # restore optimizer state if it was enabled
+	    enable_optimizer
+
+      # return results
+      result
+    
+    end
     
     
     
@@ -643,6 +721,95 @@ module MobyBehaviour
 
     end
 
+    # helper function to retrieve child oblect(s), used by child and children methods
+    def get_child_objects( attributes )
+
+      ###############################################################################################################
+      #
+      #  NOTICE: Please do not add anything unnessecery to this method, it might cause a major performance impact
+      #
+            
+      # store original hash
+      creation_hash = attributes.clone
+
+      dynamic_attributes = creation_hash.strip_dynamic_attributes!
+
+      # raise exception if wrong value type given for ;__logging 
+      dynamic_attributes[ :__logging ].check_type( 
+
+        [ TrueClass, FalseClass ], 
+
+        "Wrong value type $1 for :__logging test object creation directive (expected $2)" 
+
+      ) if dynamic_attributes.has_key?( :__logging )
+
+      # disable logging if requested, remove pair from creation_hash
+      MobyUtil::Logger.instance.push_enabled( dynamic_attributes[ :__logging ] || TDriver.logger.enabled )
+
+	    # check if the hash contains symbols as values and translate those into strings
+	    translate!( creation_hash, attributes[ :__fname ], attributes[ :__plurality ], attributes[ :__numerus ], attributes[ :__lengthvariant ] )
+
+      begin
+
+        # TODO: refactor me
+        child_test_object = @test_object_factory.make_object(
+
+          # current object as parent, can be either TestObject or SUT
+          :parent => self,
+ 
+          # test object identification hash
+          :object_attributes_hash => creation_hash, 
+          
+          :identification_directives => dynamic_attributes
+
+        )
+
+      rescue Exception => exception
+
+        if exception.kind_of?( MobyBase::MultipleTestObjectsIdentifiedError )
+
+          description = "Multiple child objects matched criteria."
+
+        elsif exception.kind_of?( MobyBase::TestObjectNotFoundError )
+
+          description = "The child object(s) could not be found."
+
+        elsif exception.kind_of?( MobyBase::TestObjectNotVisibleError )
+
+          description = "Parent test object no longer visible."
+
+        else
+
+          description = "Failed when trying to find child object(s)."
+
+        end
+
+        TDriver.logger.behaviour(
+
+          "%s;%s;%s;%s;%s" % [ 
+            "FAIL", 
+            description, 
+            identity, 
+            dynamic_attributes[ :__multiple_objects ] ? "children" : "child", 
+            attributes.inspect 
+          ]
+
+        )
+
+        Kernel::raise exception
+
+      ensure
+
+        # restore original logger state
+        MobyUtil::Logger.instance.pop_enabled
+
+      end
+
+      # return child test object
+      child_test_object
+
+    end
+
     # == nodoc
     # Changes the status of the test object to inactive, also deactivating all children
     # Removes reference from @parent TestObject or SUT to this TestObject so that 
@@ -679,8 +846,6 @@ module MobyBehaviour
     # TODO: refactor logging_enabled 
     # try to reactivate test object if currently not active
     def reactivate_test_object( attributes )
-
-      p __method__
 
       refresh_args = ( attributes[ :type ] == 'application' ? { :name => attributes[ :name ], :id => attributes[ :id ] } : { :id => get_application_id } )
 
@@ -737,6 +902,8 @@ module MobyBehaviour
 
     end
 
+
+=begin
     def get_child_objects( attributes )
 
       # create copy of attributes hash
@@ -860,6 +1027,7 @@ module MobyBehaviour
       end
 
     end
+=end
 
     # Creates a string identifying this test object: sut, type, attributes used when created
     #
@@ -933,12 +1101,6 @@ module MobyBehaviour
 
     end
 
-    # == description
-    # Returns the actual test object that was used as the parent when this object instance was created. For getting the parent object in the UI object hierarchy, 
-    # see get_parent.
-    #
-    # == returns
-    # TestObject:: test object that was used as parent when this object was created. Can also be of type SUT if sut was the parent (ie. application objects)
 
   public
 
@@ -950,6 +1112,14 @@ module MobyBehaviour
     # This method is deprecated, please use TestObject#parent
     #
     def parent_object()
+
+      # == description
+      # Returns the actual test object that was used as the parent when this object instance was created. 
+      # Userd to retrieve the parent object in the UI object hierarchy, 
+      # see get_parent.
+      #
+      # == returns
+      # TestObject:: test object that was used as parent when this object was created. Can also be of type SUT if sut was the parent (ie. application objects)
 
       $stderr.puts "warning: TestObject#parent_object is deprecated, please use TestObject#parent instead."      
 
