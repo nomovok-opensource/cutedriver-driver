@@ -120,6 +120,8 @@ module MobyBehaviour
     # puts @test_app.Triangle( :name => 'Triangle1' ).attribute('color') # prints color of triangle object
     def attribute( name )
 
+      # TODO: add behaviour logging?
+
       # raise exception if attribute name variable type is other than string
       name.check_type( [ String, Symbol ], "Wrong argument type %s for attribute (expected $2)" )
 	  	
@@ -228,10 +230,13 @@ module MobyBehaviour
     # TestObjectNotFoundError:: if TestObject is not identified within synch timeout.
     def refresh( refresh_args = {} )
 
-	    object_search_params = @test_object_factory.make_object_search_params(@creation_attributes)
-	    search_params = @test_object_factory.get_parent_params(parent)
-	    search_params.push(object_search_params)	    
-      @sut.refresh( refresh_args, search_params )
+      @sut.refresh( 
+      
+        refresh_args, 
+        
+        @test_object_factory.get_parent_params( parent ) <<  @test_object_factory.make_object_search_params( @creation_attributes )
+        
+      )
 
     end
 
@@ -1021,7 +1026,8 @@ module MobyBehaviour
 
     end
 
-    # TODO: document me
+    # TODO: document me; 
+    # NOTE: this method should be called only internally, TestObject#attribute is end-user method that shouldn't be called inside framework
     def find_attribute( name )
 
       # store xml data to variable, due to xml_data is a function that returns result of xpath to sut.xml_data
@@ -1063,17 +1069,20 @@ module MobyBehaviour
           # raise eception if xml data is empty or nil
           Kernel::raise MobyBase::TestObjectNotInitializedError.new if _xml_data.nil? || _xml_data.to_s.empty?
 
-          # retrieve attribute(s) from xml
-          #nodeset = _xml_data.xpath( "attributes/attribute[translate(@name,'ABCDEFGHIJKLMNOPQRSTUVWXYZ','abcdefghijklmnopqrstuvwxyz')='%s']" % name.downcase )
-          nodeset = _xml_data.xpath( "attributes/attribute[translate(@name,'ABCDEFGHIJKLMNOPQRSTUVWXYZ','abcdefghijklmnopqrstuvwxyz')='#{ name.downcase }']" ) 
+          begin
+          
+            # retrieve attribute(s) from test object; never access ui state xml data directly from behaviour implementation
+            TDriver::TestObjectAdapter.test_object_attribute( name, _xml_data )
 
-          # raise exception if no such attribute found
-          Kernel::raise MobyBase::AttributeNotFoundError.new( "Could not find attribute '%s' for test object of type '%s'." % [ name, type ] ) if nodeset.empty? 
+          rescue MobyBase::AttributeNotFoundError
+          
+            Kernel::raise MobyBase::AttributeNotFoundError.new(
+            
+              "Could not find attribute #{ @name.inspect } for test object of type #{ @type.to_s }"
+              
+            )
 
-          # Need to disable this for now #Kernel::raise MobyBase::MultipleAttributesFoundError.new( "Multiple attributes found with name '%s'" % name ) if nodeset.count > 1
-
-          # return found attribute
-          nodeset.first.content.strip
+          end
 
         rescue MobyBase::AttributeNotFoundError
 

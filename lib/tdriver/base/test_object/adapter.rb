@@ -52,9 +52,75 @@ module TDriver
     end
 
     # TODO: document me
-    def self.test_object_attribute( name, source_data )
+    def self.test_object_element_attribute( name, source_data, &block )
 
-      source_data.attribute( name ).to_s
+      result = source_data.attribute( name )
+      
+      unless result
+            
+        if block_given?
+        
+          yield
+        
+        else
+        
+          # raise exception if no such attribute found
+          Kernel::raise MobyBase::AttributeNotFoundError.new(
+          
+            "Could not find test object element attribute #{ attribute_name.inspect }"
+            
+          )
+        
+        end
+      
+      else
+      
+        result
+      
+      end
+
+    end
+
+    # TODO: document me
+    def self.test_object_attribute( attribute_name, source_data, &block )
+
+      # retrieve attribute(s) from xml
+      nodeset = source_data.xpath(
+       
+        "attributes/attribute[translate(@name,'ABCDEFGHIJKLMNOPQRSTUVWXYZ','abcdefghijklmnopqrstuvwxyz')='#{ attribute_name.downcase }']" # /value/text()"
+        
+      )
+
+      # if no attributes found call optional code block or raise exception 
+      if nodeset.empty? 
+
+        if block_given?
+
+          # pass return value of block as result
+          yield
+
+        else
+
+          # raise exception if no such attribute found
+          Kernel::raise MobyBase::AttributeNotFoundError.new(
+          
+            "Could not find attribute #{ attribute_name.inspect }" # for test object of type #{ type.to_s }"
+            
+          )
+          
+        end
+
+      else
+      
+        # attribute(s) found
+        # Need to disable this for now 
+        # Kernel::raise MobyBase::MultipleAttributesFoundError.new( "Multiple attributes found with name '%s'" % name ) if nodeset.count > 1
+
+        # return found attribute
+        nodeset.first.content.strip
+        
+      end
+
 
     end
 
