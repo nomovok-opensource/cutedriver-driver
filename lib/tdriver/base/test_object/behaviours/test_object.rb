@@ -171,52 +171,103 @@ module MobyBehaviour
     # == example
     # @app = @sut.run(:name => 'testapp') # launches testapp 
     # parent_test_object = @app.Node( :name => 'Node1' ).get_parent() #get parent for some test object
-    def get_parent()
+    def get_parent
 
+      # return current test object if it's type of application
       return self if application?
 
-	  @sut.refresh if disable_optimizer
+      @sut.refresh if disable_optimizer
 
-      #find parent id
-      #element_set = @sut.xml_data.xpath( "//object/objects/object[@id='%s']/../.." % @id )
+      # retrieve parent of current xml element; objects/object/objects/object/../..
+      parent_element = TDriver::TestObjectAdapter.parent_test_object_element( self )
+
+      # retrieve parent element attributes
+      parent_attributes = TDriver::TestObjectAdapter.test_object_element_attributes( parent_element )
+
+      if self.get_application_id && parent_attributes[ 'type' ] != 'application'
+
+        parent = @sut.child( 
+
+          :id => get_application_id, 
+          :type => 'application' 
+
+        ).child( 
+
+          :id => parent_attributes[ 'id' ], 
+          :name => parent_attributes[ 'name' ], 
+          :type => parent_attributes[ 'type' ],
+
+          # there was a case when the same parent was included twice in the ui dump
+          :__index => 0 
+        )
+
+      else
+
+        parent = @sut.child( 
+          :id => parent_attributes[ 'id' ], 
+          :name => parent_attributes[ 'name' ],
+          :type => parent_attributes[ 'type' ]
+        )
+
+      end
+
+      enable_optimizer
+
+      parent
+      
+
+=begin
+
+      # return current test object if it's type of application
+      return self if application?
+
+      @sut.refresh if disable_optimizer
+
+      # find parent id
       element_set = @sut.xml_data.xpath( "//object/objects/object[@id='#{ @id }']/../.." )
 
-	  kid = nil 	  
-	  if( element_set == nil or element_set.size == 0 )
-		kid = self 
-	  else
-		element = element_set.first
+      kid = nil
 
-		#if app set look for the item under the app to make sure app id is available
+      if( element_set == nil or element_set.size == 0 )
+      
+        # return self if there is not parent object available
+        kid = self 
+        
+      else
+      
+        element = element_set.first
 
-		if self.get_application_id && element.attribute( "type" ) != 'application'
+        #if app set look for the item under the app to make sure app id is available
 
-		  kid = @sut.child( 
+        if self.get_application_id && element.attribute( "type" ) != 'application'
 
-						   :id => get_application_id, 
-						   :type => 'application' 
+          kid = @sut.child( 
+            :id => get_application_id, 
+            :type => 'application' 
+          ).child( 
+            :id => element.attribute( "id" ), 
+            :name => element.attribute( "name" ), 
+            :type => element.attribute( "type" ),
+            :__index => 0 # there was a case when the same parent was included twice in the ui dump
+          )
 
-						   ).child( 
+        else
 
-								   :id => element.attribute( "id" ), 
-								   :name => element.attribute( "name" ), 
-								   :type => element.attribute( "type" ),
-								   :__index => 0 # there was a case when the same parent was included twice in the ui dump
+          kid = @sut.child( 
+            :id => element.attribute( "id" ), 
+            :name => element.attribute( "name" ), 
+            :type => element.attribute( "type" ) 
+          )
 
-								   )
+        end
 
-		else
+      end
 
-		  kid = @sut.child( 
-						   :id => element.attribute( "id" ), 
-						   :name => element.attribute( "name" ), 
-						   :type => element.attribute( "type" ) 
-						   )
+      enable_optimizer
 
-		end
-	  end
-	  enable_optimizer
-	  kid
+      kid
+=end
+
     end
     
     # == nodoc
