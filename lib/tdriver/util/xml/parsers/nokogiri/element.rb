@@ -113,6 +113,12 @@ module MobyUtil
 
         end
 
+        def at_xpath( xpath_query, *args, &block )
+
+          @xml.at_xpath( xpath_query, *args, &block ).to_s
+
+        end
+
         def replace( other )
 
           @xml.replace( other.xml )
