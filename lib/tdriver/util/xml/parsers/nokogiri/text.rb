@@ -23,13 +23,19 @@ module MobyUtil
 
     module Nokogiri
 
-      module Attribute
+      module Text # behaviour
 
-        include Abstraction
+        include Abstraction 
 
-        def value
+        def parent
+        
+          element_object( @xml.parent )
+        
+        end
 
-          @xml.value
+        def to_s
+  
+          @xml.content
 
         end
 
@@ -39,26 +45,13 @@ module MobyUtil
 
         end
 
-        def name
-
-          @xml.name
-
-        end
-
-        def to_s
-
-          @xml.value
-
-        end
-
         # enable hooking for performance measurement & debug logging
         MobyUtil::Hooking.instance.hook_methods( self ) if defined?( MobyUtil::Hooking )
 
-      end      
+      end # Element
 
     end # Nokogiri
 
   end # XML
 
 end # MobyUtil
-

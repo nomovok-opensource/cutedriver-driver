@@ -21,44 +21,12 @@ module MobyUtil
 
   module XML
 
-    module Nokogiri
+    class Text
 
-      module Attribute
+      include Abstraction
 
-        include Abstraction
-
-        def value
-
-          @xml.value
-
-        end
-
-        def content
-
-          @xml.content
-
-        end
-
-        def name
-
-          @xml.name
-
-        end
-
-        def to_s
-
-          @xml.value
-
-        end
-
-        # enable hooking for performance measurement & debug logging
-        MobyUtil::Hooking.instance.hook_methods( self ) if defined?( MobyUtil::Hooking )
-
-      end      
-
-    end # Nokogiri
+    end # Text
 
   end # XML
 
 end # MobyUtil
-
