@@ -254,8 +254,8 @@ module MobyUtil
 		#
 		# language
 		#  String
-		#   description: Name of the language column to be used. This is normally the language code found on the .ts or .qm translation files
-		#   example: "en"
+		#   description: Name of the language column to be used. This is normally the language postfix found on the .ts, .qm translation files. On .loc file postfix numbers are mapped to similar language codes according to standards in Symbian literature and others, check the localization.db implementation file for the full mapping.
+		#   example: "en" or "es_416" or "en_us"
 		#
 		# table_name
 		#  String
@@ -370,7 +370,7 @@ module MobyUtil
 		#
 		# column_names_map
 		#  Hash
-		#   description: Hash with the language codes from the translation files as keys and the desired column names as values
+		#   description: Use this parameter to change the default language names. The default language postfix translation files (.ts, .qm or .loc) as keys and the desired column names as values
 		#   example: {"en" => "en_GB"}
 		#
 		# record_sql
@@ -481,9 +481,9 @@ module MobyUtil
 			# Read TS file
 			open_file = File.new( file )
 			doc = Nokogiri.XML( open_file )
-			language = doc.xpath('.//TS').attribute("language")
+			# language = doc.xpath('.//TS').attribute("language")
 			# IF filename-to-columnname mapping is provided update language
-			fname = parseFName(file)
+			fname, language = parseFName(file)
 			if (!column_names_map.empty?)
 				language_code = file.split('/').last.gsub(fname + "_" ){|s| ""}.gsub(".ts"){|s| ""}
 				language = column_names_map[ language_code ] if column_names_map.key?( language_code )
@@ -728,7 +728,8 @@ module MobyUtil
 				end
 			end
 			fname.gsub!(".ts"){|s| ""} 
-			return fname #gsub! will return nil if now subs are performed
+      language = file.split('/').last.gsub( fname + "_" ){|s| ""}.gsub(".ts"){|s| ""}
+			return fname, language  #gsub! will return nil if now subs are performed
 		end
 		
 	end # class
