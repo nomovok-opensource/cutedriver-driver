@@ -61,7 +61,9 @@ module MobyBase
 		# === raises
 		# nothing
 		def eql?( other_test_object )
+
 			self == other_test_object
+
 		end
 
 		# Function to verify is DATA of two TestObjects are the same, 
@@ -86,7 +88,10 @@ module MobyBase
 			#return true
 
 			# optimized version			
-			other_test_object.instance_of?( MobyBase::TestObject ) && ( @type == other_test_object.type ) && ( @id == other_test_object.id ) && (@name == other_test_object.name )
+			other_test_object.instance_of?( MobyBase::TestObject ) && 
+			  ( @type == other_test_object.type ) && 
+			  ( @id == other_test_object.id ) && 
+			  ( @name == other_test_object.name )
 
 		end
 
@@ -98,6 +103,7 @@ module MobyBase
 		# Fixnum:: hash number representing current TestObject
 		def hash
 
+
 			#result = 17
 			#result = result * 37 + self.id.to_i
 			#result = result * 37 + type.hash
@@ -105,7 +111,9 @@ module MobyBase
 			#return result
 
 			# optimized version
-			( ( ( 17 * 37 + @id.to_i ) * 37 + @type.hash ) * 37 + @name.hash )
+			#( ( ( 17 * 37 + @id.to_i ) * 37 + @type.hash ) * 37 + @name.hash )
+
+      TDriver::TestObjectAdapter.test_object_hash( @id.to_i, @type, @name )
 
 		end
 
