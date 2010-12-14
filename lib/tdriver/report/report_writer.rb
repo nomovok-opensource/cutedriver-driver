@@ -973,8 +973,13 @@ display: none;
     fail_rate=0
     pass_rate=0
     if total_run.to_i > 0
-      fail_rate=(total_failed.to_f/total_run.to_f)*100
-      pass_rate=(total_passed.to_f/total_run.to_f)*100
+      begin
+        fail_rate=(total_failed.to_f/(total_run.to_f-total_not_run.to_f))*100
+        pass_rate=(total_passed.to_f/(total_run.to_f-total_not_run.to_f))*100
+      rescue
+        fail_rate=0
+        pass_rate=0
+      end
     end
 
     html_body='<div class="page_title"><center><h1>TDriver test results</h1></center></div>'<<
@@ -1048,9 +1053,9 @@ display: none;
       '</table></div><p />'
     if summary_arr
       html_body << '<div class="statistics">'
-       tdriver_group=ReportingStatistics.new(summary_arr,true)
-       html_result=tdriver_group.generate_statistics_table()
-       html_body << html_result << '</div>'
+      tdriver_group=ReportingStatistics.new(summary_arr,true)
+      html_result=tdriver_group.generate_statistics_table()
+      html_body << html_result << '</div>'
     end
 
     File.open(page, 'a') do |f2|
