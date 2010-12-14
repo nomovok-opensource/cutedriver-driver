@@ -83,6 +83,11 @@ module MobyUtil
 
               nil_node
 
+            # do not create wrapper object if already wrapped
+            when ::MobyUtil::XML::Element, ::MobyUtil::XML::Nodeset, ::MobyUtil::XML::Text, ::MobyUtil::XML::Attribute, ::MobyUtil::XML::NilNode 
+            
+              object
+
           else
 
              raise NotImplementedError.new( "Object wrapper for node type of #{ object.class } not implemented - Please contact TDriver support" )
