@@ -26,7 +26,7 @@ module TDriver
     # TODO: This method should be in application test object
     def get_layout_direction( sut )
 
-      sut.xml_data.xpath('*//object[@type="application"]/attributes/attribute[@name="layoutDirection"]/value/text()').first.content || 'LeftToRight'
+      sut.xml_data.at_xpath('*//object[@type="application"]/attributes/attribute[@name="layoutDirection"]/value/text()').to_s || 'LeftToRight'
 
     end
 
@@ -65,7 +65,7 @@ module TDriver
     end
 
     # TODO: document me
-    def make_object( rules )
+    def get_test_objects( rules )
 
       # store rules hash to variable
       object_attributes_hash = rules[ :object_attributes_hash ].clone
@@ -316,7 +316,7 @@ module TDriver
         # apply behaviours to test object
         test_object.apply_behaviour!(
           :object_type  => [ '*', object_type ],
-          :sut_type     => [ '*', sut.ui_type ],
+          #:sut_type     => [ '*', sut.ui_type ],
           :input_type   => [ '*', sut.input.to_s ],
           :env          => [ '*', *env.split(";") ],	   
           :version      => [ '*', sut.ui_version ]								   
@@ -693,7 +693,7 @@ module MobyBase
 
 
     # TODO: document me
-    def make_object( rules )
+    def get_test_objects( rules )
 
       # store rules hash to variable
       object_attributes_hash = rules[ :object_attributes_hash ].clone
@@ -776,7 +776,7 @@ module MobyBase
       child_objects = identify_object( object_attributes_hash, identification_directives, rules ).collect{ | test_object_xml |
             
         # create new test object
-        make_test_object2( 
+        make_test_object( 
         
           # sut object to t_o
           :sut => identification_directives[ :__sut ],      
@@ -802,6 +802,7 @@ module MobyBase
     end
 
 
+=begin
     # Function for dynamically creating methods for accessing child objects of a test object 
     # == params
     # test_object:: test_object where access methods should be added
@@ -817,21 +818,6 @@ module MobyBase
 
         unless created_accessors.include?( object_type ) || object_type.empty? then
 
-=begin
-          # define object type accessor method 
-          test_object.meta_def object_type do | *rules |
-
-            #raise ArgumentError, "wrong number of arguments (%s for 1)" % rules.count unless rules.count == 1
-
-            raise TypeError, 'parameter <rules> should be hash' unless rules.first.kind_of?( Hash )
-          
-            rules.first[:type] = object_type
-            
-            child( rules.first )
-          
-          end
-=end
-
          test_object.instance_eval(
 
             "def %s( rules={} ); raise TypeError, 'parameter <rules> should be hash' unless rules.kind_of?( Hash ); rules[:type] = :%s; child( rules ); end;" % [ object_type, object_type ]
@@ -845,7 +831,7 @@ module MobyBase
       }
 
     end
-
+=end
 
     def verify_ui_dump( sut )
 
@@ -1025,11 +1011,11 @@ module MobyBase
     # TODO: This method should be in application test object
     def get_layout_direction( sut )
 
-      sut.xml_data.xpath('*//object[@type="application"]/attributes/attribute[@name="layoutDirection"]/value/text()').first.content || 'LeftToRight'
+      sut.xml_data.at_xpath('*//object[@type="application"]/attributes/attribute[@name="layoutDirection"]/value/text()').to_s || 'LeftToRight'
 
     end
 
-    def make_test_object2( rules )
+    def make_test_object( rules )
 
       # get test object factory object from hash
       test_object_factory = rules[ :test_object_factory ]
@@ -1102,10 +1088,8 @@ module MobyBase
           :version      => [ '*', sut.ui_version ]								   
         )
 
-        #create_child_accessors!( test_object )
-
+        # create child accessors
         TDriver::TestObjectAdapter.create_child_accessors!( test_object, xml_object )
-
 
         # set given parent in rules hash as parent object to new child test object    
         test_object.instance_variable_set( :@parent, parent )
@@ -1152,6 +1136,7 @@ module MobyBase
 
     end
 
+=begin
     #TODO: update documetation
     # Function to make a test object.
     # Queries from the sut an xml dump which is used to generate TestObjects.
@@ -1222,7 +1207,9 @@ module MobyBase
       }
 
     end
+=end
 
+=begin
     def make_test_object( test_object_factory, sut, parent, xml_object )
 
       if xml_object.kind_of?( MobyUtil::XML::Element )
@@ -1257,27 +1244,6 @@ module MobyBase
         :env          => [ '*', env.to_s ],								   
         :version      => [ '*', sut.ui_version ]								   
       )
-      
-=begin
-         Removed object cache usage
-         # now test object has all required behaviours, store it to cache
-         @test_object_cache[ object_type ] = test_object.clone
-
-       else
-
-
-         # retreieve test object with behaviours from cache and clone it
-         ( test_object = @test_object_cache[ object_type ].clone ).instance_exec{
-
-        @test_object_factory = test_object_factory
-        @sut = sut
-        @parent = parent
-        self.xml_data = xml_object
-
-        }
-
-       end
-=end
   
       create_child_accessors!( test_object )
 
@@ -1324,7 +1290,7 @@ module MobyBase
     end
 
     # TODO: Documentation
-    def get_test_objects( rules )
+    def get_test_objects__( rules )
 
       # get parent object
       parent = rules[ :parent ]
@@ -1416,6 +1382,7 @@ module MobyBase
       }
 
     end
+=end
 
 
     # enable hoo./base/test_object/factory.rb:king for performance measurement & debug logging
@@ -1424,3 +1391,4 @@ module MobyBase
   end # TestObjectFactory
 
 end # MobyBase
+

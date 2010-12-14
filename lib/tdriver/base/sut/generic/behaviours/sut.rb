@@ -330,7 +330,7 @@ module MobyBehaviour
       begin
 
         # TODO: refactor me
-        child_test_object = @test_object_factory.make_object(
+        child_test_object = @test_object_factory.get_test_objects(
 
           # current object as parent, can be either TestObject or SUT
           :parent => self,
@@ -1129,6 +1129,7 @@ module MobyBehaviour
 
   private
 
+    # TODO: document me
     def fetch_references( xml )
 
       pids = []
@@ -1144,7 +1145,7 @@ module MobyBehaviour
 
         nodes.each { | element |
 
-          pid = element.xpath('//attribute[@name = "uri"]/value/text()')[ 0 ].to_s
+          pid = element.xpath('//attribute[@name = "uri"]/value/text()').content #[ 0 ].to_s
 
           if pid.nil? or pid.empty? or pid.to_i <= 0 # invalid reference
 
@@ -1158,7 +1159,7 @@ module MobyBehaviour
           y_abs = xml.xpath( '//object[@type = "TDriverRef"]/../../attributes/attribute[@name ="y_absolute"]/value/text()' )[ idx - 1 ]
 
           # window size
-          winSize = xml.xpath( "//objects/object[@type = 'MainWindow']/attributes/attribute[@name ='size']/value/text()" )[ 0 ].to_s
+          winSize = xml.at_xpath( "//objects/object[@type = 'MainWindow']/attributes/attribute[@name ='size']/value/text()" ).content #[ 0 ].to_s
 
           # ref-ref parent does not know x coordinate, use the grandparent xys
           x_prev = x_abs.to_s unless x_abs.nil?

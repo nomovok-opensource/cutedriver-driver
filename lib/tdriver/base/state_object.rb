@@ -75,7 +75,7 @@ module MobyBase
       @child_object_cache = TDriver::TestObjectCache.new
 
 			# Create accessor methods for any child state objects.
-			TestObjectFactory.instance.create_child_accessors!( self )
+      TDriver::TestObjectAdapter.create_child_accessors!( self, xml_element )
 
 		end
 
@@ -83,19 +83,6 @@ module MobyBase
 		def method_missing( method_id, *method_arguments )
 
 			hash_rule = method_arguments.first
-
-=begin
-			# method mapping/aliases
-			case method_id
-
-				when :Button;	
-					method_id = [ :Button, :QToolButton, :DuiButton, :HbPushButton, :softkey ]
-
-				when :List;	
-					method_id = [ :QList, :HbListWidgetView, :DuiList ]
-
-			end
-=end
 
 			hash_rule = Hash.new unless hash_rule.kind_of? Hash
 

@@ -62,6 +62,35 @@ module MobyUtil
 
       private
 
+        # TODO: document me
+        def node_object( object )
+
+          case object
+
+            when ::Nokogiri::XML::Element
+
+              element_object( object )
+
+            when ::Nokogiri::XML::Text
+
+              text_object( object )
+
+            when ::Nokogiri::XML::Attr
+
+              attribute_object( object )
+
+            when ::NilClass
+
+              nil_node
+
+          else
+
+             raise NotImplementedError.new( "Object wrapper for node type of #{ object.class } not implemented - Please contact TDriver support" )
+
+          end
+
+        end
+
         # method to create MobyUtil::XML::Attribute object
         def attribute_object( xml_data )
 
@@ -69,18 +98,24 @@ module MobyUtil
 
         end
 
-        # method to create MobyUtil::XML::Element or MobyUtil::XML::NilElement object 
+        # method to create MobyUtil::XML::Element 
         def element_object( xml_data )
 
-          unless xml_data.nil?
+          MobyUtil::XML::Element.new( xml_data, @parser ).extend( Element )
 
-            MobyUtil::XML::Element.new( xml_data, @parser ).extend( Element )
+        end
 
-          else
+        # method to create MobyUtil::XML::NilNode
+        def nil_node
 
-            MobyUtil::XML::NilElement.new( nil, @parser )
+            MobyUtil::XML::NilNode.new( nil, @parser )
 
-          end
+        end
+
+        # method to create MobyUtil::XML::Text
+        def text_object( xml_data )
+
+          MobyUtil::XML::Text.new( xml_data, @parser ).extend( Text )
 
         end
 
@@ -88,7 +123,6 @@ module MobyUtil
         def nodeset_object( xml_data )
 
           MobyUtil::XML::Nodeset.new( xml_data, @parser ).extend( Nodeset )
-
 
         end
 

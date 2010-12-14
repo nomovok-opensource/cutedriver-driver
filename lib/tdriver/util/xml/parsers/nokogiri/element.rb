@@ -25,7 +25,7 @@ module MobyUtil
 
       module Element # behaviour
 
-        include Abstraction 
+        include Abstraction
 
         def <=>( object )
 
@@ -115,7 +115,7 @@ module MobyUtil
 
         def at_xpath( xpath_query, *args, &block )
 
-          element_object( @xml.at_xpath( xpath_query, *args, &block ) )
+          node_object( @xml.at_xpath( xpath_query, *args, &block ) )
 
         end
 

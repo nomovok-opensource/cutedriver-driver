@@ -32,8 +32,14 @@ require File.expand_path( File.join( File.dirname( __FILE__ ), 'document.rb' ) )
 # element object
 require File.expand_path( File.join( File.dirname( __FILE__ ), 'element.rb' ) )
 
-# element object
-require File.expand_path( File.join( File.dirname( __FILE__ ), 'nil_element.rb' ) )
+# text object
+require File.expand_path( File.join( File.dirname( __FILE__ ), 'text.rb' ) )
+
+# attribute object
+require File.expand_path( File.join( File.dirname( __FILE__ ), 'attribute.rb' ) )
+
+# nil element object
+require File.expand_path( File.join( File.dirname( __FILE__ ), 'nil_node.rb' ) )
 
 # nodeset object
 require File.expand_path( File.join( File.dirname( __FILE__ ), 'nodeset.rb' ) )

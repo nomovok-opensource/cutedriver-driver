@@ -29,19 +29,19 @@ module MobyUtil
 
         def []( node )
 
-          element_object( @xml[ node ] )
+          node_object( @xml[ node ] )
 
         end
 
         def first
 
-          element_object( @xml.first )
+          node_object( @xml.first )
 
         end
 
         def last
 
-          element_object( @xml.last )
+          node_object( @xml.last )
 
         end
 
@@ -49,7 +49,7 @@ module MobyUtil
 
           @xml.each{ | element | 
 
-            yield( element_object( element ) ) 
+            yield( node_object( element ) ) 
 
           }
 
@@ -61,7 +61,7 @@ module MobyUtil
 
           @xml.each_with_index{ | element, index | 
 
-            yield( element_object( element ), index ) 
+            yield( node_object( element ), index ) 
 
           }
 
@@ -130,7 +130,7 @@ module MobyUtil
 
           @xml.collect{ | element | 
 
-            element_object( element ) 
+            node_object( element ) 
 
           }
           
@@ -163,7 +163,7 @@ module MobyUtil
 
           @xml.collect{ | element | 
 
-            yield( element_object( element ) ) 
+            yield( node_object( element ) ) 
 
           } 
 
@@ -175,7 +175,7 @@ module MobyUtil
         
             if block_given?
 
-              yield( element_object( element_a ), element_object( element_b ) ) 
+              yield( node_object( element_a ), element_object( element_b ) ) 
 
             else
 

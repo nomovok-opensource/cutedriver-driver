@@ -833,7 +833,7 @@ module MobyBehaviour
       begin
 
         # TODO: refactor me
-        child_test_object = @test_object_factory.make_object(
+        child_test_object = @test_object_factory.get_test_objects(
 
           # current object as parent, can be either TestObject or SUT
           :parent => self,

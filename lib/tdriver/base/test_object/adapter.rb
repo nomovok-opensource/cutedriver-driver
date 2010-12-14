@@ -60,7 +60,7 @@ module TDriver
         # iterate each attribute and collect name and value      
         source_data.xpath( 'attributes/attribute' ).collect{ | test_object | 
 
-          [ test_object.attribute( 'name' ), test_object.xpath( 'value' ).first.content ]
+          [ test_object.attribute( 'name' ), test_object.at_xpath( 'value/text()' ).to_s ]
 
         } 
 
@@ -119,6 +119,8 @@ module TDriver
     # TODO: document me
     def self.test_object_attribute( attribute_name, source_data, &block )
 
+      # TODO: consider using at_xpath and adding /value/text() to query string; however "downside" is that if multiple matches found only first value will be returned as result
+
       # retrieve attribute(s) from xml
       nodeset = source_data.xpath(
        
@@ -175,10 +177,12 @@ module TDriver
     # TODO: document me
     def self.create_child_accessors!( test_object, source_data )
 
-      # iterate through each child object type and create accessor method  
+      # iterate through each child object type attribute and create accessor method  
       source_data.xpath( 'objects/object/@type' ).each{ | object_type |
 
-        # object type content as string
+        next if object_type.nil?
+
+        # convert attribute node value to string
         object_type = object_type.content
 
         # skip if child accessor is already created 

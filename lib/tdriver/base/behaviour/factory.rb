@@ -293,11 +293,12 @@ module MobyBase
 		  # create hash of methods
 		  node.xpath( 'methods/method' ).each{ | method |
 
-			# retrieve method description & example and store to methods hash
-			methods_hash[ method.attribute( "name" ).to_s.to_sym ] = {
+			  # retrieve method description & example and store to methods hash
+			  methods_hash[ method.attribute( "name" ).to_s.to_sym ] = {
 
-			  :description => ( method.xpath( 'description' ).first.content rescue "" ), 
-			  :example => ( method.xpath( 'example' ).first.content rescue "" )
+			    :description => method.at_xpath( 'description/text()' ).to_s, 
+
+			    :example     => method.at_xpath( 'example/text()' ).to_s
 
   			}
 
