@@ -175,7 +175,7 @@ module MobyUtil
         
             if block_given?
 
-              yield( node_object( element_a ), element_object( element_b ) ) 
+              yield( node_object( element_a ), node_object( element_b ) ) 
 
             else
 
