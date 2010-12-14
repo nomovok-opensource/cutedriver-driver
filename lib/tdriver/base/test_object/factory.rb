@@ -519,7 +519,10 @@ module MobyBase
         if identification_directives[ :__xy_sorting ] == true
           
           # sort elements
-          TDriver::TestObjectAdapter.sort_elements( matches, get_layout_direction( identification_directives[ :__sut ] ) )
+          TDriver::TestObjectAdapter.sort_elements( 
+            matches, 
+            TDriver::TestObjectAdapter.application_layout_direction( identification_directives[ :__sut ] )
+          )
 
         end
 
@@ -723,7 +726,7 @@ module MobyBase
     
     end
 
-    # TODO: This method should be in application test object
+    # TODO: parent application test object should be passed to get_test_objects
     def get_layout_direction( sut )
 
       sut.xml_data.at_xpath('*//object[@type="application"]/attributes/attribute[@name="layoutDirection"]/value/text()').to_s || 'LeftToRight'

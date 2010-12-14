@@ -204,6 +204,13 @@ module TDriver
 
     end
 
+    # TODO: document me
+    def self.application_layout_direction( sut )
+
+      # TODO: parent application test object should be passed to get_test_objects; TestObjectAdapter#test_object_attribute( @app.xml_data, 'layoutDirection')
+      sut.xml_data.at_xpath('*//object[@type="application"]/attributes/attribute[@name="layoutDirection"]/value/text()').to_s || 'LeftToRight'
+
+    end
 
 		# TODO: document me
     def self.get_objects( source_data, rules )
