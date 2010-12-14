@@ -572,7 +572,7 @@ module MobyUtil
         if line.match(/#define ([a-zA-Z1-9\_]*) \"(.*)\"/)
           lname = $1
           translation = $2 
-          data <<  [ fname, lname, translation, plurality = "", lengthvariant = "" ]
+          data <<  [ fname, lname, translation, plurality = "", lengthvariant = "0" ]
         end
       end
       io.close
