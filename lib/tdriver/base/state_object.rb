@@ -75,7 +75,7 @@ module MobyBase
       @child_object_cache = TDriver::TestObjectCache.new
 
 			# Create accessor methods for any child state objects.
-      TDriver::TestObjectAdapter.create_child_accessors!( self, xml_element )
+      TDriver::TestObjectAdapter.create_child_accessors!( xml_element, self )
 
 		end
 

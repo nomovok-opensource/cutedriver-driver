@@ -72,7 +72,7 @@ module TDriver
 
       # remove test object identification directives for object identification attributes hash (e.g. :__index, :__multiple_objects etc.)
       identification_directives = rules[ :identification_directives ]
-      
+          
       #object_attributes_hash.strip_dynamic_attributes!
 
       # get parent object
@@ -134,6 +134,8 @@ module TDriver
         
         # make search params
         :__search_params => get_parent_params( parent ).push( make_object_search_params( object_attributes_hash ) ),
+      
+        :__xy_sorting => false,
       
         # test object identificator to be used
         :__test_object_identificator => MobyBase::TestObjectIdentificator.new( object_attributes_hash )
@@ -323,7 +325,7 @@ module TDriver
         )
 
         # create child accessors
-        TDriver::TestObjectAdapter.create_child_accessors!( test_object, xml_object )
+        TDriver::TestObjectAdapter.create_child_accessors!( xml_object, test_object )
 
         # set given parent in rules hash as parent object to new child test object    
         test_object.instance_variable_set( :@parent, parent )
@@ -412,6 +414,22 @@ module TDriver
 end # TDriver
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 module MobyBase
 
   # class to represent TestObjectFactory.
@@ -427,10 +445,11 @@ module MobyBase
     # TODO: Document me (TestObjectFactory::initialize)
     def initialize
 
-      # TODO maybe set elsewhere used for defaults
-      # TODO: Remove from here, to be initialized by the environment.
+      # get timeout from parameters, use default value if parameter not found
+      @timeout = MobyUtil::Parameter[ :application_synchronization_timeout, "20" ].to_i
 
-      reset_timeout
+      # get timeout retry interval from parameters, use default value if parameter not found
+      @_retry_interval = MobyUtil::Parameter[ :application_synchronization_retry_interval, "1" ].to_i
 
     end
 
@@ -451,23 +470,7 @@ module MobyBase
 
     end
 
-    #TODO: Team TE review @ Engine
-    # Function to reset timeout to default
-    # This is needed, as TOFactory is singleton.
-    # == params
-    # --
-    # == returns
-    # --
-    # == raises
-    # --
-    def reset_timeout()
-
-      @timeout = MobyUtil::Parameter[ :application_synchronization_timeout, "20" ].to_i
-
-      @_retry_interval = MobyUtil::Parameter[ :application_synchronization_retry_interval, "1" ].to_i
-
-    end
-
+    # TODO: document me
     def identify_object( object_attributes_hash, identification_directives, rules )
   
       MobyUtil::Retryable.until( 
@@ -514,15 +517,9 @@ module MobyBase
 
         # sort matches
         if identification_directives[ :__xy_sorting ] == true
-                
+          
           # sort elements
-          identification_directives[ :__test_object_identificator ].sort_elements_by_xy_layout!( 
-
-            matches, 
-
-            get_layout_direction( identification_directives[ :__sut ] ) 
-            
-          ) 
+          TDriver::TestObjectAdapter.sort_elements( matches, get_layout_direction( identification_directives[ :__sut ] ) )
 
         end
 
@@ -551,9 +548,24 @@ module MobyBase
 
       # remove test object identification directives for object identification attributes hash (e.g. :__index, :__multiple_objects etc.)
       identification_directives = rules[ :identification_directives ]
+       
+      # verify given identification directives, only documented end-user directives is checked
+      identification_directives.each{ | key, value |
       
-      #object_attributes_hash.strip_dynamic_attributes!
+        case key
 
+          # Fixnum          
+          when :__index, :__timeout, :__logging 
+            value.check_type( Fixnum, "Wrong variable type $1 for #{ key.inspect } test object identification directive (expected $2)" )
+          
+          # TrueClass, FalseClass
+          when :__xy_sorting
+            value.check_type( [ TrueClass, FalseClass ], "Wrong variable type $1 for #{ key.inspect } test object identification directive (expected $2)" )
+          
+        end
+      
+      }
+      
       # get parent object
       parent = rules[ :parent ]
       
@@ -619,8 +631,6 @@ module MobyBase
       
       )
       
-      identification_directives[ :__index ].check_type( Fixnum, "Wrong value type $1 for :__index test object identification directive (expected $2)" )
-
       # add object identification attribute keys to dynamic attributes white list
       MobyUtil::DynamicAttributeFilter.instance.add_attributes( object_attributes_hash.keys )
 
@@ -658,7 +668,7 @@ module MobyBase
         
         object_search_params = creation_attributes.clone
 
-        object_search_params[ :className ] = object_search_params.delete( :type ) if creation_attributes.has_key?( :type )
+        object_search_params[ :className  ] = object_search_params.delete( :type ) if creation_attributes.has_key?( :type )
         object_search_params[ :objectName ] = object_search_params.delete( :name ) if creation_attributes.has_key?( :name )
 
         object_search_params
@@ -677,8 +687,8 @@ module MobyBase
 
         search_params = []
       
-        search_params.concat( get_parent_params( test_object.parent ) ) if test_object.parent         
-        search_params.concat( [ { :className => test_object.type, :tasId => test_object.id } ] ) #if test_object
+        search_params.concat( get_parent_params( test_object.parent ) ) if test_object.parent
+        search_params.concat( [ :className => test_object.type, :tasId => test_object.id ] ) #if test_object
         
         search_params
         
@@ -733,20 +743,23 @@ module MobyBase
       
       xml_object = rules[ :xml_object ]
 
+      # retrieve attributes
+      #TDriver::TestObjectAdapter.fetch_attributes( xml_object, [ 'id', 'name', 'type', 'env' ], false )
+
       if xml_object.kind_of?( MobyUtil::XML::Element )
 
         # retrieve test object id from xml
-        object_id = xml_object.attribute( 'id' ).to_i
+        object_id = TDriver::TestObjectAdapter.test_object_element_attribute( xml_object, 'id' ){ nil }.to_i
 
         # retrieve test object name from xml
-        object_name = xml_object.attribute( 'name' ).to_s
+        object_name = TDriver::TestObjectAdapter.test_object_element_attribute( xml_object, 'name' ){ nil }.to_s
 
         # retrieve test object type from xml
-        object_type = xml_object.attribute( 'type' ).to_s
+        object_type = TDriver::TestObjectAdapter.test_object_element_attribute( xml_object, 'type' ){ nil }.to_s 
 
         # retrieve test object type from xml
-    	  env = ( xml_object.attribute( 'env' ) || MobyUtil::Parameter[ sut.id ][ :env ] ).to_s
-
+    	  env = TDriver::TestObjectAdapter.test_object_element_attribute( xml_object, 'env' ){ MobyUtil::Parameter[ sut.id ][ :env ] }.to_s
+    	  
       else
       
         # defaults - refactor this
@@ -761,11 +774,8 @@ module MobyBase
       end
 
       # calculate object cache hash key
-			hash_key = ( ( ( 17 * 37 + object_id ) * 37 + object_type.hash ) * 37 + object_name.hash )
-
-      # (DO NOT!!) remove object type from object attributes hash_rule
-      #rules[ :object_attributes_hash ].delete( :type )
-
+      hash_key = TDriver::TestObjectAdapter.test_object_hash( object_id, object_type, object_name )
+      
       # get reference to parent objects child objects cache
       parent_cache = rules[ :parent ].instance_variable_get( :@child_object_cache )
 
@@ -775,10 +785,12 @@ module MobyBase
         # get test object from cache
         test_object = parent_cache[ hash_key ]
 
+        # store xml_object to test object
         test_object.xml_data = xml_object
 
       else
       
+        # create test object
         test_object = MobyBase::TestObject.new( test_object_factory, sut, parent, xml_object )
 
         # apply behaviours to test object
@@ -794,7 +806,7 @@ module MobyBase
         )
 
         # create child accessors
-        TDriver::TestObjectAdapter.create_child_accessors!( test_object, xml_object )
+        TDriver::TestObjectAdapter.create_child_accessors!( xml_object, test_object )
 
         # set given parent in rules hash as parent object to new child test object    
         test_object.instance_variable_set( :@parent, parent )
@@ -804,17 +816,21 @@ module MobyBase
 
       end
 
+      # NOTE: Do not remove object_type from object attributes hash_rule due to it is used in find_objects service!
+      #rules[ :object_attributes_hash ].delete( :type )
+
       # update test objects creation attributes (either cached object or just newly created child object)
       test_object.instance_variable_set( :@creation_attributes, rules[ :object_attributes_hash ] )
   
-      # do not make test object verifications if we are operating on the 
-      # base sut itself (allow run to pass)
+      # do not make test object verifications if we are operating on the sut itself (allow run to pass)
       unless parent.kind_of?( MobyBase::SUT )
 
+        # verify ui state if any verifycation blocks given
         TDriver::TestObjectVerification.verify_ui_dump( sut ) unless sut.verify_blocks.empty?
 
       end
 
+      # return test object
       test_object
 
     end

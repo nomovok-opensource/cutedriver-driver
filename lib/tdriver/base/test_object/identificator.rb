@@ -81,28 +81,28 @@ module MobyBase
 		# Sort XML nodeset of test objects with layout direction
 		def sort_elements_by_xy_layout!( nodeset, layout_direction = "LeftToRight" )
 
-			attribute_pattern = "./attributes/attribute[@name='%s']/value"
+			attribute_pattern = "./attributes/attribute[@name='%s']/value/text()"
 
 			# collect only nodes that has x_absolute and y_absolute attributes
 			nodeset.collect!{ | node |
 
-				node unless node.xpath( attribute_pattern % 'x_absolute' ).empty? || node.xpath( attribute_pattern % 'y_absolute' ).empty?
+				node unless node.at_xpath( attribute_pattern % 'x_absolute' ).to_s.empty? || node.at_xpath( attribute_pattern % 'y_absolute' ).to_s.empty?
 
-			}.compact!.sort!{ | a, b |
+			}.compact!.sort!{ | element_a, element_b |
 
-				a_x = a.xpath( attribute_pattern % 'x_absolute' ).first.content.to_i
-				a_y = a.xpath( attribute_pattern % 'y_absolute' ).first.content.to_i
+				element_a_x = element_a.at_xpath( attribute_pattern % 'x_absolute' ).content.to_i
+				element_a_y = element_a.at_xpath( attribute_pattern % 'y_absolute' ).content.to_i
 
-				b_x = b.xpath( attribute_pattern % 'x_absolute' ).first.content.to_i
-				b_y = b.xpath( attribute_pattern % 'y_absolute' ).first.content.to_i
+				element_b_x = element_b.at_xpath( attribute_pattern % 'x_absolute' ).content.to_i
+				element_b_y = element_b.at_xpath( attribute_pattern % 'y_absolute' ).content.to_i
 
 				if ( layout_direction =~ /LeftToRight/i )
 
-					( a_y == b_y ) ? ( a_x <=> b_x ) : ( a_y <=> b_y ) 
+					( element_a_y == element_b_y ) ? ( element_a_x <=> element_b_x ) : ( element_a_y <=> element_b_y ) 
 
 				elsif ( layout_direction =~ /RightToLeft/i )
 
-					( a_y == b_y ) ? ( b_x <=> a_x ) : ( a_y <=> b_y ) 
+					( element_a_y == element_b_y ) ? ( element_b_x <=> element_a_x ) : ( element_a_y <=> element_b_y ) 
 
 				else
 
@@ -393,6 +393,7 @@ module MobyBase
 
 		end
 
+=begin
 		## Returns array of element nodes
 		def sort_elements_by_xy_layout( element_set, layout_direction = "LeftToRight" )
 
@@ -413,19 +414,20 @@ module MobyBase
 			# Sort remaining by layout direction and up to down
 			# Requires .to_a to return an array of MobyUtil::XML::Elements
 			element_set.to_a.sort!{ |a, b| 
-				a_x = a.xpath("./attributes/attribute[@name = 'x_absolute']/value").first.content.to_i
-				a_y = a.xpath("./attributes/attribute[@name = 'y_absolute']/value").first.content.to_i
-				b_x = b.xpath("./attributes/attribute[@name = 'x_absolute']/value").first.content.to_i
-				b_y = b.xpath("./attributes/attribute[@name = 'y_absolute']/value").first.content.to_i
+				element_a_x = a.xpath("./attributes/attribute[@name = 'x_absolute']/value").first.content.to_i
+				element_a_y = a.xpath("./attributes/attribute[@name = 'y_absolute']/value").first.content.to_i
+				element_b_x = b.xpath("./attributes/attribute[@name = 'x_absolute']/value").first.content.to_i
+				element_b_y = b.xpath("./attributes/attribute[@name = 'y_absolute']/value").first.content.to_i
 				if ( layout_direction.downcase == "LeftToRight".downcase )
-					( a_y == b_y ) ? ( a_x <=> b_x ) : ( a_y <=> b_y ) 
+					( element_a_y == element_b_y ) ? ( element_a_x <=> element_b_x ) : ( element_a_y <=> element_b_y ) 
 				elsif ( layout_direction.downcase == "RightToLeft".downcase ) 
-					( a_y == b_y ) ? ( b_x <=> a_x ) : ( a_y <=> b_y ) 
+					( element_a_y == element_b_y ) ? ( element_b_x <=> element_a_x ) : ( element_a_y <=> element_b_y ) 
 				else
 					Kernel::raise ArgumentError.new("Unexpected layout direction: " + layout_direction)
 				end
 			}
 		end
+=end
 
 		# Function to identify an object from tasMessage xml content
 		# 

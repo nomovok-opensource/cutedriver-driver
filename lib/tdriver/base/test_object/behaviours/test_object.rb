@@ -1169,7 +1169,7 @@ module MobyBehaviour
           begin
           
             # retrieve attribute(s) from test object; never access ui state xml data directly from behaviour implementation
-            TDriver::TestObjectAdapter.test_object_attribute( name, _xml_data )
+            TDriver::TestObjectAdapter.test_object_attribute( _xml_data, name )
 
           rescue MobyBase::AttributeNotFoundError
           

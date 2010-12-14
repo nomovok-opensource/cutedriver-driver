@@ -51,30 +51,57 @@ module TDriver
     
     end
 
-    # TODO: document me
-    def self.test_object_attributes( source_data )
+    def self.test_object_hash( object_id, object_type, object_name )
     
-      # return hash of test object attributes
-      Hash[ 
-
-        # iterate each attribute and collect name and value      
-        source_data.xpath( 'attributes/attribute' ).collect{ | test_object | 
-
-          [ test_object.attribute( 'name' ), test_object.at_xpath( 'value/text()' ).to_s ]
-
-        } 
-
-      ]
+			( ( ( 17 * 37 + object_id ) * 37 + object_type.hash ) * 37 + object_name.hash )
 
     end
-    
+
+		# Sort XML nodeset of test objects with layout direction
+		def self.sort_elements( nodeset, layout_direction = "LeftToRight" )
+
+			attribute_pattern = "./attributes/attribute[@name='%s']/value/text()"
+
+			# collect only nodes that has x_absolute and y_absolute attributes
+			nodeset.collect!{ | node |
+
+				node unless node.at_xpath( attribute_pattern % 'x_absolute' ).to_s.empty? || node.at_xpath( attribute_pattern % 'y_absolute' ).to_s.empty?
+
+			}.compact!.sort!{ | element_a, element_b |
+
+				element_a_x = element_a.at_xpath( attribute_pattern % 'x_absolute' ).content.to_i
+				element_a_y = element_a.at_xpath( attribute_pattern % 'y_absolute' ).content.to_i
+
+				element_b_x = element_b.at_xpath( attribute_pattern % 'x_absolute' ).content.to_i
+				element_b_y = element_b.at_xpath( attribute_pattern % 'y_absolute' ).content.to_i
+
+        case layout_direction
+        
+          when "LeftToRight"
+
+  					( element_a_y == element_b_y ) ? ( element_a_x <=> element_b_x ) : ( element_a_y <=> element_b_y ) 
+
+				  when "RightToLeft"
+
+  					( element_a_y == element_b_y ) ? ( element_b_x <=> element_a_x ) : ( element_a_y <=> element_b_y ) 
+
+				else
+
+					Kernel::raise ArgumentError.new( "Unsupported layout direction #{ layout_direction.inspect }" )
+
+				end
+
+			}
+
+		end
+
     def self.parent_test_object_element( test_object )
 
       # retrieve parent of current xml element; objects/object/objects/object/../..
       test_object.xml_data.parent.parent
     
     end
-
+    
     # TODO: document me
     def self.test_object_element_attributes( source_data )
 
@@ -87,7 +114,7 @@ module TDriver
     end
 
     # TODO: document me
-    def self.test_object_element_attribute( name, source_data, &block )
+    def self.test_object_element_attribute( source_data, name, &block )
 
       result = source_data.attribute( name )
       
@@ -117,7 +144,7 @@ module TDriver
     end
 
     # TODO: document me
-    def self.test_object_attribute( attribute_name, source_data, &block )
+    def self.test_object_attribute( source_data, attribute_name, &block )
 
       # TODO: consider using at_xpath and adding /value/text() to query string; however "downside" is that if multiple matches found only first value will be returned as result
 
@@ -158,8 +185,25 @@ module TDriver
         
       end
 
+    end
+
+    # TODO: document me
+    def self.test_object_attributes( source_data )
+    
+      # return hash of test object attributes
+      Hash[ 
+
+        # iterate each attribute and collect name and value      
+        source_data.xpath( 'attributes/attribute' ).collect{ | test_object | 
+
+          [ test_object.attribute( 'name' ), test_object.at_xpath( 'value/text()' ).to_s ]
+
+        } 
+
+      ]
 
     end
+
 
 		# TODO: document me
     def self.get_objects( source_data, rules )
@@ -175,7 +219,7 @@ module TDriver
     end
 
     # TODO: document me
-    def self.create_child_accessors!( test_object, source_data )
+    def self.create_child_accessors!( source_data, test_object )
 
       # iterate through each child object type attribute and create accessor method  
       source_data.xpath( 'objects/object/@type' ).each{ | object_type |
