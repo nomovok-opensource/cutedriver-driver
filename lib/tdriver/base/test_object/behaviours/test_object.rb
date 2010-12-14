@@ -744,21 +744,36 @@ module MobyBehaviour
 
   private
 
+    # TODO: document me
 	  def disable_optimizer
-	    #disable optimizer for this call since it will not work
+
+      sut_parameters = MobyUtil::Parameter[ @sut.id ]
+
+	    # disable optimizer for this call since it will not work
 	    @_enable_optimizer = false
-	    if MobyUtil::Parameter[ @sut.id ][ :use_find_object, 'false' ] == 'true' and @sut.methods.include?('find_object')
-		  MobyUtil::Parameter[ @sut.id ][ :use_find_object] = 'false'
-		  @_enable_optimizer = true
-	    end	  
+
+	    if sut_parameters[ :use_find_object, 'false' ] == 'true' and @sut.respond_to?( 'find_object' )
+
+  		  sut_parameters[ :use_find_object ] = 'false'
+
+  		  @_enable_optimizer = true
+
+	    end
+
 	    @_enable_optimizer
+
 	  end
 
+    # TODO: document me
 	  def enable_optimizer
-	    MobyUtil::Parameter[ @sut.id ][ :use_find_object] = 'true' if @_enable_optimizer
+
+	    MobyUtil::Parameter[ @sut.id ][ :use_find_object ] = 'true' if @_enable_optimizer
+
 	    @_enable_optimizer = false
+
 	  end
 
+    # TODO: document me
     # Tries to use the missing method id as a child object type and find an object based on it
     def method_missing( method_id, *method_arguments )
 
@@ -929,6 +944,7 @@ module MobyBehaviour
 
     end
 
+=begin
     # Strip dynamic attributes (such as :__timeout, :__logging) from hash and return those as hash
     # == returns
     # Hash:: Hash of dynamic attributes
@@ -967,6 +983,7 @@ module MobyBehaviour
       end
 
     end
+=end
 
 
 =begin
@@ -1106,7 +1123,7 @@ module MobyBehaviour
 
     end
 
-    # TODO: document me; 
+    # TODO: document me
     # NOTE: this method should be called only internally, TestObject#attribute is end-user method that shouldn't be called inside framework
     def find_attribute( name )
 
