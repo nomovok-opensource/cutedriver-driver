@@ -207,6 +207,17 @@ module TDriver
     # TODO: document me
     def self.application_layout_direction( sut )
 
+      # temporary fix until testobject will be associated to parent application object
+      unless MobyUtil::DynamicAttributeFilter.instance.has_attribute?( 'layoutDirection' )
+        
+        # temporary fix: add 'layoutDirection' to dynamic attributes filtering whitelist...
+        MobyUtil::DynamicAttributeFilter.instance.add_attribute( 'layoutDirection' ) 
+        
+        # temporary fix: ... and refresh sut to retrieve updated xml data
+        sut.refresh
+      
+      end 
+            
       # TODO: parent application test object should be passed to get_test_objects; TestObjectAdapter#test_object_attribute( @app.xml_data, 'layoutDirection')
       ( sut.xml_data.at_xpath('*//object[@type="application"]/attributes/attribute[@name="layoutDirection"]/value/text()').content || 'LeftToRight' ).to_s
 
