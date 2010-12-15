@@ -27,7 +27,7 @@ module TDriver
       private
       
         # TODO: document me
-        def xpath_to_object( rules )
+        def xpath_to_object( rules, find_all_children )
 
           # object element attribute or attribute element 
           test_object_identification_attributes = rules.collect{ | key, value | 
@@ -35,65 +35,179 @@ module TDriver
             key = key.to_s.downcase
             
             if [ "name", "type", "parent", "id" ].include?( key )
-            
-              "(@#{ key }='#{ value }' or attributes/attribute[translate(@name,'ABCDEFGHIJKLMNOPQRSTUVWXYZ','abcdefghijklmnopqrstuvwxyz')='#{ key }']/value='#{ value }')"
+
+              # TODO: change "any" to "*"
+              # children method may request test objects of any type
+              if key == 'type' and value == 'any'
+              
+                '@*'
+                
+              else
+
+                "(@#{ key }='#{ value }' or attributes/attribute[translate(@name,'ABCDEFGHIJKLMNOPQRSTUVWXYZ','abcdefghijklmnopqrstuvwxyz')='#{ key }' and .='#{ value }'])"
+
+                                
+                #"(@#{ key }='#{ value }' or attributes/attribute[translate(@name,'ABCDEFGHIJKLMNOPQRSTUVWXYZ','abcdefghijklmnopqrstuvwxyz')='#{ key }']/value='#{ value }')"
+              
+              end
+              
             else
             
-              "(attributes/attribute[translate(@name,'ABCDEFGHIJKLMNOPQRSTUVWXYZ','abcdefghijklmnopqrstuvwxyz')='#{ key }']/value='#{ value }')"
+              # TODO: add support for having multiple value options 
+            
+=begin
+                attribute_value.each_with_index do | value, index |
+
+                  xpath << " or " unless index.zero?
+
+                  # allow partial match when value of :type and attribute name matches. see class instance constructor.
+                  if @@partial_match_allowed.include?( [ @_attributes_used_to_identify_object[ :type ], attribute_key ] )
+
+                    xpath << "value[contains(.,%s)]" % convertToXPathLiteral( value )
+
+                  else
+
+                    xpath << "value=%s" % convertToXPathLiteral( value )
+
+                  end
+                  
+                end
+                
+=end            
+            
+              #"(attributes/attribute[translate(@name,'ABCDEFGHIJKLMNOPQRSTUVWXYZ','abcdefghijklmnopqrstuvwxyz')='#{ key }']/value='#{ value }')"
+
+              "(attributes/attribute[translate(@name,'ABCDEFGHIJKLMNOPQRSTUVWXYZ','abcdefghijklmnopqrstuvwxyz')='#{ key }' and .='#{ value }'])"
                           
             end
                                  
           }.compact.join(" and ")
 
-          "*//object[#{ test_object_identification_attributes }]" 
+          find_all_children ? "*//object[#{ test_object_identification_attributes }]" : "objects[1]/object[#{ test_object_identification_attributes }]"
         
         end
     
     end
 
-    def self.test_object_hash( object_id, object_type, object_name )
-    
-			( ( ( 17 * 37 + object_id ) * 37 + object_type.hash ) * 37 + object_name.hash )
+    # TODO: document me
+    def self.xpath_literal( string )
+
+      # make sure that argument is type of string
+      string = string.to_s
+      
+      # does not contain no single quotes
+      if not string.include?("'")
+      
+        result = "'#{ string }'"
+
+      # does not contain no double quotes
+      elsif not string.include?('"')
+
+        result = "\"#{ string }\""
+
+      # contains single and double quotes  
+      else
+      
+        # open new item
+        result = ["'"]
+
+        # iterate through each character  
+        string.each_char{ | char |
+        
+          case char
+          
+            # encapsulate single quotes with double quotes
+            when "'"
+              
+              # close current item
+              result.last << char
+              
+              # add encapsulated single quote
+              result << "\"'\""
+              
+              # open new item
+              result << char
+                       
+            else
+            
+              # any other character will appended as is
+              result.last << char
+            
+          end
+
+        }  
+
+        # close last sentence
+        result.last << "'"
+            
+        # create concat clause for xpath
+        result = "concat(#{ result.join(',') })"
+          
+      end
+
+      result
 
     end
 
-		# Sort XML nodeset of test objects with layout direction
-		def self.sort_elements( nodeset, layout_direction = "LeftToRight" )
 
-			attribute_pattern = "./attributes/attribute[@name='%s']/value/text()"
+    # TODO: document me
+    def self.get_objects( source_data, rules, find_all_children )
 
-			# collect only nodes that has x_absolute and y_absolute attributes
-			nodeset.collect!{ | node |
+      #p __method__
 
-				node unless node.at_xpath( attribute_pattern % 'x_absolute' ).to_s.empty? || node.at_xpath( attribute_pattern % 'y_absolute' ).to_s.empty?
+      rule = xpath_to_object( rules, find_all_children )
 
-			}.compact!.sort!{ | element_a, element_b |
+      [ 
+        # perform xpath to source xml data
+        source_data.xpath( rule ),
+        rule 
+      ]    
+    
+    end
 
-				element_a_x = element_a.at_xpath( attribute_pattern % 'x_absolute' ).content.to_i
-				element_a_y = element_a.at_xpath( attribute_pattern % 'y_absolute' ).content.to_i
+    def self.test_object_hash( object_id, object_type, object_name )
+    
+      ( ( ( 17 * 37 + object_id ) * 37 + object_type.hash ) * 37 + object_name.hash )
 
-				element_b_x = element_b.at_xpath( attribute_pattern % 'x_absolute' ).content.to_i
-				element_b_y = element_b.at_xpath( attribute_pattern % 'y_absolute' ).content.to_i
+    end
+
+    # Sort XML nodeset of test objects with layout direction
+    def self.sort_elements( nodeset, layout_direction = "LeftToRight" )
+
+      attribute_pattern = "./attributes/attribute[@name='%s']/value/text()"
+
+      # collect only nodes that has x_absolute and y_absolute attributes
+      nodeset.collect!{ | node |
+
+        node unless node.at_xpath( attribute_pattern % 'x_absolute' ).to_s.empty? || node.at_xpath( attribute_pattern % 'y_absolute' ).to_s.empty?
+
+      }.compact!.sort!{ | element_a, element_b |
+
+        element_a_x = element_a.at_xpath( attribute_pattern % 'x_absolute' ).content.to_i
+        element_a_y = element_a.at_xpath( attribute_pattern % 'y_absolute' ).content.to_i
+
+        element_b_x = element_b.at_xpath( attribute_pattern % 'x_absolute' ).content.to_i
+        element_b_y = element_b.at_xpath( attribute_pattern % 'y_absolute' ).content.to_i
 
         case layout_direction
         
           when "LeftToRight"
 
-  					( element_a_y == element_b_y ) ? ( element_a_x <=> element_b_x ) : ( element_a_y <=> element_b_y ) 
+            ( element_a_y == element_b_y ) ? ( element_a_x <=> element_b_x ) : ( element_a_y <=> element_b_y ) 
 
-				  when "RightToLeft"
+          when "RightToLeft"
 
-  					( element_a_y == element_b_y ) ? ( element_b_x <=> element_a_x ) : ( element_a_y <=> element_b_y ) 
+            ( element_a_y == element_b_y ) ? ( element_b_x <=> element_a_x ) : ( element_a_y <=> element_b_y ) 
 
-				else
+        else
 
-					Kernel::raise ArgumentError.new( "Unsupported layout direction #{ layout_direction.inspect }" )
+          Kernel::raise ArgumentError.new( "Unsupported layout direction #{ layout_direction.inspect }" )
 
-				end
+        end
 
-			}
+      }
 
-		end
+    end
 
     def self.parent_test_object_element( test_object )
 
@@ -221,19 +335,6 @@ module TDriver
       # TODO: parent application test object should be passed to get_test_objects; TestObjectAdapter#test_object_attribute( @app.xml_data, 'layoutDirection')
       ( sut.xml_data.at_xpath('*//object[@type="application"]/attributes/attribute[@name="layoutDirection"]/value/text()').content || 'LeftToRight' ).to_s
 
-    end
-
-		# TODO: document me
-    def self.get_objects( source_data, rules )
-
-	    rule = xpath_to_object( rules )
-
-			[ 
-			  # perform xpath to source xml data
-			  source_data.xpath( rule ),
-		    rule 
-	    ]    
-    
     end
 
     # TODO: document me
