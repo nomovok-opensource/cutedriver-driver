@@ -1,20 +1,20 @@
 ############################################################################
-## 
-## Copyright (C) 2010 Nokia Corporation and/or its subsidiary(-ies). 
-## All rights reserved. 
-## Contact: Nokia Corporation (testabilitydriver@nokia.com) 
-## 
+##
+## Copyright (C) 2010 Nokia Corporation and/or its subsidiary(-ies).
+## All rights reserved.
+## Contact: Nokia Corporation (testabilitydriver@nokia.com)
+##
 ## This file is part of TDriver.
-## 
-## If you have questions regarding the use of this file, please contact 
-## Nokia at testabilitydriver@nokia.com . 
-## 
-## This library is free software; you can redistribute it and/or 
-## modify it under the terms of the GNU Lesser General Public 
-## License version 2.1 as published by the Free Software Foundation 
-## and appearing in the file LICENSE.LGPL included in the packaging 
-## of this file. 
-## 
+##
+## If you have questions regarding the use of this file, please contact
+## Nokia at testabilitydriver@nokia.com .
+##
+## This library is free software; you can redistribute it and/or
+## modify it under the terms of the GNU Lesser General Public
+## License version 2.1 as published by the Free Software Foundation
+## and appearing in the file LICENSE.LGPL included in the packaging
+## of this file.
+##
 ############################################################################
 
 
@@ -86,7 +86,7 @@ module TDriverReportCreator
       @memory_amount_total='-'
       @total_dump_count=Hash.new
       @total_received_data=Hash.new
-      @total_sent_data=Hash.new      
+      @total_sent_data=Hash.new
       $result_storage_in_use=false
       @pages=MobyUtil::Parameter[ :report_results_per_page, 10]
       @duration_graph=MobyUtil::Parameter[ :report_generate_duration_graph, false]
@@ -129,7 +129,7 @@ module TDriverReportCreator
     # === raises
     # TypeError exception
     def set_user_data(value)
-      if value==nil        
+      if value==nil
         @test_case_user_data = Array.new
         @test_case_user_data_columns = Array.new
       else
@@ -146,13 +146,13 @@ module TDriverReportCreator
     #
     # === params
     # column_name: the column name in chronological table
-    # value: the data 
+    # value: the data
     # === returns
     # nil
     # === raises
     def set_user_table_data(column_name,value)
       if (!column_name.empty? && column_name!=nil)
-        @test_case_user_chronological_table_data[column_name.to_s]=value.to_s 
+        @test_case_user_chronological_table_data[column_name.to_s]=value.to_s
       end
     end
     #This method sets the test run behaviour log
@@ -325,7 +325,7 @@ module TDriverReportCreator
     def set_memory_amount_total(value)
       @memory_amount_total=value
     end
-    
+
     #This method gets the not run cases name array
     #
     # === params
@@ -370,7 +370,7 @@ module TDriverReportCreator
       #@all_cases_arr
       read_result_storage('all')
     end
-    
+
     #This method gets reporting groups
     #
     # === params
@@ -385,7 +385,7 @@ module TDriverReportCreator
       end
       @reporting_groups
     end
-    
+
     #This method gets user created data
     #
     # === params
@@ -396,7 +396,7 @@ module TDriverReportCreator
     def get_user_data()
       return @test_case_user_data,@test_case_user_data_columns
     end
-    
+
     #This method sets user data to display in chronological table
     #
     # === params
@@ -450,13 +450,13 @@ module TDriverReportCreator
           FileUtils.mkdir_p @report_folder+'/environment'
           FileUtils.mkdir_p @report_folder+'/cases'
           FileUtils.mkdir_p @report_folder+'/junit_xml'
-          
+
         else
           if b_fixed_report_folder==true
             FileUtils::remove_entry_secure(@report_folder, :force => true)
             FileUtils.mkdir_p @report_folder+'/environment'
             FileUtils.mkdir_p @report_folder+'/cases'
-            FileUtils.mkdir_p @report_folder+'/junit_xml'            
+            FileUtils.mkdir_p @report_folder+'/junit_xml'
           end
         end
         write_style_sheet(@report_folder+'/tdriver_report_style.css')
@@ -729,7 +729,7 @@ module TDriverReportCreator
     # === raises
     def get_sut_total_dump_count(sut_id, sut_attributes)
 
-      dump_count=sut_attributes[:sut].dump_count     
+      dump_count=sut_attributes[:sut].dump_count
       @total_dump_count[sut_id.to_sym]=dump_count
       @total_dump_count
 
@@ -768,7 +768,7 @@ module TDriverReportCreator
       end
       total
     end
-    
+
     def write_to_result_storage(status,
         testcase,
         group,
@@ -790,7 +790,7 @@ module TDriverReportCreator
       end
       $result_storage_in_use=true
       begin
-        storage_file=nil       
+        storage_file=nil
         html_link=status+'_'+index.to_s+'_'+testcase+'/index.html' if link==''
         storage_file='all_cases.xml'
 
@@ -825,13 +825,13 @@ module TDriverReportCreator
           test_comment.content = comment
           test_link = Nokogiri::XML::Node.new("link",test)
           test_link.content = html_link
-          test_dump_count = Nokogiri::XML::Node.new("dump_count",test)          
+          test_dump_count = Nokogiri::XML::Node.new("dump_count",test)
           test_dump_count.content = calculate_total_values_from_hash(total_dump)
           test_sent_bytes = Nokogiri::XML::Node.new("sent_bytes",test)
           test_sent_bytes.content = calculate_total_values_from_hash(total_sent)
           test_received_bytes = Nokogiri::XML::Node.new("received_bytes",test)
           test_received_bytes.content = calculate_total_values_from_hash(total_received)
-      
+
           test << test_name
           test << test_group
           test << test_reboots
@@ -847,10 +847,10 @@ module TDriverReportCreator
           test << test_dump_count
           test << test_sent_bytes
           test << test_received_bytes
-         
+
           if user_data!=nil && !user_data.empty?
             test_data = Nokogiri::XML::Node.new("user_display_data",test)
-            user_data.each { |key,value| 
+            user_data.each { |key,value|
               data_value=Nokogiri::XML::Node.new("data",test_data)
               data_value.content = value.to_s
               data_value.set_attribute("id",key.to_s)
@@ -892,7 +892,7 @@ module TDriverReportCreator
                 if user_data!=nil && !user_data.empty?
                   xml.user_display_data {
                     (0..counter).each { |i|
-                      xml.data("id"=>user_data_keys.at(i).to_s){ 
+                      xml.data("id"=>user_data_keys.at(i).to_s){
                         xml.text user_data_values.at(i).to_s{
                         }
                       }
@@ -911,7 +911,7 @@ module TDriverReportCreator
         $stderr.puts "caught exception when writing results: #{e}"
       end
     end
-    
+
     def read_result_storage(results)
       while $result_storage_in_use==true
         sleep 1
@@ -933,23 +933,23 @@ module TDriverReportCreator
             reboots=node.search("reboots").text #2
             crashes=node.search("crashes").text #3
             start_time=node.search("start_time").text #4
-            duration=node.search("duration").text #5
+            duration="%0.2f" % node.search("duration").text #5
             memory_usage=node.search("memory_usage").text #6
             status=node.search("status").text #7
             index=node.search("index").text #8
             log=node.search("log").text #9
             comment=node.search("comment").text #10
-            link=node.search("link").text #11            
-            dump_count=node.search("dump_count").text #12            
+            link=node.search("link").text #11
+            dump_count=node.search("dump_count").text #12
             sent_bytes=node.search("sent_bytes").text #13
-            received_bytes=node.search("received_bytes").text #14            
+            received_bytes=node.search("received_bytes").text #14
             user_data = Hash.new
             node.xpath("user_display_data/data").each do |data_node|
-              value_name =  data_node.get_attribute("id")  
+              value_name =  data_node.get_attribute("id")
               val = data_node.text
               user_data[value_name] = val
             end
-        
+
             case results
             when 'passed'
               if @pass_statuses.include?(status)
@@ -1174,11 +1174,11 @@ module TDriverReportCreator
     def update_test_case_summary_pages(status,rewrite=false)
 
       @all_cases_arr=Array.new
-      begin        
+      begin
         case status
         when 'passed'
           update_test_case_summary_page(status,rewrite,'Passed')
-          
+
         when 'failed'
           update_test_case_summary_page(status,rewrite,'Failed')
 
@@ -1223,7 +1223,7 @@ module TDriverReportCreator
     end
 
     def update_test_case_summary_pages_for_crashes_and_reboots(rewrite=false)
-      
+
       begin
         update_test_case_summary_page('crash',rewrite,'Crash')
         update_test_case_summary_page('reboot',rewrite,'Reboot')
@@ -1232,13 +1232,13 @@ module TDriverReportCreator
       end
       return nil
     end
-    
+
     def create_csv
       storage_file='all_cases.xml'
       csv_file = 'all_cases.csv'
       csv_array = Array.new
       not_added=false
-    
+
       file=@report_folder+'/'+storage_file
       csv =  nil
       begin
@@ -1248,10 +1248,10 @@ module TDriverReportCreator
           xml_data = Nokogiri::XML(io){ |config| config.options = Nokogiri::XML::ParseOptions::STRICT }
           io.close
           xml_data.root.xpath("//tests/test").each do |node|
-        
+
             line=Array.new
             first_line=Array.new
-        
+
             value=node.search("name").text
             first_line<<"name" if !not_added
             line<<value
@@ -1288,6 +1288,6 @@ module TDriverReportCreator
         puts e.to_s
       end
     end
-  
+
   end
 end
