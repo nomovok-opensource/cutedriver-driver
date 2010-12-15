@@ -20,7 +20,7 @@
 include TDriverReportJavascript
 
 module TDriverReportWriter
-  
+
   def write_style_sheet(page)
     css='body
 {
@@ -320,7 +320,7 @@ a:hover { color:White; background-color:#005B9A;}
 }
 
 #statistics_table
-{	
+{
 	font-size: 12px;
 	text-align: left;
 	border-collapse: collapse;
@@ -330,12 +330,12 @@ a:hover { color:White; background-color:#005B9A;}
 	font-size: 13px;
 	font-weight: normal;
 	padding: 8px;
-	background: #b9c9fe;	
+	background: #b9c9fe;
 	color: #039;
 }
 #statistics_table td
 {
-	padding: 8px;	
+	padding: 8px;
 	border-bottom: 1px solid Black;
 	color: #669;
 	border-top: 1px solid transparent;
@@ -586,7 +586,7 @@ display: none;
     when "TDriver test results"
       stylesheet='<link rel="stylesheet" title="TDriverReportStyle" href="tdriver_report_style.css"/>'
     when "TDriver test environment","Total run","Statistics","Passed","Failed","Not run","Crash","Reboot","TDriver log"
-      stylesheet='<link rel="stylesheet" title="TDriverReportStyle" href="../tdriver_report_style.css"/>'    
+      stylesheet='<link rel="stylesheet" title="TDriverReportStyle" href="../tdriver_report_style.css"/>'
     else
       stylesheet='<link rel="stylesheet" title="TDriverReportStyle" href="../../tdriver_report_style.css"/>'
     end
@@ -824,15 +824,15 @@ display: none;
     html_body='</dd>'<<
       '</dl>'
     html_body
-  end  
+  end
   def write_duration_graph(page, folder, graph_file_name, tc_arr)
-  
+
     tdriver_group=ReportingStatistics.new(tc_arr)
     tdriver_group.generate_duration_graph(folder + '/cases/' + graph_file_name)
-	
+
     html_body=Array.new
     html_body << '<div>'
-    html_body << '<H1 ALIGN=center><img border="0" src="./'+graph_file_name+'"/></H1>'    
+    html_body << '<H1 ALIGN=center><img border="0" src="./'+graph_file_name+'"/></H1>'
     html_body << '</div>'
     File.open(page, 'a') do |f2|
       f2.puts html_body
@@ -976,9 +976,11 @@ display: none;
       begin
         fail_rate=(total_failed.to_f/(total_run.to_f-total_not_run.to_f))*100
         pass_rate=(total_passed.to_f/(total_run.to_f-total_not_run.to_f))*100
+        fail_rate="%0.2f" % fail_rate
+        pass_rate="%0.2f" % pass_rate
       rescue
-        fail_rate=0
-        pass_rate=0
+        fail_rate="0"
+        pass_rate="0"
       end
     end
 
@@ -1044,11 +1046,11 @@ display: none;
     end
     html_body << '<tr>'<<
       '<td><b>Pass %</b></td>'<<
-      '<td>'+pass_rate.to_f.to_s+'%</td>'<<
+      '<td>'+pass_rate.to_s+'%</td>'<<
       '</tr>'<<
       '<tr>'<<
       '<td><b>Fail %</b></td>'<<
-      '<td>'+fail_rate.to_f.to_s+'%</td>'<<
+      '<td>'+fail_rate.to_s+'%</td>'<<
       '</tr>'<<
       '</table></div><p />'
     if summary_arr
@@ -1293,10 +1295,10 @@ display: none;
 
   def write_page_navigation_div(page,report_page,report_pages)
     page_with_no_number=page.gsub("#{report_page}_","")
-    page_base_name=File.basename(page_with_no_number)    
+    page_base_name=File.basename(page_with_no_number)
     div_body=Array.new
     div_body<<"<div class=\"page_navigation_section\"><center>"<<
-      "<ul id=\"navigation\">"      
+      "<ul id=\"navigation\">"
     max=10
     start_page=report_page/max
     if start_page==0
@@ -1332,8 +1334,8 @@ display: none;
 
   def write_page_end(page,report_page=nil,report_pages=nil)
     page_ready=nil
-    if report_page!=nil      
-      navigation_div="#{write_page_navigation_div(page,report_page,report_pages)}"      
+    if report_page!=nil
+      navigation_div="#{write_page_navigation_div(page,report_page,report_pages)}"
       html_end="#{navigation_div}</body></html>"
       doc = Nokogiri::HTML(open(page))
       b_div_found=false
@@ -1341,10 +1343,10 @@ display: none;
         if div.text.include?('Next')
           page_ready=report_page
         end
-        b_div_found=true          
+        b_div_found=true
         div.replace(Nokogiri.make(navigation_div))
-      end     
-      if b_div_found==false 
+      end
+      if b_div_found==false
         File.open(page, 'a') do |f|
           f.puts html_end
         end
@@ -1358,7 +1360,7 @@ display: none;
       File.open(page, 'a') do |f|
         f.puts html_end
       end
-    end    
+    end
     html_end=nil
     page_ready
   end
