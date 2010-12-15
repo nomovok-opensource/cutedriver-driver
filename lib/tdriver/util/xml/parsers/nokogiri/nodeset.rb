@@ -47,9 +47,9 @@ module MobyUtil
 
         def each( &block )
 
-          @xml.each{ | element | 
+          @xml.each{ | node | 
 
-            yield( node_object( element ) ) 
+            yield( node_object( node ) ) 
 
           }
 
@@ -59,9 +59,9 @@ module MobyUtil
 
         def each_with_index( &block )
 
-          @xml.each_with_index{ | element, index | 
+          @xml.each_with_index{ | node, index | 
 
-            yield( node_object( element ), index ) 
+            yield( node_object( node ), index ) 
 
           }
 
@@ -128,9 +128,9 @@ module MobyUtil
     
         def to_a
 
-          @xml.collect{ | element | 
+          @xml.collect{ | node | 
 
-            node_object( element ) 
+            node_object( node ) 
 
           }
           
@@ -138,11 +138,11 @@ module MobyUtil
         
         def delete( node )
 
-          @xml.each do | element |
+          @xml.each do | nodeset_node |
 
-            if ( node.xml.content == element.content )
+            if ( node.xml.content == nodeset_node.content )
 
-              @xml.delete( element )
+              @xml.delete( nodeset_node )
 
               break
 
@@ -161,9 +161,9 @@ module MobyUtil
 
         def _collect( &block )
 
-          @xml.collect{ | element | 
+          @xml.collect{ | node | 
 
-            yield( node_object( element ) ) 
+            yield( node_object( node ) ) 
 
           } 
 
@@ -171,15 +171,15 @@ module MobyUtil
 
         def _sort( &block )
 
-          @xml.sort{ | element_a, element_b | 
+          @xml.sort{ | node_a, node_b | 
         
             if block_given?
 
-              yield( node_object( element_a ), node_object( element_b ) ) 
+              yield( node_object( node_a ), node_object( node_b ) ) 
 
             else
 
-              element_a <=> element_b
+              node_a <=> node_b
 
             end
 

@@ -67,6 +67,12 @@ module MobyUtil
 
       end
 
+      def content
+      
+        nil
+      
+      end
+
       def to_s
 
         ""
