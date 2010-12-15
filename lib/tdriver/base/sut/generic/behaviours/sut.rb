@@ -649,7 +649,7 @@ module MobyBehaviour
         error_details = target[ :name ].nil? ? "" : "name: " << target[ :name ].to_s
         error_details << ( error_details.empty? ? "" : ", ") << "id: " << target[ :uid ].to_s if !target[ :uid ].nil?
 
-        if( self.ui_type.downcase.include?( 'qt' ) && !expected_attributes[ :FullName ].nil? )
+        if( !expected_attributes[ :FullName ].nil? )
 
           if( expected_attributes[ :FullName ].include?('/') )
 
