@@ -29,6 +29,8 @@ module TDriver
         # TODO: document me
         def xpath_to_object( rules, find_all_children )
 
+          p __method__
+
           # object element attribute or attribute element 
           test_object_identification_attributes = rules.collect{ | key, value | 
                       
@@ -44,7 +46,9 @@ module TDriver
                 
               else
 
-                "(@#{ key }='#{ value }' or attributes/attribute[translate(@name,'ABCDEFGHIJKLMNOPQRSTUVWXYZ','abcdefghijklmnopqrstuvwxyz')='#{ key }' and .='#{ value }'])"
+                "(@#{ key }='#{ value }' or attributes/attribute[translate(@name,'ABCDEFGHIJKLMNOPQRSTUVWXYZ','abcdefghijklmnopqrstuvwxyz')='#{ key }' and .=#{ xpath_literal_string( value ) }])"
+
+                #"(@#{ key }='#{ value }' or attributes/attribute[translate(@name,'ABCDEFGHIJKLMNOPQRSTUVWXYZ','abcdefghijklmnopqrstuvwxyz')='#{ key }' and .='#{ value }'])"
 
                                 
                 #"(@#{ key }='#{ value }' or attributes/attribute[translate(@name,'ABCDEFGHIJKLMNOPQRSTUVWXYZ','abcdefghijklmnopqrstuvwxyz')='#{ key }']/value='#{ value }')"
@@ -77,11 +81,15 @@ module TDriver
             
               #"(attributes/attribute[translate(@name,'ABCDEFGHIJKLMNOPQRSTUVWXYZ','abcdefghijklmnopqrstuvwxyz')='#{ key }']/value='#{ value }')"
 
-              "(attributes/attribute[translate(@name,'ABCDEFGHIJKLMNOPQRSTUVWXYZ','abcdefghijklmnopqrstuvwxyz')='#{ key }' and .='#{ value }'])"
-                          
+              "(attributes/attribute[translate(@name,'ABCDEFGHIJKLMNOPQRSTUVWXYZ','abcdefghijklmnopqrstuvwxyz')='#{ key }' and .=#{ xpath_literal_string( value ) }])"
+               
+              #"(attributes/attribute[translate(@name,'ABCDEFGHIJKLMNOPQRSTUVWXYZ','abcdefghijklmnopqrstuvwxyz')='#{ key }' and .='#{ value }'])"
+           
             end
                                  
           }.compact.join(" and ")
+
+        p find_all_children ? "*//object[#{ test_object_identification_attributes }]" : "objects[1]/object[#{ test_object_identification_attributes }]"
 
           find_all_children ? "*//object[#{ test_object_identification_attributes }]" : "objects[1]/object[#{ test_object_identification_attributes }]"
         
@@ -90,7 +98,7 @@ module TDriver
     end
 
     # TODO: document me
-    def self.xpath_literal( string )
+    def self.xpath_literal_string( string )
 
       # make sure that argument is type of string
       string = string.to_s
@@ -148,7 +156,6 @@ module TDriver
       result
 
     end
-
 
     # TODO: document me
     def self.get_objects( source_data, rules, find_all_children )
