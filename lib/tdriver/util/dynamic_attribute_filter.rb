@@ -75,6 +75,12 @@ module MobyUtil
 
 		end
 
+    def has_attribute?( symbol )
+    
+      @attributes.include?( symbol.to_s )
+    
+    end
+
 		def add_attribute( symbol )
 
 			# update filter if new symbols added
