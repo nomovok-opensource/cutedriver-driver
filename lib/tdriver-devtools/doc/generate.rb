@@ -501,9 +501,8 @@ def collect_feature_tests
 
           begin
 
-            
-
-            code = /\"(.*)\"\s/m.match( example ).captures.first
+            code = /"([^\"]*)"\s/m.match( example ).captures.first
+            #code = /\"(.*)\"\s/m.match( example ).captures.first
 
             status = /^.*\s{1}(\w+)$/m.match( example ).captures.to_a
 
