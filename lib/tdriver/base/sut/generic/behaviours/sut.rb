@@ -231,7 +231,7 @@ module MobyBehaviour
         MobyUtil::Retryable.while(
           :tries => @refresh_tries,
           :interval => @refresh_interval,
-          :unless => [ MobyBase::ControllerNotFoundError, MobyBase::CommandNotFoundError ] 
+          :unless => [ MobyBase::ControllerNotFoundError, MobyBase::CommandNotFoundError, MobyBase::ApplicationNotAvailableError ] 
         ) {
 
           #use find_object if set on and the method exists
