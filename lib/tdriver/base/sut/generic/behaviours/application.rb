@@ -73,6 +73,11 @@ module MobyBehaviour
     #  |:force_kill|TrueClass, FalseClass|If this options is set to true, the application process is killed if close fails. Setting this option to nil (default value), will cause close to use the value defined in the 'application_close_kill' parameter as defined in the TDriver parameter file.|nil|No|
     #  |:check_process|TrueClass, FalseClass|If this options is set to true, success of the close method is verified by checking if the process is still active. If it is set to false, TDriver will only check that the application is no longer in the foreground.|true|No|
     #
+    # == returns
+    # NilClass
+    #  description: -
+    #  example: -
+    #
     # == exceptions
     # TestObjectNotFoundError
     #  description: If this application is not the foreground application on the device under test.

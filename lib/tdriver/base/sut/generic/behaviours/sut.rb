@@ -169,6 +169,7 @@ module MobyBehaviour
 
     end
 
+    # == nodoc  
     # == description
     # Force to use user defined ui state (e.g. for debugging purposes). Freezes the SUT xml_data, until unfreezed or set to nil. 
     #
