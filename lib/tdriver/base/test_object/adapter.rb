@@ -25,75 +25,98 @@ module TDriver
     class << self
     
       private
-      
-        # TODO: document me
-        def xpath_to_object( rules, find_all_children )
 
-          p __method__
+    		# special cases: allow partial match when value of type and attribute name matches
+        @@partial_match_allowed = [ 'list_item', 'text' ], ['application', 'fullname' ]
+ 
+        def xpath_attributes( attributes, element_attributes, object_type )
+        
+          attributes = attributes.collect{ | key, values |
 
-          # object element attribute or attribute element 
-          test_object_identification_attributes = rules.collect{ | key, value | 
-                      
-            key = key.to_s.downcase
+            values = ( values.kind_of?( Array ) ? values : [ values ] ).collect{ | value |
             
-            if [ "name", "type", "parent", "id" ].include?( key )
+              # concatenate string if it contains single and double quotes, otherwise return as is
+              value = xpath_literal_string( value )
 
-              # TODO: change "any" to "*"
-              # children method may request test objects of any type
-              if key == 'type' and value == 'any'
+              if @@partial_match_allowed.include?( [ object_type, key ] )
+            
+                # partial match allowed
+    						value = "[contains(.,#{ value })]"
+            
+              else
               
-                '@*'
-                
+                # exact match required
+    						value = "=#{ value }"
+
+              end
+
+              if element_attributes
+              
+                prefix = "@#{key}#{value} or " 
+              
               else
 
-                "(@#{ key }='#{ value }' or attributes/attribute[translate(@name,'ABCDEFGHIJKLMNOPQRSTUVWXYZ','abcdefghijklmnopqrstuvwxyz')='#{ key }' and .=#{ xpath_literal_string( value ) }])"
-
-                #"(@#{ key }='#{ value }' or attributes/attribute[translate(@name,'ABCDEFGHIJKLMNOPQRSTUVWXYZ','abcdefghijklmnopqrstuvwxyz')='#{ key }' and .='#{ value }'])"
-
-                                
-                #"(@#{ key }='#{ value }' or attributes/attribute[translate(@name,'ABCDEFGHIJKLMNOPQRSTUVWXYZ','abcdefghijklmnopqrstuvwxyz')='#{ key }']/value='#{ value }')"
+                prefix = "" 
               
               end
-              
-            else
-            
-              # TODO: add support for having multiple value options 
-            
-=begin
-                attribute_value.each_with_index do | value, index |
-
-                  xpath << " or " unless index.zero?
-
-                  # allow partial match when value of :type and attribute name matches. see class instance constructor.
-                  if @@partial_match_allowed.include?( [ @_attributes_used_to_identify_object[ :type ], attribute_key ] )
-
-                    xpath << "value[contains(.,%s)]" % convertToXPathLiteral( value )
-
-                  else
-
-                    xpath << "value=%s" % convertToXPathLiteral( value )
-
-                  end
+  
+              "#{ prefix }attributes/attribute[translate(@name,'ABCDEFGHIJKLMNOPQRSTUVWXYZ','abcdefghijklmnopqrstuvwxyz')='#{key}' and .#{value}]"
                   
-                end
-                
-=end            
-            
-              #"(attributes/attribute[translate(@name,'ABCDEFGHIJKLMNOPQRSTUVWXYZ','abcdefghijklmnopqrstuvwxyz')='#{ key }']/value='#{ value }')"
+            }.join( " or " )
+                    
+          }
+          
+          result = attributes.join(' and ')
 
-              "(attributes/attribute[translate(@name,'ABCDEFGHIJKLMNOPQRSTUVWXYZ','abcdefghijklmnopqrstuvwxyz')='#{ key }' and .=#{ xpath_literal_string( value ) }])"
-               
-              #"(attributes/attribute[translate(@name,'ABCDEFGHIJKLMNOPQRSTUVWXYZ','abcdefghijklmnopqrstuvwxyz')='#{ key }' and .='#{ value }'])"
-           
-            end
-                                 
-          }.compact.join(" and ")
+          if result.empty?
+          
+            result = nil
 
-        p find_all_children ? "*//object[#{ test_object_identification_attributes }]" : "objects[1]/object[#{ test_object_identification_attributes }]"
+          else
 
-          find_all_children ? "*//object[#{ test_object_identification_attributes }]" : "objects[1]/object[#{ test_object_identification_attributes }]"
-        
+            result = "(#{ result })" if element_attributes
+          
+          end
+          
+          result
+                  
         end
+      
+    
+    end
+
+    # TODO: document me
+    def self.xpath_to_object( rules, find_all_children )
+
+      # convert hash keys to downcased string
+      rules = Hash[ rules.collect{ | key, value | [ key.to_s.downcase, value ] } ]
+
+      test_object_identification_attributes_array = []
+
+      # store and remove object element attributes from hash
+      object_element_attributes = rules.delete_keys!( "name", "type", "parent", "id" )
+
+      # TODO: change "any" to "*"
+      # children method may request test objects of any type
+      if object_element_attributes[ "type" ] == 'any' 
+
+        # test object with any name, type, parent and id is allowed
+        test_object_identification_attributes_array << '@*'
+
+      else
+
+        # required attributes          
+        test_object_identification_attributes_array << xpath_attributes( object_element_attributes, true, object_element_attributes[ "type" ] )
+      
+      end
+
+      # additional attributes, eg. :text, :x, :y etc. 
+      test_object_identification_attributes_array << xpath_attributes( rules, false, object_element_attributes[ "type" ] )
+
+      # join required and additional attribute strings
+      test_object_identification_attributes = test_object_identification_attributes_array.compact.join(" and ")
+
+      find_all_children ? "*//object[#{ test_object_identification_attributes }]" : "objects[1]/object[#{ test_object_identification_attributes }]"
     
     end
 
@@ -160,8 +183,6 @@ module TDriver
     # TODO: document me
     def self.get_objects( source_data, rules, find_all_children )
 
-      #p __method__
-
       rule = xpath_to_object( rules, find_all_children )
 
       [ 
@@ -186,7 +207,8 @@ module TDriver
       # collect only nodes that has x_absolute and y_absolute attributes
       nodeset.collect!{ | node |
 
-        node unless node.at_xpath( attribute_pattern % 'x_absolute' ).to_s.empty? || node.at_xpath( attribute_pattern % 'y_absolute' ).to_s.empty?
+        #node unless node.at_xpath( attribute_pattern % 'x_absolute' ).to_s.empty? || node.at_xpath( attribute_pattern % 'y_absolute' ).to_s.empty?
+        node unless node.at_xpath( attribute_pattern % 'x_absolute' ).nil? || node.at_xpath( attribute_pattern % 'y_absolute' ).nil?
 
       }.compact!.sort!{ | element_a, element_b |
 
