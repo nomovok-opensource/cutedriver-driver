@@ -31,7 +31,7 @@ module TDriverReportWriter
 .navigation_section
 {
 	background-color:#0191C8;
-	width:800px;
+	width:1024px;
 	height:40px;
     margin-left : auto;
     margin-right: auto;
@@ -48,7 +48,7 @@ module TDriverReportWriter
 .page_navigation_section
 {
 	background-color:#0191C8;
-	width:800px;
+	width:1024px;
 	height:40px;
     margin-left : auto;
     margin-right: auto;
@@ -67,7 +67,7 @@ module TDriverReportWriter
 .summary
 {
 	background-color:White;
-	width:800px;
+	width:1024px;
 	height:100%;
 	margin-left : auto;
     margin-right: auto;
@@ -82,7 +82,7 @@ module TDriverReportWriter
 .summary_total_run
 {
 	background-color:White;
-	width:800px;
+	width:1024px;
 	height:100%;
 	margin-left : auto;
     margin-right: auto;
@@ -97,7 +97,7 @@ module TDriverReportWriter
 .summary_passed
 {
 	background-color:White;
-	width:800px;
+	width:1024px;
 	height:100%;
 	margin-left : auto;
     margin-right: auto;
@@ -112,7 +112,7 @@ module TDriverReportWriter
 .summary_crash
 {
 	background-color:White;
-	width:800px;
+	width:1024px;
 	height:100%;
 	margin-left : auto;
     margin-right: auto;
@@ -127,7 +127,7 @@ module TDriverReportWriter
 .summary_reboot
 {
 	background-color:White;
-	width:800px;
+	width:1024px;
 	height:100%;
 	margin-left : auto;
     margin-right: auto;
@@ -142,7 +142,7 @@ module TDriverReportWriter
 .statistics
 {
 	background-color:White;
-	width:800px;
+	width:1024px;
 	height:100%;
 	margin-left : auto;
     margin-right: auto;
@@ -157,7 +157,7 @@ module TDriverReportWriter
 .summary_failed
 {
 	background-color:White;
-	width:800px;
+	width:1024px;
 	height:100%;
 	margin-left : auto;
     margin-right: auto;
@@ -172,7 +172,7 @@ module TDriverReportWriter
 .summary_not_run
 {
 	background-color:White;
-	width:800px;
+	width:1024px;
 	height:100%;
 	margin-left : auto;
     margin-right: auto;
@@ -187,7 +187,7 @@ module TDriverReportWriter
 .test_passed
 {
 	background-color:White;
-	width:800px;
+	width:1024px;
 	height:100%;
 	margin-left : auto;
     margin-right: auto;
@@ -202,7 +202,7 @@ module TDriverReportWriter
 .test_failed
 {
 	background-color:White;
-	width:800px;
+	width:1024px;
 	height:100%;
 	margin-left : auto;
     margin-right: auto;
@@ -217,7 +217,7 @@ module TDriverReportWriter
 .test_not_run
 {
 	background-color:White;
-	width:800px;
+	width:1024px;
 	height:100%;
 	margin-left : auto;
     margin-right: auto;
@@ -232,7 +232,7 @@ module TDriverReportWriter
 .environment
 {
 	background-color:White;
-	width:800px;
+	width:1024px;
 	height:100%;
 	margin-left : auto;
     margin-right: auto;
@@ -247,7 +247,7 @@ module TDriverReportWriter
 .page_title
 {
 	background-color:#0191C8;
-	width:800px;
+	width:1024px;
 	min-height:100%;
 	margin-left : auto;
     margin-right: auto;
