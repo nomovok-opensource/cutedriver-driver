@@ -99,7 +99,7 @@ module MobyBehaviour
 
       MobyUtil::Retryable.until( :timeout => 60, :retry_timeout => 5 ) {
         system(str_commands_after_powerup) if str_commands_after_powerup != nil
-        if MobyUtil::Parameter[ :ats4_error_recovery_enabled, false ]=='true'
+        if MobyUtil::Parameter[ :ats4_error_recovery_enabled, false ]!='true'
           MobyUtil::Logger.instance.log "behaviour" , "PASS;TDriver attempting reconnect"
           self.connect(self.id)
           MobyUtil::Logger.instance.log "behaviour" , "PASS;TDriver connected"
