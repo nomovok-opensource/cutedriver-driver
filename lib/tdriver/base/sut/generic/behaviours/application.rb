@@ -286,7 +286,9 @@ module MobyBehaviour
       id
 
     end
-    
+
+    # == nodoc
+    # TODO: document all the possible values and then make public    
     def environment
     
       @environment
