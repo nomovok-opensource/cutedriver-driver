@@ -20,7 +20,7 @@
 # Find behaviour 
 # Methods for finding test objects on the suttest objet state
 module MobyBehaviour
-
+  
 	# == description
 	# This module contains generic find behaviour
 	#
@@ -44,7 +44,7 @@ module MobyBehaviour
 	module Find   
 
 		include MobyBehaviour::Behaviour
-
+    # == nodoc
 		# == description
 		# Finds a child test_object given its name and type and returns it as a reference 
 		#

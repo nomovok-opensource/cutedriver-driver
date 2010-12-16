@@ -58,6 +58,7 @@ module MobyUtil
         if MobyUtil::EnvironmentHelper.windows? 
 
           File.open( 'nmake.bat', 'w') { |f| f.write "SET ERRORLEVEL=0" }
+          File.open( 'make.bat', 'w') { |f| f.write "SET ERRORLEVEL=0" }
           File.open( 'extconf.dll', 'w' ) {}
 
         else

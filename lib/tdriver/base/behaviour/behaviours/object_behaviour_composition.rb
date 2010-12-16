@@ -43,7 +43,7 @@ module MobyBehaviour
 	module ObjectBehaviourComposition
 
   public
-
+    # == nodoc
     # == description
     # Apply all behaviour modules to target object which meets the given rules. Target object can be either type of "sut", "application" or "*" (any test object). 
     # == tables
