@@ -1145,7 +1145,7 @@ module MobyBehaviour
 
         nodes.each { | element |
 
-          pid = element.xpath('//attribute[@name = "uri"]/value/text()').content #[ 0 ].to_s
+          pid = element.at_xpath('//attribute[@name = "uri"]/value/text()').content #[ 0 ].to_s
 
           if pid.nil? or pid.empty? or pid.to_i <= 0 # invalid reference
 
