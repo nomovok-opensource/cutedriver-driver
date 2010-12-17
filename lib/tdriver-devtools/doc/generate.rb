@@ -469,6 +469,9 @@ def collect_feature_tests
         # collect step status
         step_results = ( scenario[ "step" ] || [] ).collect{ | step |
         
+          # do not process commented lines
+          next if /^#/.match( step )
+
           #p scenario
         
           if /^.*\s{1}(\w+)$/.match( step )
@@ -484,6 +487,9 @@ def collect_feature_tests
           #( /^.*\s{1}(\w+)$/.match( step ).captures || [] ).first
         
         }
+
+        # remove nils (skipped lines comment lines)
+        step_results.compact! unless step_results.nil?
         
         unless scenario["example_step"].nil?
 
@@ -495,8 +501,8 @@ def collect_feature_tests
 
           begin
 
-
-            code = /\"(.*)\"\s/m.match( example ).captures.first
+            code = /"([^\"]*)"\s/m.match( example ).captures.first
+            #code = /\"(.*)\"\s/m.match( example ).captures.first
 
             status = /^.*\s{1}(\w+)$/m.match( example ).captures.to_a
 

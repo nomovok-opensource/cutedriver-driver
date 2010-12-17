@@ -171,7 +171,7 @@ module MobyBehaviour
             :timeout => MobyUtil::Parameter[ self.sut.id ][ :application_synchronization_timeout, '60' ].to_f,
             :interval => MobyUtil::Parameter[ self.sut.id ][ :application_synchronization_retry_interval, '0.25' ].to_f,
             :exception => MobyBase::VerificationError,
-            :unless => MobyBase::TestObjectNotFoundError ) {
+            :unless => [MobyBase::TestObjectNotFoundError, MobyBase::ApplicationNotAvailableError] ) {
 
             # check if the application is still found or not
             if ( close_options[ :check_process ] == true and @sut.application( :id => self.uid, :__timeout => 0 ) )
@@ -202,6 +202,10 @@ module MobyBehaviour
           }
 
         rescue MobyBase::TestObjectNotFoundError
+
+          # everything ok: application not running anymore
+
+		rescue MobyBase::ApplicationNotAvailableError
 
           # everything ok: application not running anymore
 

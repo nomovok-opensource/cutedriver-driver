@@ -128,4 +128,7 @@ module MobyBase
 		end
 	end
 
+	# TODO: document
+	class ApplicationNotAvailableError < MobyStandardError; end;
+
 end # MobyBase
