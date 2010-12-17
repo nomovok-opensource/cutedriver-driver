@@ -97,6 +97,27 @@ class Hash
   
   end
 
+  # remove keys from hash, return hash of deleted keys as result
+  def delete_keys!( *keys )
+
+    deleted_keys = []
+
+    Hash[ keys.flatten.collect{ | key | [ key, delete( key ) ] if has_key?( key ) }.compact ]
+    
+  end
+  
+  # delete multiple keys from hash, does not modify original hash
+  def delete_keys( *keys )
+  
+    # create a duplicate of current hash
+    result = dup
+
+    keys.flatten.each{ | key | result.delete( key ) }
+    
+    result
+
+  end
+
   # store keys and values to hash if not already defined
   def default_values( hash )
 
