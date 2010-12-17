@@ -86,7 +86,7 @@ module MobyBehaviour
     end
 
     # == description
-    # Retrieves the total amount of data sent in bytes
+    # Disconnects the current SUT
     # == returns
     # Boolean
     #  description: Determines if SUT is connected
