@@ -225,6 +225,9 @@ module MobyBase
 
 		begin
 
+      # skip parsing the xml if string is empty
+      next if behaviours[ :xml ].empty?
+
 		  # parse behaviour xml
 		  document = MobyUtil::XML.parse_string( behaviours[ :xml ] )
 
