@@ -316,9 +316,9 @@ module MobyUtil
     end
         
     if in_verbose
-      system('ffmpeg.exe -v 0 -i '+in_target_video.to_s+' -y -f image2 -r '+in_fps.to_s+' '+alive_temp_folder+'/frame-%05d.png')
+      system('ffmpeg -v 0 -i '+in_target_video.to_s+' -y -f image2 -r '+in_fps.to_s+' '+alive_temp_folder+'/frame-%05d.png')
     else
-      system('ffmpeg.exe 2>video_split.log -v 0 -i '+in_target_video.to_s+' -y -f image2 -r '+in_fps.to_s+' '+alive_temp_folder+'/frame-%05d.png')
+      system('ffmpeg 2>video_split.log -v 0 -i '+in_target_video.to_s+' -y -f image2 -r '+in_fps.to_s+' '+alive_temp_folder+'/frame-%05d.png')
     end
 
     puts "Video processing duration: " << (Time.now - ts).to_s if in_verbose
