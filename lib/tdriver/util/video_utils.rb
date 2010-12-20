@@ -290,7 +290,7 @@ module MobyUtil
     
     alive_temp_folder = "temp_target_alive"
     
-    require 'rmagick'
+    require 'RMagick'
     
     raise ArgumentError.new( "The FPS argument must be an Interger or a Float, it was a #{ in_fps.class }." ) unless in_fps.kind_of? Numeric
     raise ArgumentError.new( "The frame treshold argument must be an Interger or a Float, it was a #{ in_image_treshold.class }." ) unless in_image_treshold.kind_of? Numeric
