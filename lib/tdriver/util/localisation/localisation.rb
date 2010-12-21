@@ -106,7 +106,7 @@ module MobyUtil
       # "Moldavian" => ["MO", "73"],  
       "Mongolian" => ["mn", "74"],  
       # "Norwegian Nynorsk" => ["nn", "75"],  
-      "Portuguese BR" => ["pt_BP", "76"],  
+      "Portuguese BR" => ["pt_BR", "76"],  
       "Punjabi" => ["pa", "77"],  
       "Romanian" => ["ro", "78"],  
       "Servian" => ["sr", "79"], 
@@ -718,19 +718,21 @@ module MobyUtil
 		# Extracs application name used for FNAME from a given filename (removes language tags and file extension)
 		# Used only on .ts files
 		def self.parseFName(file)
-			fname = file.split('/').last
 			#(wordlist matching)
-			words = ["ar", "bg", "ca", "cs", "da", "de", "el", "en", "english-gb", "(apac)", "(apaccn)", "(apachk)", "(apactw)", "japanese", "thai", "us", "es", "419", "et", "eu", "fa", "fi", "fr", "gl", "he", "hi", "hr", "hu", "id", "is", "it", "ja", "ko", "lt", "lv", "mr", "ms", "nb", "nl", "pl", "pt", "br", "ro", "ru", "sk", "sl", "sr", "sv", "th", "tl", "tr", "uk", "ur", "us", "vi", "zh", "hk", "tw", "no"]
-			match = fname.scan(/_([a-zA-Z1-9\-\(\)]*)/)
-			if match
-				match.each do |m|
-					fname.gsub!("_#{m[0]}"){|s| ""} if words.include?( m[0].downcase )
-				end
-			end
-			fname.gsub!(".ts"){|s| ""} 
+			words = ["ar", "bg", "ca", "cs", "da", "de", "el", "en", "english-gb", "(apac)", "(apaccn)", "(apachk)", "(apactw)", "japanese", "thai", "us", "es", "419", "et", "eu", "fa", "fi", "fr", "gl", "he", "hi", "hr", "hu", "id", "is", "it", "ja", "ko", "lt", "lv", "mr", "ms", "nb", "nl", "pl", "pt", "br", "ro", "ru", "sk", "sl", "sr", "sv", "th", "tl", "tr", "uk", "ur", "us", "vi", "zh", "hk", "tw", "no", "gb", "cn"]
+      
+      fname = file.split('/').last
+      fname.gsub!(".ts"){|s| ""} 
+      fname_fragments = fname.split('_')
+      fname_fragments.each_index do |i|
+        fname_fragments[i] = "" if words.include?( fname_fragments[i].downcase )
+      end
+      fname_fragments.delete("")
+      fname = fname_fragments.join("_")
       language = file.split('/').last.gsub( fname + "_" ){|s| ""}.gsub(".ts"){|s| ""}
-			return fname, language  #gsub! will return nil if now subs are performed
-		end
+      return fname, "" if fname == language
+      return fname, language
+    end
 		
 	end # class
 
