@@ -498,6 +498,9 @@ module MobyBase
         # determine that did user give index value
         :__index_given => directives.has_key?( :__index ),
 
+        # use sorting if index given
+        :__xy_sorting => directives.has_key?( :__index ),
+
         # determine index of test object to be retrieved
         :__index => 0
                  
@@ -545,7 +548,7 @@ module MobyBase
 
         # sort matches if enabled
         if directives[ :__xy_sorting ] == true
-          
+                  
           # sort elements
           TDriver::TestObjectAdapter.sort_elements( 
             matches, 
