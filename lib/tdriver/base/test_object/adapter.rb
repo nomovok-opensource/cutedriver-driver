@@ -27,63 +27,49 @@ module TDriver
       private
 
     		# special cases: allow partial match when value of type and attribute name matches
-        @@partial_match_allowed = [ 'list_item', 'text' ], ['application', 'fullname' ]
+        @@partial_match_allowed = [ 'list_item', 'text' ], [ 'application', 'fullname' ]
  
+        # TODO: document me
         def xpath_attributes( attributes, element_attributes, object_type )
         
+          # collect attributes
           attributes = attributes.collect{ | key, values |
 
-            values = ( values.kind_of?( Array ) ? values : [ values ] ).collect{ | value |
+            # allow multiple values options for attribute, e.g. object which 'text' attribute value is either '1' or '2' 
+            ( values.kind_of?( Array ) ? values : [ values ] ).collect{ | value |
             
               # concatenate string if it contains single and double quotes, otherwise return as is
               value = xpath_literal_string( value )
 
-              if @@partial_match_allowed.include?( [ object_type, key ] )
+              # check that if partial matche is allowed otherwise require exact match  
+              value = @@partial_match_allowed.include?( [ object_type, key ] ) ? "[contains(.,#{ value })]" : "=#{ value }"
             
-                # partial match allowed
-    						value = "[contains(.,#{ value })]"
-            
-              else
+              # compare also element attributes if key is required attribute e.g. "name", "type", "parent" or "id" 
+              prefix = element_attributes ? "@#{ key }#{ value } or " : ""
               
-                # exact match required
-    						value = "=#{ value }"
-
-              end
-
-              if element_attributes
-              
-                prefix = "@#{key}#{value} or " 
-              
-              else
-
-                prefix = "" 
-              
-              end
-  
-              "#{ prefix }attributes/attribute[translate(@name,'ABCDEFGHIJKLMNOPQRSTUVWXYZ','abcdefghijklmnopqrstuvwxyz')='#{key}' and .#{value}]"
+              # construct xpath
+              "#{ prefix }attributes/attribute[translate(@name,'ABCDEFGHIJKLMNOPQRSTUVWXYZ','abcdefghijklmnopqrstuvwxyz')='#{ key }' and .#{ value }]"
                   
-            }.join( " or " )
+            }.join( ' or ' )
                     
-          }
+          }.join( ' and ' )
           
-          result = attributes.join(' and ')
-
-          if result.empty?
+          # return created xpath or nil if no attributes given 
+          if attributes.empty?
           
-            result = nil
-
+            # no attributes given
+            nil
+          
           else
-
-            result = "(#{ result })" if element_attributes
+          
+            # return result in parenthesis if creating element attributes xpath fragment
+            element_attributes ? "(#{ attributes })" : attributes
           
           end
           
-          result
-                  
-        end
+        end # xpath_attributes
       
-    
-    end
+    end # static
 
     # TODO: document me
     def self.xpath_to_object( rules, find_all_children )
@@ -91,14 +77,14 @@ module TDriver
       # convert hash keys to downcased string
       rules = Hash[ rules.collect{ | key, value | [ key.to_s.downcase, value ] } ]
 
+      # xpath container array
       test_object_identification_attributes_array = []
 
       # store and remove object element attributes from hash
-      object_element_attributes = rules.delete_keys!( "name", "type", "parent", "id" )
+      object_element_attributes = rules.delete_keys!( 'name', 'type', 'parent', 'id' )
 
-      # TODO: change "any" to "*"
       # children method may request test objects of any type
-      if object_element_attributes[ "type" ] == 'any' 
+      if object_element_attributes[ 'type' ] == '*' 
 
         # test object with any name, type, parent and id is allowed
         test_object_identification_attributes_array << '@*'
@@ -106,16 +92,17 @@ module TDriver
       else
 
         # required attributes          
-        test_object_identification_attributes_array << xpath_attributes( object_element_attributes, true, object_element_attributes[ "type" ] )
+        test_object_identification_attributes_array << xpath_attributes( object_element_attributes, true, object_element_attributes[ 'type' ] )
       
       end
 
       # additional attributes, eg. :text, :x, :y etc. 
-      test_object_identification_attributes_array << xpath_attributes( rules, false, object_element_attributes[ "type" ] )
+      test_object_identification_attributes_array << xpath_attributes( rules, false, object_element_attributes[ 'type' ] )
 
       # join required and additional attribute strings
-      test_object_identification_attributes = test_object_identification_attributes_array.compact.join(" and ")
+      test_object_identification_attributes = test_object_identification_attributes_array.compact.join( ' and ' )
 
+      # return any child element under current node or only immediate child element 
       find_all_children ? "*//object[#{ test_object_identification_attributes }]" : "objects[1]/object[#{ test_object_identification_attributes }]"
     
     end
@@ -183,26 +170,37 @@ module TDriver
     # TODO: document me
     def self.get_objects( source_data, rules, find_all_children )
 
-      rule = xpath_to_object( rules, find_all_children )
+      #rule = xpath_to_object( rules, find_all_children )
+      #
+      #[ 
+      #  # perform xpath to source xml data
+      #  source_data.xpath( rule ),
+      #  rule 
+      #]    
 
       [ 
         # perform xpath to source xml data
-        source_data.xpath( rule ),
+        source_data.xpath( rule = xpath_to_object( rules, find_all_children ) ),
+
+        # return also created xpath  
         rule 
       ]    
+
     
     end
 
+    # TODO: document me
     def self.test_object_hash( object_id, object_type, object_name )
     
+      # calculate test object hash
       ( ( ( 17 * 37 + object_id ) * 37 + object_type.hash ) * 37 + object_name.hash )
 
     end
 
     # Sort XML nodeset of test objects with layout direction
-    def self.sort_elements( nodeset, layout_direction = "LeftToRight" )
+    def self.sort_elements( nodeset, layout_direction = 'LeftToRight' )
 
-      attribute_pattern = "./attributes/attribute[@name='%s']/value/text()"
+      attribute_pattern = './attributes/attribute[@name="%s"]/value/text()'
 
       # collect only nodes that has x_absolute and y_absolute attributes
       nodeset.collect!{ | node |
@@ -212,25 +210,30 @@ module TDriver
 
       }.compact!.sort!{ | element_a, element_b |
 
+        # retrieve element a's attributes x and y
         element_a_x = element_a.at_xpath( attribute_pattern % 'x_absolute' ).content.to_i
         element_a_y = element_a.at_xpath( attribute_pattern % 'y_absolute' ).content.to_i
 
+        # retrieve element b's attributes x and y
         element_b_x = element_b.at_xpath( attribute_pattern % 'x_absolute' ).content.to_i
         element_b_y = element_b.at_xpath( attribute_pattern % 'y_absolute' ).content.to_i
 
         case layout_direction
         
-          when "LeftToRight"
+          when 'LeftToRight'
 
+            # compare elements
             ( element_a_y == element_b_y ) ? ( element_a_x <=> element_b_x ) : ( element_a_y <=> element_b_y ) 
 
-          when "RightToLeft"
+          when 'RightToLeft'
 
+            # compare elements
             ( element_a_y == element_b_y ) ? ( element_b_x <=> element_a_x ) : ( element_a_y <=> element_b_y ) 
 
         else
 
-          Kernel::raise ArgumentError.new( "Unsupported layout direction #{ layout_direction.inspect }" )
+          # raise exception if layout direction it not supported 
+          Kernel::raise ArgumentError, "Unsupported layout direction #{ layout_direction.inspect }"
 
         end
 
@@ -261,25 +264,25 @@ module TDriver
 
       result = source_data.attribute( attribute_name )
       
+      # if no attribute found call optional code block or raise exception 
       unless result
             
         if block_given?
-                
+          
+          # pass return value of block as result
           yield( attribute_name )
         
         else
         
+          # raise exception if no default value given
           if default.empty?
         
             # raise exception if no such attribute found
-            Kernel::raise MobyBase::AttributeNotFoundError.new(
-            
-              "Could not find test object element attribute #{ attribute_name.inspect }"
-              
-            )
+            Kernel::raise MobyBase::AttributeNotFoundError, "Could not find test object element attribute #{ attribute_name.inspect }"
 
           else
           
+            # pass default value as result
             default.first
           
           end
@@ -302,7 +305,7 @@ module TDriver
       # retrieve attribute(s) from xml
       nodeset = source_data.xpath(
        
-        "attributes/attribute[translate(@name,'ABCDEFGHIJKLMNOPQRSTUVWXYZ','abcdefghijklmnopqrstuvwxyz')='#{ attribute_name.downcase }']" # /value/text()"
+        "attributes/attribute[translate(@name,'ABCDEFGHIJKLMNOPQRSTUVWXYZ','abcdefghijklmnopqrstuvwxyz')='#{ attribute_name.downcase }']"
         
       )
 
@@ -316,23 +319,22 @@ module TDriver
 
         else
 
+          # raise exception if no default value given
           if default.empty?
+          
             # raise exception if no such attribute found
-            Kernel::raise MobyBase::AttributeNotFoundError.new(
-            
-              "Could not find attribute #{ attribute_name.inspect }" # for test object of type #{ type.to_s }"
-              
-            )
+            Kernel::raise MobyBase::AttributeNotFoundError, "Could not find attribute #{ attribute_name.inspect }" # for test object of type #{ type.to_s }"
 
           else
           
+            # pass default value as result
             default.first
           
           end
           
-        end
+        end # block_given?
 
-      else
+      else # not nodeset.empty?
       
         # attribute(s) found
         # Need to disable this for now 
@@ -352,9 +354,10 @@ module TDriver
       Hash[ 
 
         # iterate each attribute and collect name and value      
-        source_data.xpath( 'attributes/attribute' ).collect{ | test_object | 
+        source_data.xpath( 'attributes/attribute/value' ).collect{ | value | 
 
-          [ test_object.attribute( 'name' ), test_object.at_xpath( 'value/text()' ).to_s ]
+          # collect attribute elements name and content
+          [ value.parent.attribute('name'), value.content ]
 
         } 
 
@@ -387,6 +390,7 @@ module TDriver
       # iterate through each child object type attribute and create accessor method  
       source_data.xpath( 'objects/object/@type' ).each{ | object_type |
 
+        # skip if object type value is nil (element)
         next if object_type.nil?
 
         # convert attribute node value to string

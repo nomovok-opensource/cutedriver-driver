@@ -481,9 +481,6 @@ module MobyBase
 
       # search parameters for find_objects feature    
       search_parameters = make_object_search_params( rules[ :parent ], rules[ :object_attributes_hash ] )
-      
-      # test object identificator to be used      
-      test_object_identificator = MobyBase::TestObjectIdentificator.new( rules[ :object_attributes_hash ] )
             
       # default rules      
       directives.default_values(
@@ -528,8 +525,15 @@ module MobyBase
         # refresh sut
         sut.refresh( directives[ :__refresh_arguments ], search_parameters )
 
-        matches, rule = test_object_identificator.find_objects( rules[ :parent ].xml_data, directives[ :__find_all_children ] )
+        # retrieve objects from xml
+        matches, rule = TDriver::TestObjectAdapter.get_objects(
+        
+         rules[ :parent ].xml_data, 
+         rules[ :object_attributes_hash ], 
+         directives[ :__find_all_children ] 
 
+        )
+        
         # raise exception if no matching object(s) found
         raise MobyBase::TestObjectNotFoundError, "Cannot find object with rule:\n%s" % rules[ :object_attributes_hash ].inspect if matches.empty?
 

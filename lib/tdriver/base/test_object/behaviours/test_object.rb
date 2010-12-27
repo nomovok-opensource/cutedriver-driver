@@ -284,16 +284,35 @@ module MobyBehaviour
 
       begin
 
-        if !( _xml_data = MobyBase::TestObjectIdentificator.new( :type => @type, :id => @id, :name => @name ).find_object_data( xml_document ) ).eql?( xml_data )
+        # find object from new xml data
+        _xml_data, unused_rule = TDriver::TestObjectAdapter.get_objects( xml_document, { :type => @type, :id => @id, :name => @name }, true )
+                        
+        # deactivate if test object not found or multiple matches found
+        raise unless _xml_data.count == 1 
 
-          @_child_objects.each { | test_object | test_object.update( ( xml_data = _xml_data ) ) }
+        # get first matching element
+        _xml_data = _xml_data.first
 
+        unless _xml_data.eql?( xml_data )
+
+          # update current test objects xml_data 
+          xml_data = _xml_data
+
+          # update child objects
+          @child_object_cache.each_object{ | test_object | 
+          
+            # update test object with new xml_data
+            test_object.update( _xml_data ) 
+            
+          }
+        
         end
+                
+      rescue
 
-      rescue MobyBase::TestObjectNotFoundError, MobyBase::MultipleTestObjectsIdentifiedError
-
+        # deactivate test object
         deactivate
-
+                      
       end
 
     end 
@@ -646,8 +665,8 @@ module MobyBehaviour
       # verify find_all_children argument format
       find_all_children.check_type( [ TrueClass, FalseClass ], "Wrong argument type $1 for find_all_children (expected $2)" )
 
-      # If empty or only special attributes then add :type => "any" to search all
-      attributes.merge!( :type => "any" ) if attributes.select{ | key, value | key.to_s !~ /^__/ ? true : false }.empty?
+      # If empty or only special attributes then add :type => '*' to search all
+      attributes.merge!( :type => '*' ) if attributes.select{ | key, value | key.to_s !~ /^__/ ? true : false }.empty?
 
       # children method specific settings
       attributes.merge!( :__multiple_objects => true, :__find_all_children => find_all_children )
@@ -718,8 +737,8 @@ module MobyBehaviour
       # respect the original attributes variable value
       creation_attributes = attributes.clone
 
-      # If empty or only special attributes then add :type => "any" to search all
-      creation_attributes.merge!( :type => "any" ) if creation_attributes.select{ | key, value | key.to_s !~ /^__/ ? true : false }.empty?
+      # If empty or only special attributes then add :type => "*" to search all
+      creation_attributes.merge!( :type => "*" ) if creation_attributes.select{ | key, value | key.to_s !~ /^__/ ? true : false }.empty?
 
       # children method specific settings
       creation_attributes.merge!( :__multiple_objects => true, :__find_all_children => find_all_children )
