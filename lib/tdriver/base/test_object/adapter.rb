@@ -414,11 +414,11 @@ module TDriver
     def self.state_object_xml( source_data, id )
     
       # collect each object from source xml
-      objects = xml_data.xpath( 'tasInfo/object' ).collect{ | element | element.to_s }.join
+      objects = source_data.xpath( 'tasInfo/object' ).collect{ | element | element.to_s }.join
     
       # return xml root element
       MobyUtil::XML.parse_string( 
-        "<sut name='sut' type='sut' id='#{ @id }'><objects>#{ objects }</objects></sut>"
+        "<sut name='sut' type='sut' id='#{ @id }'><objects>#{ objects }</objects></sut>"
       ).root
     
     end
