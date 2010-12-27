@@ -57,7 +57,7 @@ module MobyUtil
 
       end
 
-      nil
+      #nil
       
     end
 
@@ -101,7 +101,7 @@ module MobyUtil
 
       end
       
-      nil
+      #nil
 
     end
 
