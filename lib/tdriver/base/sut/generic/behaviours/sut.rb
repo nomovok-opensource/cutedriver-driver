@@ -137,7 +137,15 @@ module MobyBehaviour
     #  example: -
     def freeze
 
-      @frozen = true
+      if MobyUtil::Parameter[ @id ][ :use_find_object, 'false' ] == 'true' && self.respond_to?( 'find_object' )
+
+        warn("warning: SUT##{ __method__ } is not supported when use_find_objects optimization is enabled")
+
+      else
+
+        @frozen = true
+
+      end
 
       nil
 
@@ -152,8 +160,16 @@ module MobyBehaviour
     #  example: -
     def unfreeze
 
-      @frozen = false
+      if MobyUtil::Parameter[ @id ][ :use_find_object, 'false' ] == 'true' && self.respond_to?( 'find_object' )
 
+        warn("warning: SUT##{ __method__ } is not supported when use_find_objects optimization is enabled")
+
+      else
+      
+        @frozen = false
+
+      end
+  
       nil
 
     end
@@ -165,7 +181,7 @@ module MobyBehaviour
     # TODO: Document me when I'm ready
     def get_object( object_id )
 
-      test_object = @test_object_factory.make( self, MobyBase::TestObjectIdentificator.new( object_id ) )
+      @test_object_factory.make( self, MobyBase::TestObjectIdentificator.new( object_id ) )
 
     end
 
@@ -216,70 +232,6 @@ module MobyBehaviour
 
       nil
 
-    end
-
-    # == nodoc
-    # Function asks for fresh xml ui data from the device and stores the result
-    # == returns
-    # MobyUtil::XML::Element:: xml document containing valid xml fragment describing the current state of the device
-    def refresh_ui_dump( refresh_args = {}, creation_attributes = [] )
-
-      current_time = Time.now
-
-      if !@frozen && ( @_previous_refresh.nil? || ( current_time - @_previous_refresh ).to_f > @refresh_interval )
-
-        MobyUtil::Retryable.while(
-          :tries => @refresh_tries,
-          :interval => @refresh_interval,
-          :unless => [ MobyBase::ControllerNotFoundError, MobyBase::CommandNotFoundError, MobyBase::ApplicationNotAvailableError ] 
-        ) {
-
-          #use find_object if set on and the method exists
-          if MobyUtil::Parameter[ @id ][ :use_find_object, 'false' ] == 'true' and self.respond_to?('find_object') # self.methods.include?('find_object')
-
-            new_xml_data, crc = find_object( refresh_args.clone, creation_attributes )
-
-          else
-
-            app_command = MobyCommand::Application.new( 
-              :State, 
-              refresh_args[ :FullName ] || refresh_args[ :name ],
-              refresh_args[ :id ], 
-              self 
-            ) 
-
-            #store in case needed
-            app_command.refresh_args( refresh_args )
-
-            new_xml_data, crc = execute_command( app_command )
-
-          end  
-
-          # remove timestamp from the beginning of tasMessage, parse if not same as previous ui state
-          #if ( xml_data_no_timestamp = new_xml_data.split( ">", 2 ).last ) != @last_xml_data
-
-            @xml_data, @childs_updated = MobyUtil::XML.parse_string( new_xml_data ).root, false
-
-            #@last_xml_data = xml_data_no_timestamp
-
-          #end
-
-          #if ( @xml_data_crc == 0 || crc != @xml_data_crc || crc.nil? )          
-          # @xml_data, @xml_data_crc, @childs_updated = MobyUtil::XML.parse_string( new_xml_data ).root, crc, false
-          #end
-
-          @dump_count += 1
-
-          @_previous_refresh = current_time
-
-        } 
-
-      end
-
-      @xml_data = fetch_references( @xml_data )
-
-      @xml_data
-      
     end
 
     # TODO: merge TestObject#child and SUT#child 
@@ -345,19 +297,19 @@ module MobyBehaviour
 
       rescue MobyBase::MultipleTestObjectsIdentifiedError => exception
 
-        MobyUtil::Logger.instance.log "behaviour", "FAIL;Multiple child objects matched criteria.;#{ id };sut;{};child;#{ attributes.inspect }"
+        TDriver.logger.behaviour "FAIL;Multiple child objects matched criteria.;#{ id };sut;{};child;#{ attributes.inspect }"
 
         Kernel::raise exception
 
       rescue MobyBase::TestObjectNotFoundError => exception
 
-        MobyUtil::Logger.instance.log "behaviour", "FAIL;The child object could not be found.;#{ id };sut;{};child;#{ attributes.inspect }"
+        TDriver.logger.behaviour "FAIL;The child object could not be found.;#{ id };sut;{};child;#{ attributes.inspect }"
 
         Kernel::raise exception
 
       rescue Exception => exception
 
-        MobyUtil::Logger.instance.log "behaviour", "FAIL;Failed when trying to find child object.;#{ id };sut;{};child;#{ attributes.inspect }"
+        TDriver.logger.behaviour "FAIL;Failed when trying to find child object.;#{ id };sut;{};child;#{ attributes.inspect }"
 
         Kernel::raise exception
 
@@ -386,7 +338,7 @@ module MobyBehaviour
     def state
 
       # refresh if xml data is empty
-      self.refresh({},{}) if @xml_data.empty?
+      self.refresh if @xml_data.empty?
 
       Kernel::raise RuntimeError, "Can not create state object of SUT with id #{ @id.inspect }, no XML content or SUT not initialized properly." if @xml_data.empty?
 
@@ -415,27 +367,30 @@ module MobyBehaviour
     def application( attributes = {} )
 
       begin
-
+      
         attributes.check_type( Hash, "Wrong argument type $1 for attributes (expected $2)" )
-
-        get_default_app = attributes.empty?
 
         attributes[ :type ] = 'application'
 
         @current_application_id = nil if attributes[ :id ].nil?
 
-        app_child = child( attributes )
+        # create test object and return it as result 
+        child( attributes )
 
-      rescue Exception => e
+      rescue
+      
+        TDriver.logger.behaviour(
+          "FAIL;Failed to find application.;#{ id.to_s };sut;{};application;#{ attributes.kind_of?( Hash ) ? attributes.inspect : attributes.class.to_s }"
+        )
 
-        MobyUtil::Logger.instance.log "behaviour" , "FAIL;Failed to find application.;#{id.to_s};sut;{};application;" << (attributes.kind_of?(Hash) ? attributes.inspect : attributes.class.to_s)
-        Kernel::raise e
+        # raise same exception
+        Kernel::raise $!
 
+      ensure
+      
+        TDriver.logger.behaviour "PASS;Application found.;#{ id.to_s };sut;{};application;#{ attributes.inspect }" if $!.nil?
+      
       end
-
-      MobyUtil::Logger.instance.log "behaviour" , "PASS;Application found.;#{id.to_s};sut;{};application;" << attributes.inspect
-
-      app_child
 
     end
 
@@ -504,15 +459,15 @@ module MobyBehaviour
 
         }
 
-      rescue Exception => e
+      rescue 
 
-        MobyUtil::Logger.instance.log "behaviour" , "FAIL;Failed to capture screen.;#{id.to_s};sut;{};capture_screen;" << ( arguments.kind_of?( Hash ) ? arguments.inspect : arguments.class.to_s )
+        TDriver.logger.behaviour "FAIL;Failed to capture screen.;#{ id.to_s };sut;{};capture_screen;#{ arguments.kind_of?( Hash ) ? arguments.inspect : arguments.class.to_s }"
 
-        Kernel::raise e
+        Kernel::raise $!
 
       end
 
-      MobyUtil::Logger.instance.log "behaviour" , "PASS;Screen was captured successfully.;#{id.to_s};sut;{};capture_screen;" << arguments.inspect
+      TDriver.logger.behaviour "PASS;Screen was captured successfully.;#{ id.to_s };sut;{};capture_screen;#{ arguments.inspect }"
 
       nil
 
@@ -571,7 +526,7 @@ module MobyBehaviour
 
         sleep_time = target[ :sleep_after_launch ].to_i
 
-        Kernel::raise ArgumentError.new( "Sleep time need to be >= 0" ) unless sleep_time >= 0
+        Kernel::raise ArgumentError, "Sleep time need to be >= 0" unless sleep_time >= 0
 
         # try to find an existing app with the current arguments
         if target[ :try_attach ]
@@ -594,7 +549,7 @@ module MobyBehaviour
 
             rescue Exception => e
 
-              MobyUtil::Logger.instance.log "WARNING", "Could not bring app to foreground"
+              TDriver.logger.warning "Could not bring app to foreground"
 
             end
 
@@ -681,24 +636,24 @@ module MobyBehaviour
 
         rescue MobyBase::SyncTimeoutError
 
-          Kernel::raise MobyBase::VerificationError.new("The application (#{ error_details }) was not found on the sut after being launched.")
+          Kernel::raise MobyBase::VerificationError, "The application (#{ error_details }) was not found on the sut after being launched."
 
         end
         
         # verify run results
         foreground_app = self.application( expected_attributes )
 
-        Kernel::raise MobyBase::VerificationError.new("No application type test object was found on the device after starting the application.") unless foreground_app.kind_of?( MobyBehaviour::Application )
+        Kernel::raise MobyBase::VerificationError, "No application type test object was found on the device after starting the application." unless foreground_app.kind_of?( MobyBehaviour::Application )
 
       rescue Exception => e
 
-        MobyUtil::Logger.instance.log "behaviour", "FAIL;Failed to launch application.;#{id.to_s};sut;{};run;" << ( target.kind_of?( Hash ) ? target.inspect : target.class.to_s )
+        TDriver.logger.behaviour "FAIL;Failed to launch application.;#{ id.to_s };sut;{};run;#{ target.kind_of?( Hash ) ? target.inspect : target.class.to_s }"
 
         Kernel::raise MobyBase::BehaviourError.new("Run", "Failed to launch application")
 
       end
 
-      MobyUtil::Logger.instance.log "behaviour" , "PASS;The application was launched successfully.;#{id.to_s};sut;{};run;" << target.inspect
+      TDriver.logger.behaviour "PASS;The application was launched successfully.;#{ id.to_s };sut;{};run;#{ target.inspect }"
 
       foreground_app
 
@@ -758,14 +713,15 @@ module MobyBehaviour
 
         execute_command( sequence )
 
-      rescue Exception => e
+      rescue 
 
-        MobyUtil::Logger.instance.log "behaviour" , "FAIL;Failed to press key(s).;#{id.to_s};sut;{};press_key;#{ value }"
-        Kernel::raise e
+        TDriver.logger.behaviour "FAIL;Failed to press key(s).;#{id.to_s};sut;{};press_key;#{ value }"
+
+        Kernel::raise $!
 
       end
 
-      MobyUtil::Logger.instance.log "behaviour" , "PASS;Successfully pressed key(s).;#{id.to_s};sut;{};press_key;#{ value }"
+      TDriver.logger.behaviour "PASS;Successfully pressed key(s).;#{ id.to_s };sut;{};press_key;#{ value }"
 
       nil
 
@@ -880,60 +836,106 @@ module MobyBehaviour
   #  description: In case there are problems with the database connectivity
   #
   def translate( logical_name, file_name = nil, plurality = nil, numerus = nil, lengthvariant = nil )
-    Kernel::raise LogicalNameNotFoundError.new("Logical name is nil") if logical_name.nil?
+
+    Kernel::raise LogicalNameNotFoundError, "Logical name is nil" if logical_name.nil?
+
     translation_type = "localisation"
     
     # Check for User Information prefix( "uif_...")
     MobyUtil::Parameter[ :user_data_logical_string_identifier, 'uif_' ].split('|').each do |identifier|
+
       if logical_name.to_s.index(identifier)==0
+
         translation_type="user_data"
+
       end
+
     end
     
     # Check for Operator Data prefix( "operator_...")
     MobyUtil::Parameter[ :operator_data_logical_string_identifier, 'operator_' ].split('|').each do |identifier|
+
       if logical_name.to_s.index(identifier)==0
+
         translation_type="operator_data"
+
       end
+
     end
     
     case translation_type
+
       when "user_data"
+
         get_user_information( logical_name )
     
       when "operator_data"
+
         get_operator_data( logical_name )
     
       when "localisation"
+
         language=nil
+        
         if ( MobyUtil::Parameter[ self.id ][:read_lang_from_app]=='true')
+
           #read localeName app
           language=self.application.attribute("localeName")
+
           #determine the language from the locale
           language=language.split('_')[0].to_s if (language!=nil && !language.empty?)
+
         else
+
           language=MobyUtil::Parameter[ self.id ][ :language ]
+
         end
-        Kernel::raise LanguageNotFoundError.new("Language cannot be determind to perform translation") if (language==nil || language.empty?)
-        translation = MobyUtil::Localisation.translation( logical_name, language,
-        MobyUtil::Parameter[ self.id ][ :localisation_server_database_tablename ], file_name, plurality, lengthvariant )        
+        
+        Kernel::raise LanguageNotFoundError, "Language cannot be determind to perform translation" if ( language.nil? || language.empty? )
+
+        translation = MobyUtil::Localisation.translation( 
+          logical_name, 
+          language,
+          MobyUtil::Parameter[ self.id ][ :localisation_server_database_tablename ], 
+          file_name, 
+          plurality, 
+          lengthvariant 
+        )        
+
         if translation.kind_of? String and !numerus.nil?
+
           if numerus.kind_of? Array
+
             translation.gsub!(/%[L]?(\d)/){|s| numerus[($1.to_i) -1] }
+
           elsif numerus.kind_of? String or numerus.kind_of? Integer
+
             translation.gsub!(/%(Ln|1)/){|s| numerus.to_s} 
+
           end
+
         elsif translation.kind_of? Array and !numerus.nil?
+
           translation.each do |trans|
+
             if numerus.kind_of? Array
+
               trans.gsub!(/%[L]?(\d)/){|s| numerus[($1.to_i) -1] }
+
             elsif numerus.kind_of? String or numerus.kind_of? Integer
+
               trans.gsub!(/%(Ln|1)/){|s| numerus.to_s} 
+
             end
+
           end
+
         end
+
         translation
+
     end
+
   end
   
   # == description
@@ -967,9 +969,19 @@ module MobyBehaviour
   #  description: In case there are problems with the database connectivity
   #
   def get_user_information( user_data_lname )
-    language = MobyUtil::Parameter[ self.id ][ :language ]
-    table_name = MobyUtil::Parameter[ self.id ][ :user_data_server_database_tablename ] 
-    MobyUtil::UserData.retrieve( user_data_lname, language, table_name )
+
+    MobyUtil::UserData.retrieve( 
+      
+      user_data_lname, 
+      
+      # language
+      MobyUtil::Parameter[ self.id ][ :language ],
+        
+      # table name
+      MobyUtil::Parameter[ self.id ][ :user_data_server_database_tablename ] 
+      
+    )
+
   end
   
   # == description
@@ -1000,9 +1012,19 @@ module MobyBehaviour
   #  description: In case there are problems with the database connectivity
   #
   def get_operator_data( operator_data_lname )
-    operator = MobyUtil::Parameter[ self.id ][ :operator_selected ]
-    table_name = MobyUtil::Parameter[ self.id ][ :operator_data_server_database_tablename]
-    MobyUtil::OperatorData.retrieve( operator_data_lname, operator, table_name )
+
+    MobyUtil::OperatorData.retrieve( 
+
+      operator_data_lname, 
+
+      # operator 
+      MobyUtil::Parameter[ self.id ][ :operator_selected ],
+
+      # table name 
+      MobyUtil::Parameter[ self.id ][ :operator_data_server_database_tablename ]
+      
+    )
+
   end
 
     # == nodoc
@@ -1020,7 +1042,9 @@ module MobyBehaviour
 
         @child_object_cache.each_object{ | test_object | 
 
-          test_object.update( @xml_data ) 
+          test_object.send( :update, @xml_data )
+
+          #test_object.update( @xml_data ) 
 
         }
 
@@ -1033,7 +1057,7 @@ module MobyBehaviour
     # == nodoc
     def refresh( refresh_args = {}, creation_attributes = {})
       
-      refresh_ui_dump refresh_args, creation_attributes
+      refresh_ui_dump( refresh_args, creation_attributes )
 
       # update childs only if ui state is new
       update if !@childs_updated
@@ -1124,6 +1148,70 @@ module MobyBehaviour
     end
 
   private
+
+    # == nodoc
+    # Function asks for fresh xml ui data from the device and stores the result
+    # == returns
+    # MobyUtil::XML::Element:: xml document containing valid xml fragment describing the current state of the device
+    def refresh_ui_dump( refresh_args = {}, creation_attributes = [] )
+
+      current_time = Time.now
+
+      if !@frozen && ( @_previous_refresh.nil? || ( current_time - @_previous_refresh ).to_f > @refresh_interval )
+
+        MobyUtil::Retryable.while(
+          :tries => @refresh_tries,
+          :interval => @refresh_interval,
+          :unless => [ MobyBase::ControllerNotFoundError, MobyBase::CommandNotFoundError, MobyBase::ApplicationNotAvailableError ] 
+        ) {
+
+          #use find_object if set on and the method exists
+          if MobyUtil::Parameter[ @id ][ :use_find_object, 'false' ] == 'true' and self.respond_to?('find_object') # self.methods.include?('find_object')
+
+            new_xml_data, crc = find_object( refresh_args.clone, creation_attributes )
+
+          else
+
+            app_command = MobyCommand::Application.new( 
+              :State, 
+              refresh_args[ :FullName ] || refresh_args[ :name ],
+              refresh_args[ :id ], 
+              self 
+            ) 
+
+            #store in case needed
+            app_command.refresh_args( refresh_args )
+
+            new_xml_data, crc = execute_command( app_command )
+
+          end  
+
+          # remove timestamp from the beginning of tasMessage, parse if not same as previous ui state
+          #if ( xml_data_no_timestamp = new_xml_data.split( ">", 2 ).last ) != @last_xml_data
+
+            @xml_data, @childs_updated = MobyUtil::XML.parse_string( new_xml_data ).root, false
+
+            #@last_xml_data = xml_data_no_timestamp
+
+          #end
+
+          #if ( @xml_data_crc == 0 || crc != @xml_data_crc || crc.nil? )          
+          # @xml_data, @xml_data_crc, @childs_updated = MobyUtil::XML.parse_string( new_xml_data ).root, crc, false
+          #end
+
+          @dump_count += 1
+
+          @_previous_refresh = current_time
+
+        } 
+
+      end
+
+      @xml_data = fetch_references( @xml_data )
+
+      @xml_data
+      
+    end
 
     # TODO: document me
     def fetch_references( xml )

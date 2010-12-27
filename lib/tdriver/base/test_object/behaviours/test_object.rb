@@ -214,108 +214,9 @@ module MobyBehaviour
       enable_optimizer
 
       parent
-      
-
-=begin
-
-      # return current test object if it's type of application
-      return self if application?
-
-      @sut.refresh if disable_optimizer
-
-      # find parent id
-      element_set = @sut.xml_data.xpath( "//object/objects/object[@id='#{ @id }']/../.." )
-
-      kid = nil
-
-      if( element_set == nil or element_set.size == 0 )
-      
-        # return self if there is not parent object available
-        kid = self 
-        
-      else
-      
-        element = element_set.first
-
-        #if app set look for the item under the app to make sure app id is available
-
-        if self.get_application_id && element.attribute( "type" ) != 'application'
-
-          kid = @sut.child( 
-            :id => get_application_id, 
-            :type => 'application' 
-          ).child( 
-            :id => element.attribute( "id" ), 
-            :name => element.attribute( "name" ), 
-            :type => element.attribute( "type" ),
-            :__index => 0 # there was a case when the same parent was included twice in the ui dump
-          )
-
-        else
-
-          kid = @sut.child( 
-            :id => element.attribute( "id" ), 
-            :name => element.attribute( "name" ), 
-            :type => element.attribute( "type" ) 
-          )
-
-        end
-
-      end
-
-      enable_optimizer
-
-      kid
-=end
 
     end
     
-    # == nodoc
-    # Updates this test object to match the data in the provided xml document
-    # Propagates updating to all child TestObjects
-    # If TestObject is not identified, then current TO is deactivated, as is all the Child objects, as defined in TestObject#deactivate.
-    # === params
-    # xml_document:: LibXML::XML::Node describing the new state of this test object
-    # === returns 
-    # ?
-    # === raises
-    # nothing
-    def update( xml_document )
-
-      begin
-
-        # find object from new xml data
-        _xml_data, unused_rule = TDriver::TestObjectAdapter.get_objects( xml_document, { :type => @type, :id => @id, :name => @name }, true )
-                        
-        # deactivate if test object not found or multiple matches found
-        raise unless _xml_data.count == 1 
-
-        # get first matching element
-        _xml_data = _xml_data.first
-
-        unless _xml_data.eql?( xml_data )
-
-          # update current test objects xml_data 
-          xml_data = _xml_data
-
-          # update child objects
-          @child_object_cache.each_object{ | test_object | 
-          
-            # update test object with new xml_data
-            test_object.update( _xml_data ) 
-            
-          }
-        
-        end
-                
-      rescue
-
-        # deactivate test object
-        deactivate
-                      
-      end
-
-    end 
 
     # == nodoc
     # Function refreshes test objects to correspond with the current state of the device.
@@ -455,138 +356,6 @@ module MobyBehaviour
 
     end
 
-=begin
-    # == description
-    # Creates a child test object of this test object. Caller object will be associated as child test objects parent.\n
-    # \n
-    # [b]NOTE:[/b] Subsequent calls to TestObject#child( rule ) always returns reference to same Testobject:\n
-    # [code]a = to.child( :type => 'Button', :text => '1' )
-    # b = to.child( :type => 'Button', :text => '1' )
-    # a.eql?( b ) # => true[/code]
-    # == arguments
-    # attributes
-    #  Hash
-    #   description: Hash object holding information for identifying which child to create
-    #   example: { :type => :slider }
-    #
-    # == returns
-    # MobyBase::TestObject
-    #  description: new child test object or reference to existing child
-    #  example: -
-    #
-    # == exceptions
-    # TypeError
-    #  description: Wrong argument type %s for attributes (expected Hash)
-    #
-    # MultipleTestObjectsIdentifiedError
-    #  description:  raised if multiple objects found that match the given attributes
-    #
-    # TestObjectNotFoundError
-    #  description:  raised if the child object could not be found
-    #
-    # TestObjectNotVisibleError
-    #  description: rasied if the parent test object is no longer visible
-    def child( attributes )
-
-      # verify attributes argument format
-      #raise TypeError.new( 'Unexpected argument type (%s) for attributes, expecting %s' % [ attributes.class, "Hash" ] ) unless attributes.kind_of?( Hash ) 
-      attributes.check_type( Hash, "Wrong argument type $1 for attributes (expected $2)" )
-  
-      
-      # retrieve child object
-      get_child_objects( attributes )
-
-    end
-    
-    def child( attributes )
-
-      ###############################################################################################################
-      #
-      #  NOTICE: Please do not add anything unnessecery to this method, it might cause a major performance impact
-      #
-
-      # verify attributes argument format
-      attributes.check_type( Hash, "Wrong argument type $1 for attributes (expected $2)" )
-            
-      # store original hash
-      creation_hash = attributes.clone
-
-      dynamic_attributes = creation_hash.strip_dynamic_attributes!
-
-      # raise exception if wrong value type given for ;__logging 
-      dynamic_attributes[ :__logging ].check_type( 
-
-        [ TrueClass, FalseClass ], 
-
-        "Wrong value type $1 for :__logging test object creation directive (expected $2)" 
-
-      ) if dynamic_attributes.has_key?( :__logging )
-
-      # disable logging if requested, remove pair from creation_hash
-      MobyUtil::Logger.instance.push_enabled( dynamic_attributes[ :__logging ] || TDriver.logger.enabled )
-
-	    # check if the hash contains symbols as values and translate those into strings
-	    translate!( creation_hash, attributes[ :__fname ], attributes[ :__plurality ], attributes[ :__numerus ], attributes[ :__lengthvariant ] )
-
-      begin
-
-        # TODO: refactor me
-        child_test_object = @test_object_factory.make_object(
-
-          # current object as parent, can be either TestObject or SUT
-          :parent => self,
- 
-          # test object identification hash
-          :object_attributes_hash => creation_hash, 
-          
-          :identification_directives => dynamic_attributes
-
-        )
-
-
-      rescue Exception => exception
-
-        if exception.kind_of?( MobyBase::MultipleTestObjectsIdentifiedError )
-
-          description = "Multiple child objects matched criteria."
-
-        elsif exception.kind_of?( MobyBase::TestObjectNotFoundError )
-
-          description = "The child object(s) could not be found."
-
-        elsif exception.kind_of?( MobyBase::TestObjectNotVisibleError )
-
-          description = "Parent test object no longer visible."
-
-        else
-
-          description = "Failed when trying to find child object(s)."
-
-        end
-
-        TDriver.logger.behaviour(
-
-          "%s;%s;%s;%s;%s" % [ "FAIL", description, identity, dynamic_attributes[ :__multiple_objects ] ? "children" : "child", attributes.inspect ]
-
-        )
-
-        Kernel::raise exception
-
-
-      ensure
-
-        # restore original logger state
-        MobyUtil::Logger.instance.pop_enabled
-
-      end
-
-      # return child test object
-      child_test_object
-
-    end
-   
-=end
-
     # == description
     # Creates a child test object of this test object. Caller object will be associated as child test objects parent.\n
     # \n
@@ -685,77 +454,55 @@ module MobyBehaviour
     
     end
     
-    
-    
-    
-    
-    
-    
-    
-    
-    
-=begin
-    # == description
-    # Function similar to child, but returns an array of children test objects that meet the given criteria
-    #
-    # == arguments
-    # attributes
-    #  Hash
-    #   description: object holding information for identifying which child to create
-    #   example: { :type => :slider }
-    #  
-    # find_all_children
-    #  TrueClass
-    #   description: Boolean specifying whether all children under the test node or just immediate children should be retreived
-    #   example: true
-    #  FalseClass
-    #   description: Boolean specifying whether all children under the test node or just immediate children should be retreived
-    #   example: false
-    #   
-    # == returns
-    # Array
-    #   description: An array of test objects
-    #   example: [ MobyBase::TestObject, MobyBase::TestObject, MobyBase::TestObject, ... ]
-    #
-    # == exceptions
-    # TypeError
-    #  description: raised if agument is not a Hash
-    #
-    # TestObjectNotFoundError
-    #  description: raised if the child object could not be found
-    #
-    # TestObjectNotVisibleError
-    #  description: rasied if the parent test object is no longer visible
-	  def children( attributes, find_all_children = true )
-
-      # verify attributes argument format
-      #raise TypeError.new( 'Unexpected argument type (%s) for attributes, expecting %s' % [ attributes.class, "Hash" ] ) unless attributes.kind_of?( Hash ) 
-      attributes.check_type( Hash, "Wrong argument type $1 for attributes (expected $2)" )
-
-      # verify attributes argument format
-
-      # respect the original attributes variable value
-      creation_attributes = attributes.clone
-
-      # If empty or only special attributes then add :type => "*" to search all
-      creation_attributes.merge!( :type => "*" ) if creation_attributes.select{ | key, value | key.to_s !~ /^__/ ? true : false }.empty?
-
-      # children method specific settings
-      creation_attributes.merge!( :__multiple_objects => true, :__find_all_children => find_all_children )
-
-	    disable_optimizer
-
-      # retrieve child objects
-      kids = get_child_objects( creation_attributes )
-
-	    enable_optimizer
-
-	    kids
-
-    end
-=end
-
   private
+
+    # == nodoc
+    # Updates this test object to match the data in the provided xml document
+    # Propagates updating to all child TestObjects
+    # If TestObject is not identified, then current TO is deactivated, as is all the Child objects, as defined in TestObject#deactivate.
+    # === params
+    # xml_document:: MobyUtil::XML::Node describing the new state of this test object
+    # === returns 
+    # ?
+    # === raises
+    # nothing
+    def update( xml_document )
+
+      begin
+
+        # find object from new xml data
+        _xml_data, unused_rule = TDriver::TestObjectAdapter.get_objects( xml_document, { :type => @type, :id => @id, :name => @name }, true )
+                        
+        # deactivate if test object not found or multiple matches found
+        raise unless _xml_data.count == 1 
+
+        # get first matching element
+        _xml_data = _xml_data.first
+
+        unless _xml_data.eql?( xml_data )
+
+          # update current test objects xml_data 
+          xml_data = _xml_data
+
+          # update child objects
+          @child_object_cache.each_object{ | test_object | 
+          
+            # update test object with new xml_data
+            #test_object.update( _xml_data ) 
+            test_object.send( :update, _xml_data ) 
+            
+          }
+        
+        end
+                
+      rescue
+
+        # deactivate test object
+        deactivate
+                      
+      end
+
+    end 
 
     # TODO: document me
 	  def disable_optimizer
@@ -972,181 +719,12 @@ module MobyBehaviour
 
     end
 
-=begin
-    # Strip dynamic attributes (such as :__timeout, :__logging) from hash and return those as hash
-    # == returns
-    # Hash:: Hash of dynamic attributes
-    def strip_dynamic_attributes!( attributes, exceptions = [] )
-
-      Hash[ attributes.select{ | key, value | 
-
-        if /^__/.match( key.to_s ) and !exceptions.include?( key )
-
-          attributes.delete( key )
-
-          true
-
-        else
-
-          false
-
-        end
-
-      }]
-
-    end
-
-    def get_cached_test_object!( object )
-
-      if @child_object_cache.has_object?( object ) 
-
-        object = @child_object_cache[ object ]
-
-        true
-
-      else
-
-        false
-
-      end
-
-    end
-=end
-
-
-=begin
-    def get_child_objects( attributes )
-
-      # create copy of attributes hash
-      creation_data = attributes.clone
-
-      # strip all dynamic attributes such as :__timeout, :__logging etc.
-      dynamic_attributes = strip_dynamic_attributes!( creation_data )
-
-      # store and set logger state if given, use default value if none given
-      TDriver.logger.push_enabled( MobyUtil::KernelHelper.to_boolean( dynamic_attributes[ :__logging ], TDriver.logger.enabled ) )
-
-      # determine if multiple matches is allowed, default value is false
-      multiple_objects = MobyUtil::KernelHelper.to_boolean( dynamic_attributes[ :__multiple_objects ], false )
-
-      find_all_children = MobyUtil::KernelHelper.to_boolean( dynamic_attributes[ :__find_all_children ], true )
-
-	    # check if the hash contains symbols as values and translate those into strings
-	    file_name = dynamic_attributes[ :__fname ]
-	    plurality = dynamic_attributes[ :__plurality ]
-	    numerus = dynamic_attributes[ :__numerus ]
-	    lengthvariant = dynamic_attributes[ :__lengthvariant ]
-
-	    translate!( creation_data, file_name, plurality, numerus, lengthvariant )
-
-      # use custom timeout if defined
-      timeout = ( dynamic_attributes[ :__timeout ] || @test_object_factory.timeout ).to_i
-
-      # determine which application to refresh
-      #application_id_hash = ( creation_data[ :type ] == 'application' ? { :name => creation_data[ :name ], :id => creation_data[ :id ] } : { :id => get_application_id } )
-            
-      if creation_data[ :type ] == 'application'
-      
-        application_id_hash = { :name => creation_data[ :name ], :id => creation_data[ :id ] }
-      
-      else
-      
-        application_id_hash = { :id => get_application_id }
-      
-      end
-
-      # add symbols to dynamic attributes list -- to avoid IRB bug
-      MobyUtil::DynamicAttributeFilter.instance.add_attributes( creation_data.keys )
-
-      begin
-
-        # try to reactivate test object if currently not active
-        #reactivate_test_object( creation_data ) unless @_active
-
-        # retrieve test objects from xml
-        child_objects = @test_object_factory.make_child_objects( 
-
-          :attributes => creation_data,
-          :dynamic_attributes => dynamic_attributes, 
-
-          :parent => self,
-          :sut => @sut,
-          :application => application_id_hash,
-
-          :timeout => timeout,
-          :multiple_objects => multiple_objects,
-          :find_all_children => find_all_children
-
-        )
-
-        # Type information is stored in a separate member, not in the Hash
-        #creation_data.delete( :type )
-
-        child_objects.each do | child_object |
-
-          # use cached test object if once already retrieved
-          get_cached_test_object!( child_object ).tap{ | found_in_cache |
-
-            # Store/update the attributes that were used to create the child object.
-            child_object.creation_attributes = creation_data
-
-            # add child to objects cache 
-            #add_child( child_object ) unless found_in_cache
-
-            @child_object_cache.add_object( child_object ) unless found_in_cache
-
-          }
-
-        end
-
-        # return test object(s)
-        multiple_objects ? child_objects : child_objects.first
-
-      rescue Exception => exception
-
-        if exception.kind_of?( MobyBase::MultipleTestObjectsIdentifiedError )
-
-          description = "Multiple child objects matched criteria."
-
-        elsif exception.kind_of?( MobyBase::TestObjectNotFoundError )
-
-          description = "The child object(s) could not be found."
-
-        elsif exception.kind_of?( MobyBase::TestObjectNotVisibleError )
-
-          description = "Parent test object no longer visible."
-
-        else
-
-          description = "Failed when trying to find child object(s)."
-
-        end
-
-        TDriver.logger.behaviour(
-
-          "%s;%s;%s;%s;%s" % [ "FAIL", description, identity, multiple_objects ? "children" : "child", creation_data.inspect ]
-
-        )
-
-        Kernel::raise exception
-
-      ensure
-
-        # restore logger state
-        MobyUtil::Logger.instance.pop_enabled
-
-      end
-
-    end
-=end
-
     # Creates a string identifying this test object: sut, type, attributes used when created
     #
     # === returns
     # String:: String identifying this test object
     def identity
 
-      #"%s;%s;%s" % [ @sut.id, @type, @creation_attributes.inspect ]
       "#{ @sut.id };#{ @type };#{ @creation_attributes.inspect }"
 
     end

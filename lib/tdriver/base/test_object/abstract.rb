@@ -172,7 +172,7 @@ module MobyBase
 		# Returns a XML node representing this test object.
 		#
 		# === returns
-		# LibXML::XML::Node:: XML representation of this test object
+		# MobyUtil::XML::Element:: XML representation of this test object
 		# === raises
 		# TestObjectNotFoundError:: The test object does not exist on the SUT any longer.
 		def xml_data()
