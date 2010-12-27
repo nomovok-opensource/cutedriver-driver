@@ -790,25 +790,40 @@ module MobyBehaviour
     # Tries to use the missing method id as a child object type and find an object based on it
     def method_missing( method_id, *method_arguments )
 
-      # method mapping/aliases - this should be configured in xml file
-      #case method_id
-      #  when :Button;  method_id = [ :Button, :QToolButton, :DuiButton, :HbPushButton, :softkey ]
-      #  when :List;  method_id = [ :QList, :HbListWidgetView, :DuiList ]
-      #end
+      # create rules hash
+      rules_hash = method_arguments.first
 
-      hash_rule = ( method_arguments.first.kind_of?( Hash ) ? method_arguments.first : {} ).merge( :type => method_id )
+      # set rules hash to empty Hash if rules hash is not type of Hash
+      rules_hash = {} unless rules_hash.kind_of?( Hash ) 
 
+      # set test object type
+      rules_hash[ :type ] = method_id
+  
       begin
 
-        child( hash_rule )
+        # return created child object
+        child( rules_hash )
 
       rescue MobyBase::TestObjectNotFoundError, MobyBase::TestObjectNotVisibleError
 
-        #hash_rule.delete( :type )
+        # string representation of used rule hash, remove curly braces
+        attributes_string = rules_hash.inspect[ 1 .. -2 ]
+        
+        if attributes_string.empty?
+        
+          # do not show any attribute details if none given                
+          attributes_string = ""
+          
+        else
+  
+          # show used attributes      
+          attributes_string = " (attributes #{ attributes_string })"
 
+        end
+
+        # raise exception
         Kernel::raise MobyBase::TestObjectNotFoundError.new(
-          'The test object (id: "%s", type: "%s", name: "%s") has no child object with type or behaviour method with name "%s" (%s) on sut "%s".' % 
-          [ @id, @type, @name, method_id.inspect, ( hash_rule.empty? ? "" : "attributes: #{ hash_rule.inspect }" ), @sut.id ]
+          "The test object (id: #{ @id }, type: #{ @type.inspect }, name: #{ @name.inspect }) has no child object with type or behaviour method with name #{ method_id.to_s.inspect }#{ attributes_string } on #{ @sut.id.inspect }" 
         )
 
       end
