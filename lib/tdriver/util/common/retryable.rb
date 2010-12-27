@@ -30,18 +30,17 @@ module MobyUtil
     # == returns
     def self.while( options = {}, &block )
 
-      options = { :tries => 1, :interval => 0, :exception => Exception }.merge( options )
+      # default options
+      options.default_values( :tries => 1, :interval => 0, :exception => Exception )
 
       attempt = 1
 
       begin
 
         # yield given block and pass attempt number as parameter
-        return yield( attempt )
+        yield( attempt )
 
       rescue *options[ :exception ]
-  
-        #if ( options[ :tries ] -= 1) > 0 && ![ *options[ :unless ] ].include?( $!.class )
 
         if ( attempt < options[ :tries ] ) && ![ *options[ :unless ] ].include?( $!.class )
 
@@ -59,6 +58,7 @@ module MobyUtil
       end
 
       nil
+      
     end
 
     # Function to retry code block until timeout expires if exception raises 
@@ -70,24 +70,39 @@ module MobyUtil
     # == returns
     def self.until( options = {}, &block )
 
-      options = { :timeout => 0, :interval => 0, :exception => Exception }.merge( options )      
+      # default options
+      options.default_values( :timeout => 0, :interval => 0, :exception => Exception )
+      
+      # store start time
       start_time = Time.now
+
+      # attempt number
+      attempt = 0
 
       begin
 
-        return yield
+        # execute block
+        yield( attempt )
 
       rescue *options[ :exception ]
 
         if (Time.now - start_time) <= options[ :timeout ] && ![ *options[ :unless ] ].include?( $!.class )
+
           sleep( options[ :interval ] ) if options[ :interval ] > 0
+
+          attempt += 1
+
           retry
+
         end
 
         # raise exception with correct exception backtrace
         Kernel::raise $!
 
-      end      
+      end
+      
+      nil
+
     end
 
     # enable hooking for performance measurement & debug logging

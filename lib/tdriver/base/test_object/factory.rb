@@ -16,6 +16,7 @@
 ## of this file. 
 ## 
 ############################################################################
+=begin
 module TDriver
 
   class TestObjectFactory
@@ -412,7 +413,7 @@ module TDriver
   end # TestObjectFactory
 
 end # TDriver
-
+=end
 
 
 
