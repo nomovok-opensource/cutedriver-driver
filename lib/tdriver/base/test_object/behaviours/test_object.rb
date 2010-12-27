@@ -309,13 +309,7 @@ module MobyBehaviour
     # TestObjectNotFoundError:: if TestObject is not identified within synch timeout.
     def refresh( refresh_args = {} )
 
-      @sut.refresh( 
-      
-        refresh_args, 
-        
-        @test_object_factory.get_parent_params( parent ) <<  @test_object_factory.make_object_search_params( @creation_attributes )
-        
-      )
+      @sut.refresh( refresh_args, @test_object_factory.make_object_search_params( parent, @creation_attributes ) )
 
     end
 
@@ -331,7 +325,7 @@ module MobyBehaviour
     # TestObjectNotFoundError:: if TestObject is not identified within synch timeout.
     def force_refresh( refresh_args = {} )
 
-      refresh(refresh_args)
+      refresh( refresh_args )
 
     end
 

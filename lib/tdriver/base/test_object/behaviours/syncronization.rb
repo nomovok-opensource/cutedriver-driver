@@ -86,12 +86,6 @@ module MobyBehaviour
 		#
 		def wait_child( attributes = {}, timeout_secs = 10, retry_interval = 0.5 )
 
-			#Kernel::raise ArgumentError.new( "Argument attributes was not a valid. Expected: Hash" ) unless attributes.kind_of?( Hash )
-			#Kernel::raise ArgumentError.new( "Argument type was not a valid. Expected: String" ) unless attributes[ :type ].kind_of?( String ) && attributes[ :type ].length > 0
-			#Kernel::raise ArgumentError.new( "Argument timeout_secs was not a valid. Expected: Integer, Fixnum or Float" ) unless [ Integer, Fixnum, Float ].include? timeout_secs.class
-			#Kernel::raise ArgumentError.new( "Argument retry_interval was not a valid. Expected: Integer, Fixnum or Float" ) unless [ Integer, Fixnum, Float ].include? retry_interval.class
-
-
       # verify that attributes is type of Hash
       attributes.check_type( Hash, "Wrong argument type $1 for attributes (expected $2)" )
   
@@ -108,20 +102,29 @@ module MobyBehaviour
       retry_interval.check_type( [ Integer, Fixnum, Float ], "Wrong argument type $1 for retry interval (expected $2)" )
 
 			begin
+			
+        dynamic_attributes = attributes.strip_dynamic_attributes!
 
-				MobyUtil::Retryable.until( :timeout => timeout_secs, :interval => retry_interval ) {
+        # try to identify desired child test object
+        @test_object_factory.identify_object(
+          :object_attributes_hash => attributes,
+          :identification_directives => dynamic_attributes.default_values(
+            :__timeout => timeout_secs,
+            :__retry_interval => retry_interval,
+            :__refresh_arguments => self.kind_of?( MobyBase::SUT ) ? attributes : { :id => self.get_application_id }
+          ),
+          :parent => self        
+        )
 
-					#self.refresh( attributes )
-
-					self.refresh( self.kind_of?( MobyBase::SUT ) ? attributes : { :id => self.get_application_id } )
-
-					MobyBase::TestObjectIdentificator.new( attributes ).find_object_data( self.xml_data )
-
-				}
-			rescue
+			rescue MobyBase::TestObjectNotFoundError
 
 				# the child object was not found in the specified timeout
-				Kernel::raise MobyBase::SyncTimeoutError.new( "Synchronization timed out (%i) before the defined child object could be found." % timeout_secs )
+				raise MobyBase::SyncTimeoutError, "Synchronization timed out (#{ timeout_secs }) before the defined child object could be found."
+
+      rescue # unexpected errors
+
+				raise RuntimeError, "Synchronization failed due to #{ $!.message } (#{ $!.class })"
+
 			end
 
 			self

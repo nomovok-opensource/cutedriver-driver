@@ -454,7 +454,6 @@ module MobyBase
 
     end
 
-    #TODO: Team TE review @ Wheels
     # Function to set timeout for TestObjectFactory
     # This should be used only in unit testing, otherwise should not be used
     # sets timeout used in identifying TestObjects to new timeout
@@ -478,8 +477,14 @@ module MobyBase
       directives = rules[ :identification_directives ]
 
       # retrieve sut object
-      directives[ :__sut ] = directives[ :__parent ].kind_of?( MobyBase::SUT ) ? directives[ :__parent ] : directives[ :__parent ].sut
-              
+      sut = rules[ :parent ].kind_of?( MobyBase::SUT ) ? rules[ :parent ] : rules[ :parent ].sut
+
+      # search parameters for find_objects feature    
+      search_parameters = make_object_search_params( rules[ :parent ], rules[ :object_attributes_hash ] )
+      
+      # test object identificator to be used      
+      test_object_identificator = MobyBase::TestObjectIdentificator.new( rules[ :object_attributes_hash ] )
+            
       # default rules      
       directives.default_values(
       
@@ -503,7 +508,7 @@ module MobyBase
 
         # determine index of test object to be retrieved
         :__index => 0
-                 
+                         
       )
 
       # identify objects until desired matches found or timeout exceeds
@@ -521,13 +526,9 @@ module MobyBase
       ){
 
         # refresh sut
-        directives[ :__sut ].refresh( directives[ :__refresh_arguments ], directives[ :__search_params ] )
+        sut.refresh( directives[ :__refresh_arguments ], search_parameters )
 
-        # find objects from xml
-        matches, rule = directives[ :__test_object_identificator ].find_objects( 
-          directives[ :__parent ].xml_data, 
-          directives[ :__find_all_children ]
-        )
+        matches, rule = test_object_identificator.find_objects( rules[ :parent ].xml_data, directives[ :__find_all_children ] )
 
         # raise exception if no matching object(s) found
         raise MobyBase::TestObjectNotFoundError, "Cannot find object with rule:\n%s" % rules[ :object_attributes_hash ].inspect if matches.empty?
@@ -552,7 +553,7 @@ module MobyBase
           # sort elements
           TDriver::TestObjectAdapter.sort_elements( 
             matches, 
-            TDriver::TestObjectAdapter.application_layout_direction( directives[ :__sut ] )
+            TDriver::TestObjectAdapter.application_layout_direction( sut )
           )
 
         end
@@ -626,16 +627,16 @@ module MobyBase
       identification_directives.default_values(
       
         # parent object
-        :__parent => rules[ :parent ],
+        #:__parent => rules[ :parent ],
                 
         # attributes used to refresh sut 
-        :__refresh_arguments => refresh_arguments,
+        :__refresh_arguments => refresh_arguments
         
         # make search params
-        :__search_params => get_parent_params( rules[ :parent ] ).push( make_object_search_params( object_attributes_hash ) ),
+        #:__search_params => get_parent_params( rules[ :parent ] ).push( make_object_search_params( object_attributes_hash ) ),
       
         # test object identificator to be used
-        :__test_object_identificator => MobyBase::TestObjectIdentificator.new( object_attributes_hash )
+        #:__test_object_identificator => MobyBase::TestObjectIdentificator.new( object_attributes_hash )
       
       )
       
@@ -665,7 +666,21 @@ module MobyBase
 
     end
 
-    def make_object_search_params( creation_attributes )
+    # create test object search parameters for find_objects service
+    def make_object_search_params( test_object, creation_attributes )
+
+      result = get_parent_params( test_object ).push( get_object_params( creation_attributes ) )
+
+      # TODO: review find_objects controller
+      # workaround? return empty hash if no search params were 
+      result == [{}] ? {} : result
+
+    end
+
+  private 
+
+    # TODO: document me
+    def get_object_params( creation_attributes )
 
       if creation_attributes[ :type ] != 'application'
         
@@ -681,9 +696,10 @@ module MobyBase
         {}
       
       end    
-
+    
     end
 
+    # TODO: document me
     def get_parent_params( test_object )
 
       unless [ 'application', 'sut' ].include?( test_object.type ) 
@@ -703,8 +719,7 @@ module MobyBase
 
     end
 
-  private 
-
+    # TODO: document me
     def list_matching_test_objects( matches )
 
       matches.collect{ | object |
@@ -726,13 +741,7 @@ module MobyBase
     
     end
 
-    # TODO: parent application test object should be passed to get_test_objects
-    def get_layout_direction( sut )
-
-      sut.xml_data.at_xpath('*//object[@type="application"]/attributes/attribute[@name="layoutDirection"]/value/text()').to_s || 'LeftToRight'
-
-    end
-
+    # TODO: document me
     def make_test_object( rules )
                   
       # get parent object from hash
