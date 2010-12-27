@@ -388,12 +388,17 @@ module MobyBehaviour
       # refresh if xml data is empty
       self.refresh({},{}) if @xml_data.empty?
 
-      Kernel::raise RuntimeError.new( "Can not create state object of SUT with id '%s', no XML content or SUT not initialized properly." % @id ) if @xml_data.empty?
+      Kernel::raise RuntimeError, "Can not create state object of SUT with id #{ @id.inspect }, no XML content or SUT not initialized properly." if @xml_data.empty?
 
       MobyBase::StateObject.new(
-        MobyUtil::XML.parse_string( 
-          "<sut name='sut' type='sut' id='%s'><objects>%s</objects></sut>" % [ @id, xml_data.xpath("tasInfo/object").collect{ | element | element.to_s }.join ]
-        ).root, 
+      
+        TDriver::TestObjectAdapter.state_object_xml( xml_data, @id ),
+        
+        #MobyUtil::XML.parse_string( 
+        #  #"<sut name='sut' type='sut' id='%s'><objects>%s</objects></sut>" % [ @id, xml_data.xpath("tasInfo/object").collect{ | element | element.to_s }.join ]
+        #  "<sut name='sut' type='sut' id='#{ @id }'><objects>#{ xml_data.xpath( 'tasInfo/object' ).collect{ | element | element.to_s }.join }</objects></sut>"
+        #).root, 
+        
         self 
       )
 
