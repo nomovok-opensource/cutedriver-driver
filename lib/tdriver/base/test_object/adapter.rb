@@ -257,24 +257,32 @@ module TDriver
     end
 
     # TODO: document me
-    def self.test_object_element_attribute( source_data, name, &block )
+    def self.test_object_element_attribute( source_data, attribute_name, *default, &block )
 
-      result = source_data.attribute( name )
+      result = source_data.attribute( attribute_name )
       
       unless result
             
         if block_given?
-        
-          yield
+                
+          yield( attribute_name )
         
         else
         
-          # raise exception if no such attribute found
-          Kernel::raise MobyBase::AttributeNotFoundError.new(
-          
-            "Could not find test object element attribute #{ attribute_name.inspect }"
+          if default.empty?
+        
+            # raise exception if no such attribute found
+            Kernel::raise MobyBase::AttributeNotFoundError.new(
             
-          )
+              "Could not find test object element attribute #{ attribute_name.inspect }"
+              
+            )
+
+          else
+          
+            default.first
+          
+          end
         
         end
       
@@ -287,7 +295,7 @@ module TDriver
     end
 
     # TODO: document me
-    def self.test_object_attribute( source_data, attribute_name, &block )
+    def self.test_object_attribute( source_data, attribute_name, *default, &block )
 
       # TODO: consider using at_xpath and adding /value/text() to query string; however "downside" is that if multiple matches found only first value will be returned as result
 
@@ -304,16 +312,23 @@ module TDriver
         if block_given?
 
           # pass return value of block as result
-          yield
+          yield( attribute_name )
 
         else
 
-          # raise exception if no such attribute found
-          Kernel::raise MobyBase::AttributeNotFoundError.new(
-          
-            "Could not find attribute #{ attribute_name.inspect }" # for test object of type #{ type.to_s }"
+          if default.empty?
+            # raise exception if no such attribute found
+            Kernel::raise MobyBase::AttributeNotFoundError.new(
             
-          )
+              "Could not find attribute #{ attribute_name.inspect }" # for test object of type #{ type.to_s }"
+              
+            )
+
+          else
+          
+            default.first
+          
+          end
           
         end
 
@@ -332,7 +347,7 @@ module TDriver
 
     # TODO: document me
     def self.test_object_attributes( source_data )
-    
+      
       # return hash of test object attributes
       Hash[ 
 
