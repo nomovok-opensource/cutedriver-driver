@@ -447,10 +447,10 @@ module MobyBase
     def initialize
 
       # get timeout from parameters, use default value if parameter not found
-      @timeout = MobyUtil::Parameter[ :application_synchronization_timeout, "20" ].to_i
+      @timeout = MobyUtil::Parameter[ :application_synchronization_timeout, "20" ].to_f
 
       # get timeout retry interval from parameters, use default value if parameter not found
-      @_retry_interval = MobyUtil::Parameter[ :application_synchronization_retry_interval, "1" ].to_i
+      @_retry_interval = MobyUtil::Parameter[ :application_synchronization_retry_interval, "1" ].to_f
 
     end
 
@@ -472,38 +472,65 @@ module MobyBase
     end
 
     # TODO: document me
-    def identify_object( object_attributes_hash, identification_directives, rules )
+    def identify_object( rules )
   
+      # retrieve test object identification directives; e.g. :__index, :__xy_sorting etc 
+      directives = rules[ :identification_directives ]
+
+      # retrieve sut object
+      directives[ :__sut ] = directives[ :__parent ].kind_of?( MobyBase::SUT ) ? directives[ :__parent ] : directives[ :__parent ].sut
+              
+      # default rules      
+      directives.default_values(
+      
+        # get timeout from rules hash or TestObjectFactory
+        :__timeout => @timeout,
+
+        # get retry interval from rules hash or TestObjectFactory
+        :__retry_interval => @_retry_interval,
+         
+        # determine that are we going to retrieve multiple test objects or just one
+        :__multiple_objects => false,
+
+        # determine that should all child objects childrens be retrieved
+        :__find_all_children => true,
+
+        # determine that did user give index value
+        :__index_given => directives.has_key?( :__index ),
+
+        # determine index of test object to be retrieved
+        :__index => 0
+                 
+      )
+
+      # identify objects until desired matches found or timeout exceeds
       MobyUtil::Retryable.until( 
 
         # maximum time used for retrying, if timeout exceeds pass last raised exception
-        :timeout => identification_directives[ :__timeout ], 
+        :timeout => directives[ :__timeout ], 
 
         # interval used before retrying
-        :interval => identification_directives[ :__retry_interval ],
+        :interval => directives[ :__retry_interval ],
 
         # following exceptions are allowed; Retry until timeout exceeds or other exception type is raised
-        :exception => [ MobyBase::TestObjectNotFoundError, MobyBase::MultipleTestObjectsIdentifiedError ] 
+        :exception => [ MobyBase::TestObjectNotFoundError, MobyBase::MultipleTestObjectsIdentifiedError ]
 
       ){
 
         # refresh sut
-        identification_directives[ :__sut ].refresh( identification_directives[ :__refresh_arguments ], identification_directives[ :__search_params ] )
+        directives[ :__sut ].refresh( directives[ :__refresh_arguments ], directives[ :__search_params ] )
 
-        matches, rule = identification_directives[ :__test_object_identificator ].find_objects( 
-          identification_directives[ :__parent ].xml_data, 
-          identification_directives[ :__find_all_children ]
+        # find objects from xml
+        matches, rule = directives[ :__test_object_identificator ].find_objects( 
+          directives[ :__parent ].xml_data, 
+          directives[ :__find_all_children ]
         )
 
         # raise exception if no matching object(s) found
-        raise MobyBase::TestObjectNotFoundError.new( 
-        
-          "Cannot find object with rule:\n%s" % rules[ :object_attributes_hash ].inspect
-
-        ) if matches.empty?
+        raise MobyBase::TestObjectNotFoundError, "Cannot find object with rule:\n%s" % rules[ :object_attributes_hash ].inspect if matches.empty?
 
         # raise exception if multiple matches found and only one expected 
-        if ( !identification_directives[ :__multiple_objects ] ) && ( matches.count > 1 && !identification_directives[ :__index_given ] )
+        if ( !directives[ :__multiple_objects ] ) && ( matches.count > 1 && !directives[ :__index_given ] )
 
           # raise exception (with list of paths to all matching objects) if multiple objects flag is false and more than one match found
           raise MobyBase::MultipleTestObjectsIdentifiedError.new( 
@@ -516,19 +543,19 @@ module MobyBase
             
         end
 
-        # sort matches
-        if identification_directives[ :__xy_sorting ] == true
+        # sort matches if enabled
+        if directives[ :__xy_sorting ] == true
           
           # sort elements
           TDriver::TestObjectAdapter.sort_elements( 
             matches, 
-            TDriver::TestObjectAdapter.application_layout_direction( identification_directives[ :__sut ] )
+            TDriver::TestObjectAdapter.application_layout_direction( directives[ :__sut ] )
           )
 
         end
 
-        # return result
-        if identification_directives[ :__multiple_objects ] && !identification_directives[ :__index_given ]
+        # return result; one or multiple xml elements
+        if directives[ :__multiple_objects ] && !directives[ :__index_given ]
         
           # return multiple test objects
           matches.to_a
@@ -536,7 +563,7 @@ module MobyBase
         else
 
           # return only one test object  
-          [ matches[ identification_directives[ :__index ] ] ]
+          [ matches[ directives[ :__index ] ] ]
 
         end
 
@@ -569,13 +596,7 @@ module MobyBase
         end
       
       }
-      
-      # get parent object
-      parent = rules[ :parent ]
-      
-      # retrieve sut object
-      sut = parent.kind_of?( MobyBase::SUT ) ? parent : parent.sut
-
+            
       # create application refresh attributes hash
       if object_attributes_hash[ :type ] == 'application'
 
@@ -584,15 +605,15 @@ module MobyBase
 
       else
                           
-        if parent.kind_of?( MobyBase::TestObject )
+        if rules[ :parent ].kind_of?( MobyBase::TestObject )
 
           # get current application for test object
-          refresh_arguments = { :id => parent.get_application_id }
+          refresh_arguments = { :id => rules[ :parent ].get_application_id }
 
-        elsif parent.kind_of?( MobyBase::SUT )
+        elsif rules[ :parent ].kind_of?( MobyBase::SUT )
         
           # get current application for sut
-          refresh_arguments = { :id => sut.current_application_id }
+          refresh_arguments = { :id => rules[ :parent ].current_application_id }
 
         end
         
@@ -601,34 +622,14 @@ module MobyBase
       # set default values 
       identification_directives.default_values(
       
-        # associated sut
-        :__sut => sut,
-
-        # new child objects parent object
-        :__parent => parent,
-            
-        # get timeout from rules hash or TestObjectFactory
-        :__timeout => @timeout,
-
-        # get retry interval from rules hash or TestObjectFactory
-        :__retry_interval => @_retry_interval,
-
-        # determine that are we going to retrieve multiple test objects or just one
-        :__multiple_objects => false,
-
-        # determine that should all child objects childrens be retrieved
-        :__find_all_children => true,
-
-        # determine that did user give index value
-        :__index_given => identification_directives.has_key?( :__index ),
-
-        # determine index of test object to be retrieved
-        :__index => 0,
-        
+        # parent object
+        :__parent => rules[ :parent ],
+                
+        # attributes used to refresh sut 
         :__refresh_arguments => refresh_arguments,
         
         # make search params
-        :__search_params => get_parent_params( parent ).push( make_object_search_params( object_attributes_hash ) ),
+        :__search_params => get_parent_params( rules[ :parent ] ).push( make_object_search_params( object_attributes_hash ) ),
       
         # test object identificator to be used
         :__test_object_identificator => MobyBase::TestObjectIdentificator.new( object_attributes_hash )
@@ -638,23 +639,18 @@ module MobyBase
       # add object identification attribute keys to dynamic attributes white list
       MobyUtil::DynamicAttributeFilter.instance.add_attributes( object_attributes_hash.keys )
 
-      child_objects = identify_object( object_attributes_hash, identification_directives, rules ).collect{ | test_object_xml |
+      child_objects = identify_object( rules ).collect{ | test_object_xml |
             
         # create new test object
         make_test_object( 
         
-          # sut object to t_o
-          :sut => identification_directives[ :__sut ],      
+          # test objects parent test object
+          :parent => rules[ :parent ],
 
-          # parent object to t_o
-          :parent => identification_directives[ :__parent ],   
-
-          # t_o xml
+          # xml element to test object
           :xml_object => test_object_xml,                           
 
-          # test object factory
-          :test_object_factory => self,                                     
-
+          # object identification attributes
           :object_attributes_hash => object_attributes_hash
 
         )
@@ -735,16 +731,13 @@ module MobyBase
     end
 
     def make_test_object( rules )
-
-      # get test object factory object from hash
-      test_object_factory = rules[ :test_object_factory ]
-            
-      # get sut object from hash
-      sut = rules[ :sut ]
-      
+                  
       # get parent object from hash
       parent = rules[ :parent]
       
+      # retrieve sut object
+      sut = parent.kind_of?( MobyBase::SUT ) ? parent : parent.sut
+            
       xml_object = rules[ :xml_object ]
 
       # retrieve attributes
@@ -795,7 +788,7 @@ module MobyBase
       else
       
         # create test object
-        test_object = MobyBase::TestObject.new( test_object_factory, sut, parent, xml_object )
+        test_object = MobyBase::TestObject.new( self, sut, parent, xml_object )
 
         # apply behaviours to test object
         test_object.extend( MobyBehaviour::ObjectBehaviourComposition )
