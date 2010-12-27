@@ -34,6 +34,13 @@ module TDriverReportJavascript
       "dt.getElementsByTagName('span')[0].innerHTML"<<
       "= toOpen? '<input id=\"Button1\" type=\"button\" value=\"Close\" class=\"btn\" style=\"background-color: #FFFFFF\" />':'<input id=\"Button1\" type=\"button\" value=\"Open\" class=\"btn\" />' ;"<<
       '}'<<
+      get_table_sorting_java_script <<
+      'function init()
+      {
+        var Table1Sorter = new TSorter;
+        Table1Sorter.init(\'statistics_table\');
+      }
+      window.onload = init;'<<
       '</script>'
     java_script
   end
@@ -111,11 +118,11 @@ module TDriverReportJavascript
       {
         case \"link_column\":
           get = function(index){
-            return  getCell(index).firstChild.firstChild.nodeValue;
+            return  parseFloat(getCell(index).firstChild.firstChild.nodeValue);
           };
           break;
         default:
-          get = function(index){	return getCell(index).firstChild.nodeValue;};
+          get = function(index){	return parseInt(getCell(index).firstChild.nodeValue);};
           break;
       };
     }

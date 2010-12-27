@@ -59,21 +59,21 @@ class ReportingStatistics
   def generate_statistics_headers()
     status_heads=Array.new
     @pass_statuses.each do |status|
-      status_heads << "<td><b>#{status}</b></td>"
+      status_heads << "<th abbr=\"link_column\"><b>#{status}</b></th>"
     end
     @fail_statuses.each do |status|
-      status_heads << "<td><b>#{status}</b></td>"
+      status_heads << "<th abbr=\"link_column\"><b>#{status}</b></th>"
     end
     @not_run_statuses.each do |status|
-      status_heads << "<td><b>#{status}</b></td>"
+      status_heads << "<th abbr=\"link_column\"><b>#{status}</b></th>"
     end
-    status_heads << "<td><b>Reboots</b></td>"
-    status_heads << "<td><b>Crashes</b></td>"
-    status_heads << "<td><b>Duration</b></td>"
-    status_heads << "<td><b>Dump count</b></td>"
-    status_heads << "<td><b>Sent bytes</b></td>"
-    status_heads << "<td><b>Received bytes</b></td>"
-    status_heads << "<td><b>Used mem</b></td>"
+    status_heads << "<th abbr=\"link_column\"><b>Reboots</b></th>"
+    status_heads << "<th abbr=\"link_column\"><b>Crashes</b></th>"
+    status_heads << "<th abbr=\"link_column\"><b>Duration</b></th>"
+    status_heads << "<th abbr=\"link_column\"><b>Dump count</b></th>"
+    status_heads << "<th abbr=\"link_column\"><b>Sent bytes</b></th>"
+    status_heads << "<th abbr=\"link_column\"><b>Received bytes</b></th>"
+    status_heads << "<th abbr=\"link_column\"><b>Used mem</b></th>"
     status_heads
   end
 
@@ -289,16 +289,16 @@ class ReportingStatistics
     table_body=Array.new
     reset_total_statistics()
     collect_test_case_statistics()
-    table_body='<table id="statistics_table" align="center" border="0" cellspacing="0" style="width:100%;">'<<
-      '<tr>'<<
-      '<td>'<<
-      '<b>Row</b></td>'<<
-      '<td>'<<
-      '<b>Name</b></td>'<<
-      '<td>'<<
-      '<b>Total</b></td>'<<
+    table_body='<table id="statistics_table" class="sortable" align="center" border="0" cellspacing="0" style="width:100%;">'<<
+      '<thead><tr>'<<
+      '<th>'<<
+      '<b>Row</b></th>'<<
+      '<th abbr="link_column">'<<
+      '<b>Name</b></th>'<<
+      '<th abbr="link_column">'<<
+      '<b>Total</b></th>'<<
       generate_statistics_headers.to_s <<
-      '</tr>'
+      '</tr></thead><tbody>'
 
     test_case_added=Array.new
     row=1
@@ -326,14 +326,14 @@ class ReportingStatistics
     end
 
 
-    table_body << '<tr></tr>'
-    table_body << '<tr>' <<
+    table_body << '</tbody>'
+    table_body << '<tfoot><tr>' <<
       '<td></td><td>'<<
       '<b>Total</b></td>'
     @total_statistics_arr.each do |statistic|
       table_body << "<td><b>#{statistic[1]}</b></td>"
     end
-    table_body << '</tr>' <<
+    table_body << '</tr></tfoot>' <<
       '</table>'
 
 
