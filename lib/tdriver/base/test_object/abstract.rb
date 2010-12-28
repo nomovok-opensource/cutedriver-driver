@@ -175,18 +175,13 @@ module MobyBase
 		# MobyUtil::XML::Element:: XML representation of this test object
 		# === raises
 		# TestObjectNotFoundError:: The test object does not exist on the SUT any longer.
-		def xml_data()
-
-			#Kernel::raise MobyBase::TestObjectNotFoundError.new( 'The test object does not exist on the sut anymore.' ) if ( elements = @sut.xml_data.xpath( @x_path ) ).size.zero?
-
-			#Kernel::raise MobyBase::TestObjectNotFoundError.new( "The test object with id: \"#{ @id.to_s }\", type: \"#{ @type.to_s }\" and name: \"#{ @name.to_s }\" does not exist on sut \"#{ @sut.id.to_s }\" anymore" ) if ( elements = @sut.xml_data.xpath( @x_path ) ).size.zero?
+		def xml_data
 
       elements = @sut.xml_data.xpath( @x_path )
 
 			Kernel::raise MobyBase::TestObjectNotFoundError.new( 
 
-			  #'The test object (id: "%s", type: "%s", name: "%s") does not exist on sut (%s) anymore' % [ @id, @type, @name, @sut.id ]  
-			  "The test object (id: #{ @id.inspect }, type: #{ @type.inspect }, name: #{ @name.inspect }) does not exist on sut (#{ @sut.id.inspect }) anymore" 
+			  "The test object (id: #{ @id.inspect }, type: #{ @type.inspect }, name: #{ @name.inspect }) does not exist on #{ @sut.id.inspect } anymore" 
 
 		  ) if elements.size.zero?
 

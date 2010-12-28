@@ -629,31 +629,44 @@ module MobyBase
             
       # set default values 
       identification_directives.default_values(
-      
-        # parent object
-        #:__parent => rules[ :parent ],
-                
+                      
         # attributes used to refresh sut 
         :__refresh_arguments => refresh_arguments
         
-        # make search params
-        #:__search_params => get_parent_params( rules[ :parent ] ).push( make_object_search_params( object_attributes_hash ) ),
-      
-        # test object identificator to be used
-        #:__test_object_identificator => MobyBase::TestObjectIdentificator.new( object_attributes_hash )
-      
       )
       
       # add object identification attribute keys to dynamic attributes white list
       MobyUtil::DynamicAttributeFilter.instance.add_attributes( object_attributes_hash.keys )
 
       child_objects = identify_object( rules ).collect{ | test_object_xml |
+        
+        # create parent application test object if none defined in rules; most likely the call is originated from SUT#child, but not by using SUT#application
+        unless identification_directives.has_key?( :__parent_application ) || rules.has_key?( :parent_application )
             
+          # create application test object            
+          rules[ :parent_application ] = make_test_object( 
+        
+            :parent => rules[ :parent ].kind_of?( MobyBase::SUT ) ? rules[ :parent ] : rules[ :parent ].sut,
+            
+            :parent_application => nil,
+            
+            :xml_object => TDriver::TestObjectAdapter.retrieve_parent_application( test_object_xml )
+        
+          )
+          
+          # point to self
+          rules[ :parent_application ].instance_variable_set( :@parent_application, rules[ :parent_application ] )
+                 
+        end
+        
         # create new test object
         make_test_object( 
         
           # test objects parent test object
           :parent => rules[ :parent ],
+
+          # test objects parent application 
+          :parent_application => rules[ :parent_application ],
 
           # xml element to test object
           :xml_object => test_object_xml,                           
@@ -749,7 +762,7 @@ module MobyBase
     def make_test_object( rules )
                   
       # get parent object from hash
-      parent = rules[ :parent]
+      parent = rules[ :parent ]
       
       # retrieve sut object
       sut = parent.kind_of?( MobyBase::SUT ) ? parent : parent.sut
@@ -821,8 +834,11 @@ module MobyBase
         # create child accessors
         TDriver::TestObjectAdapter.create_child_accessors!( xml_object, test_object )
 
-        # set given parent in rules hash as parent object to new child test object    
+        # set given parent in rules hash as parent object for new child test object    
         test_object.instance_variable_set( :@parent, parent )
+
+        # set given application test object in rules hash as parent application for new child test object
+        test_object.instance_variable_set( :@parent_application, rules[ :parent_application ] )
 
         # add created test object to parents child objects cache
         parent_cache.add_object( test_object ) 

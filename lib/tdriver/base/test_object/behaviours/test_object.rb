@@ -51,6 +51,16 @@ module MobyBehaviour
     #  example: { :name => 'Triangle1', :type => :Triangle }
     attr_accessor :creation_attributes
 
+=begin
+    # == nodoc
+    # == description
+    # attr_reader
+    # == returns
+    # Hash
+    #  description: Parent application test object
+    #  example: <MobyBase::TestObject>
+    attr_reader :parent_application
+=end
 
     # == nodoc
     # == description
@@ -613,9 +623,13 @@ module MobyBehaviour
           # current object as parent, can be either TestObject or SUT
           :parent => self,
  
+          # pass parent application
+          :parent_application => @parent_application,
+ 
           # test object identification hash
           :object_attributes_hash => creation_hash, 
-          
+
+          # pass test object identification directives, e.g. :__index          
           :identification_directives => dynamic_attributes
 
         )
@@ -816,6 +830,8 @@ module MobyBehaviour
       
         # initialize cache object 
         @child_object_cache = TDriver::TestObjectCache.new
+      
+        @parent_application = nil
       
         # defaults
         @_application_id = nil

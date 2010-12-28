@@ -423,6 +423,42 @@ module TDriver
     
     end
 
+    def self.retrieve_parent_application( xml_source )
+
+      xml_source_iterator = xml_source.clone
+
+      while xml_source_iterator.kind_of?( MobyUtil::XML::Element )
+
+        if ( test_object_element_attribute( xml_source_iterator, 'type' ) == 'application' )
+
+          return xml_source_iterator
+
+        end
+
+        if xml_source_iterator.kind_of?( MobyUtil::XML::Element )
+
+          xml_source_iterator = xml_source_iterator.parent.parent
+
+        else
+        
+          # not found from xml tree
+          break
+        
+        end
+
+      end
+
+      warn("warning: unable to retrieve parent application")
+      
+      nil
+      
+      # return application object or nil if no parent found
+      # Does is make sense to return nil - should  n't all test objects belong to an application? Maybe throw exception if application not found
+
+      #return @sut.child( :type => 'application' ) rescue nil
+          
+    end
+
     # enable hooking for performance measurement & debug logging
     MobyUtil::Hooking.instance.hook_methods( self ) if defined?( MobyUtil::Hooking )
 

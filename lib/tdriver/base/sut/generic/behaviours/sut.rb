@@ -259,7 +259,7 @@ module MobyBehaviour
       #
       #  NOTICE: Please do not add anything unnessecery to this method, it might cause a major performance impact
       #
-      
+            
       # verify attributes argument format
       attributes.check_type( Hash, "Wrong argument type $1 for attributes (expected $2)" )
             
@@ -277,6 +277,8 @@ module MobyBehaviour
         
       ) if identification_directives.has_key?( :__logging )
 
+      #p caller unless identification_directives.has_key?( :__application_method )
+
       # disable logging if requested, remove pair from creation_hash
       MobyUtil::Logger.instance.push_enabled( identification_directives[ :__logging ] || TDriver.logger.enabled )
 
@@ -287,7 +289,7 @@ module MobyBehaviour
 
           # current object as parent, can be either TestObject or SUT
           :parent => self,
- 
+  
           # test object identification hash
           :object_attributes_hash => creation_hash,
           
@@ -372,11 +374,18 @@ module MobyBehaviour
 
         attributes[ :type ] = 'application'
 
+        attributes[ :__parent_application ] = nil
+
         @current_application_id = nil if attributes[ :id ].nil?
 
         # create test object and return it as result 
-        child( attributes )
+        test_object = child( attributes )
 
+        # store parent application to test object
+        test_object.instance_variable_set( :@parent_application, test_object )
+
+        test_object
+        
       rescue
       
         TDriver.logger.behaviour(
@@ -391,6 +400,7 @@ module MobyBehaviour
         TDriver.logger.behaviour "PASS;Application found.;#{ id.to_s };sut;{};application;#{ attributes.inspect }" if $!.nil?
       
       end
+
 
     end
 
