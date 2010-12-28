@@ -31,6 +31,8 @@ module TDriver
  
         # TODO: document me
         def xpath_attributes( attributes, element_attributes, object_type )
+
+          object_type = object_type.to_s
         
           # collect attributes
           attributes = attributes.collect{ | key, values |
@@ -41,14 +43,16 @@ module TDriver
               # concatenate string if it contains single and double quotes, otherwise return as is
               value = xpath_literal_string( value )
 
+              partial = @@partial_match_allowed.include?( [ object_type, key ] )
+
               # check that if partial matche is allowed otherwise require exact match  
-              value = @@partial_match_allowed.include?( [ object_type, key ] ) ? "[contains(.,#{ value })]" : "=#{ value }"
+              value = partial ? "contains(.,#{ value })" : "=#{ value }"
             
               # compare also element attributes if key is required attribute e.g. "name", "type", "parent" or "id" 
-              prefix = element_attributes ? "@#{ key }#{ value } or " : ""
+              prefix = element_attributes ? "@#{ key }#{ partial ? '[' : '' }#{ value }#{ partial ? ']' : '' } or " : ""
               
               # construct xpath
-              "#{ prefix }attributes/attribute[translate(@name,'ABCDEFGHIJKLMNOPQRSTUVWXYZ','abcdefghijklmnopqrstuvwxyz')='#{ key }' and .#{ value }]"
+              "#{ prefix }attributes/attribute[translate(@name,'ABCDEFGHIJKLMNOPQRSTUVWXYZ','abcdefghijklmnopqrstuvwxyz')='#{ key }' and #{ partial ? '' : '.' }#{ value }]"
                   
             }.join( ' or ' )
                     
@@ -170,14 +174,6 @@ module TDriver
     # TODO: document me
     def self.get_objects( source_data, rules, find_all_children )
 
-      #rule = xpath_to_object( rules, find_all_children )
-      #
-      #[ 
-      #  # perform xpath to source xml data
-      #  source_data.xpath( rule ),
-      #  rule 
-      #]    
-
       [ 
         # perform xpath to source xml data
         source_data.xpath( rule = xpath_to_object( rules, find_all_children ) ),
@@ -185,7 +181,6 @@ module TDriver
         # return also created xpath  
         rule 
       ]    
-
     
     end
 
