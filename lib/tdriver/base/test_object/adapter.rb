@@ -202,8 +202,17 @@ module TDriver
       # collect only nodes that has x_absolute and y_absolute attributes
       nodeset.collect!{ | node |
 
-        #node unless node.at_xpath( attribute_pattern % 'x_absolute' ).to_s.empty? || node.at_xpath( attribute_pattern % 'y_absolute' ).to_s.empty?
-        node unless node.at_xpath( attribute_pattern % 'x_absolute' ).nil? || node.at_xpath( attribute_pattern % 'y_absolute' ).nil?
+        if node.at_xpath( attribute_pattern % 'x_absolute' ).nil? || node.at_xpath( attribute_pattern % 'y_absolute' ).nil?
+
+          warn("Warning: Unable to sort object set due to object type of #{ node.attribute( 'type' ).inspect } does not have \"x_absolute\" or \"y_absolute\" attribute")
+
+          return nodeset
+
+        else
+
+          node
+
+        end
 
       }.compact!.sort!{ | element_a, element_b |
 
@@ -445,20 +454,22 @@ module TDriver
 
       end
 
-      warn("warning: unable to retrieve parent application")
-      
-      nil
-      
-      # return application object or nil if no parent found
-      # Does is make sense to return nil - should  n't all test objects belong to an application? Maybe throw exception if application not found
+      #warn("warning: unable to retrieve parent application")
 
+      raise MobyBase::TestObjectNotFoundError, "Unable to retrieve parent application"
+
+      # return application object or nil if no parent found
+      # Does is make sense to return nil - shouldn't all test objects belong to an application? Maybe throw exception if application not found
+      
+      #nil
+    
       #return @sut.child( :type => 'application' ) rescue nil
           
     end
     
     # TODO: document me
-    def self.get_test_object_element_from_xml( test_object )
-            
+    def self.get_xml_element_for_test_object( test_object )
+      
       # retrieve nodeset from sut xml_data
       nodeset = test_object.instance_variable_get( :@sut ).xml_data.xpath( test_object.instance_variable_get( :@x_path ) )
 

@@ -158,7 +158,7 @@ module MobyBase
 
       begin
       
-        TDriver::TestObjectAdapter.get_test_object_element_from_xml( self )
+        TDriver::TestObjectAdapter.get_xml_element_for_test_object( self )
 
       rescue MobyBase::TestObjectNotFoundError
       

@@ -1132,28 +1132,22 @@ module MobyBehaviour
 
     # == nodoc
     def get_application_id
+     
+      # retrieve application object from sut.xml_data
+      matches, unused_rule = TDriver::TestObjectAdapter.get_objects( xml_data, { :type => 'application' }, true )
+
+      # retrieve id attribute if application test object found      
+      if matches.count > 0
+
+        # return id attribute value
+        TDriver::TestObjectAdapter.test_object_element_attribute( matches.first, 'id' )
       
-      orig_frozen = @frozen;
-
-      begin
-
-        freeze unless @frozen
-
-        ret = self.application.id
-
-        unfreeze unless orig_frozen
-        
-        return ret
-
-      rescue
-
-      ensure
-
-        unfreeze unless orig_frozen
-
+      else
+      
+        # application not found
+        '-1'
+      
       end
-      
-      '-1'
 
     end
 

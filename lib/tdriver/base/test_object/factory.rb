@@ -604,7 +604,7 @@ module MobyBase
         end
       
       }
-      
+            
       # do not create refresh arguments hash if already exists
       unless identification_directives.has_key?( :__refresh_arguments )
             
@@ -636,52 +636,61 @@ module MobyBase
       MobyUtil::DynamicAttributeFilter.instance.add_attributes( object_attributes_hash.keys )
 
       child_objects = identify_object( rules ).collect{ | test_object_xml |
-        
+                
         # create parent application test object if none defined in rules; most likely the call is originated from SUT#child, but not by using SUT#application
         unless identification_directives.has_key?( :__parent_application ) || rules.has_key?( :parent_application )
-            
-          # retrieve sut object
-          sut = rules[ :parent ].kind_of?( MobyBase::SUT ) ? rules[ :parent ] : rules[ :parent ].instance_variable_get( :@sut )
-            
+              
           # retrieve application test object xml element
           application_test_object_xml = TDriver::TestObjectAdapter.retrieve_parent_application( test_object_xml )
 
-          # retrieve test object id from xml
-          object_id = TDriver::TestObjectAdapter.test_object_element_attribute( application_test_object_xml, 'id' ){ nil }.to_i
-
-          # retrieve test object name from xml
-          object_name = TDriver::TestObjectAdapter.test_object_element_attribute( application_test_object_xml, 'name' ){ nil }.to_s
-
-          # retrieve test object type from xml
-          object_type = TDriver::TestObjectAdapter.test_object_element_attribute( application_test_object_xml, 'type' ){ nil }.to_s 
-            
-          # calculate object cache hash key
-          hash_key = TDriver::TestObjectAdapter.test_object_hash( object_id, object_type, object_name )
-            
-          parent_cache = sut.instance_variable_get( :@child_object_cache )                       
+          unless application_test_object_xml.nil?
           
-          # get cached test object from parents child objects cache if found; if not found from cache pass newly created object as is
-          if parent_cache.has_object?( hash_key )
+            # retrieve sut object
+            sut = rules[ :parent ].kind_of?( MobyBase::SUT ) ? rules[ :parent ] : rules[ :parent ].instance_variable_get( :@sut )
 
-            rules[ :parent_application ] = parent_cache[ hash_key ]
+            # retrieve test object id from xml
+            object_id = TDriver::TestObjectAdapter.test_object_element_attribute( application_test_object_xml, 'id' ){ nil }.to_i
+
+            # retrieve test object name from xml
+            object_name = TDriver::TestObjectAdapter.test_object_element_attribute( application_test_object_xml, 'name' ){ nil }.to_s
+
+            # retrieve test object type from xml
+            object_type = TDriver::TestObjectAdapter.test_object_element_attribute( application_test_object_xml, 'type' ){ nil }.to_s 
+              
+            # calculate object cache hash key
+            hash_key = TDriver::TestObjectAdapter.test_object_hash( object_id, object_type, object_name )
+              
+            parent_cache = sut.instance_variable_get( :@child_object_cache )                       
             
+            # get cached test object from parents child objects cache if found; if not found from cache pass newly created object as is
+            if parent_cache.has_object?( hash_key )
+
+              rules[ :parent_application ] = parent_cache[ hash_key ]
+              
+            else
+                                  
+              # create application test object            
+              rules[ :parent_application ] = make_test_object( 
+            
+                :parent => sut,
+                
+                :parent_application => nil,
+                
+                :xml_object => application_test_object_xml
+            
+              )
+              
+            end
+
           else
-                                
-            # create application test object            
-            rules[ :parent_application ] = make_test_object( 
-          
-              :parent => sut,
-              
-              :parent_application => nil,
-              
-              :xml_object => application_test_object_xml
-          
-            )
-            
-            # store application test object to new test object 
-            rules[ :parent_application ].instance_variable_set( :@parent_application, rules[ :parent_application ] )
 
+            # could not retrieve parent application object
+            rules[ :parent_application ] = nil
+          
           end
+
+          # store application test object to new test object 
+          rules[ :parent_application ].instance_variable_set( :@parent_application, rules[ :parent_application ] )
                   
         end
         
@@ -695,7 +704,7 @@ module MobyBase
           :parent_application => rules[ :parent_application ],
 
           # xml element to test object
-          :xml_object => test_object_xml,                           
+          :xml_object => test_object_xml,
 
           # object identification attributes
           :object_attributes_hash => object_attributes_hash
@@ -841,7 +850,7 @@ module MobyBase
         test_object.xml_data = xml_object
 
       else
-      
+              
         # create test object
         test_object = MobyBase::TestObject.new( self, sut, parent, xml_object )
 
