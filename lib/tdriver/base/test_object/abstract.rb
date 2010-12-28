@@ -19,148 +19,158 @@
 
 module MobyBase
 
-	class TestObject
+  class TestObject
 
-		attr_reader(
-			:sut, 		# SUT associated to test object
-			:type, 		# test object type (from xml)
-			:id, 		# test object id (from xml)
-			:parent,	# parent test object
-			:name, 		# test object name (from xml)
-			:x_path		# xpath for test object, used when updating self with fresh ui dump
-		)
+    attr_reader(
+      :sut,     # SUT associated to test object
+      :type,     # test object type (from xml)
+      :id,     # test object id (from xml)
+      :parent,  # parent test object
+      :name,     # test object name (from xml)
+      :x_path    # xpath for test object, used when updating self with fresh ui dump
+    )
 
-		# Creation of a new TestObject requires a data object to be given to constructor
-		# === params
-		# factory:: TestObjectFactory used for creating test object for the sut this object is associated with
-		# sut:: SUT object that this test object is associated with
-		# xml_object:: REXML::Document object describing this test object
-		# === returns
-		# TestObject:: new TestObject instance
-		# === raises
-		def initialize( test_object_factory, sut, parent = nil, xml_object = nil )
+    # Creation of a new TestObject requires a data object to be given to constructor
+    # === params
+    # factory:: TestObjectFactory used for creating test object for the sut this object is associated with
+    # sut:: SUT object that this test object is associated with
+    # xml_object:: REXML::Document object describing this test object
+    # === returns
+    # TestObject:: new TestObject instance
+    # === raises
+    def initialize( test_object_factory, sut, parent = nil, xml_object = nil )
 
-			# Initializes a test object by assigning it a test object factory and a sut and storing xml data 
-			# describing the object.
-			@test_object_factory = test_object_factory
-			@parent = parent
-			@sut = sut
+      # Initializes a test object by assigning it a test object factory and a sut and storing xml data 
+      # describing the object.
+      @test_object_factory = test_object_factory
+      @parent = parent
+      @sut = sut
 
-			#self.xml_data = xml_object if xml_object
-			method( :xml_data= ).call( xml_object ) if xml_object
-			
-		end
+      #self.xml_data = xml_object if xml_object
+      method( :xml_data= ).call( xml_object ) if xml_object
+      
+    end
 
-		# Function to verify is DATA of two TestObjects are the same, 
-		# Defined in TestObject#== other_test_object
-		# === param
-		# other_test_object:: TestObject other, could be null
-		# === returns
-		# true:: if TestObjects have same DATA
-		# false:: if TestObjects have different DATA
-		# === raises
-		# nothing
-		def eql?( other_test_object )
+    # Function to verify is DATA of two TestObjects are the same, 
+    # Defined in TestObject#== test_object
+    # === param
+    # test_object:: TestObject other, could be null
+    # === returns
+    # true:: if TestObjects have same DATA
+    # false:: if TestObjects have different DATA
+    # === raises
+    # nothing
+    def eql?( test_object )
 
-			self == other_test_object
+      self == test_object
 
-		end
+    end
 
-		# Function to verify is DATA of two TestObjects are the same, 
-		# return TRUE if other_test_object:
-		#   instance of MobyBase::TestObject
-		#   type's are equal
-		#   id's are equal
-		#   name's are equal
-		# == param
-		# other_test_object:: TestObject other, could be null
-		# == returns
-		# true:: if TestObjects have same DATA
-		# false:: if TestObjects have different DATA
-		# == raises
-		# nothing
-		def ==( other_test_object )
+    # Function to verify is DATA of two TestObjects are the same, 
+    # return TRUE if test_object:
+    #   instance of MobyBase::TestObject
+    #   type's are equal
+    #   id's are equal
+    #   name's are equal
+    # == param
+    # test_object:: TestObject other, could be null
+    # == returns
+    # true:: if TestObjects have same DATA
+    # false:: if TestObjects have different DATA
+    # == raises
+    # nothing
+    def ==( test_object )
 
-			#return false unless other_test_object.instance_of?( MobyBase::TestObject ) 
-			#return false unless self.type == other_test_object.type
-			#return false unless self.id == other_test_object.id
-			#return false unless self.name == other_test_object.name
-			#return true
+      #return false unless test_object.instance_of?( MobyBase::TestObject ) 
+      #return false unless self.type == test_object.type
+      #return false unless self.id == test_object.id
+      #return false unless self.name == test_object.name
+      #return true
 
-			# optimized version			
-			other_test_object.instance_of?( MobyBase::TestObject ) && 
-			  ( @type == other_test_object.type ) && 
-			  ( @id == other_test_object.id ) && 
-			  ( @name == other_test_object.name )
+      # optimized version
+      test_object.instance_of?( MobyBase::TestObject ) && ( @type == test_object.type ) && ( @id == test_object.id ) && ( @name == test_object.name )
 
-		end
+    end
 
-		# Function to calculate HASH value for a TestObject
-		# as required by, e.g. Set
-		#
-		# This is required, as eql? method is being overwritten.
-		# === returns
-		# Fixnum:: hash number representing current TestObject
-		def hash
+    # Function to calculate HASH value for a TestObject
+    # as required by, e.g. Set
+    #
+    # This is required, as eql? method is being overwritten.
+    # === returns
+    # Fixnum:: hash number representing current TestObject
+    def hash
 
 
-			#result = 17
-			#result = result * 37 + self.id.to_i
-			#result = result * 37 + type.hash
-			#result = result * 37 + name.hash
-			#return result
+      #result = 17
+      #result = result * 37 + self.id.to_i
+      #result = result * 37 + type.hash
+      #result = result * 37 + name.hash
+      #return result
 
-			# optimized version
-			#( ( ( 17 * 37 + @id.to_i ) * 37 + @type.hash ) * 37 + @name.hash )
+      # optimized version
+      #( ( ( 17 * 37 + @id.to_i ) * 37 + @type.hash ) * 37 + @name.hash )
 
       TDriver::TestObjectAdapter.test_object_hash( @id.to_i, @type, @name )
 
-		end
+    end
 
-		# Function to support sorting TestObjects within an array.
-		# Mostly for unit testing purposes, as Set is not ordered.
-		# should not be used normally. Thus, not documented.
-		def <=>( other )
+    # Function to support sorting TestObjects within an array.
+    # Mostly for unit testing purposes, as Set is not ordered.
+    # should not be used normally. Thus, not documented.
+    def <=>( test_object )
 
-			#self_type = self.type
-			#other_type = other.type
-			#return -1 if self_type < other_type
-			#return 1  if self_type > other_type
+      #self_type = self.type
+      #other_type = test_object.type
+      #return -1 if self_type < other_type
+      #return 1  if self_type > other_type
 
-			#self_name = self.name
-			#other_name = other.name
-			#return -1 if self_name < other_name
-			#return 1  if self_name > other_name
+      #self_name = self.name
+      #other_name = test_object.name
+      #return -1 if self_name < other_name
+      #return 1  if self_name > other_name
 
-			#self_id = self.id
-			#other_id = other.id
-			#return -1 if self_id < other_id
-			#return 1  if self_id > other_id
+      #self_id = self.id
+      #other_id = test_object.id
+      #return -1 if self_id < other_id
+      #return 1  if self_id > other_id
 
-			#0
+      #0
 
-			# optimized version
-			( ( result = ( @type <=> other.type ) ) == 0 ? ( ( result = ( @name <=> other.name ) ) == 0 ? @id <=> other.id : result ) : result )  
+      # optimized version
+      ( ( result = ( @type <=> test_object.type ) ) == 0 ? ( ( result = ( @name <=> test_object.name ) ) == 0 ? @id <=> test_object.id : result ) : result )  
 
-		end
+    end
 
-		# Function to be renamed, possibly refactored
-		def xml_data=( xml_object )
+    # Function to be renamed, possibly refactored
+    def xml_data=( xml_object )
 
-=begin
-			@name, 
-			@x_path = 
-				xml_object.attribute( 'name' ), 
-				"%s/*//object[@type='%s' and @id='%s']" % [ 
-					@parent.x_path, 
-					@type = xml_object.attribute( 'type' ), 
-					@id = xml_object.attribute( 'id' ) 
-				]
-=end
+      @x_path, @name, @type, @id = TDriver::TestObjectAdapter.get_test_object_identifiers( xml_object, self )
 
-			@name, @x_path = xml_object.attribute( 'name' ), "#{ @parent.x_path }/*//object[@type='#{ @type = xml_object.attribute( 'type' ) }' and @id='#{ @id = xml_object.attribute( 'id' ) }']"
+    end
 
-		end
+    # Returns a XML node representing this test object.
+    #
+    # === returns
+    # MobyUtil::XML::Element:: XML representation of this test object
+    # === raises
+    # TestObjectNotFoundError:: The test object does not exist on the SUT any longer.
+    def xml_data
+
+      begin
+      
+        TDriver::TestObjectAdapter.get_test_object_element_from_xml( self )
+
+      rescue MobyBase::TestObjectNotFoundError
+      
+        Kernel::raise MobyBase::TestObjectNotFoundError.new( 
+
+          "The test object (id: #{ @id.inspect }, type: #{ @type.inspect }, name: #{ @name.inspect }) does not exist on #{ @sut.id.inspect } anymore" 
+        
+        )
+      
+      end
+
+    end
 
     # TODO: document me
     def inspect
@@ -168,30 +178,10 @@ module MobyBase
       "#<#{ self.class }:0x#{ ( "%x" % ( self.object_id.to_i << 1 ) )[ 3 .. -1 ] } @id=\"#{ @id }\" @name=\"#{ @name }\" @parent=#{ @parent.inspect } @sut=#{ @sut.inspect } @type=\"#{ @type }\" @x_path=\"#{ @x_path }\">"
 
     end
+    
+    # enable hooking for performance measurement & debug logging
+    MobyUtil::Hooking.instance.hook_methods( self ) if defined?( MobyUtil::Hooking )
 
-		# Returns a XML node representing this test object.
-		#
-		# === returns
-		# MobyUtil::XML::Element:: XML representation of this test object
-		# === raises
-		# TestObjectNotFoundError:: The test object does not exist on the SUT any longer.
-		def xml_data
-
-      elements = @sut.xml_data.xpath( @x_path )
-
-			Kernel::raise MobyBase::TestObjectNotFoundError.new( 
-
-			  "The test object (id: #{ @id.inspect }, type: #{ @type.inspect }, name: #{ @name.inspect }) does not exist on #{ @sut.id.inspect } anymore" 
-
-		  ) if elements.size.zero?
-
-			elements.first
-
-		end
-
-		# enable hooking for performance measurement & debug logging
-		MobyUtil::Hooking.instance.hook_methods( self ) if defined?( MobyUtil::Hooking )
-
-	end # TestObject 
+  end # TestObject 
 
 end # MobyBase

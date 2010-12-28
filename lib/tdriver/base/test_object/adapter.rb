@@ -98,8 +98,6 @@ module TDriver
           
           else
           
-            #p element_attributes ? "(#{ attributes })" : attributes
-          
             # return result in parenthesis if creating element attributes xpath fragment
             element_attributes ? "(#{ attributes })" : attributes
           
@@ -486,6 +484,44 @@ module TDriver
 
       #return @sut.child( :type => 'application' ) rescue nil
           
+    end
+    
+    # TODO: document me
+    def self.get_test_object_element_from_xml( test_object )
+            
+      # retrieve nodeset from sut xml_data
+      nodeset = test_object.instance_variable_get( :@sut ).xml_data.xpath( test_object.instance_variable_get( :@x_path ) )
+
+      # raise exception if no test objects found 
+			Kernel::raise MobyBase::TestObjectNotFoundError if nodeset.empty?
+			
+      # return first test object from the nodeset
+			nodeset.first
+    
+    end
+
+    # TODO: document me    
+    def self.get_test_object_identifiers( xml_source, test_object )
+    
+      # retrieve test object element attributes
+      attrbutes = TDriver::TestObjectAdapter.test_object_element_attributes( xml_source )
+
+      # return array containting xpath to test object, name, type and id elements
+      [ 
+        # x_path to test object
+        "#{ test_object.instance_variable_get( :@parent ).x_path }/*//object[@type='#{ attrbutes[ 'type' ] }' and @name='#{ attrbutes[ 'name' ] }' and @id='#{ attrbutes[ 'id' ] }']",
+        
+        # test object name 
+        attrbutes[ 'name' ],
+        
+        # test object type 
+        attrbutes[ 'type' ],
+        
+        # test object id 
+        attrbutes[ 'id' ]
+        
+      ]
+    
     end
 
     # enable hooking for performance measurement & debug logging
