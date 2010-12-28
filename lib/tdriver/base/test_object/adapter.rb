@@ -45,6 +45,7 @@ module TDriver
 
               partial = @@partial_match_allowed.include?( [ object_type, key ] )
 
+=begin
               # check that if partial matche is allowed otherwise require exact match  
               value = partial ? "contains(.,#{ value })" : "=#{ value }"
             
@@ -53,7 +54,38 @@ module TDriver
               
               # construct xpath
               "#{ prefix }attributes/attribute[translate(@name,'ABCDEFGHIJKLMNOPQRSTUVWXYZ','abcdefghijklmnopqrstuvwxyz')='#{ key }' and #{ partial ? '' : '.' }#{ value }]"
-                  
+=end
+
+              # check that if partial matche is allowed otherwise require exact match  
+              #value = partial ? "contains(.,#{ value })" : "=#{ value }"
+            
+              # compare also element attributes if key is required attribute e.g. "name", "type", "parent" or "id" 
+              #prefix = element_attributes ? "@#{ key }#{ partial ? '[' : '' }#{ value }#{ partial ? ']' : '' } or " : ""
+
+              if partial
+                
+                prefix_value = "[contains(.,#{ value })]"
+                attribute_value = "contains(value/text(),#{ value })"
+              
+              else
+
+                prefix_value = "=#{ value }"
+                attribute_value = "value/text()=#{ value }"
+              
+              end
+              
+              if element_attributes
+
+                # construct xpath
+                "(@#{ key }#{ prefix_value } or attributes/attribute[translate(@name,'ABCDEFGHIJKLMNOPQRSTUVWXYZ','abcdefghijklmnopqrstuvwxyz')='#{ key }' and #{ attribute_value }])"
+              
+              else
+              
+                # construct xpath
+                "attributes/attribute[translate(@name,'ABCDEFGHIJKLMNOPQRSTUVWXYZ','abcdefghijklmnopqrstuvwxyz')='#{ key }' and #{ attribute_value }]"
+              
+              end
+     
             }.join( ' or ' )
                     
           }.join( ' and ' )
@@ -65,6 +97,8 @@ module TDriver
             nil
           
           else
+          
+            #p element_attributes ? "(#{ attributes })" : attributes
           
             # return result in parenthesis if creating element attributes xpath fragment
             element_attributes ? "(#{ attributes })" : attributes
