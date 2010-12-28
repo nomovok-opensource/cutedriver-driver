@@ -643,20 +643,49 @@ module MobyBase
         # create parent application test object if none defined in rules; most likely the call is originated from SUT#child, but not by using SUT#application
         unless identification_directives.has_key?( :__parent_application ) || rules.has_key?( :parent_application )
             
-          # create application test object            
-          rules[ :parent_application ] = make_test_object( 
-        
-            :parent => rules[ :parent ].kind_of?( MobyBase::SUT ) ? rules[ :parent ] : rules[ :parent ].sut,
+          # retrieve sut object
+          sut = rules[ :parent ].kind_of?( MobyBase::SUT ) ? rules[ :parent ] : rules[ :parent ].sut
             
-            :parent_application => nil,
+          # retrieve application test object xml element
+          application_test_object_xml = TDriver::TestObjectAdapter.retrieve_parent_application( test_object_xml )
+
+          # retrieve test object id from xml
+          object_id = TDriver::TestObjectAdapter.test_object_element_attribute( application_test_object_xml, 'id' ){ nil }.to_i
+
+          # retrieve test object name from xml
+          object_name = TDriver::TestObjectAdapter.test_object_element_attribute( application_test_object_xml, 'name' ){ nil }.to_s
+
+          # retrieve test object type from xml
+          object_type = TDriver::TestObjectAdapter.test_object_element_attribute( application_test_object_xml, 'type' ){ nil }.to_s 
             
-            :xml_object => TDriver::TestObjectAdapter.retrieve_parent_application( test_object_xml )
-        
-          )
+          # calculate object cache hash key
+          hash_key = TDriver::TestObjectAdapter.test_object_hash( object_id, object_type, object_name )
+            
+          parent_cache = sut.instance_variable_get( :@child_object_cache )                       
           
-          # point to self
-          rules[ :parent_application ].instance_variable_set( :@parent_application, rules[ :parent_application ] )
-                 
+          # get cached test object from parents child objects cache if found; if not found from cache pass newly created object as is
+          if parent_cache.has_object?( hash_key )
+
+            rules[ :parent_application ] = parent_cache[ hash_key ]
+            
+          else
+                                
+            # create application test object            
+            rules[ :parent_application ] = make_test_object( 
+          
+              :parent => sut,
+              
+              :parent_application => nil,
+              
+              :xml_object => application_test_object_xml
+          
+            )
+            
+            # store application test object to new test object 
+            rules[ :parent_application ].instance_variable_set( :@parent_application, rules[ :parent_application ] )
+
+          end
+                  
         end
         
         # create new test object
