@@ -604,36 +604,33 @@ module MobyBase
         end
       
       }
+      
+      # do not create refresh arguments hash if already exists
+      unless identification_directives.has_key?( :__refresh_arguments )
             
-      # create application refresh attributes hash
-      if object_attributes_hash[ :type ] == 'application'
+        # create application refresh attributes hash
+        if object_attributes_hash[ :type ] == 'application'
 
-        # collect :name, :id and :applicationUid from object_attributes_hash if found
-        refresh_arguments = object_attributes_hash.collect_keys( :name, :id, :applicationUid )
+          # collect :name, :id and :applicationUid from object_attributes_hash if found
+          identification_directives[ :__refresh_arguments ] = object_attributes_hash.collect_keys( :name, :id, :applicationUid )
 
-      else
-                          
-        if rules[ :parent ].kind_of?( MobyBase::TestObject )
+        else
+                            
+          if rules[ :parent ].kind_of?( MobyBase::TestObject )
 
-          # get current application for test object
-          refresh_arguments = { :id => rules[ :parent ].get_application_id }
+            # get current application for test object
+            identification_directives[ :__refresh_arguments ] = { :id => rules[ :parent ].get_application_id }
 
-        elsif rules[ :parent ].kind_of?( MobyBase::SUT )
-        
-          # get current application for sut
-          refresh_arguments = { :id => rules[ :parent ].current_application_id }
+          elsif rules[ :parent ].kind_of?( MobyBase::SUT )
+          
+            # get current application for sut
+            identification_directives[ :__refresh_arguments ] = { :id => rules[ :parent ].current_application_id }
 
+          end
+          
         end
-        
+
       end
-            
-      # set default values 
-      identification_directives.default_values(
-                      
-        # attributes used to refresh sut 
-        :__refresh_arguments => refresh_arguments
-        
-      )
       
       # add object identification attribute keys to dynamic attributes white list
       MobyUtil::DynamicAttributeFilter.instance.add_attributes( object_attributes_hash.keys )
@@ -644,7 +641,7 @@ module MobyBase
         unless identification_directives.has_key?( :__parent_application ) || rules.has_key?( :parent_application )
             
           # retrieve sut object
-          sut = rules[ :parent ].kind_of?( MobyBase::SUT ) ? rules[ :parent ] : rules[ :parent ].sut
+          sut = rules[ :parent ].kind_of?( MobyBase::SUT ) ? rules[ :parent ] : rules[ :parent ].instance_variable_get( :@sut )
             
           # retrieve application test object xml element
           application_test_object_xml = TDriver::TestObjectAdapter.retrieve_parent_application( test_object_xml )
