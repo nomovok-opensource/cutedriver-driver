@@ -182,11 +182,11 @@ module MobyBehaviour
             matches, unused_rule = TDriver::TestObjectAdapter.get_objects( @sut.xml_data, application_identification_hash, true )
 
             # check if the application is still found or not
-            if ( close_options[ :check_process ] == true and matches.count > 0 ) 
+            if ( close_options[ :check_process ] == true ) 
 
               # the application did not close
-              raise MobyBase::VerificationError.new("Verification of close failed. The application that was to be closed is still running.")
-              
+              raise MobyBase::VerificationError.new, "Verification of close failed. The application that was to be closed is still running." if matches.count > 0
+
             elsif ( close_options[ :check_process ] == false )
 
               if matches.count > 0 
@@ -194,70 +194,21 @@ module MobyBehaviour
                 if TDriver::TestObjectAdapter.test_object_element_attribute( matches.first, 'id' ) == @id 
 
                   # the application was still in the foreground
-                  raise MobyBase::VerificationError.new("Verification of close failed. The application that was to be closed was still in the foreground.")
+                  raise MobyBase::VerificationError, "Verification of close failed. The application that was to be closed was still in the foreground."
 
                 else
 
                   # The foreground application was not the one being closed.
-                  raise MobyBase::TestObjectNotFoundError.new( "The foreground application was not the one being closed (id: #{ @id })." )
+                  raise MobyBase::TestObjectNotFoundError, "The foreground application was not the one being closed (id: #{ @id })."
 
                 end 
 
               end
 
-            else
-            
-              # The application could not be found, break
-              break;
-
             end
 
-=begin
-
-            p x2 = Time.now
-            # retrieve application object from sut.xml_data
-            matches, unused_rule = TDriver::TestObjectAdapter.get_objects( @sut.xml_data, { :type => 'application', :id => @uid }, true )
-            p matches.count
-            p "x2: %f" % ( Time.now - x2) 
-
-
-            # check if the application is still found or not
-            if ( close_options[ :check_process ] == true and @sut.application( :id => self.uid, :__timeout => 0 ) )
-
-                p "--0"
-
-              # the application did not close
-              raise MobyBase::VerificationError.new("Verification of close failed. The application that was to be closed is still running.")
-              
-            elsif ( close_options[ :check_process ] == false )
-
-              if @sut.application( :__timeout => 0 ).uid == self.uid             
-
-                p "--1"
-
-
-                # the application was still in the foreground
-                raise MobyBase::VerificationError.new("Verification of close failed. The application that was to be closed was still in the foreground.")
-
-              else
-
-                p "--2"
-
-                # The foreground application was not the one being closed.
-                raise MobyBase::TestObjectNotFoundError.new( "The foreground application was not the one being closed (id: #{self.uid})." )
-
-              end 
-
-            else
-          
-              p "break"
-            
-              # The application could not be found, break
-              break;
-
-            end
-
-=end
+            # The application could not be found, break
+            break
 
           }
           

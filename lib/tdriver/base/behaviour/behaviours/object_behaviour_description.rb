@@ -239,8 +239,10 @@ module MobyBehaviour
 					value = result_hash[ key ]
 					result << "\n#{ key.to_s.capitalize }:\n"
 					case value.class.to_s
-						when "Array": result << "\t" << value.join("\n\t") << "\n"
-						when "Hash": result << value.collect{ | key, value | "\t#{ key } => #{ value }" }.join("\n") << "\n"
+						when "Array"
+              result << "\t" << value.join("\n\t") << "\n"
+						when "Hash"
+              result << value.collect{ | key, value | "\t#{ key } => #{ value }" }.join("\n") << "\n"
 					#else
 						#result << "\t#{ value }\n"
 					end

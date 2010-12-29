@@ -399,7 +399,6 @@ module MobyBehaviour
       
       end
 
-
     end
 
     # == description
@@ -547,6 +546,7 @@ module MobyBehaviour
 
           app_info = find_app(app_list, {:id => target[ :uid ]}) if target[ :uid ] != nil
           app_info = find_app(app_list, {:name => target[ :name ]}) unless app_info
+
           app = self.application(:id => app_info.id) if app_info
 
           if app
@@ -636,24 +636,55 @@ module MobyBehaviour
 
         begin
 
+          # verify that application is launched and application test object is found from xml
           self.wait_child(
+
+            # attributes to identify application object
             expected_attributes,
+
+            # timeout to for application synchronization
             MobyUtil::Parameter[ @id ][ :application_synchronization_timeout, '5' ].to_f,
+
+            # wait retry interval and try again if application was not found
             MobyUtil::Parameter[ @id ][ :application_synchronization_retry_interval, '0.5' ].to_f
+
           )
+
+          # retrieve application object element from sut.xml_data
+          matches, unused_rule = TDriver::TestObjectAdapter.get_objects( xml_data, expected_attributes, true )
+
+          # raise exception if application element was not found; this shouldn't ever happen?
+          #raise MobyBase::TestObjectNotFoundError if matches.count == 0
+
+          # create application test object
+          foreground_app = @test_object_factory.make_test_object( 
+        
+            :parent => self,
+            
+            :parent_application => nil,
+            
+            :xml_object => matches.first
+        
+          )
+
+          # store application reference to test application; this will be passed to it's child test object(s)
+          foreground_app.instance_variable_set( :@parent_application, foreground_app )
+
+          # application was not found; this scenario shouldn't ever happen?
+          #raise MobyBase::TestObjectNotFoundError unless foreground_app.kind_of?( MobyBehaviour::Application )
+
+        rescue MobyBase::TestObjectNotFoundError
+
+          Kernel::raise MobyBase::VerificationError, "No application type test object was found on the device after starting the application."
 
         rescue MobyBase::SyncTimeoutError
 
           Kernel::raise MobyBase::VerificationError, "The application (#{ error_details }) was not found on the sut after being launched."
 
         end
-        
-        # verify run results
-        foreground_app = self.application( expected_attributes )
 
-        Kernel::raise MobyBase::VerificationError, "No application type test object was found on the device after starting the application." unless foreground_app.kind_of?( MobyBehaviour::Application )
-
-      rescue Exception => e
+      # raise behaviour error if any exception is raised
+      rescue # Exception => e
 
         TDriver.logger.behaviour "FAIL;Failed to launch application.;#{ id.to_s };sut;{};run;#{ target.kind_of?( Hash ) ? target.inspect : target.class.to_s }"
 

@@ -204,7 +204,7 @@ module TDriver
 
         if node.at_xpath( attribute_pattern % 'x_absolute' ).nil? || node.at_xpath( attribute_pattern % 'y_absolute' ).nil?
 
-          warn("Warning: Unable to sort object set due to object type of #{ node.attribute( 'type' ).inspect } does not have \"x_absolute\" or \"y_absolute\" attribute")
+          #warn("Warning: Unable to sort object set due to object type of #{ node.attribute( 'type' ).inspect } does not have \"x_absolute\" or \"y_absolute\" attribute")
 
           return nodeset
 
