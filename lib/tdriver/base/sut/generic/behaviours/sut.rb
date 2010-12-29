@@ -277,8 +277,6 @@ module MobyBehaviour
         
       ) if identification_directives.has_key?( :__logging )
 
-      #p caller unless identification_directives.has_key?( :__application_method )
-
       # disable logging if requested, remove pair from creation_hash
       MobyUtil::Logger.instance.push_enabled( identification_directives[ :__logging ] || TDriver.logger.enabled )
 
@@ -1066,7 +1064,7 @@ module MobyBehaviour
     
     # == nodoc
     def refresh( refresh_args = {}, creation_attributes = {} )
-      
+            
       refresh_ui_dump( refresh_args, creation_attributes )
 
       # update childs only if ui state is new
