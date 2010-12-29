@@ -20,7 +20,7 @@
 # rakefile for building and releasing Testability Driver
 @__release_mode = ENV['rel_mode']
 @__release_mode = 'minor' if @__release_mode == nil
-  
+GEM_NAME="testability-driver"
 # version information
 def read_version
 	version = "0"
@@ -67,7 +67,7 @@ def make_spec
     
     gem_version     =   @__gem_version
     s.platform      =   Gem::Platform::RUBY
-    s.name          =   GEM_NAME #"testability-driver"
+    s.name          =   GEM_NAME
     s.version       =   "#{gem_version}"
     s.author        =   "Testability Driver team"
     s.email         =   "testabilitydriver@nokia.com"
