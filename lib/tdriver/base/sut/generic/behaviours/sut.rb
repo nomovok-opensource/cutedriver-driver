@@ -380,7 +380,7 @@ module MobyBehaviour
         test_object = child( attributes )
 
         # store parent application to test object
-        test_object.instance_variable_set( :@parent_application, test_object )
+        test_object.instance_variable_set( :@parent_application, nil )
 
         test_object
         
@@ -398,7 +398,6 @@ module MobyBehaviour
         TDriver.logger.behaviour "PASS;Application found.;#{ id.to_s };sut;{};application;#{ attributes.inspect }" if $!.nil?
       
       end
-
 
     end
 
