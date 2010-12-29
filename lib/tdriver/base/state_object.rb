@@ -230,7 +230,10 @@ module MobyBase
 		# StateObject:: new child state object or reference to existing child
 		def child( attributes )
 
-			identified_object_xml = MobyBase::TestObjectIdentificator.new( attributes ).find_object_data( @_xml_data )
+      # retrieve application object from sut.xml_data
+      matches, unused_rule = TDriver::TestObjectAdapter.get_objects( @_xml_data, attributes, true )
+
+      identified_object_xml = matches.first
 
 			child_object = StateObject.new( identified_object_xml, self )
 

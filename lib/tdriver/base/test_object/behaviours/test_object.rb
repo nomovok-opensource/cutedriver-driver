@@ -558,7 +558,7 @@ module MobyBehaviour
       rules_hash = {} unless rules_hash.kind_of?( Hash ) 
 
       # set test object type
-      rules_hash[ :type ] = method_id.to_s
+      rules_hash[ :type ] = method_id #.to_s
   
       begin
 
