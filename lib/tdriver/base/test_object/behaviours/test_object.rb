@@ -268,6 +268,10 @@ module MobyBehaviour
     # parent_app = @app.Node( :name => 'Node1' ).get_application() #get application for some test object, this should return @app.
     def get_application
 
+      # test object should have @parent_application always
+      return @parent_application if @parent_application
+
+      # workaround: fetch application from sut, this part of code should not be executed ever
       return self if application?
 
       test_object = @parent
@@ -282,7 +286,6 @@ module MobyBehaviour
 
       # return application object or nil if no parent found
       # Does is make sense to return nil - should  n't all test objects belong to an application? Maybe throw exception if application not found
-
       return @sut.child( :type => 'application' ) rescue nil
 
     end
@@ -296,8 +299,10 @@ module MobyBehaviour
     # puts @app.Node( :name => 'Node1' ).get_application_id() #print the application id, this should print @app.id
     def get_application_id
 
-      return @_application_id if @_application_id
-      #What about the case when get_application returns nil? This line will throw an exception in that case.
+      return @parent_application.id if @parent_application
+
+      # workaround
+      # What about the case when get_application returns nil? This line will throw an exception in that case.
       get_application.id
 
     end
@@ -553,7 +558,7 @@ module MobyBehaviour
       rules_hash = {} unless rules_hash.kind_of?( Hash ) 
 
       # set test object type
-      rules_hash[ :type ] = method_id
+      rules_hash[ :type ] = method_id.to_s
   
       begin
 
