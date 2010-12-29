@@ -174,17 +174,6 @@ module MobyBehaviour
 
     end
 
-    # == nodoc
-    # function to get TestObject
-    # TODO: Still under construction. Should be able to create single descendant of the SUT
-    # Then is Should create path (parent-child-child-child...) until reaching the particular TestObject
-    # TODO: Document me when I'm ready
-    def get_object( object_id )
-
-      @test_object_factory.make( self, MobyBase::TestObjectIdentificator.new( object_id ) )
-
-    end
-
     # == nodoc  
     # == description
     # Force to use user defined ui state (e.g. for debugging purposes). Freezes the SUT xml_data, until unfreezed or set to nil. 
@@ -1450,6 +1439,18 @@ module MobyBehaviour
 
   public # deprecated
 
+    # == nodoc
+    # function to get TestObject
+    # TODO: Still under construction. Should be able to create single descendant of the SUT
+    # Then is Should create path (parent-child-child-child...) until reaching the particular TestObject
+    # TODO: Document me when I'm ready
+    def get_object( object_id )
+
+      warn("deprecated: use SUT#child instead of SUT#get_object in order to retrieve child test objects")
+
+      child( object_id )
+
+    end
     
     # == nodoc
     #TODO: Update documentation
