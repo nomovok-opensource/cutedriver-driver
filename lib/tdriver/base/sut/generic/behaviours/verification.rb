@@ -97,13 +97,9 @@ module MobyBehaviour
 			#translate the symbol values into string using sut's localisation setting
 			translate!( attributes_with_type )
 
-      # JKo: is there some reason for the line below?
-			#identificator = MobyBase::TestObjectIdentificator.new( attributes_with_type )
-
 			original_logging = MobyUtil::Logger.instance.enabled
 			desired_logging = (attributes[:__logging] == nil || attributes[:__logging] == 'false') ? false : true
 			MobyUtil::Logger.instance.enabled = false      
-
 
 			begin
 
