@@ -55,7 +55,7 @@ safe_require('tdriver/version.rb',  File.expand_path( File.join( File.dirname( _
 safe_require('tdriver/util/common/loader.rb',  File.expand_path( File.join( File.dirname( __FILE__ ), '../tdriver/util/common/loader.rb' ) ) )
 
 require 'tmpdir'
-require 'fileutils'
+require "fileutils" unless defined?( ::FileUtils )
 
 # default options
 @options = { 

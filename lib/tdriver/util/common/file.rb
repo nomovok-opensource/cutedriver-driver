@@ -17,7 +17,7 @@
 ## 
 ############################################################################
 
-require 'ftools'
+require "fileutils" unless defined?( ::FileUtils )
 
 module MobyUtil
 
@@ -281,11 +281,11 @@ module MobyUtil
 
         Kernel::raise RuntimeError.new( "Unable to copy %s to %s due to source file does not exist" % [ source, destination ] ) unless File.exist?( source )
 
-        File.copy( 
+        ::FileUtils.copy( 
 
           MobyUtil::FileHelper.fix_path( source ), 
           destination, 
-          verbose
+          :verbose => verbose
 
         ) unless ( !overwrite && File.exist?( destination ) )
       
