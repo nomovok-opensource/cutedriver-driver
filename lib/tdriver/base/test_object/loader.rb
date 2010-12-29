@@ -21,7 +21,7 @@
 require File.expand_path( File.join( File.dirname( __FILE__ ), 'abstract' ) )
 
 # load test object identificator
-require File.expand_path( File.join( File.dirname( __FILE__ ), 'identificator' ) )
+#require File.expand_path( File.join( File.dirname( __FILE__ ), 'identificator' ) )
 
 # load test object factory
 require File.expand_path( File.join( File.dirname( __FILE__ ), 'factory' ) )
