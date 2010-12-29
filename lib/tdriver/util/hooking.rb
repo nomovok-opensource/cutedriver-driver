@@ -249,7 +249,7 @@ module MobyUtil
 
 				_base.singleton_methods( false ).each { | method_name |
 
-					hook_method( _base, method_name, "static" ) unless @@non_wrappable_methods.include?( method_name )
+					hook_method( _base, method_name.to_s, "static" ) unless @@non_wrappable_methods.include?( method_name.to_s ) # method_name.to_s for ruby 1.9 compatibility
 
 				} 
 
@@ -268,7 +268,7 @@ module MobyUtil
 
 				{ :public => _base.public_instance_methods( false ), :private => _base.private_instance_methods( false ), :protected => _base.protected_instance_methods( false ) }.each { | method_type, methods |
 
-					methods.each { | method_name | hook_method( _base, method_name, method_type.to_s ) unless /__wrappee_\d+/i.match( method_name ) }
+					methods.each { | method_name | hook_method( _base, method_name.to_s, method_type.to_s ) unless /__wrappee_\d+/i.match( method_name.to_s ) } # method_name.to_s for ruby 1.9 compatibility
 
 				}
 
