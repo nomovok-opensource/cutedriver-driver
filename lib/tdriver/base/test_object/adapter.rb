@@ -32,8 +32,6 @@ module TDriver
         # TODO: document me
         def xpath_attributes( attributes, element_attributes, object_type )
 
-          object_type = object_type.to_s
-        
           # collect attributes
           attributes = attributes.collect{ | key, values |
 
@@ -43,26 +41,7 @@ module TDriver
               # concatenate string if it contains single and double quotes, otherwise return as is
               value = xpath_literal_string( value )
 
-              partial = @@partial_match_allowed.include?( [ object_type, key ] )
-
-=begin
-              # check that if partial matche is allowed otherwise require exact match  
-              value = partial ? "contains(.,#{ value })" : "=#{ value }"
-            
-              # compare also element attributes if key is required attribute e.g. "name", "type", "parent" or "id" 
-              prefix = element_attributes ? "@#{ key }#{ partial ? '[' : '' }#{ value }#{ partial ? ']' : '' } or " : ""
-              
-              # construct xpath
-              "#{ prefix }attributes/attribute[translate(@name,'ABCDEFGHIJKLMNOPQRSTUVWXYZ','abcdefghijklmnopqrstuvwxyz')='#{ key }' and #{ partial ? '' : '.' }#{ value }]"
-=end
-
-              # check that if partial matche is allowed otherwise require exact match  
-              #value = partial ? "contains(.,#{ value })" : "=#{ value }"
-            
-              # compare also element attributes if key is required attribute e.g. "name", "type", "parent" or "id" 
-              #prefix = element_attributes ? "@#{ key }#{ partial ? '[' : '' }#{ value }#{ partial ? ']' : '' } or " : ""
-
-              if partial
+              if @@partial_match_allowed.include?( [ object_type, key ] )
                 
                 prefix_value = "[contains(.,#{ value })]"
                 attribute_value = "contains(value/text(),#{ value })"
@@ -73,23 +52,14 @@ module TDriver
                 attribute_value = "value/text()=#{ value }"
               
               end
-              
-              if element_attributes
 
-                # construct xpath
-                "(@#{ key }#{ prefix_value } or attributes/attribute[translate(@name,'ABCDEFGHIJKLMNOPQRSTUVWXYZ','abcdefghijklmnopqrstuvwxyz')='#{ key }' and #{ attribute_value }])"
-              
-              else
-              
-                # construct xpath
-                "attributes/attribute[translate(@name,'ABCDEFGHIJKLMNOPQRSTUVWXYZ','abcdefghijklmnopqrstuvwxyz')='#{ key }' and #{ attribute_value }]"
-              
-              end
+              # construct xpath
+              "(#{ element_attributes ? "@#{ key }#{ prefix_value } or " : "" }attributes/attribute[translate(@name,'ABCDEFGHIJKLMNOPQRSTUVWXYZ','abcdefghijklmnopqrstuvwxyz')='#{ key }' and #{ attribute_value }])"
      
-            }.join( ' or ' )
+            }.join( ' or ' ) # join attribute alternative values
                     
-          }.join( ' and ' )
-          
+          }.join( ' and ' ) # join all required attributes
+                    
           # return created xpath or nil if no attributes given 
           if attributes.empty?
           
@@ -98,10 +68,8 @@ module TDriver
           
           else
           
-            #p element_attributes ? "(#{ attributes })" : attributes
-          
-            # return result in parenthesis if creating element attributes xpath fragment
-            element_attributes ? "(#{ attributes })" : attributes
+            # return result 
+            attributes
           
           end
           
@@ -113,10 +81,10 @@ module TDriver
     def self.xpath_to_object( rules, find_all_children )
 
       # convert hash keys to downcased string
-      rules = Hash[ rules.collect{ | key, value | [ key.to_s.downcase, value ] } ]
+      rules = Hash[ rules.collect{ | key, value | [ key.to_s.downcase, value.to_s ] } ]
 
       # xpath container array
-      test_object_identification_attributes_array = []
+      test_object_xpath_array = []
 
       # store and remove object element attributes from hash
       object_element_attributes = rules.delete_keys!( 'name', 'type', 'parent', 'id' )
@@ -125,23 +93,23 @@ module TDriver
       if object_element_attributes[ 'type' ] == '*' 
 
         # test object with any name, type, parent and id is allowed
-        test_object_identification_attributes_array << '@*'
+        test_object_xpath_array << '@*'
 
       else
 
         # required attributes          
-        test_object_identification_attributes_array << xpath_attributes( object_element_attributes, true, object_element_attributes[ 'type' ] )
+        test_object_xpath_array << xpath_attributes( object_element_attributes, true, object_element_attributes[ 'type' ] )
       
       end
 
       # additional attributes, eg. :text, :x, :y etc. 
-      test_object_identification_attributes_array << xpath_attributes( rules, false, object_element_attributes[ 'type' ] )
+      test_object_xpath_array << xpath_attributes( rules, false, object_element_attributes[ 'type' ] )
 
       # join required and additional attribute strings
-      test_object_identification_attributes = test_object_identification_attributes_array.compact.join( ' and ' )
+      test_object_xpath_string = test_object_xpath_array.compact.join( ' and ' )
 
       # return any child element under current node or only immediate child element 
-      find_all_children ? "*//object[#{ test_object_identification_attributes }]" : "objects[1]/object[#{ test_object_identification_attributes }]"
+      find_all_children ? "*//object[#{ test_object_xpath_string }]" : "objects[1]/object[#{ test_object_xpath_string }]"
     
     end
 
@@ -234,8 +202,17 @@ module TDriver
       # collect only nodes that has x_absolute and y_absolute attributes
       nodeset.collect!{ | node |
 
-        #node unless node.at_xpath( attribute_pattern % 'x_absolute' ).to_s.empty? || node.at_xpath( attribute_pattern % 'y_absolute' ).to_s.empty?
-        node unless node.at_xpath( attribute_pattern % 'x_absolute' ).nil? || node.at_xpath( attribute_pattern % 'y_absolute' ).nil?
+        if node.at_xpath( attribute_pattern % 'x_absolute' ).nil? || node.at_xpath( attribute_pattern % 'y_absolute' ).nil?
+
+          warn("Warning: Unable to sort object set due to object type of #{ node.attribute( 'type' ).inspect } does not have \"x_absolute\" or \"y_absolute\" attribute")
+
+          return nodeset
+
+        else
+
+          node
+
+        end
 
       }.compact!.sort!{ | element_a, element_b |
 
@@ -447,7 +424,7 @@ module TDriver
     
       # return xml root element
       MobyUtil::XML.parse_string( 
-        "<sut name='sut' type='sut' id='#{ @id }'><objects>#{ objects }</objects></sut>"
+        "<sut name='sut' type='sut' id='#{ id }'><objects>#{ objects }</objects></sut>"
       ).root
     
     end
@@ -477,15 +454,53 @@ module TDriver
 
       end
 
-      warn("warning: unable to retrieve parent application")
-      
-      nil
-      
-      # return application object or nil if no parent found
-      # Does is make sense to return nil - should  n't all test objects belong to an application? Maybe throw exception if application not found
+      #warn("warning: unable to retrieve parent application")
 
+      raise MobyBase::TestObjectNotFoundError, "Unable to retrieve parent application"
+
+      # return application object or nil if no parent found
+      # Does is make sense to return nil - shouldn't all test objects belong to an application? Maybe throw exception if application not found
+      
+      #nil
+    
       #return @sut.child( :type => 'application' ) rescue nil
           
+    end
+    
+    # TODO: document me
+    def self.get_xml_element_for_test_object( test_object )
+      
+      # retrieve nodeset from sut xml_data
+      nodeset = test_object.instance_variable_get( :@sut ).xml_data.xpath( test_object.instance_variable_get( :@x_path ) )
+
+      # raise exception if no test objects found 
+			Kernel::raise MobyBase::TestObjectNotFoundError if nodeset.empty?
+			
+      # return first test object from the nodeset
+			nodeset.first
+    
+    end
+
+    # TODO: document me    
+    def self.get_test_object_identifiers( xml_source, test_object )
+
+      # retrieve test object element attributes and return array containting xpath to test object, name, type and id elements
+      [ 
+        # x_path to test object
+        "#{ test_object.instance_variable_get( :@parent ).x_path }/*//object[@type='#{ @type = xml_source.attribute( 'type' ) }' and @id='#{ @id = xml_source.attribute( 'id' ) }']",
+
+        
+        # test object name 
+        xml_source.attribute( 'name' ),
+        
+        # test object type 
+        @type,
+        
+        # test object id 
+        @id
+        
+      ]
+
     end
 
     # enable hooking for performance measurement & debug logging
