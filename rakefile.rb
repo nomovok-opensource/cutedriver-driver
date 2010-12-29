@@ -297,7 +297,41 @@ task :doc, :tests do | task, args |
 
 end
 
+desc "Task for uninstalling the generated gem"
+task :gem_uninstall do
+  
+  puts "#########################################################"
+  puts "### Uninstalling GEM #{GEM_NAME}     ###"
+  puts "#########################################################"
+  tdriver_gem = "testability-driver-#{@__gem_version}.gem"
+     
+  FileUtils.rm(Dir.glob('pkg/*gem'))
+  cmd = "gem uninstall -a -x #{GEM_NAME}"
+  failure = system(cmd)
+#  raise "uninstalling  #{GEM_NAME} failed" if (failure != true) or ($? != 0)
+  
+end
 
+desc "Task for installing the generated gem"
+task :gem_install do
+  
+  puts "#########################################################"
+  puts "### Installing GEM  #{GEM_NAME}       ###"
+  puts "#########################################################"
+  tdriver_gem = "testability-driver-#{@__gem_version}.gem"
+  if /win/ =~ RUBY_PLATFORM
+     cmd = "gem install pkg\\testability-driver*.gem --LOCAL"
+  else
+     cmd = "gem install pkg/testability-driver*.gem --LOCAL"
+  end
+  failure = system(cmd)
+  raise "installing  #{GEM_NAME} failed" if (failure != true) or ($? != 0)
+  
+end
+
+task :cruise => ['gem_uninstall', 'gem', 'gem_install'] do
+	
+end
 
 
 
