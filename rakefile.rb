@@ -67,7 +67,7 @@ def make_spec
     
     gem_version     =   @__gem_version
     s.platform      =   Gem::Platform::RUBY
-    s.name          =   "testability-driver"
+    s.name          =   GEM_NAME #"testability-driver"
     s.version       =   "#{gem_version}"
     s.author        =   "Testability Driver team"
     s.email         =   "testabilitydriver@nokia.com"
