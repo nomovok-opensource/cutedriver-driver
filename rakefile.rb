@@ -307,9 +307,9 @@ task :gem_uninstall do
      
   FileUtils.rm(Dir.glob('pkg/*gem'))
   if /win/ =~ RUBY_PLATFORM
-    cmd = "gem uninstall -a -x #{GEM_NAME}"
+    cmd = "gem uninstall #{GEM_NAME} -a -x -I"
   else
-    cmd = "sudo gem uninstall -a -x #{GEM_NAME}"
+    cmd = "sudo gem uninstall #{GEM_NAME} -a -x -I"
   end
   failure = system(cmd)
 #  raise "uninstalling  #{GEM_NAME} failed" if (failure != true) or ($? != 0)
