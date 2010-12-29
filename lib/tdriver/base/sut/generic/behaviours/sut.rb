@@ -380,7 +380,7 @@ module MobyBehaviour
         test_object = child( attributes )
 
         # store parent application to test object
-        test_object.instance_variable_set( :@parent_application, nil )
+        test_object.instance_variable_set( :@parent_application, test_object )
 
         test_object
         
@@ -666,6 +666,9 @@ module MobyBehaviour
             :xml_object => matches.first
         
           )
+
+          # store application reference to test application; this will be passed to it's child test object(s)
+          foreground_app.instance_variable_set( :@parent_application, foreground_app )
 
           # application was not found; this scenario shouldn't ever happen?
           #raise MobyBase::TestObjectNotFoundError unless foreground_app.kind_of?( MobyBehaviour::Application )
