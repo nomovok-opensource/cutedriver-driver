@@ -227,7 +227,6 @@ module MobyBehaviour
 
     end
     
-
     # == nodoc
     # Function refreshes test objects to correspond with the current state of the device.
     # 

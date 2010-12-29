@@ -1065,12 +1065,12 @@ module MobyBehaviour
     end
     
     # == nodoc
-    def refresh( refresh_args = {}, creation_attributes = {})
+    def refresh( refresh_args = {}, creation_attributes = {} )
       
       refresh_ui_dump( refresh_args, creation_attributes )
 
       # update childs only if ui state is new
-      update if !@childs_updated
+      update_childs
 
     end
 
@@ -1132,33 +1132,35 @@ module MobyBehaviour
 
     # == nodoc
     def get_application_id
+     
+      # retrieve application object from sut.xml_data
+      matches, unused_rule = TDriver::TestObjectAdapter.get_objects( xml_data, { :type => 'application' }, true )
+
+      # retrieve id attribute if application test object found      
+      if matches.count > 0
+
+        # return id attribute value
+        TDriver::TestObjectAdapter.test_object_element_attribute( matches.first, 'id' )
       
-      orig_frozen = @frozen;
-
-      begin
-
-        freeze unless @frozen
-
-        ret = self.application.id
-
-        unfreeze unless orig_frozen
-        
-        return ret
-
-      rescue
-
-      ensure
-
-        unfreeze unless orig_frozen
-
+      else
+      
+        # application not found
+        '-1'
+      
       end
-      
-      '-1'
 
     end
 
   private
 
+    # TODO: document me
+    def update_childs
+        
+      # update childs only if ui state is new
+      update if !@childs_updated
+    
+    end
+  
     # == nodoc
     # Function asks for fresh xml ui data from the device and stores the result
     # == returns
@@ -1169,6 +1171,10 @@ module MobyBehaviour
 
       if !@frozen && ( @_previous_refresh.nil? || ( current_time - @_previous_refresh ).to_f > @refresh_interval )
 
+        use_find_objects = MobyUtil::Parameter[ @id ][ :use_find_object, 'false' ] == 'true' and self.respond_to?( 'find_object' )
+        
+        refresh_arguments = refresh_args.clone
+
         MobyUtil::Retryable.while(
           :tries => @refresh_tries,
           :interval => @refresh_interval,
@@ -1176,9 +1182,9 @@ module MobyBehaviour
         ) {
 
           #use find_object if set on and the method exists
-          if MobyUtil::Parameter[ @id ][ :use_find_object, 'false' ] == 'true' and self.respond_to?('find_object') # self.methods.include?('find_object')
+          if use_find_objects
 
-            new_xml_data, crc = find_object( refresh_args.clone, creation_attributes )
+            new_xml_data, crc = find_object( refresh_arguments, creation_attributes )
 
           else
 
@@ -1189,37 +1195,36 @@ module MobyBehaviour
               self 
             ) 
 
-            #store in case needed
+            # store in case needed
             app_command.refresh_args( refresh_args )
 
             new_xml_data, crc = execute_command( app_command )
 
           end  
 
+          @dump_count += 1
+
+          @childs_updated = false
+          
+          @xml_data = MobyUtil::XML.parse_string( new_xml_data ).root
+
+          @_previous_refresh = Time.now
+
           # remove timestamp from the beginning of tasMessage, parse if not same as previous ui state
-          #if ( xml_data_no_timestamp = new_xml_data.split( ">", 2 ).last ) != @last_xml_data
-
-            @xml_data, @childs_updated = MobyUtil::XML.parse_string( new_xml_data ).root, false
-
-            #@last_xml_data = xml_data_no_timestamp
-
+          #if ( xml_data_no_timestamp = new_xml_data.split( ">", 2 ).last ) != @last_xml_data          
+          # @xml_data = MobyUtil::XML.parse_string( new_xml_data ).root
+          # @last_xml_data = xml_data_no_timestamp
           #end
 
           #if ( @xml_data_crc == 0 || crc != @xml_data_crc || crc.nil? )          
           # @xml_data, @xml_data_crc, @childs_updated = MobyUtil::XML.parse_string( new_xml_data ).root, crc, false
           #end
 
-          @dump_count += 1
-
-          @_previous_refresh = current_time
-
         } 
 
       end
 
-      @xml_data = fetch_references( @xml_data )
-
-      @xml_data
+      fetch_references( @xml_data )
       
     end
 
