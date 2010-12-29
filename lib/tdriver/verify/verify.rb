@@ -137,7 +137,7 @@ module TDriverVerify
 
         sleep TIMEOUT_CYCLE_SECONDS
 
-        #refresh_suts if counter == ref_counter
+        refresh_suts if counter == ref_counter
 
       end # do
 
@@ -229,7 +229,7 @@ module TDriverVerify
 
           sleep TIMEOUT_CYCLE_SECONDS
 
-          #refresh_suts if counter == ref_counter
+          refresh_suts if counter == ref_counter
 
         end
 
@@ -342,7 +342,7 @@ module TDriverVerify
 
           sleep TIMEOUT_CYCLE_SECONDS
 
-          #refresh_suts if counter == ref_counter
+          refresh_suts if counter == ref_counter
 
         rescue Exception => e
 
@@ -439,7 +439,7 @@ module TDriverVerify
 
           sleep TIMEOUT_CYCLE_SECONDS
 
-          #refresh_suts if counter == ref_counter
+          refresh_suts if counter == ref_counter
 
 
         rescue Exception => e
@@ -537,7 +537,7 @@ module TDriverVerify
 
           sleep TIMEOUT_CYCLE_SECONDS
 
-          #refresh_suts if counter == ref_counter
+          refresh_suts if counter == ref_counter
         rescue MobyBase::ContinuousVerificationError
           raise
         rescue Exception => e
