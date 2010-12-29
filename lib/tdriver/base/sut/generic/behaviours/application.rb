@@ -167,30 +167,43 @@ module MobyBehaviour
         # verify close results
         begin
 
+          application_identification_hash = { :type => 'application', :id => @id }
+
           MobyUtil::Retryable.until(
             :timeout => MobyUtil::Parameter[ self.sut.id ][ :application_synchronization_timeout, '60' ].to_f,
             :interval => MobyUtil::Parameter[ self.sut.id ][ :application_synchronization_retry_interval, '0.25' ].to_f,
             :exception => MobyBase::VerificationError,
             :unless => [MobyBase::TestObjectNotFoundError, MobyBase::ApplicationNotAvailableError] ) {
 
+            # raises MobyBase::ApplicationNotAvailableError if application was not found 
+            @sut.refresh( application_identification_hash, [{:className=>"application", :tasId => @id }] )
+
+            # retrieve application object from sut.xml_data
+            matches, unused_rule = TDriver::TestObjectAdapter.get_objects( @sut.xml_data, application_identification_hash, true )
+
             # check if the application is still found or not
-            if ( close_options[ :check_process ] == true and @sut.application( :id => self.uid, :__timeout => 0 ) )
+            if ( close_options[ :check_process ] == true and matches.count > 0 ) 
 
               # the application did not close
               raise MobyBase::VerificationError.new("Verification of close failed. The application that was to be closed is still running.")
               
             elsif ( close_options[ :check_process ] == false )
 
-                if @sut.application( :__timeout => 0 ).uid == self.uid             
-                # the application was still in the foreground
-                raise MobyBase::VerificationError.new("Verification of close failed. The application that was to be closed was still in the foreground.")
+              if matches.count > 0 
+              
+                if TDriver::TestObjectAdapter.test_object_element_attribute( matches.first, 'id' ) == @id 
 
-              else
+                  # the application was still in the foreground
+                  raise MobyBase::VerificationError.new("Verification of close failed. The application that was to be closed was still in the foreground.")
 
-                # The foreground application was not the one being closed.
-                raise MobyBase::TestObjectNotFoundError.new( "The foreground application was not the one being closed (id: #{self.uid})." )
+                else
 
-              end 
+                  # The foreground application was not the one being closed.
+                  raise MobyBase::TestObjectNotFoundError.new( "The foreground application was not the one being closed (id: #{ @id })." )
+
+                end 
+
+              end
 
             else
             
@@ -199,19 +212,65 @@ module MobyBehaviour
 
             end
 
-          }
+=begin
 
+            p x2 = Time.now
+            # retrieve application object from sut.xml_data
+            matches, unused_rule = TDriver::TestObjectAdapter.get_objects( @sut.xml_data, { :type => 'application', :id => @uid }, true )
+            p matches.count
+            p "x2: %f" % ( Time.now - x2) 
+
+
+            # check if the application is still found or not
+            if ( close_options[ :check_process ] == true and @sut.application( :id => self.uid, :__timeout => 0 ) )
+
+                p "--0"
+
+              # the application did not close
+              raise MobyBase::VerificationError.new("Verification of close failed. The application that was to be closed is still running.")
+              
+            elsif ( close_options[ :check_process ] == false )
+
+              if @sut.application( :__timeout => 0 ).uid == self.uid             
+
+                p "--1"
+
+
+                # the application was still in the foreground
+                raise MobyBase::VerificationError.new("Verification of close failed. The application that was to be closed was still in the foreground.")
+
+              else
+
+                p "--2"
+
+                # The foreground application was not the one being closed.
+                raise MobyBase::TestObjectNotFoundError.new( "The foreground application was not the one being closed (id: #{self.uid})." )
+
+              end 
+
+            else
+          
+              p "break"
+            
+              # The application could not be found, break
+              break;
+
+            end
+
+=end
+
+          }
+          
         rescue MobyBase::TestObjectNotFoundError
 
           # everything ok: application not running anymore
 
-		rescue MobyBase::ApplicationNotAvailableError
+    		rescue MobyBase::ApplicationNotAvailableError
 
           # everything ok: application not running anymore
 
         rescue RuntimeError => e
         
-          
           unless ( e.message =~ /The application with Id \d+ is no longer available/ )
 
             # something unexpected happened during the close, let exception through
@@ -235,7 +294,8 @@ module MobyBehaviour
 
       MobyUtil::Logger.instance.log "behaviour", "PASS;Closed successfully.;#{ identity };close;"
 
-      @sut.application
+      #@sut.application
+            
       nil
 
     end
@@ -316,6 +376,39 @@ module MobyBehaviour
       true
 
     end
+
+	    
+	# == description
+	# Bring the application to foreground.\n
+	# \n
+	# [b]NOTE:[/b] Currently this works only for Symbian OS target!
+	# 
+	# == returns
+	# NilClass
+	#   description: -
+	#   example: -
+	#
+	#
+	def bring_to_foreground
+	  @sut.execute_command(MobyCommand::Application.new(:BringToForeground, nil, self.uid, self.sut))
+	end
+
+
+	# == description
+	# Kills the application process
+	# 
+	# == returns
+	# NilClass
+	#   description: -
+	#   example: -
+	#
+	def kill
+
+	  @sut.execute_command( MobyCommand::Application.new( :Kill, self.executable_name, self.uid, self.sut, nil ) )
+
+	end
+
+
 
     # enable hooking for performance measurement & debug logging
     MobyUtil::Hooking.instance.hook_methods( self ) if defined?( MobyUtil::Hooking )

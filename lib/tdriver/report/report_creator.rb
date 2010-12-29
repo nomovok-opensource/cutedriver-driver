@@ -280,7 +280,7 @@ module TDriverReportCreator
 
         each_video_device do | video_device, device_index |
           begin
-            File.copy( "cam_" + device_index + "_" + @_video_file_name, "cam_" + device_index + "_" + @_previous_video_file_name )
+            FileUtils.copy( "cam_" + device_index + "_" + @_video_file_name, "cam_" + device_index + "_" + @_previous_video_file_name )
           rescue
             # do nothing..
           end
