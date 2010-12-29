@@ -718,81 +718,6 @@ module MobyBase
 
     end
 
-    # create test object search parameters for find_objects service
-    def make_object_search_params( test_object, creation_attributes )
-
-      result = get_parent_params( test_object ).push( get_object_params( creation_attributes ) )
-
-      # TODO: review find_objects controller
-      # workaround? return empty hash if no search params were 
-      result == [{}] ? {} : result
-
-    end
-
-  private 
-
-    # TODO: document me
-    def get_object_params( creation_attributes )
-
-      if creation_attributes[ :type ] != 'application'
-        
-        object_search_params = creation_attributes.clone
-
-        object_search_params[ :className  ] = object_search_params.delete( :type ) if creation_attributes.has_key?( :type )
-        object_search_params[ :objectName ] = object_search_params.delete( :name ) if creation_attributes.has_key?( :name )
-
-        object_search_params
-
-      else
-      
-        {}
-      
-      end    
-    
-    end
-
-    # TODO: document me
-    def get_parent_params( test_object )
-
-      unless [ 'application', 'sut' ].include?( test_object.type ) 
-
-        search_params = []
-      
-        search_params.concat( get_parent_params( test_object.parent ) ) if test_object.parent
-        search_params.concat( [ :className => test_object.type, :tasId => test_object.id ] ) #if test_object
-        
-        search_params
-        
-      else
-      
-        []
-      
-      end
-
-    end
-
-    # TODO: document me
-    def list_matching_test_objects( matches )
-
-      matches.collect{ | object |
-          
-        path = [ object.attribute( 'type' ) ]
-
-        while object.attribute( 'type' ) != 'application' do
-        
-          # object/objects/object/../..
-          object = object.parent.parent
-          
-          path << object.attribute( 'type' )
-        
-        end
-
-        path.reverse.join( '.' )
-      
-      }.sort
-    
-    end
-
     # TODO: document me
     def make_test_object( rules )
                   
@@ -897,6 +822,81 @@ module MobyBase
       # return test object
       test_object
 
+    end
+
+    # create test object search parameters for find_objects service
+    def make_object_search_params( test_object, creation_attributes )
+
+      result = get_parent_params( test_object ).push( get_object_params( creation_attributes ) )
+
+      # TODO: review find_objects controller
+      # workaround? return empty hash if no search params were 
+      result == [{}] ? {} : result
+
+    end
+
+  private 
+
+    # TODO: document me
+    def get_object_params( creation_attributes )
+
+      if creation_attributes[ :type ] != 'application'
+        
+        object_search_params = creation_attributes.clone
+
+        object_search_params[ :className  ] = object_search_params.delete( :type ) if creation_attributes.has_key?( :type )
+        object_search_params[ :objectName ] = object_search_params.delete( :name ) if creation_attributes.has_key?( :name )
+
+        object_search_params
+
+      else
+      
+        {}
+      
+      end    
+    
+    end
+
+    # TODO: document me
+    def get_parent_params( test_object )
+
+      unless [ 'application', 'sut' ].include?( test_object.type ) 
+
+        search_params = []
+      
+        search_params.concat( get_parent_params( test_object.parent ) ) if test_object.parent
+        search_params.concat( [ :className => test_object.type, :tasId => test_object.id ] ) #if test_object
+        
+        search_params
+        
+      else
+      
+        []
+      
+      end
+
+    end
+
+    # TODO: document me
+    def list_matching_test_objects( matches )
+
+      matches.collect{ | object |
+          
+        path = [ object.attribute( 'type' ) ]
+
+        while object.attribute( 'type' ) != 'application' do
+        
+          # object/objects/object/../..
+          object = object.parent.parent
+          
+          path << object.attribute( 'type' )
+        
+        end
+
+        path.reverse.join( '.' )
+      
+      }.sort
+    
     end
 
   public # deprecated methods
