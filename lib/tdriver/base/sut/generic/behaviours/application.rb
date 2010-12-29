@@ -317,6 +317,39 @@ module MobyBehaviour
 
     end
 
+	    
+	# == description
+	# Bring the application to foreground.\n
+	# \n
+	# [b]NOTE:[/b] Currently this works only for Symbian OS target!
+	# 
+	# == returns
+	# NilClass
+	#   description: -
+	#   example: -
+	#
+	#
+	def bring_to_foreground
+	  @sut.execute_command(MobyCommand::Application.new(:BringToForeground, nil, self.uid, self.sut))
+	end
+
+
+	# == description
+	# Kills the application process
+	# 
+	# == returns
+	# NilClass
+	#   description: -
+	#   example: -
+	#
+	def kill
+
+	  @sut.execute_command( MobyCommand::Application.new( :Kill, self.executable_name, self.uid, self.sut, nil ) )
+
+	end
+
+
+
     # enable hooking for performance measurement & debug logging
     MobyUtil::Hooking.instance.hook_methods( self ) if defined?( MobyUtil::Hooking )
 
