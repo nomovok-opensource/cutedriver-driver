@@ -497,14 +497,13 @@ module TDriver
     end
 
     # TODO: document me    
-    def self.get_test_object_identifiers( xml_source, test_object )
+    def self.get_test_object_identifiers( xml_source, test_object = nil )
 
       # retrieve test object element attributes and return array containting xpath to test object, name, type and id elements
       [ 
         # x_path to test object
-        "#{ test_object.instance_variable_get( :@parent ).x_path }/*//object[@type='#{ @type = xml_source.attribute( 'type' ) }' and @id='#{ @id = xml_source.attribute( 'id' ) }']",
+        test_object ? "#{ test_object.instance_variable_get( :@parent ).x_path }/*//object[@type='#{ @type = xml_source.attribute( 'type' ) }' and @id='#{ @id = xml_source.attribute( 'id' ) }']" : nil,
 
-        
         # test object name 
         xml_source.attribute( 'name' ),
         
