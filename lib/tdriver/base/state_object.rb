@@ -67,7 +67,7 @@ module MobyBase
 
       @parent = parent 
 
-      self.xml_data = xml_element
+      method(:xml_data=).call( xml_element )
 
       @child_object_cache = TDriver::TestObjectCache.new
 
@@ -163,10 +163,11 @@ module MobyBase
     def xml_data=( xml_object )
      
       @_xml_data = xml_object
-      
+            
       unused_xpath, @name, @type, @id = TDriver::TestObjectAdapter.get_test_object_identifiers( xml_object )
       
     end
+    
 
     # Returns a XML element representing this state object.
     #
@@ -262,8 +263,17 @@ module MobyBase
       # retrieve application object from sut.xml_data
       matches, unused_rule = TDriver::TestObjectAdapter.get_objects( @_xml_data, rules, true )
 
-      # raise exception if no matches found
-      raise MobyBase::TestObjectNotFoundError if matches.count == 0
+      if matches.count == 0
+
+        # raise exception if no matches found
+        raise MobyBase::TestObjectNotFoundError 
+
+      elsif matches.count > 1 and multiple_objects == false and dynamic_attributes.has_key?( :__index ) == false
+
+        # raise exception if multiple maches found      
+        raise MobyBase::MultipleTestObjectsIdentifiedError, "Multiple objects found with attributes #{ attributes.inspect }"
+
+      end
 
       # fetch matches, use index if given
       matches = [ matches[ dynamic_attributes[ :__index ] || 0 ] ] unless multiple_objects
