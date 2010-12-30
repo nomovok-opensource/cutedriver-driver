@@ -366,7 +366,7 @@ module TDriver
         source_data.xpath( 'attributes/attribute/value' ).collect{ | value | 
 
           # retrieve attribute name
-          name = value.parent.attribute('name')
+          name = value.parent.attribute('name').to_s
 
           # collect attribute elements name and content
           unless inclusive_filter.empty?
