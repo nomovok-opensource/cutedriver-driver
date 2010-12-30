@@ -60,8 +60,8 @@ class String
       
     else
     
-      #default
-      Kernel::raise TypeError.new( "Unable to convert string \"#{ self }\" to boolean (Expected \”true\" or \"false\")" )
+      #default      
+      Kernel::raise TypeError.new( "Unable to convert string \"#{ self }\" to boolean (Expected \"true\" or \"false\")" )
 
     end
 
