@@ -316,12 +316,12 @@ module TDriverVerify
 
           unless result == true
 
-              error_msg = "Verification #{message.nil? ? '' : '"' << message.to_s << '" '}at #{verify_caller} failed."
-              error_msg << MobyUtil::KernelHelper.find_source(verify_caller)
+            error_msg = "Verification #{message.nil? ? '' : '"' << message.to_s << '" '}at #{verify_caller} failed."
+            error_msg << MobyUtil::KernelHelper.find_source(verify_caller)
 
-              error_msg << "\nThe block did not return true. It returned: " << result.inspect          
+            error_msg << "\nThe block did not return true. It returned: " << result.inspect
 
-              raise MobyBase::VerificationError.new( error_msg ) 
+            raise MobyBase::VerificationError.new( error_msg )
 
           end
 
@@ -651,7 +651,7 @@ module TDriverVerify
   def refresh_suts
     begin
       if self.kind_of? MobyBase::SUT
-        appid = self.get_application_id
+        appid = self.get_application_id        
         if appid != "-1"
           self.refresh({:id => appid})
         else
@@ -660,7 +660,7 @@ module TDriverVerify
       else
         #refresh all connected suts
         MobyBase::SUTFactory.instance.connected_suts.each do |sut_id, sut_attributes|
-          appid = sut_attributes[:sut].get_application_id
+          appid = sut_attributes[:sut].get_application_id         
           if appid != "-1"
             sut_attributes[:sut].refresh({:id => appid}) if sut_attributes[:is_connected]
           else
@@ -671,10 +671,14 @@ module TDriverVerify
 
       # Ignore all availability errors
     rescue RuntimeError => e
-      # This occurs when no applications are registered to sut
-      if !(e.message =~ /no longer available/)
-        # all other errors are passed up
-        raise e
+      begin
+        self.refresh
+      rescue RuntimeError => e
+        # This occurs when no applications are registered to sut
+        if !(e.message =~ /no longer available/)
+          # all other errors are passed up
+          raise e
+        end
       end
     end
   end
