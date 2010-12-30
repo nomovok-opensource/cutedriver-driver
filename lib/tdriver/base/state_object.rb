@@ -158,7 +158,9 @@ module MobyBase
       return true
     end
 
+    attr_reader :type, :name, :id
 
+=begin
     # Function to return type of the state object
     # === returns
     # type:: String value of the type
@@ -176,9 +178,10 @@ module MobyBase
     # Function to return id of the state object
     # === returns
     # id String value of the id
-    def id()
-      @object_id
+    def id
+      @id
     end
+=end
 
     # Sets the XML content of this state object. Also sets identification attributes based
     # on the contents of the XML.
@@ -189,7 +192,7 @@ module MobyBase
       @_xml_data = xml_object
       @name = xml_object.attribute( 'name' )
       @type = xml_object.attribute( 'type' )
-      @object_id = xml_object.attribute( 'id' )
+      @id = xml_object.attribute( 'id' )
     end
 
     # Returns a XML element representing this state object.
@@ -255,8 +258,31 @@ module MobyBase
     # StateObject:: new child state object or reference to existing child
     def child( attributes )
 
+      get_objects( attributes, false )
+
+    end
+
+    # TODO: document me
+    def children( attributes )
+
+      get_objects( attributes, true )
+    
+    end
+    
+    # TODO: document me
+    def inspect
+
+      "#<#{ self.class }:0x#{ ( "%x" % ( self.object_id.to_i << 1 ) )[ 3 .. -1 ] } @id=#{ @id.inspect } @type=\"#{ @type }\" @name=\"#{ @name }\">"
+
+    end
+
+  private
+  
+    def get_objects( attributes, multiple_objects )
+    
       rules = attributes.clone
 
+      # strip dynamic attributes from rules hash
       dynamic_attributes = rules.strip_dynamic_attributes!
 
       # retrieve application object from sut.xml_data
@@ -265,31 +291,34 @@ module MobyBase
       # raise exception if no matches found
       raise MobyBase::TestObjectNotFoundError if matches.count == 0
 
-      identified_object_xml = matches[ dynamic_attributes[ :__index ] || 0 ]
+      # fetch matches, use index if given
+      matches = [ matches[ dynamic_attributes[ :__index ] || 0 ] ] unless multiple_objects
+      
+      # create state objects
+      matches = matches.collect{ | object_xml |
+      
+        result = StateObject.new( object_xml, self )
+        
+        # use cached state object if once already retrieved
+        get_cached_test_object!( result ).tap{ | found_in_cache |
 
-      child_object = StateObject.new( identified_object_xml, self )
+          # add child to objects cache 
+          @child_object_cache.add_object( result ) unless found_in_cache
 
-      # use cached test object if once already retrieved
-      get_cached_test_object!( child_object ).tap{ | found_in_cache |
-
-        # add child to objects cache 
-        @child_object_cache.add_object( child_object ) unless found_in_cache
-
+        }
+      
+        # pass result object to array
+        result
+                
       }
 
-      child_object
-
-    end
-
-    def inspect 
-
-      "#{ self.to_s }\nName: #{ self.name.to_s } Type: #{ self.type.to_s } Id: #{ self.id.to_s }"
-
+      # return results      
+      multiple_objects ? matches : matches.first
+        
     end
 
     # enable hooking for performance measurement & debug logging
     MobyUtil::Hooking.instance.hook_methods( self ) if defined?( MobyUtil::Hooking )
-
 
   end # StateObject 
 
