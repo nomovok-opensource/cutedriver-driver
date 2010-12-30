@@ -652,6 +652,8 @@ module MobyBehaviour
             
             :parent_application => nil,
             
+            :object_attributes_hash => expected_attributes,
+            
             :xml_object => matches.first
         
           )

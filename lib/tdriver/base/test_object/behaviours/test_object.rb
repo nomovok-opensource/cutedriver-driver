@@ -567,8 +567,12 @@ module MobyBehaviour
 
       rescue MobyBase::TestObjectNotFoundError, MobyBase::TestObjectNotVisibleError
 
+        rules_hash_clone = rules_hash.clone
+        
+        rules_hash_clone.delete(:type)
+
         # string representation of used rule hash, remove curly braces
-        attributes_string = rules_hash.inspect[ 1 .. -2 ]
+        attributes_string = rules_hash_clone.inspect[ 1 .. -2 ]
         
         if attributes_string.empty?
         
@@ -715,7 +719,6 @@ module MobyBehaviour
       @parent.instance_variable_get( :@child_object_cache ).remove_object( self )
 
     end
-
 
     # TODO: refactor logging_enabled 
     # try to reactivate test object if currently not active
