@@ -354,7 +354,10 @@ module TDriver
     end
 
     # TODO: document me
-    def self.test_object_attributes( source_data )
+    def self.test_object_attributes( source_data, inclusive_filter = [] )
+      
+      # convert all keys to lowercase
+      inclusive_filter.collect!{ | key | key.to_s.downcase } unless inclusive_filter.empty?
       
       # return hash of test object attributes
       Hash[ 
@@ -362,10 +365,22 @@ module TDriver
         # iterate each attribute and collect name and value      
         source_data.xpath( 'attributes/attribute/value' ).collect{ | value | 
 
-          # collect attribute elements name and content
-          [ value.parent.attribute('name'), value.content ]
+          # retrieve attribute name
+          name = value.parent.attribute('name')
 
-        } 
+          # collect attribute elements name and content
+          unless inclusive_filter.empty?
+          
+            [ name, value.content ] if inclusive_filter.include?( name.downcase )
+                    
+          else
+
+            # pass the attribute pair - no filtering done
+            [ name, value.content ]
+          
+          end
+
+        }
 
       ]
 
