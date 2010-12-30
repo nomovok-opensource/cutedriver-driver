@@ -230,10 +230,14 @@ module MobyBase
 		# StateObject:: new child state object or reference to existing child
 		def child( attributes )
 
-      # retrieve application object from sut.xml_data
-      matches, unused_rule = TDriver::TestObjectAdapter.get_objects( @_xml_data, attributes, true )
+      rules = attributes.clone
 
-      identified_object_xml = matches.first
+      dynamic_attributes = rules.strip_dynamic_attributes!
+
+      # retrieve application object from sut.xml_data
+      matches, unused_rule = TDriver::TestObjectAdapter.get_objects( @_xml_data, rules, true )
+
+      identified_object_xml = matches[ dynamic_attributes[ :__index ] || 0 ]
 
 			child_object = StateObject.new( identified_object_xml, self )
 
