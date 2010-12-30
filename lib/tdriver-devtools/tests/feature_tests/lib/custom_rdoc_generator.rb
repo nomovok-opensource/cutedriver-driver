@@ -179,7 +179,7 @@ module Generators
         # first scenario with all required arguments
         if mode.to_s =~ /method/
 
-          required_arguments = arguments_table.select{ | argument | argument.last == false }.collect{ | scenario | scenario.first }
+          required_arguments = arguments_table.select{ | argument | argument.last == false }.to_a.collect{ | scenario | scenario.first } # Array conversion for ruby 1.9 compatibility
 
           results << $templates[ mode ] % [ @current_method.name, "required", "(s)", @current_method.name, required_arguments.join(", ") ]
 
@@ -196,8 +196,8 @@ module Generators
         unless arguments_table.nil?
 
           # scenarios with one of each optional argument.. and eventually with all arguments
-          arguments_table.select{ | argument | argument.last == true }.collect{ | scenario | scenario 
-
+          arguments_table.select{ | argument | argument.last == true }.to_a.collect{ | scenario | scenario 
+            # Array conversion for ruby 1.9 compatibility
             scenario = required_arguments << scenario.first
 
             results << $templates[ mode ] % [ @current_method.name, "optional", " '%s'" % scenario.last.first, @current_method.name, scenario.join(", ") ]

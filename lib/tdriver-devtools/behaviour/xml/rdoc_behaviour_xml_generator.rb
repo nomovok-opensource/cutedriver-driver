@@ -604,7 +604,7 @@ EXAMPLE
 
       params_array.each{ | param |
 
-        if ( item = result.select{ | arg | arg.keys.include?( param.first ) }).empty?
+        if ( item = result.select{ | arg | arg.keys.include?( param.first ) }.to_a).empty? # Array conversion for ruby 1.9 compatibility
 
           raise_error("Error: Argument '#{ param.first }' is implemented but not documented in '#{ @current_method.name }' ($MODULE).\nNote that documented argument and variable name must be identical.", [ 'writer', 'accessor' ].include?( @processing ) ? 'attr_argument' : 'arguments' ) unless param.first.to_s.include?("#")
 
@@ -678,7 +678,7 @@ EXAMPLE
             # always add block parameters
             unimplemented_arguments.include?( documented_argument.to_a.flatten.first ) == false || documented_argument.to_a.flatten.first.include?("#")
 
-          }
+          }.to_a # Array conversion for ruby 1.9 compatiblity
 
         end
 

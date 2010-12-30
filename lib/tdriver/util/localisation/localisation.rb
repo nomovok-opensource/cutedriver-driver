@@ -564,7 +564,7 @@ module MobyUtil
       language_number = $2
       # select returns an array of [language, codes] that suite the conditional
       # codes is the array ["NokiaCode(2-leter)", "SymbianCode(number)"]
-      language = @language_code_map.select{|lang,codes| codes[1] == language_number}[0][1][0]   
+      language = @language_code_map.select{|lang,codes| codes[1] == language_number}.to_a[0][1][0] # Array conversion for ruby 1.9 compatibility
 			language = column_names_map[ language_number ] if !column_names_map.empty? and column_names_map.key?( language_number )
       
       io = open(file)
