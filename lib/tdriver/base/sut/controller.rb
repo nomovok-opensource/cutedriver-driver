@@ -92,7 +92,7 @@ module MobyBase
 				begin 
 
 					# extend command_data with combinination of command data object name and module name to be extended  
-					eval 'command_data.extend %s::%s' % [ @sut_controllers[ controller ], command_data.class.name.scan( /::(.+)/ ) ]
+					eval 'command_data.extend %s::%s' % [ @sut_controllers[ controller ].first.first, command_data.class.name.scan( /::(.+)/ ).first.first ]
 
 					# break if controller associated succesfully 
 					break
