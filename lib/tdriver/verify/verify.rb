@@ -1,20 +1,20 @@
 ############################################################################
-## 
-## Copyright (C) 2010 Nokia Corporation and/or its subsidiary(-ies). 
-## All rights reserved. 
-## Contact: Nokia Corporation (testabilitydriver@nokia.com) 
-## 
-## This file is part of Testability Driver. 
-## 
-## If you have questions regarding the use of this file, please contact 
-## Nokia at testabilitydriver@nokia.com . 
-## 
-## This library is free software; you can redistribute it and/or 
-## modify it under the terms of the GNU Lesser General Public 
-## License version 2.1 as published by the Free Software Foundation 
-## and appearing in the file LICENSE.LGPL included in the packaging 
-## of this file. 
-## 
+##
+## Copyright (C) 2010 Nokia Corporation and/or its subsidiary(-ies).
+## All rights reserved.
+## Contact: Nokia Corporation (testabilitydriver@nokia.com)
+##
+## This file is part of Testability Driver.
+##
+## If you have questions regarding the use of this file, please contact
+## Nokia at testabilitydriver@nokia.com .
+##
+## This library is free software; you can redistribute it and/or
+## modify it under the terms of the GNU Lesser General Public
+## License version 2.1 as published by the Free Software Foundation
+## and appearing in the file LICENSE.LGPL included in the packaging
+## of this file.
+##
 ############################################################################
 
 module TDriverVerify
@@ -43,12 +43,12 @@ module TDriverVerify
 
       begin
 
-        @@on_error_verify_block.call 
+        @@on_error_verify_block.call
 
       rescue Exception => exception
 
-        raise exception.class.new( "Exception was raised while executing on_error_verify_block. Reason: %s" % [ exception.message ]) 
-          
+        raise exception.class.new( "Exception was raised while executing on_error_verify_block. Reason: %s" % [ exception.message ])
+
       end
 
     else
@@ -102,7 +102,7 @@ module TDriverVerify
           # no error => verification ok
           break
 
-        rescue Exception => e 
+        rescue Exception => e
 
           raise if e.kind_of? MobyBase::ContinuousVerificationError
 
@@ -299,7 +299,7 @@ module TDriverVerify
 
             result = yield
 
-          rescue Exception => e 
+          rescue Exception => e
 
             #@@on_error_verify_block.call unless @@on_error_verify_block.nil?
 
@@ -423,7 +423,7 @@ module TDriverVerify
 
           error_msg = "Verification #{message.nil? ? '' : '"' << message.to_s << '" '}at #{verify_caller} failed:"
           error_msg << MobyUtil::KernelHelper.find_source(verify_caller)
-          error_msg << "The block did not return false. It returned: " << result.inspect          
+          error_msg << "The block did not return false. It returned: " << result.inspect
           raise MobyBase::VerificationError.new(error_msg) unless result == false
 
           # break loop if no exceptions thrown
@@ -521,7 +521,7 @@ module TDriverVerify
           if result != expected
             error_msg = "Verification #{message.nil? ? '' : '"' << message.to_s << '" '}at #{verify_caller} failed:"
             error_msg << MobyUtil::KernelHelper.find_source(verify_caller)
-            error_msg << "\nThe block did not return #{expected.inspect}. It returned: " << result.inspect            
+            error_msg << "\nThe block did not return #{expected.inspect}. It returned: " << result.inspect
             raise MobyBase::VerificationError.new(error_msg)
           end
           # break loop if no exceptions thrown
@@ -601,7 +601,7 @@ module TDriverVerify
 
         error_msg = "Verification #{message.nil? ? '' : '"' << message.to_s << '" '}at #{verify_caller} failed:"
         error_msg << MobyUtil::KernelHelper.find_source(verify_caller)
-        error_msg << "The signal #{signal_name} was not emitted in #{timeout} seconds."        
+        error_msg << "The signal #{signal_name} was not emitted in #{timeout} seconds."
         error_msg << "\nNested exception:\n" << e.inspect
         Kernel::raise MobyBase::VerificationError.new(error_msg)
 
@@ -647,12 +647,10 @@ module TDriverVerify
     counter
   end
 
-  # Refresh ui state inside verify
-  def refresh_suts
-    begin
-      if self.kind_of? MobyBase::SUT
-        appid = self.get_application_id        
-        if appid != "-1"
+  def verify_refresh(b_use_id=true)
+    if self.kind_of? MobyBase::SUT
+        appid = self.get_application_id
+        if appid != "-1" && b_use_id
           self.refresh({:id => appid})
         else
           self.refresh
@@ -660,22 +658,28 @@ module TDriverVerify
       else
         #refresh all connected suts
         MobyBase::SUTFactory.instance.connected_suts.each do |sut_id, sut_attributes|
-          appid = sut_attributes[:sut].get_application_id         
-          if appid != "-1"
+          appid = sut_attributes[:sut].get_application_id
+          if appid != "-1" && b_use_id
             sut_attributes[:sut].refresh({:id => appid}) if sut_attributes[:is_connected]
           else
             sut_attributes[:sut].refresh if sut_attributes[:is_connected]
           end
         end
       end
+  end
 
+  # Refresh ui state inside verify
+  def refresh_suts
+    begin
+      verify_refresh
       # Ignore all availability errors
-    rescue RuntimeError => e
+    rescue RuntimeError, MobyBase::ApplicationNotAvailableError => e
       begin
-        self.refresh
-      rescue RuntimeError => e
+        verify_refresh(false)
+      rescue RuntimeError, MobyBase::ApplicationNotAvailableError => e
         # This occurs when no applications are registered to sut
         if !(e.message =~ /no longer available/)
+          puts 'Raising exception'
           # all other errors are passed up
           raise e
         end
