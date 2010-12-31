@@ -1189,7 +1189,7 @@ module MobyBehaviour
 
       current_time = Time.now
 
-      if !@frozen && ( @_previous_refresh.nil? || ( current_time - @_previous_refresh ).to_f > @refresh_interval )
+      if !@frozen && ( @_previous_refresh.nil? || ( current_time - @_previous_refresh ).to_f >= @refresh_interval )
 
         use_find_objects = MobyUtil::Parameter[ @id ][ :use_find_object, 'false' ] == 'true' and self.respond_to?( 'find_object' )
         
