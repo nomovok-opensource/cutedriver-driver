@@ -49,7 +49,12 @@ module MobyUtil
 
       # deterimine caller methods working folder
       source_path = File.dirname( MobyUtil::KernelHelper.parse_caller( caller(3).first ).first )
-
+      
+      # Compatiblity for Ruby 1.9.2 caller format
+      if source_path == "." || source_path[0].to_s == "<" 
+        source_path = File.dirname( MobyUtil::KernelHelper.parse_caller( caller(2).first ).first )      
+      end
+      
       path.each{ | path |
 
         # expand path if given path is relative path

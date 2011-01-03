@@ -497,26 +497,86 @@ module TDriver
     end
 
     # TODO: document me    
-    def self.get_test_object_identifiers( xml_source, test_object )
+    def self.get_test_object_identifiers( xml_source, test_object = nil )
+
+      # retrieve parent xpath if test_object given
+      parent_xpath = test_object ? test_object.instance_variable_get( :@parent ).x_path : ""
+    
+      # retrieve type attribute
+      type = xml_source.attribute( 'type' )
+
+      # retrieve id attribute
+      id = xml_source.attribute( 'id' )
 
       # retrieve test object element attributes and return array containting xpath to test object, name, type and id elements
       [ 
         # x_path to test object
-        "#{ test_object.instance_variable_get( :@parent ).x_path }/*//object[@type='#{ @type = xml_source.attribute( 'type' ) }' and @id='#{ @id = xml_source.attribute( 'id' ) }']",
+        test_object ? "#{ parent_xpath }/*//object[@type='#{ type }' and @id='#{ id }']" : nil,
 
-        
         # test object name 
         xml_source.attribute( 'name' ),
         
         # test object type 
-        @type,
+        type,
         
         # test object id 
-        @id
+        id
         
       ]
 
     end
+
+	# TODO: document me
+    def self.merge_application_elements( xml_string )
+    
+      # parse the ui state xml
+      document_root = MobyUtil::XML.parse_string( xml_string ).root
+
+      # new header, apply original element attributes
+      new_xml = 
+        "<tasMessage " << document_root.attributes.collect{ | key, value | "#{ key }=\"#{ value }\"" }.join(" ") << ">" <<
+        "<tasInfo " << document_root.xpath('./tasInfo').first.attributes.collect{ | key, value | "#{ key }=\"#{ value }\"" }.join(" ") << ">"
+
+      # flag defining that is application element already created
+      application_element_set = false
+
+      # retrieve application objects as nodeset
+      nodeset = document_root.xpath('/tasMessage/tasInfo/object')
+
+      # check if multiple application objects found
+      if nodeset.count > 1
+  
+        # root objects
+        document_root.xpath('/tasMessage/tasInfo/object').each{ | object |
+          
+          # only one application element
+          unless application_element_set
+          
+            new_xml << 
+              "<object name=#{ object.attribute("name").inspect } type=#{ object.attribute("type").inspect } id=#{ object.attribute("id").inspect } env=\"symbian;qt\">"
+          
+            # application element is now set, no need to do it again
+            application_element_set = true
+            
+          end
+
+          # append all found elements
+          object.xpath('./*').each{ | object | new_xml << object.to_s }
+          
+        }
+
+        # multiple applications found, return merged application xml
+        new_xml << "</object></tasInfo></tasMessage>"
+
+      else
+      
+        # only one application found, return data as is
+        xml_string
+      
+      end
+
+    end
+
 
     # enable hooking for performance measurement & debug logging
     MobyUtil::Hooking.instance.hook_methods( self ) if defined?( MobyUtil::Hooking )
