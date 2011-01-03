@@ -49,21 +49,21 @@ module TDriverReport
     # === raises
     def step_name(keyword, step_match, status, source_indent, background)
       if status == :passed
-        step_name = step_match.format_args(lambda{|param| "*#{param}*"})
+        step_name = step_match.format_args(lambda{|param| "#{param}"})
         update_test_case("#{step_name} PASSED")
         @tc_status='passed'
       end
       if status == :failed
-        step_name = step_match.format_args(lambda{|param| "*#{param}*"})
+        step_name = step_match.format_args(lambda{|param| "#{param}"})
         update_test_case("#{step_name} FAILED")
         @tc_status='failed'
       end
       if status == :skipped
-        step_name = step_match.format_args(lambda{|param| "*#{param}*"})
+        step_name = step_match.format_args(lambda{|param| "#{param}"})
         update_test_case("#{step_name} SKIPPED")
       end
       if status == :undefined
-        step_name = step_match.format_args(lambda{|param| "*#{param}*"})
+        step_name = step_match.format_args(lambda{|param| "#{param}"})
         update_test_case("#{step_name} NOT RUN")
         @tc_status='not run'
       end
