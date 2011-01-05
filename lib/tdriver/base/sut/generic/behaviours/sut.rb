@@ -1290,56 +1290,55 @@ module MobyBehaviour
 
             begin
 
-        subdata =
-        MobyUtil::XML.parse_string( 
-                       execute_command( 
-                               MobyCommand::Application.new(
-                                            :State,
-                                            nil,
-                                            pid,
-                                            self,
-                                            nil,
-                                            nil,
-                                            nil,
-                                            nil,
-                                            {
-                                              'x_parent_absolute' => x_prev,
-                                              'y_parent_absolute' => y_prev,
-                                              'embedded' => 'true',
-                                              'parent_size' => winSize
-                                            }
-                                            )
-                               )[ 0 ]
-                       )
+              subdata =
+                MobyUtil::XML.parse_string( 
+                                           execute_command( 
+                                                           MobyCommand::Application.new(
+                                                                                        :State,
+                                                                                        nil,
+                                                                                        pid,
+                                                                                        self,
+                                                                                        nil,
+                                                                                        nil,
+                                                                                        nil,
+                                                                                        nil,
+                                                                                        {
+                                                                                          'x_parent_absolute' => x_prev,
+                                                                                          'y_parent_absolute' => y_prev,
+                                                                                          'embedded' => 'true',
+                                                                                          'parent_size' => winSize
+                                                                                        }
+                                                                                        )
+                                                           )[ 0 ]
+                                           )
 
-        child = subdata.root.xpath('//object')[0]
+              child = subdata.root.xpath('//object')[0]
 
-        # Remove the attribute with the pid retrieval was not successful.
-        # (server returns the previous hit if not found)
-        if child.attribute('id' ) != pid
-        
-        element.remove
+              # Remove the attribute with the pid retrieval was not successful.
+              # (server returns the previous hit if not found)
+              if child.attribute('id' ) != pid
+                
+                element.remove
 
-        else
+              else
 
-        # Remove the application layer
-        objs = child.xpath( '/tasMessage/tasInfo/object/objects/*' )
+                # Remove the application layer
+                objs = child.xpath( '/tasMessage/tasInfo/object/objects/*' )
 
-        if !objs.nil?
+                if !objs.nil?
 
-          objs.each { | el | element.add_previous_sibling( el ) }
+                  objs.each { | el | element.add_previous_sibling( el ) }
 
-          element.remove
+                  element.remove
 
-        end
+                end
 
-        end
+              end
 
-            rescue RuntimeError => e
+            rescue MobyBase::ApplicationNotAvailableError => e
 
-        raise e unless e.message.include? "no longer available"
-
-        return xml
+              # Ignore the application not available error
+              return xml
 
             end
 
