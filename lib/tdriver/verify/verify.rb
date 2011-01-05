@@ -649,7 +649,11 @@ module TDriverVerify
 
   def verify_refresh(b_use_id=true)
     if self.kind_of? MobyBase::SUT
-        appid = self.get_application_id
+        begin
+          appid = self.get_application_id
+        rescue
+          appid='-1'
+        end
         if appid != "-1" && b_use_id
           self.refresh({:id => appid})
         else
@@ -658,7 +662,11 @@ module TDriverVerify
       else
         #refresh all connected suts
         MobyBase::SUTFactory.instance.connected_suts.each do |sut_id, sut_attributes|
-          appid = sut_attributes[:sut].get_application_id
+          begin
+            appid = sut_attributes[:sut].get_application_id
+          rescue
+            appid='-1'
+          end
           if appid != "-1" && b_use_id
             sut_attributes[:sut].refresh({:id => appid}) if sut_attributes[:is_connected]
           else
