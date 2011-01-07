@@ -438,6 +438,7 @@ display: none;
     File.open(page, 'w') {|f| f.write(css) }
     css=nil
   end
+
   def format_duration(seconds)
     if Gem.available?('chronic_duration')
       require 'chronic_duration'
@@ -448,6 +449,40 @@ display: none;
     end
     duration_str
   end
+
+  def copy_code_file_to_test_case_report(file,folder)
+    begin
+      FileUtils.mkdir_p(folder.to_s+'/stack_files') if File::directory?(folder.to_s+'/stack_files')==false
+      if File.directory?("#{Dir.pwd}/#{@report_folder}/#{folder}")
+        FileUtils.copy(file,"#{Dir.pwd}/#{@report_folder}/#{folder}/stack_files/#{File.basename(file)}")
+      else
+        FileUtils.copy(file,"#{folder}/stack_files/#{File.basename(file)}")
+      end
+    rescue Exception => e
+      puts e.message
+      puts e.backtrace
+    end
+  end
+
+  def reporter_link_to_code(log_line,folder=nil)
+    begin
+      log_line.gsub(/([\w\]*\/[ \w\/\.-]+)\:(\d+)/) do |match|
+        file="#{File.dirname(match.strip)}/#{File.basename(match.strip)}"
+        if File.exist?(file) && match.include?('testability-driver')==false
+          copy_code_file_to_test_case_report(file,folder)
+          link_to_stack='<a style="color: #FF0000" href="stack_files/'<<
+            file.to_s<<
+            '">'+match+'</a>'
+          log_line=log_line.gsub(match,link_to_stack)
+        end
+      end
+    rescue Exception => e
+      puts e.message
+      puts e.backtrace
+    end
+    log_line
+  end
+
   def behaviour_log_summary(log,log_format='string')
     begin
       log_table = Array.new
@@ -566,11 +601,12 @@ display: none;
       '-'
     end
   end
-  def format_execution_log(log)
+  def format_execution_log(log,folder=nil)
     begin
       formatted_log=Array.new
       log.each do |line|
-        if line.include?('test_unit.rb')
+        line=reporter_link_to_code(line,folder)
+        if line.include?('testability-driver')==false
           formatted_log << line.gsub('PASSED','<b style="color: #00FF00">PASSED</b>').gsub('FAILED','<b style="color: #FF0000">FAILED</b>').gsub('SKIPPED','<b>SKIPPED</b>')
         else
           formatted_log << "<b style=\"color: #2554C7\">#{line}</b>".gsub('PASSED','<b style="color: #00FF00">PASSED</b>').gsub('FAILED','<b style="color: #FF0000">FAILED</b>').gsub('SKIPPED','<b>SKIPPED</b>')
@@ -700,7 +736,7 @@ display: none;
       '<td style="font-weight: 700">'<<
       'Details</td>'<<
       '<td style="font-size: small; font-weight: bold">'<<
-      format_execution_log(@test_case_execution_log)<<
+      format_execution_log(@test_case_execution_log,folder.to_s)<<
       '</td></tr>'
 
     if File::directory?(folder.to_s+'/crash_files')==true
