@@ -466,7 +466,7 @@ display: none;
 
   def reporter_link_to_code(log_line,folder=nil)
     begin
-      log_line.gsub(/([\w\ \]*\/[ \w\/\.-]+)\:(\d+)/) do |match|
+      log_line.gsub(/([\w\*\/\w\/\.-]+)\:(\d+)/) do |match|
         file="#{File.dirname(match.strip)}/#{File.basename(match.strip)}"
         if File.exist?(file) && match.include?('testability-driver')==false
           copy_code_file_to_test_case_report(file,folder)
