@@ -468,6 +468,8 @@ display: none;
     begin
       log_line.gsub(/([\w\*\/\w\/\.-]+)\:(\d+)/) do |match|
         file="#{File.dirname(match.strip)}/#{File.basename(match.strip)}"
+        file = file if File.exist?(file)
+        file = "#{Dir.pwd}/#{file}" if File.exist?("#{Dir.pwd}/#{file}")
         if File.exist?(file) && match.include?('testability-driver')==false
           copy_code_file_to_test_case_report(file,folder)
           link_to_stack='<a style="color: #FF0000" href="stack_files/'<<
