@@ -467,15 +467,17 @@ display: none;
   def reporter_link_to_code(log_line,folder=nil)
     begin
       log_line.gsub(/([\w\*\/\w\/\.-]+)\:(\d+)/) do |match|
-        file="#{File.dirname(match.strip)}/#{File.basename(match.strip)}"
-        file = file if File.exist?(file)
-        file = "#{Dir.pwd}/#{file}" if File.exist?("#{Dir.pwd}/#{file}")
-        if File.exist?(file) && match.include?('testability-driver')==false
-          copy_code_file_to_test_case_report(file,folder)
-          link_to_stack='<a style="color: #FF0000" href="stack_files/'<<
-            File.basename(file.to_s)<<
-            '">'+match+'</a>'
-          log_line=log_line.gsub(match,link_to_stack)
+        match.gsub(/([\w\*\/\w\/\.-]+)/) do |f|
+          file="#{File.dirname(f.strip)}/#{File.basename(f.strip)}"
+          file = file if File.exist?(file)
+          file = "#{Dir.pwd}/#{file}" if File.exist?("#{Dir.pwd}/#{file}")
+          if File.exist?(file) && match.include?('testability-driver')==false
+            copy_code_file_to_test_case_report(file,folder)
+            link_to_stack='<a style="color: #FF0000" href="stack_files/'<<
+              File.basename(file.to_s)<<
+              '">'+match+'</a>'
+            log_line=log_line.gsub(match,link_to_stack)
+          end
         end
       end
     rescue Exception => e
