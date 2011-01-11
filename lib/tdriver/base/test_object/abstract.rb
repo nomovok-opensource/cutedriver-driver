@@ -144,7 +144,7 @@ module MobyBase
     # Function to be renamed, possibly refactored
     def xml_data=( xml_object )
 
-      @x_path, @name, @type, @id = TDriver::TestObjectAdapter.get_test_object_identifiers( xml_object, self )
+      @x_path, @name, @type, @id, @env = TDriver::TestObjectAdapter.get_test_object_identifiers( xml_object, self )
 
     end
 
