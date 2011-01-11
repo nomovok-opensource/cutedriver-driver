@@ -508,6 +508,9 @@ module TDriver
       # retrieve id attribute
       id = xml_source.attribute( 'id' )
 
+      # retrieve env attribute
+      env = xml_source.attribute( 'env' )
+
       # retrieve test object element attributes and return array containting xpath to test object, name, type and id elements
       [ 
         # x_path to test object
@@ -520,7 +523,9 @@ module TDriver
         type,
         
         # test object id 
-        id
+        id,
+
+        env
         
       ]
 
