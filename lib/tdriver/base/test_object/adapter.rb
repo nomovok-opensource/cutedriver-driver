@@ -526,34 +526,54 @@ module TDriver
 
     end
 
-	# TODO: document me
+    # TODO: document me
+    def self.hash_to_element_attributes( hash )
+
+      hash.collect{ | key, value | 
+
+        "#{ key.to_s }=\"#{ value.to_s }\"" 
+
+      }.join(' ')
+
+    end
+
+	  # TODO: document me
     def self.merge_application_elements( xml_string )
     
       # parse the ui state xml
       document_root = MobyUtil::XML.parse_string( xml_string ).root
-
-      # new header, apply original element attributes
-      new_xml = 
-        "<tasMessage " << document_root.attributes.collect{ | key, value | "#{ key }=\"#{ value }\"" }.join(" ") << ">" <<
-        "<tasInfo " << document_root.xpath('./tasInfo').first.attributes.collect{ | key, value | "#{ key }=\"#{ value }\"" }.join(" ") << ">"
-
-      # flag defining that is application element already created
-      application_element_set = false
 
       # retrieve application objects as nodeset
       nodeset = document_root.xpath('/tasMessage/tasInfo/object')
 
       # check if multiple application objects found
       if nodeset.count > 1
+
+        # new header, apply original element attributes
+        new_xml = "<tasMessage #{ hash_to_element_attributes( document_root.attributes )  }><tasInfo #{ hash_to_element_attributes( nodeset.first.parent.attributes ) }>"
+
+        # flag defining that is application element already created
+        application_element_set = false
+
+        # collect environment values
+        environments = document_root.xpath('/tasMessage/tasInfo/object[@type="application"]/@env').collect{ | attribute | attribute.to_s }
+
+        # iterate through each object found in xml
+        nodeset.each{ | object |        
   
-        # root objects
-        document_root.xpath('/tasMessage/tasInfo/object').each{ | object |
-          
           # only one application element
           unless application_element_set
           
-            new_xml << 
-              "<object name=#{ object.attribute("name").inspect } type=#{ object.attribute("type").inspect } id=#{ object.attribute("id").inspect } env=\"symbian;qt\">"
+            #application_objects << object
+
+            # retrieve object attributes
+            attributes = object.attributes
+
+            # merge env to attributes hash
+            attributes['env'] = environments.join(';')
+
+            # add application object xml element to new xml string
+            new_xml << "<object #{ hash_to_element_attributes( attributes ) }>"
           
             # application element is now set, no need to do it again
             application_element_set = true
@@ -576,7 +596,6 @@ module TDriver
       end
 
     end
-
 
     # enable hooking for performance measurement & debug logging
     MobyUtil::Hooking.instance.hook_methods( self ) if defined?( MobyUtil::Hooking )
