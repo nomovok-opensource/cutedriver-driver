@@ -52,16 +52,32 @@ class String
   # string:: String
   # == returns
   # TrueClass/FalseClass 
-  def to_boolean
+  def to_boolean( *default )
 
     if /^(true|false)$/i.match( self.to_s )
     
       $1.downcase == 'true'
       
     else
-    
-      #default      
-      Kernel::raise TypeError.new( "Unable to convert string \"#{ self }\" to boolean (Expected \"true\" or \"false\")" )
+        
+      # pass default value if string didn't contain boolean
+      if default.count > 0
+      
+        # retrieve first value from array
+        default = default.first
+        
+        # check that argument type is correct
+        default.check_type( [ TrueClass, FalseClass ], 'wrong argument type $1 for to_boolean default value argument (expecting $2)') 
+        
+        # return default value as result
+        default
+        
+      else
+      
+        # raise exception if no default given
+        Kernel::raise TypeError, "Unable to convert string \"#{ self }\" to boolean (Expected \"true\" or \"false\")"
+
+      end
 
     end
 
