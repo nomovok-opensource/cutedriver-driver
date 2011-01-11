@@ -541,9 +541,10 @@ module MobyUtil
 							priority += 1					
 						end
 					else
+            # When no lengthvar is provided we now assign priority '1' by default
 						# puts ">>> Translation"
 						nodeTranslation = node.xpath('.//translation').inner_text()
-						data << [ fname, nodeId, nodeTranslation, nodePlurality, nodeLengthVar ]
+						data << [ fname, nodeId, nodeTranslation, nodePlurality, nodeLengthVar = '1' ]
 					end
 				rescue Exception # ignores bad elements or elements with empty translations for now
 				end
@@ -571,8 +572,9 @@ module MobyUtil
       while line = io.gets
         if line.match(/#define ([a-zA-Z1-9\_]*) \"(.*)\"/)
           lname = $1
-          translation = $2 
-          data <<  [ fname, lname, translation, plurality = "", lengthvariant = "0" ]
+          translation = $2
+          # When no lengthvar is provided we now assign priority '1' by default          
+          data <<  [ fname, lname, translation, plurality = "", lengthvariant = "1" ]
         end
       end
       io.close
@@ -604,14 +606,15 @@ module MobyUtil
 			sql_file = File.open(table_name + ".#{db_connection.db_type}.sql", 'a') if record_sql
 
 			# CREATE TABLE if doesn't exist (language columns to be created as needed)
+      # When no lengthvar is provided we now assign priority '1' by default
 			case db_connection.db_type
 				when "mysql"
 					query_string = "CREATE TABLE IF NOT EXISTS " + table_name + " ( 
 									`ID` INT(10) UNSIGNED NOT NULL AUTO_INCREMENT,
 									`FNAME` VARCHAR(150) NOT NULL COLLATE latin1_general_ci,
 									`LNAME` VARCHAR(150) NOT NULL COLLATE latin1_general_ci,
-									`PLURALITY` VARCHAR(50) COLLATE latin1_general_ci,
-									`LENGTHVAR` INT(10),
+									`PLURALITY` VARCHAR(50) NULL DEFAULT NULL COLLATE latin1_general_ci,
+									`LENGTHVAR` INT(10) NULL DEFAULT '1',
 									PRIMARY KEY (`ID`),
 									UNIQUE INDEX `FileLogicNameIndex` (`FNAME`,`LNAME`, `PLURALITY`, `LENGTHVAR`),
 									INDEX `LNameIndex` (`LNAME`)
@@ -623,8 +626,8 @@ module MobyUtil
 									`ID` INTEGER PRIMARY KEY AUTOINCREMENT,
 									`FNAME` VARCHAR(150) NOT NULL,
 									`LNAME` VARCHAR(150) NOT NULL,
-									`PLURALITY` VARCHAR(50),
-									`LENGTHVAR` INT(10));"
+									`PLURALITY` VARCHAR(50) DEFAULT NULL,
+									`LENGTHVAR` INT(10) DEFAULT '1');"
 					MobyUtil::DBAccess.query( db_connection, query_string )
 					sql_file.write( query_string + "\n" ) if record_sql
 					
