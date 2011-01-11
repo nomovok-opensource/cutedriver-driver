@@ -862,7 +862,7 @@ module MobyBehaviour
   # 
   # lengthvariant
   #  String
-  #   description: Optional LENGTHVAR search argument for the translation (1-9)
+  #   description: Optional argument to specify a length variant with its priority number (1-9). Translations with no length variants are considered a variant of priority "1". The default 'nil' value will retrieve all variants available.
   #   example: "1"
   #   default: nil
   #
