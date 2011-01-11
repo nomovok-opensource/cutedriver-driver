@@ -45,6 +45,8 @@ module MobyBase
       @input = :key
       @type = "sut"
 
+      @object_behaviours = []
+
     end  
 
     # Interface to forward command execution to sut specific controller (SutController#execute_command)

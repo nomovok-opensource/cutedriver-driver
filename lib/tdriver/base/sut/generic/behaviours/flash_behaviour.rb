@@ -167,7 +167,7 @@ module MobyBehaviour
       begin
         if parameter(:flaxi_sleep_time_after_flash_command)
           $stderr.puts "%s:%s warning: parameter :flaxi_sleep_time_after_flash_command deprecated use :sleep_time_after_flash_command instead" % [ file, line]
-          parameter[:sleep_time_after_flash_command]=parameter(:flaxi_sleep_time_after_flash_command)
+          parameter[:flash_sleep_time_after_flash_command]=parameter(:flaxi_sleep_time_after_flash_command)
         end
       rescue
       end
@@ -214,7 +214,7 @@ module MobyBehaviour
       result = start_flashing( flash_command )
       
       Kernel::raise MobyBase::BehaviourError.new("flash_images", "Flashing failed") if result.to_s == 'false'
-
+      sleep parameter[:flash_sleep_time_after_flash_command].to_i
     end
 
   private
@@ -270,7 +270,7 @@ module MobyBehaviour
         end
         flash_result=system(flash_command)
         if flash_result.to_s=='true'
-          current_flash_attempt==flash_attempts
+          current_flash_attempt=flash_attempts.to_i
         else
           flash_error_recovery
         end

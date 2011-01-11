@@ -45,6 +45,7 @@ module MobyBase
       @test_object_factory = test_object_factory
       @parent = parent
       @sut = sut
+      @object_behaviours = []
 
       #self.xml_data = xml_object if xml_object
       method( :xml_data= ).call( xml_object ) if xml_object
@@ -144,7 +145,7 @@ module MobyBase
     # Function to be renamed, possibly refactored
     def xml_data=( xml_object )
 
-      @x_path, @name, @type, @id = TDriver::TestObjectAdapter.get_test_object_identifiers( xml_object, self )
+      @x_path, @name, @type, @id, @env = TDriver::TestObjectAdapter.get_test_object_identifiers( xml_object, self )
 
     end
 
