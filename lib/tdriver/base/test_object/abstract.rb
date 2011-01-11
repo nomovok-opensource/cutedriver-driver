@@ -45,6 +45,7 @@ module MobyBase
       @test_object_factory = test_object_factory
       @parent = parent
       @sut = sut
+      @object_behaviours = []
 
       #self.xml_data = xml_object if xml_object
       method( :xml_data= ).call( xml_object ) if xml_object

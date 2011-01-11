@@ -258,10 +258,8 @@ module MobyBase
               # create application test object            
               rules[ :parent_application ] = make_test_object( 
             
-                :parent => sut,
-                
+                :parent => sut,          
                 :parent_application => nil,
-                
                 :xml_object => application_test_object_xml
             
               )
@@ -312,7 +310,8 @@ module MobyBase
       
       # retrieve sut object
       sut = parent.kind_of?( MobyBase::SUT ) ? parent : parent.sut
-            
+      
+      # xml object element      
       xml_object = rules[ :xml_object ]
 
       # retrieve attributes
@@ -344,7 +343,7 @@ module MobyBase
         env = MobyUtil::Parameter[ sut.id ][ :env ].to_s
 
       end
-
+      
       # calculate object cache hash key
       hash_key = TDriver::TestObjectAdapter.test_object_hash( object_id, object_type, object_name )
       
@@ -361,25 +360,25 @@ module MobyBase
         test_object.xml_data = xml_object
 
       else
-              
+        
         # create test object
         test_object = MobyBase::TestObject.new( self, sut, parent, xml_object )
 
-        # apply behaviours to test object
-        test_object.extend( MobyBehaviour::ObjectBehaviourComposition )
+        #test_object.instance_variable_set( :@object_behaviours, [] )
 
         # apply all test object related behaviours unless object type is 'application'
         object_type << ';*' unless object_type == 'application'
 
         # apply behaviours to test object
-        test_object.apply_behaviour!(
-          :object_type  => [ *object_type.split(';') ],
-          #:sut_type     => [ '*', sut.ui_type ],
-          :input_type   => [ '*', sut.input.to_s ],
-          :env          => [ '*', *env.split(';') ],	   
-          :version      => [ '*', sut.ui_version ]								   
-        )
+        MobyBase::BehaviourFactory.instance.apply_behaviour!(
 
+          :object => test_object,
+          :object_type => [ *object_type.split(';') ], 
+          :input_type => [ '*', sut.input.to_s ],
+          :env => [ '*', *env.to_s.split(";") ],
+          :version => [ '*', sut.ui_version.to_s ]
+
+        )
         # create child accessors
         TDriver::TestObjectAdapter.create_child_accessors!( xml_object, test_object )
 

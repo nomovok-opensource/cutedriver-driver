@@ -17,6 +17,9 @@
 ## 
 ############################################################################
 
+# deprecated: use MobyUtil::BehaviourFactory instead
+
+=begin
 module MobyBehaviour
 
   # == description
@@ -86,9 +89,11 @@ module MobyBehaviour
 			}
 
 		end
+
 		# enable hooking for performance measurement & debug logging
 		MobyUtil::Hooking.instance.hook_methods( self ) if defined?( MobyUtil::Hooking )
 	
 	end # ObjectBehaviourComposition
 
 end # MobyBehaviour
+=end
