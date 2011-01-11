@@ -270,7 +270,7 @@ module MobyBehaviour
         end
         flash_result=system(flash_command)
         if flash_result.to_s=='true'
-          current_flash_attempt==flash_attempts
+          current_flash_attempt=flash_attempts.to_i
         else
           flash_error_recovery
         end
