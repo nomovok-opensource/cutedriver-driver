@@ -368,12 +368,15 @@ module MobyBase
         # apply behaviours to test object
         test_object.extend( MobyBehaviour::ObjectBehaviourComposition )
 
+        # apply all test object related behaviours unless object type is 'application'
+        object_type << ';*' unless object_type == 'application'
+
         # apply behaviours to test object
         test_object.apply_behaviour!(
-          :object_type  => [ '*', object_type ],
+          :object_type  => [ *object_type.split(';') ],
           #:sut_type     => [ '*', sut.ui_type ],
           :input_type   => [ '*', sut.input.to_s ],
-          :env          => [ '*', *env.split(";") ],	   
+          :env          => [ '*', *env.split(';') ],	   
           :version      => [ '*', sut.ui_version ]								   
         )
 

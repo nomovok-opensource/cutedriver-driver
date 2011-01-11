@@ -69,7 +69,7 @@ module MobyBehaviour
 		# 
 		# == info
 		#  Same as calling child method.
-		def find ( attributes = {} )
+		def find( attributes = {} )
 
 			begin
 
