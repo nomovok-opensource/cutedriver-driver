@@ -99,14 +99,16 @@ module MobyUtil
         # method to create MobyUtil::XML::Attribute object
         def attribute_object( xml_data )
 
-          MobyUtil::XML::Attribute.new( xml_data, @parser ).extend( Attribute )
+          #MobyUtil::XML::Attribute.new( xml_data, @parser ).extend( Attribute )
+          MobyUtil::XML::Attribute.new( xml_data, @parser )
 
         end
 
         # method to create MobyUtil::XML::Element 
         def element_object( xml_data )
 
-          MobyUtil::XML::Element.new( xml_data, @parser ).extend( Element )
+          #MobyUtil::XML::Element.new( xml_data, @parser ).extend( Element )
+          MobyUtil::XML::Element.new( xml_data, @parser )
 
         end
 
@@ -120,21 +122,23 @@ module MobyUtil
         # method to create MobyUtil::XML::Text
         def text_object( xml_data )
 
-          MobyUtil::XML::Text.new( xml_data, @parser ).extend( Text )
+          #MobyUtil::XML::Text.new( xml_data, @parser ).extend( Text )
+          MobyUtil::XML::Text.new( xml_data, @parser )
 
         end
 
         # method to create MobyUtil::XML::Nodeset object
         def nodeset_object( xml_data )
 
-          MobyUtil::XML::Nodeset.new( xml_data, @parser ).extend( Nodeset )
+          #MobyUtil::XML::Nodeset.new( xml_data, @parser ).extend( Nodeset )
+          MobyUtil::XML::Nodeset.new( xml_data, @parser )
 
         end
 
         # TODO: Documentation
         def method_missing( method, *args, &block )
 
-          raise RuntimeError.new( "Method '%s' is not supported by %s (%s)" % [ method, self.class, @parser ] )
+          raise RuntimeError, "Method '#{ method }' is not supported by #{ self.class } (#{ @parser })"
 
         end
 

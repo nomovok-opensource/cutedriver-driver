@@ -43,11 +43,29 @@ module MobyUtil
 
       #raise RuntimeError, "Parser can be set only once per session" unless defined?( @@parser )
 
+      # set current parser
       @@parser = value
 
-      #MobyUtil::XML::Document.module_exec{ include @@parser::Document }
+      # apply parser implementation to abstraction modules
+      [ 
+        MobyUtil::XML::Document, 
+        MobyUtil::XML::Element, 
+        MobyUtil::XML::Nodeset, 
+        MobyUtil::XML::Attribute, 
+        MobyUtil::XML::Text, 
+        MobyUtil::XML::Builder ].each do | _module |
+          
+          _module.module_exec{ 
 
-      nil
+            # include parser implementation to abstraction modules 
+            include MobyUtil::KernelHelper.get_constant( "#{ @@parser }::#{ _module.name.split('::').last }") 
+
+          }
+        
+      end
+
+      # return current parser as result
+      value
 
     end
 
@@ -65,8 +83,7 @@ module MobyUtil
 
       begin
 
-        MobyUtil::XML::Document.new( nil, @@parser ).extend( @@parser::Document ).tap{ | document | 
-        #MobyUtil::XML::Document.new( nil, @@parser ).tap{ | document | 
+        MobyUtil::XML::Document.new( nil, @@parser ).tap{ | document | 
 
           # parse given string
           document.xml = document.parse( xml_string ) 
@@ -82,7 +99,6 @@ module MobyUtil
 
           # check if xml parse error logging is enabled
           if MobyUtil::Parameter[ :logging_xml_parse_error_dump, 'true' ].to_s.to_boolean
-          #if MobyUtil::KernelHelper.to_boolean( MobyUtil::Parameter[ :logging_xml_parse_error_dump ] )
 
             # construct filename for xml dump
             filename = 'xml_error_dump'
@@ -105,23 +121,25 @@ module MobyUtil
               # write xml string to file
               File.open( path, "w" ){ | file | file << xml_string }
 
-              dump_location = ". Saved to #{ path }"
+              dump_location = "Saved to #{ path }"
 
             rescue
 
-              dump_location = ". Error while saving to file #{ path }"
+              dump_location = "Error while saving to file #{ path }"
 
             end
 
           end
 
           # raise exception
-          Kernel::raise MobyUtil::XML::ParseError.new( "%s (%s)%s" % [ exception.message.gsub("\n", ''), exception.class, dump_location ] )
+          #Kernel::raise MobyUtil::XML::ParseError.new( "%s (%s)%s" % [ exception.message.gsub("\n", ''), exception.class, dump_location ] )
+          Kernel::raise MobyUtil::XML::ParseError, "#{ exception.message.gsub("\n", '') } (#{ exception.class }). #{ dump_location }"
 
         else
         
           # raise exception
-          Kernel::raise MobyUtil::XML::ParseError.new( "%s (%s)" % [ exception.message.gsub("\n", ''), exception.class ] )
+          #Kernel::raise MobyUtil::XML::ParseError.new( "%s (%s)" % [ exception.message.gsub("\n", ''), exception.class ] )
+          Kernel::raise MobyUtil::XML::ParseError, "#{ exception.message.gsub("\n", '') } (#{ exception.class })"
         
         end
 
@@ -143,7 +161,7 @@ module MobyUtil
     def self.parse_file( filename )    
 
       # raise exception if file not found
-      Kernel::raise IOError.new( "File '%s' not found" % filename ) unless File.exist?( filename )
+      Kernel::raise IOError, "File #{ filename.inspect } not found" unless File.exist?( filename )
 
       self.parse_string( IO.read( filename ) )
 
@@ -171,7 +189,7 @@ module MobyUtil
 
       begin
 
-        MobyUtil::XML::Builder.new.extend( @@parser::Builder ).tap{ | builder | 
+        MobyUtil::XML::Builder.new.tap{ | builder | 
 
           builder.build( &block )
 
@@ -179,7 +197,7 @@ module MobyUtil
 
       rescue Exception => exception
 
-        Kernel::raise MobyUtil::XML::BuilderError.new( "%s (%s)" % [ exception.message, exception.class ] )
+        Kernel::raise MobyUtil::XML::BuilderError, "#{ exception.message } (#{ exception.class })"
 
       end
       
@@ -194,4 +212,3 @@ end # MobyUtil
 
 # set used parser module
 MobyUtil::XML.current_parser = MobyUtil::XML::Nokogiri
-
