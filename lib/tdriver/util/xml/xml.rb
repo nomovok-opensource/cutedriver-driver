@@ -21,10 +21,6 @@ module MobyUtil
 
   module XML    
 
-    # default values
-    #@@parser = MobyUtil::XML::LibXML 
-    @@parser = MobyUtil::XML::Nokogiri
-
     # Get current XML parser
     # == params
     # == return
@@ -45,7 +41,11 @@ module MobyUtil
     # == raises
     def self.current_parser=( value )
 
+      #raise RuntimeError, "Parser can be set only once per session" unless defined?( @@parser )
+
       @@parser = value
+
+      #MobyUtil::XML::Document.module_exec{ include @@parser::Document }
 
       nil
 
@@ -66,6 +66,7 @@ module MobyUtil
       begin
 
         MobyUtil::XML::Document.new( nil, @@parser ).extend( @@parser::Document ).tap{ | document | 
+        #MobyUtil::XML::Document.new( nil, @@parser ).tap{ | document | 
 
           # parse given string
           document.xml = document.parse( xml_string ) 
@@ -80,10 +81,21 @@ module MobyUtil
           dump_location = ""
 
           # check if xml parse error logging is enabled
-          if MobyUtil::KernelHelper.to_boolean( MobyUtil::Parameter[ :logging_xml_parse_error_dump ] )
+          if MobyUtil::Parameter[ :logging_xml_parse_error_dump, 'true' ].to_s.to_boolean
+          #if MobyUtil::KernelHelper.to_boolean( MobyUtil::Parameter[ :logging_xml_parse_error_dump ] )
 
-            # generate filename for xml dump
-            filename = MobyUtil::KernelHelper.to_boolean( MobyUtil::Parameter[ :logging_xml_parse_error_dump_overwrite ] ) ? 'xml_error_dump.xml' : 'xml_error_dump_%i.xml' % Time.now
+            # construct filename for xml dump
+            filename = 'xml_error_dump'
+
+            # add timestamp to filename if not overwriting the existing dump file 
+            unless MobyUtil::Parameter[ :logging_xml_parse_error_dump_overwrite, 'false' ].to_s.to_boolean
+
+              filename << "_#{ Time.now.to_i }"
+
+            end
+
+            # add file extension
+            filename << '.xml'
 
             # ... join filename with xml dump output path 
             path = File.join( MobyUtil::FileHelper.expand_path( MobyUtil::Parameter[ :logging_xml_parse_error_dump_path ] ), filename )
@@ -93,14 +105,13 @@ module MobyUtil
               # write xml string to file
               File.open( path, "w" ){ | file | file << xml_string }
 
-              dump_location = ". Saved to %s" % path
+              dump_location = ". Saved to #{ path }"
 
             rescue
 
-              dump_location = ". Error while saving to file %s" % path
+              dump_location = ". Error while saving to file #{ path }"
 
             end
-
 
           end
 
@@ -170,7 +181,6 @@ module MobyUtil
 
         Kernel::raise MobyUtil::XML::BuilderError.new( "%s (%s)" % [ exception.message, exception.class ] )
 
-
       end
       
     end
@@ -181,3 +191,7 @@ module MobyUtil
   end # XML
 
 end # MobyUtil
+
+# set used parser module
+MobyUtil::XML.current_parser = MobyUtil::XML::Nokogiri
+
