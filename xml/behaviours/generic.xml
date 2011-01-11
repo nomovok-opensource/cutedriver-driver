@@ -1,6 +1,6 @@
 <behaviours>
 
-	<behaviour name="GenericTestObject" object_type="*" sut_type="*" input_type="*" version="*">
+	<behaviour name="GenericTestObject" object_type="*;application" sut_type="*" input_type="*" version="*">
 
 		<module name="MobyBehaviour::TestObject" />
 
@@ -100,7 +100,7 @@
 				<example>get_application_id</example>
 			</method>
 
-                        <method name="get_application">
+      <method name="get_application">
 				<description>Function for finding out the application for this test ojbect</description>
 				<example>get_application</example>
 			</method>
@@ -186,7 +186,7 @@
 
     </behaviour>
 
-    <behaviour name="GenericObjectComposition" object_type="*;sut" sut_type="*" input_type="*" version="*">
+    <behaviour name="GenericObjectComposition" object_type="*;sut;application" sut_type="*" input_type="*" version="*">
 
         <module name="MobyBehaviour::ObjectComposition" />
 
@@ -214,7 +214,7 @@
     </behaviour>
 
 
-    <behaviour name="GenericObjectDescription" object_type="*;sut" sut_type="*" input_type="*" version="*">
+    <behaviour name="GenericObjectDescription" object_type="*;sut;application" sut_type="*" input_type="*" version="*">
 
         <module name="MobyBehaviour::ObjectBehaviourDescription" />
 
@@ -379,11 +379,11 @@
                 <description>Function to disable taking UI dumps from target for a moment. User must remember to enable UI dumps again using unfreeze.</description>
                 <example>freeze</example>
             </method>
+
             <method name="unfreeze">
                 <description>Function to enable taking UI dumps from target</description>
                 <example>unfreeze</example>
             </method>
-
 
             <method name="get_object">
                 <description>Retrieve object with given identification hash. Id, Name or Type must be given in hash.</description>
@@ -394,19 +394,21 @@
                 <description>Retrieve current application id.</description>
                 <example>get_application_id</example>
             </method>
+
             <method name="clear_verify_blocks">
                 <description>Clear existing verify blocks</description>
                 <example>clear_verify_blocks</example>
             </method>
+
             <method name="verify_always">
                 <description>Verify always</description>
                 <example>verify_always( expected, message = nil, block )</example>
             </method>
+
             <method name="verify_blocks">
                 <description>Verify blocks</description>
                 <example>verify_blocks</example>
             </method>
-
 
         </methods>
 
@@ -440,7 +442,7 @@
 
     </behaviour>
 
-    <behaviour name="GenericTestObjectSyncronization" object_type="*;sut" sut_type="*" input_type="*" version="*">
+    <behaviour name="GenericTestObjectSyncronization" object_type="*;sut;application" sut_type="*" input_type="*" version="*">
 
         <module name="MobyBehaviour::TestObjectSynchronization" />
 
@@ -453,7 +455,7 @@
 
     </behaviour>
 
-    <behaviour name="GenericVerification" object_type="*" sut_type="*" input_type="*" version="*">
+    <behaviour name="GenericVerification" object_type="*;application" sut_type="*" input_type="*" version="*">
 
         <module name="MobyBehaviour::Verification" />
 
@@ -466,7 +468,7 @@
 
     </behaviour>
 
-    <behaviour name="GenericFind" object_type="*;sut" sut_type="*" input_type="*" version="*">
+    <behaviour name="GenericFind" object_type="*;sut;application" sut_type="*" input_type="*" version="*">
 
         <module name="MobyBehaviour::Find" />
 
