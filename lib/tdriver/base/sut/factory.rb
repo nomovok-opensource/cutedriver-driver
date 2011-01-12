@@ -41,14 +41,14 @@ module MobyBase
 
   def mapped_sut?( sut_id )
 
-    MobyUtil::Parameter[ :mappings, {} ].has_key?( sut_id.to_sym )
+    $parameters[ :mappings, {} ].has_key?( sut_id.to_sym )
 
   end
 
 
   def get_mapped_sut( sut_id )
 
-    MobyUtil::Parameter[ :mappings ][ sut_id.to_sym ].to_sym
+    $parameters[ :mappings ][ sut_id.to_sym ].to_sym
 
   end
 
@@ -70,7 +70,7 @@ module MobyBase
     return get_sut_from_list( sut_id ) if sut_exists?( sut_id )
 
     # retrieve sut from parameters
-    sut = MobyUtil::Parameter[ sut_id, nil ]
+    sut = $parameters[ sut_id, nil ]
 
     # raise exception if sut was not found
     Kernel::raise ArgumentError.new( "%s not defined in TDriver parameters XML" % [ sut_id ]) if sut.nil?
@@ -133,24 +133,24 @@ module MobyBase
     created_sut.instance_variable_set( :@ui_type, sut_type )
 
     # store SUT UI version to sut object
-    created_sut.instance_variable_set( :@ui_version, MobyUtil::Parameter[ sut_id ][ :version, nil ] )
+    created_sut.instance_variable_set( :@ui_version, $parameters[ sut_id ][ :version, nil ] )
 
     # store SUT input type to sut object
-    created_sut.instance_variable_set( :@input, MobyUtil::Parameter[ sut_id ][ :input_type, nil ] )
+    created_sut.instance_variable_set( :@input, $parameters[ sut_id ][ :input_type, nil ] )
 
 =begin
     # sut type version, default: nil    
     created_sut.instance_eval{
 
       @ui_type = sut_type 
-      @ui_version = MobyUtil::Parameter[ sut_id ][ :version, nil ]
-      @input = MobyUtil::Parameter[ sut_id ][ :input_type, nil ]
+      @ui_version = $parameters[ sut_id ][ :version, nil ]
+      @input = $parameters[ sut_id ][ :input_type, nil ]
 
     }
 =end
     
     # retrieve list of optional extension plugins
-    @extension_plugins = MobyUtil::Parameter[ sut_id ][ :extension_plugins, "" ].split( ";" )
+    @extension_plugins = $parameters[ sut_id ][ :extension_plugins, "" ].split( ";" )
 
     # load optional extension plugins
     if @extension_plugins.count > 0
@@ -298,20 +298,20 @@ module MobyBase
     begin
 
     # check if direct match exists
-    return sut_id if MobyUtil::Parameter[ sut_id ]
+    return sut_id if $parameters[ sut_id ]
 
-    rescue MobyUtil::ParameterNotFoundError
+    rescue $parametersNotFoundError
 
     # check if a mapping is defined for the id
     begin        
 
       # return nil if no mapping exists
-      return nil if ( mapped_id = MobyUtil::Parameter[ :mappings ][ sut_id ] ).nil?                
+      return nil if ( mapped_id = $parameters[ :mappings ][ sut_id ] ).nil?                
 
       # check if the mapped to sut id exists
-      return mapped_id if MobyUtil::Parameter[ ( mapped_id = mapped_id.to_sym ) ]
+      return mapped_id if $parameters[ ( mapped_id = mapped_id.to_sym ) ]
 
-    rescue MobyUtil::ParameterNotFoundError
+    rescue $parametersNotFoundError
 
       # no mappings defined in tdriver_parameters.xml or the mapped to sut was not found
       return nil

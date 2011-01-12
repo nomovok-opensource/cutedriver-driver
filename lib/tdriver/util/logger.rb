@@ -323,14 +323,14 @@ module MobyUtil
       # raise exception if unsupported logging level
       Kernel::raise RuntimeError.new( "Unsupported logging level '#{ logging_level }' defined in TDriver parameter/template XML (expected 0..5)" ) unless ( 0..5 ).include?( logging_level )
 
-      @include_behaviour_info = MobyUtil::Parameter[ :logging_include_behaviour_info, 'false' ].to_s.to_boolean
+      @include_behaviour_info = $parameters[ :logging_include_behaviour_info, 'false' ].to_s.to_boolean
 
       # UI state XML parse error logging - verify that all required parameters are configured and output folder is created succesfully
-      if MobyUtil::KernelHelper.to_boolean( MobyUtil::Parameter[ :logging_xml_parse_error_dump, 'false' ] ) == true
+      if MobyUtil::KernelHelper.to_boolean( $parameters[ :logging_xml_parse_error_dump, 'false' ] ) == true
 
         begin
 
-          if MobyUtil::Parameter[ :logging_xml_parse_error_dump_path, nil ].nil?
+          if $parameters[ :logging_xml_parse_error_dump_path, nil ].nil?
 
             warn("Warning: Configuration parameter :logging_xml_parse_error_dump_path missing, disabling the feature...") 
 
@@ -346,7 +346,7 @@ module MobyUtil
 
             rescue #Exception
 
-              warn("Warning: Unable to create log folder #{ MobyUtil::Parameter[ :logging_xml_parse_error_dump_path ] } for corrupted XML UI state files")
+              warn("Warning: Unable to create log folder #{ $parameters[ :logging_xml_parse_error_dump_path ] } for corrupted XML UI state files")
 
               # disable feature
               raise ArgumentError
@@ -355,39 +355,39 @@ module MobyUtil
 
           end
 
-          if MobyUtil::Parameter[ :logging_xml_parse_error_dump_overwrite, nil ].nil?
+          if $parameters[ :logging_xml_parse_error_dump_overwrite, nil ].nil?
 
             warn("Warning: Configuration parameter :logging_xml_parse_error_dump_overwrite missing, using 'false' as default value")
 
-            MobyUtil::Parameter[ :logging_xml_parse_error_dump_overwrite ] = 'false'
+            $parameters[ :logging_xml_parse_error_dump_overwrite ] = 'false'
 
           end
 
         rescue ArgumentError => exception
 
           # disable xml logging
-          MobyUtil::Parameter[ :logging_xml_parse_error_dump ] = 'false'
+          $parameters[ :logging_xml_parse_error_dump ] = 'false'
 
         rescue #Exception => exception
 
           # disable xml logging
           warn( "Warning: Disabling logging due to failure (#{ $!.class }: #{ $!.message })" )
 
-          MobyUtil::Parameter[ :logging_xml_parse_error_dump ] = 'false'
+          $parameters[ :logging_xml_parse_error_dump ] = 'false'
 
         end
 
       else
 
         warn("Warning: Configuration parameter :logging_xml_parse_error_dump missing, disabling the feature...") 
-        MobyUtil::Parameter[ :logging_xml_parse_error_dump ] = 'false'
+        $parameters[ :logging_xml_parse_error_dump ] = 'false'
 
       end
       
       unless logging_level.zero?
 
         # logger output path
-        outputter_path = MobyUtil::FileHelper.expand_path( MobyUtil::Parameter[ :logging_outputter_path ] )
+        outputter_path = MobyUtil::FileHelper.expand_path( $parameters[ :logging_outputter_path ] )
 
         # disable logging if exception is raised during 
         begin
@@ -437,7 +437,7 @@ module MobyUtil
 
         rescue
 
-          MobyUtil::Parameter[ :logging_level ] = '0'
+          $parameters[ :logging_level ] = '0'
 
           @logger_instance = nil
 

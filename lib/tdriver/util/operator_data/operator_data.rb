@@ -61,11 +61,11 @@ module MobyUtil
 		    Kernel::raise OperatorDataNotFoundError.new( "Search string parameter cannot be nil" ) if operator_data_lname == nil
 
 			# Get Localization parameters for DB Connection
-			db_type =  MobyUtil::Parameter[ :operator_data_db_type, nil ].to_s.downcase
-			host =  MobyUtil::Parameter[ :operator_data_server_ip ]
-			username = MobyUtil::Parameter[ :operator_data_server_username ]
-			password = MobyUtil::Parameter[ :operator_data_server_password ]
-			database_name = MobyUtil::Parameter[ :operator_data_server_database_name ]
+			db_type =  $parameters[ :operator_data_db_type, nil ].to_s.downcase
+			host =  $parameters[ :operator_data_server_ip ]
+			username = $parameters[ :operator_data_server_username ]
+			password = $parameters[ :operator_data_server_password ]
+			database_name = $parameters[ :operator_data_server_database_name ]
 			
 			db_connection = DBConnection.new(  db_type, host, database_name, username, password )
 			

@@ -170,8 +170,8 @@ module MobyBehaviour
           application_identification_hash = { :type => 'application', :id => @id }
 
           MobyUtil::Retryable.until(
-            :timeout => MobyUtil::Parameter[ self.sut.id ][ :application_synchronization_timeout, '60' ].to_f,
-            :interval => MobyUtil::Parameter[ self.sut.id ][ :application_synchronization_retry_interval, '0.25' ].to_f,
+            :timeout => $parameters[ self.sut.id ][ :application_synchronization_timeout, '60' ].to_f,
+            :interval => $parameters[ self.sut.id ][ :application_synchronization_retry_interval, '0.25' ].to_f,
             :exception => MobyBase::VerificationError,
             :unless => [MobyBase::TestObjectNotFoundError, MobyBase::ApplicationNotAvailableError] ) {
 

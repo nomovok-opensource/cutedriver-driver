@@ -33,10 +33,10 @@ module MobyBase
     def initialize
 
       # get timeout from parameters, use default value if parameter not found
-      @timeout = MobyUtil::Parameter[ :application_synchronization_timeout, "20" ].to_f
+      @timeout = $parameters[ :application_synchronization_timeout, "20" ].to_f
 
       # get timeout retry interval from parameters, use default value if parameter not found
-      @_retry_interval = MobyUtil::Parameter[ :application_synchronization_retry_interval, "1" ].to_f
+      @_retry_interval = $parameters[ :application_synchronization_retry_interval, "1" ].to_f
 
     end
 
@@ -329,7 +329,7 @@ module MobyBase
         object_type = TDriver::TestObjectAdapter.test_object_element_attribute( xml_object, 'type' ){ nil }.to_s 
 
         # retrieve test object type from xml
-    	  env = TDriver::TestObjectAdapter.test_object_element_attribute( xml_object, 'env' ){ MobyUtil::Parameter[ sut.id ][ :env ] }.to_s
+    	  env = TDriver::TestObjectAdapter.test_object_element_attribute( xml_object, 'env' ){ $parameters[ sut.id ][ :env ] }.to_s
     	  
       else
       
@@ -340,7 +340,7 @@ module MobyBase
         
         object_id = 0
 
-        env = MobyUtil::Parameter[ sut.id ][ :env ].to_s
+        env = $parameters[ sut.id ][ :env ].to_s
 
       end
       

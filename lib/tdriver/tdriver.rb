@@ -102,14 +102,14 @@ module TDriver
 	# Wrapper for MobyUtil::Parameter.configured_suts to retrieve all configured sut names
 	def self.suts
 
-		MobyUtil::Parameter.configured_suts
+		$parameters.configured_suts
 
 	end
 
 	# Wrapper for MobyUtil::ParameterUserAPI class with methods e.g. [] and []=, files and load_xml etc.
 	def self.parameter
 
-		@matti_parameter_instance || ( @matti_parameter_instance = MobyUtil::ParameterUserAPI.instance )
+		@matti_parameter_instance || ( @matti_parameter_instance = MobyUtil::ParameterUserAPI )
 
 	end
 

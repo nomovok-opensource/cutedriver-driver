@@ -521,7 +521,7 @@ module MobyBehaviour
     # TODO: document me
 	  def disable_optimizer
 
-      sut_parameters = MobyUtil::Parameter[ @sut.id ]
+      sut_parameters = $parameters[ @sut.id ]
 
 	    # disable optimizer for this call since it will not work
 	    @_enable_optimizer = false
@@ -541,7 +541,7 @@ module MobyBehaviour
     # TODO: document me
 	  def enable_optimizer
 
-	    MobyUtil::Parameter[ @sut.id ][ :use_find_object ] = 'true' if @_enable_optimizer
+	    $parameters[ @sut.id ][ :use_find_object ] = 'true' if @_enable_optimizer
 
 	    @_enable_optimizer = false
 

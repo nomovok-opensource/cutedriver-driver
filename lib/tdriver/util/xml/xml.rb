@@ -98,13 +98,13 @@ module MobyUtil
           dump_location = ""
 
           # check if xml parse error logging is enabled
-          if MobyUtil::Parameter[ :logging_xml_parse_error_dump, 'true' ].to_s.to_boolean
+          if $parameters[ :logging_xml_parse_error_dump, 'true' ].to_s.to_boolean
 
             # construct filename for xml dump
             filename = 'xml_error_dump'
 
             # add timestamp to filename if not overwriting the existing dump file 
-            unless MobyUtil::Parameter[ :logging_xml_parse_error_dump_overwrite, 'false' ].to_s.to_boolean
+            unless $parameters[ :logging_xml_parse_error_dump_overwrite, 'false' ].to_s.to_boolean
 
               filename << "_#{ Time.now.to_i }"
 
@@ -114,7 +114,7 @@ module MobyUtil
             filename << '.xml'
 
             # ... join filename with xml dump output path 
-            path = File.join( MobyUtil::FileHelper.expand_path( MobyUtil::Parameter[ :logging_xml_parse_error_dump_path ] ), filename )
+            path = File.join( MobyUtil::FileHelper.expand_path( $parameters[ :logging_xml_parse_error_dump_path ] ), filename )
 
             begin
 
