@@ -22,243 +22,243 @@ require 'log4r/configurator'
 
 module MobyUtil
 
-	class Logger
+  class Logger
 
-		include Singleton
+    include Singleton
 
-		attr_reader :include_behaviour_info
+    attr_reader :include_behaviour_info
 
-		def initialize()
+    def initialize()
 
-			# Allow all levels to be reported - do not change this!
-			@custom_levels = ['debug', 'behaviour', 'info', 'warning', 'error', 'fatal']
+      # Allow all levels to be reported - do not change this!
+      @custom_levels = ['debug', 'behaviour', 'info', 'warning', 'error', 'fatal']
 
-			Log4r::Configurator.custom_levels( *@custom_levels.collect{ | level | level.upcase } )
+      Log4r::Configurator.custom_levels( *@custom_levels.collect{ | level | level.upcase } )
 
-			Log4r::Logger.root.level = Log4r::DEBUG
+      Log4r::Logger.root.level = Log4r::DEBUG
 
-			@enabled_stack = [ false ]
+      @enabled_stack = [ false ]
 
-			@logger_instance = nil
+      @logger_instance = nil
 
-		end
+    end
 
-		def include_behaviour_info=( value )
+    def include_behaviour_info=( value )
 
-			raise ArgumentError.new( "Unexpected variable type (%s) for 'include_behaviour_info' boolean, expected TrueClass or FalseClass" ) unless [ TrueClass, FalseClass ].include?( value.class )
+      raise ArgumentError.new( "Unexpected variable type (%s) for 'include_behaviour_info' boolean, expected TrueClass or FalseClass" ) unless [ TrueClass, FalseClass ].include?( value.class )
 
-			@include_behaviour_info = value
+      @include_behaviour_info = value
 
-		end
+    end
 
-		# allow reporting by passing level as method name, raise exception if method_id not found in @custom_levels array
-		def method_missing( method_id, *method_arguments )
+    # allow reporting by passing level as method name, raise exception if method_id not found in @custom_levels array
+    def method_missing( method_id, *method_arguments )
 
-			super unless @custom_levels.include?( method_id.to_s )
+      super unless @custom_levels.include?( method_id.to_s )
 
-			self.log( method_id.to_s, *method_arguments )
+      self.log( method_id.to_s, *method_arguments )
 
-		end
+    end
 
-		# TODO: add documentation
-		def enabled
+    # TODO: add documentation
+    def enabled
 
-			@enabled_stack[ -1 ]
+      @enabled_stack[ -1 ]
 
-		end
+    end
 
-		# TODO: add documentation
-		def enabled=( value )
+    # TODO: add documentation
+    def enabled=( value )
 
-			@enabled_stack[ -1 ] = value
+      @enabled_stack[ -1 ] = value
 
-		end
+    end
 
-		# TODO: add documentation
-		def push_enabled( value )
+    # TODO: add documentation
+    def push_enabled( value )
 
-			# push current value to stack if given argument is other than boolean
-			value = @enabled_stack[ -1 ] unless [ TrueClass, FalseClass ].include?( value.class )
+      # push current value to stack if given argument is other than boolean
+      value = @enabled_stack[ -1 ] unless [ TrueClass, FalseClass ].include?( value.class )
 
-			@enabled_stack << value
+      @enabled_stack << value
 
-		end
+    end
 
-		# TODO: add documentation
-		def pop_enabled
+    # TODO: add documentation
+    def pop_enabled
 
-			@enabled_stack.pop if @enabled_stack.count > 1
+      @enabled_stack.pop if @enabled_stack.count > 1
 
-		end
+    end
 
-		# TODO: add documentation
-		def set_report_level( report_level )
+    # TODO: add documentation
+    def set_report_level( report_level )
 
-			Log4r::Logger.root.level = report_level
+      Log4r::Logger.root.level = report_level
 
-		end
+    end
 
-		# TODO: add documentation
-		def new_logger( logger_name )
+    # TODO: add documentation
+    def new_logger( logger_name )
 
-			Log4r::Logger.new( logger_name )
+      Log4r::Logger.new( logger_name )
 
-		end
+    end
 
-		# TODO: add documentation
-		def get_logger( logger_name )
+    # TODO: add documentation
+    def get_logger( logger_name )
 
-			begin
+      begin
 
-				Log4r::Logger.get( logger_name )
+        Log4r::Logger.get( logger_name )
 
-			rescue
+      rescue
 
-				Kernel::raise ArgumentError.new( "Logger '%s' not found" % logger_name )
+        Kernel::raise ArgumentError.new( "Logger '%s' not found" % logger_name )
 
-			end
+      end
 
-		end
+    end
 
-		# TODO: add documentation
-		def create_outputter( outputter_class, *args )
+    # TODO: add documentation
+    def create_outputter( outputter_class, *args )
 
-			outputter_class.new( *args ) 
+      outputter_class.new( *args ) 
 
-		end
+    end
 
-		# TODO: add documentation
-		def add_outputter( logger_instance, outputter_instance )
+    # TODO: add documentation
+    def add_outputter( logger_instance, outputter_instance )
 
-			logger_instance.add( outputter_instance )
+      logger_instance.add( outputter_instance )
 
-		end
+    end
 
-		# TODO: add documentation
-		def remove_outputter( logger_instance, outputter_instance )
+    # TODO: add documentation
+    def remove_outputter( logger_instance, outputter_instance )
 
-			logger_instance.remove( outputter_instance )
+      logger_instance.remove( outputter_instance )
 
-		end
+    end
 
-		# TODO: add documentation
-		def set_outputter_pattern( outputter_instance, pattern )
+    # TODO: add documentation
+    def set_outputter_pattern( outputter_instance, pattern )
 
-			# Allow only FileOutputter instances
-			Kernel::raise ArgumentError.new("Outputter instance not valid") if ![ Log4r::FileOutputter ].include?( outputter_instance.class )
+      # Allow only FileOutputter instances
+      Kernel::raise ArgumentError.new("Outputter instance not valid") if ![ Log4r::FileOutputter ].include?( outputter_instance.class )
 
-			# Allow only FileOutputter instances
-			Kernel::raise ArgumentError.new("Outputter pattern not valid, %M required by minimum") if !/\%M/.match( pattern ) 
+      # Allow only FileOutputter instances
+      Kernel::raise ArgumentError.new("Outputter pattern not valid, %M required by minimum") if !/\%M/.match( pattern ) 
 
-			# create pattern for outputter
-			outputter_instance.formatter = Log4r::PatternFormatter.new( :pattern => pattern )
+      # create pattern for outputter
+      outputter_instance.formatter = Log4r::PatternFormatter.new( :pattern => pattern )
 
-		end
+    end
 
-		# TODO: add documentation
-		# return logger instance
-		def self.[]( key )
+    # TODO: add documentation
+    # return logger instance
+    def self.[]( key )
 
-			self.instance.get_logger( key )
+      self.instance.get_logger( key )
 
-		end
+    end
 
-		# TODO: add documentation
-		def root
+    # TODO: add documentation
+    def root
 
-			Log4r::Logger.global
+      Log4r::Logger.global
 
-		end
+    end
 
-		# TODO: add documentation
-		def log( level, *text_array )
+    # TODO: add documentation
+    def log( level, *text_array )
 
-			if self.enabled && @logger_instance
+      if self.enabled && @logger_instance
 
-				# convert to lowercase string
-				level = level.to_s.downcase
+        # convert to lowercase string
+        level = level.to_s.downcase
 
-				include_behaviour_info = @include_behaviour_info 
+        include_behaviour_info = @include_behaviour_info 
 
-				# debug log entries and logging by using TDriver.logging.info or MobyUtil::Logging.instance.info etc
-				if caller.first =~ /method_missing/
+        # debug log entries and logging by using TDriver.logging.info or MobyUtil::Logging.instance.info etc
+        if caller.first =~ /method_missing/
 
-					# get correct caller method
-					log_caller = caller.at( 1 )
+          # get correct caller method
+          log_caller = caller.at( 1 )
 
-					# debug level
-					if log_caller =~ /hooking\.rb/
+          # debug level
+          if log_caller =~ /hooking\.rb/
 
-						log_caller = caller.at( 3 ).first
+            log_caller = caller.at( 3 ).first
 
-					end
+          end
 
-				elsif caller.first =~ /logger\.rb/
+        elsif caller.first =~ /logger\.rb/
 
-					# do not add caller info if called from self
-					include_behaviour_info = false
+          # do not add caller info if called from self
+          include_behaviour_info = false
 
-				else
+        else
 
-					# normal logging, e.g. behaviour logging from method etc
-					log_caller = caller.at( 0 )
+          # normal logging, e.g. behaviour logging from method etc
+          log_caller = caller.at( 0 )
 
-				end
+        end
 
-				# log text to given level if logging enabled
-				text_array.each{ | text |
+        # log text to given level if logging enabled
+        text_array.each{ | text |
 
-					@logger_instance.send( level, ( include_behaviour_info && !text.empty? ) ? ( "%s in %s" % [ text, log_caller ] ) : ( "%s" % text ) ) 
+          @logger_instance.send( level, ( include_behaviour_info && !text.empty? ) ? ( "%s in %s" % [ text, log_caller ] ) : ( "%s" % text ) ) 
 
-				} 
+        } 
 
-			end
+      end
 
-		end
+    end
 
-		def enable_raise_hooking
+    def enable_raise_hooking
 
       # hook Kernel.raise
-			def Kernel::raise( *exception )
+      def Kernel::raise( *exception )
 
-				begin
+        begin
 
-					super( *exception )
+          super( *exception )
 
-				rescue => raised_exception
+        rescue => raised_exception
 
-					raised_exception.backtrace.slice!( 0 )
+          raised_exception.backtrace.slice!( 0 )
 
-					warn_array = [ '', "(%s) %s" % [ raised_exception.class, raised_exception.message.split("\n") ], '', raised_exception.backtrace, '' ].flatten
+          warn_array = [ '', "(%s) %s" % [ raised_exception.class, raised_exception.message.split("\n") ], '', raised_exception.backtrace, '' ].flatten
 
-					MobyUtil::Logger.instance.log( 'warning', *warn_array )
+          MobyUtil::Logger.instance.log( 'warning', *warn_array )
 
-					super( raised_exception )
+          super( raised_exception )
 
-				end
+        end
 
-			end
+      end
 
-		end
+    end
 
     def set_debug_exceptions
 
       if ARGV.include?( '--debug_exceptions' ) || TDriver.parameter[ :debug_exceptions, 'false' ].to_s.downcase == 'true'
 
         ARGV.delete('--debug_exceptions')
- 	      # for debugging to see every occured exception
-	      def Kernel.raise( *args )
+         # for debugging to see every occured exception
+        def Kernel.raise( *args )
           #begin
             # raise and catch exception  
             super( *args )
           #rescue
             # remove wrapper call from backtrace 
            # $!.backtrace.shift
-  		      #puts "%s: %s\nBacktrace: \n%s\n\n" % [ $!.class, $!.message, $!.backtrace.collect{ | line | "  %s" % line }.join("\n") ]
+            #puts "%s: %s\nBacktrace: \n%s\n\n" % [ $!.class, $!.message, $!.backtrace.collect{ | line | "  %s" % line }.join("\n") ]
             # raise exception again
            # super $!          
           #end
-	      end
+        end
 
         # hook Object(Kernel)#raise
         ::Object.class_exec{ 
@@ -283,12 +283,12 @@ module MobyUtil
                 
                 end
                 
-      		      puts "[debug] %s: %s\n[debug] Backtrace: \n[debug] %s\n\n" % [ 
-      		        $!.class, 
-      		        $!.message, 
-      		        $!.backtrace.collect{ | line | "  ... from %s" % line }.join("\n[debug] ") 
-    		        ]
-    		        
+                puts "[debug] %s: %s\n[debug] Backtrace: \n[debug] %s\n\n" % [ 
+                  $!.class, 
+                  $!.message, 
+                  $!.backtrace.collect{ | line | "  ... from %s" % line }.join("\n[debug] ") 
+                ]
+                
                 # raise exception again
                 original_raise $!
 
@@ -303,35 +303,27 @@ module MobyUtil
 
     end
 
-		# TODO: add documentation
-		def enable_logging
+    # TODO: add documentation
+    def enable_logging
 
       set_debug_exceptions # if enabled
 
       # returns logging level as string
-			logging_level = Parameter[ :logging_level, nil ]
+      logging_level = Parameter[ :logging_level, nil ]
 
       # do not enable logging if no logging level is not defined
-			return nil if logging_level.nil?
+      return nil if logging_level.nil?
 
       # raise exception if wrong format for logging level
-			Kernel::raise RuntimeError.new( 
-			
-			  "Wrong logging level format '%s' defined in TDriver parameter/template XML (expected %s)" % [ logging_level, "numeric string"]
-			  
-		  ) unless logging_level.numeric? #MobyUtil::StringHelper.numeric?( logging_level )      
+      Kernel::raise RuntimeError.new( "Wrong logging level format '#{ logging_level }' defined in TDriver parameter/template XML (expected numeric string)" ) unless logging_level.numeric?
 
       # convert to integer
-			logging_level = logging_level.to_i
+      logging_level = logging_level.to_i
 
       # raise exception if unsupported logging level
-			Kernel::raise RuntimeError.new( 
-			
-			  "Unsupported logging level '%s' defined in TDriver parameter/template XML (expected %s)" % [ logging_level, "0..5"] 
-			  
-		  ) unless (0..5).include?( logging_level )
+      Kernel::raise RuntimeError.new( "Unsupported logging level '#{ logging_level }' defined in TDriver parameter/template XML (expected 0..5)" ) unless ( 0..5 ).include?( logging_level )
 
-			@include_behaviour_info = ( MobyUtil::Parameter[ :logging_include_behaviour_info, 'false' ].downcase == 'true' )
+      @include_behaviour_info = MobyUtil::Parameter[ :logging_include_behaviour_info, 'false' ].to_s.to_boolean
 
       # UI state XML parse error logging - verify that all required parameters are configured and output folder is created succesfully
       if MobyUtil::KernelHelper.to_boolean( MobyUtil::Parameter[ :logging_xml_parse_error_dump, 'false' ] ) == true
@@ -349,12 +341,12 @@ module MobyUtil
 
             begin
 
-			        # create error dump folder if not exist, used e.g. when xml parse error
-			        MobyUtil::FileHelper.mkdir_path( MobyUtil::FileHelper.expand_path( $last_parameter ) )
+              # create error dump folder if not exist, used e.g. when xml parse error
+              MobyUtil::FileHelper.mkdir_path( MobyUtil::FileHelper.expand_path( $last_parameter ) )
 
-            rescue Exception
+            rescue #Exception
 
-              warn("Warning: Unable to create log folder %s for corrupted XML UI state files" % [ MobyUtil::Parameter[ :logging_xml_parse_error_dump_path ] ] )
+              warn("Warning: Unable to create log folder #{ MobyUtil::Parameter[ :logging_xml_parse_error_dump_path ] } for corrupted XML UI state files")
 
               # disable feature
               raise ArgumentError
@@ -373,11 +365,13 @@ module MobyUtil
 
         rescue ArgumentError => exception
 
+          # disable xml logging
           MobyUtil::Parameter[ :logging_xml_parse_error_dump ] = 'false'
 
-        rescue Exception => exception
+        rescue #Exception => exception
 
-          warn("Warning: Disabling logging due to failure (%s: %s)" % [ exception.class, exception.message ] )
+          # disable xml logging
+          warn( "Warning: Disabling logging due to failure (#{ $!.class }: #{ $!.message })" )
 
           MobyUtil::Parameter[ :logging_xml_parse_error_dump ] = 'false'
 
@@ -390,117 +384,135 @@ module MobyUtil
 
       end
       
-			unless logging_level.zero?
+      unless logging_level.zero?
 
-				# create new logger instance
-				MobyUtil::Logger.instance.new_logger( 'TDriver' )
+        # logger output path
+        outputter_path = MobyUtil::FileHelper.expand_path( MobyUtil::Parameter[ :logging_outputter_path ] )
 
-				# get logger object reference
-				@logger_instance = get_logger( 'TDriver' )
+        # disable logging if exception is raised during 
+        begin
 
-				# create unique name for logfile or use default (TDriver.log)
-				filename = ( MobyUtil::StringHelper.to_boolean( Parameter[ :logging_outputter_unique_filename ] ) ? "TDriver_%i.log" % Time.now : "TDriver.log" )
+          # create outputter folder if not exist
+          MobyUtil::FileHelper.mkdir_path( outputter_path )
 
-				# logger output path
-				outputter_path = MobyUtil::FileHelper.expand_path( MobyUtil::Parameter[ :logging_outputter_path ] )
+          # create new logger instance
+          MobyUtil::Logger.instance.new_logger( 'TDriver' )
 
-				# create outputter folder if not exist
-				MobyUtil::FileHelper.mkdir_path( outputter_path )
+          # get logger object reference
+          @logger_instance = get_logger( 'TDriver' )
 
-				# check if outputter is enabled
-				if MobyUtil::StringHelper.to_boolean( Parameter[ :logging_outputter_enabled ] )
+          # create unique name for logfile or use default (TDriver.log)
+          filename = ( MobyUtil::StringHelper.to_boolean( Parameter[ :logging_outputter_unique_filename ] ) ? "TDriver_#{ Time.now.to_i }.log" : "TDriver.log" )
 
-					# create new outputter instance type of FileOutputter
-					outputter = create_outputter(
+          # check if outputter is enabled
+          if MobyUtil::StringHelper.to_boolean( Parameter[ :logging_outputter_enabled ] )
 
-						# outputter type
-						Log4r::FileOutputter, 
+            # create new outputter instance type of FileOutputter
+            outputter = create_outputter(
 
-						# outputter name
-						"TDriver_LOG",
+              # outputter type
+              Log4r::FileOutputter, 
 
-						# outputter filename 
-						:filename => File.join( outputter_path, filename ), 
+              # outputter name
+              "TDriver_LOG",
 
-						# append to or truncate file
-						:trunc => MobyUtil::StringHelper.to_boolean( Parameter[ :logging_outputter_append ] ) == false, 
+              # outputter filename 
+              :filename => File.join( outputter_path, filename ), 
 
-						# logging level
-						:level => logging_level
+              # append to or truncate file
+              :trunc => MobyUtil::StringHelper.to_boolean( Parameter[ :logging_outputter_append ] ) == false, 
 
-					) 
+              # logging level
+              :level => logging_level
 
-					# set outputter log event write pattern
-					set_outputter_pattern( outputter, Parameter[ :logging_outputter_pattern ] )
+            ) 
 
-					# add outputter to logger instance
-					add_outputter( @logger_instance, outputter )
+            # set outputter log event write pattern
+            set_outputter_pattern( outputter, Parameter[ :logging_outputter_pattern ] )
 
-				end
+            # add outputter to logger instance
+            add_outputter( @logger_instance, outputter )
 
-				# debug logging
-				if ( logging_level == 1 )
+          end
 
-					# enable exception capturing on debug level
-					enable_raise_hooking
+        rescue
 
-					# pass logger instance to hooking module
-					MobyUtil::Hooking.instance.set_logger_instance( MobyUtil::Logger.instance )
+          MobyUtil::Parameter[ :logging_level ] = '0'
 
-				end  
+          @logger_instance = nil
 
-				# enable logging
-				@enabled_stack = [ true ]
+          @enabled_stack = [ false ]
 
-				# log event: start logging
-			        log( 'info' , "", "Logging engine started", "" )
+          warn("Warning: Disabling logging due to failure (#{ $!.class }: #{ $!.message })")
 
-			end
+          return nil
 
-			report_status_at_exit
+        end
 
-		end
+        # debug logging
+        if ( logging_level == 1 )
 
-		def report_status_at_exit
+          # enable exception capturing on debug level
+          enable_raise_hooking
 
-			at_exit{
+          # pass logger instance to hooking module
+          MobyUtil::Hooking.instance.set_logger_instance( MobyUtil::Logger.instance )
 
-				begin
-					exit_status = nil
+        end  
 
-					case $!
+        # enable logging
+        @enabled_stack = [ true ]
 
-						when NilClass
+        # log event: start logging
+        log( 'info' , "", "Logging engine started", "" )
 
-							exit_status = ['info', '', 'Execution finished succesfully', '']
+      end
 
-						when SystemExit
+      report_status_at_exit
 
-							exit_status = ['info', '', 'Execution terminated by system exit', '' ]
+    end
 
-					else
+    def report_status_at_exit
 
-						exit_status = ['error', '', "Execution terminated with exception: %s: %s" % [ caller.first, $!.message.split("\n") ], '' ]
+      at_exit{
 
-					end
+        begin
 
-					log( *exit_status )
+          exit_status = nil
 
-				rescue
+          case $!
 
-				end
+            when NilClass
 
-			}
-		end
+              exit_status = ['info', '', 'Execution finished succesfully', '']
 
-		def hook_methods( _base )
+            when SystemExit
 
-			#STDOUT.puts "Use MobyUtil::Hooking instead of MobyUtil::Logging when calling hook_methods (#{ caller(1).first })"
+              exit_status = ['info', '', 'Execution terminated by system exit', '' ]
 
-			MobyUtil::Hooking.instance.hook_methods( _base ) #if @enabled
+          else
 
-		end
+            exit_status = ['error', '', "Execution terminated with exception: %s: %s" % [ caller.first, $!.message.split("\n") ], '' ]
 
-	end # Logger
+          end
+
+          log( *exit_status )
+
+        rescue
+
+        end
+
+      }
+    end
+
+    def hook_methods( _base )
+
+      #STDOUT.puts "Use MobyUtil::Hooking instead of MobyUtil::Logging when calling hook_methods (#{ caller(1).first })"
+
+      MobyUtil::Hooking.instance.hook_methods( _base ) #if @enabled
+
+    end
+
+  end # Logger
   
 end # MobyUtil
