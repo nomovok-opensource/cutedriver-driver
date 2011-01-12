@@ -283,3 +283,7 @@ module MobyUtil
   end # Parameter
 
 end # MobyUtil
+
+# set global variable pointing to parameter class
+$parameter = MobyUtil::Parameter
+
