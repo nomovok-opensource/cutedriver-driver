@@ -23,6 +23,7 @@ require File.expand_path( File.join( File.dirname( __FILE__ ), 'error_recovery/t
 require File.expand_path( File.join( File.dirname( __FILE__ ), 'report_file_capture' ) )
 require File.expand_path( File.join( File.dirname( __FILE__ ), 'report_crash_file_capture' ) )
 require File.expand_path( File.join( File.dirname( __FILE__ ), 'report_javascript' ) )
+require 'chronic_duration' if Gem.available?('chronic_duration')
 require File.expand_path( File.join( File.dirname( __FILE__ ), 'report_writer' ) )
 require File.expand_path( File.join( File.dirname( __FILE__ ), 'report_combine' ) )
 require File.expand_path( File.join( File.dirname( __FILE__ ), 'report_data_table' ) )

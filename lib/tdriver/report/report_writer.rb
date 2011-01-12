@@ -18,7 +18,6 @@
 ############################################################################
 
 include TDriverReportJavascript
-
 module TDriverReportWriter
 
   def write_style_sheet(page)
@@ -440,8 +439,7 @@ display: none;
   end
 
   def format_duration(seconds)
-    if Gem.available?('chronic_duration')
-      require 'chronic_duration'
+    if Gem.available?('chronic_duration')      
       duration_str=ChronicDuration.output(seconds)
     else
       m, s = seconds.divmod(60)
@@ -450,14 +448,34 @@ display: none;
     duration_str
   end
 
-  def copy_code_file_to_test_case_report(file,folder)
+  def write_stack_file_to_html(file,page,linen)
+    code=File.read(file)
+    html_code=[]
+    code_line=1
+    code.each do |line|
+      if linen.to_s==code_line.to_s
+        html_code << "<b><a style=\"color: #FF0000\" name=\"#{code_line}\">#{code_line}: #{line.gsub(' ','&nbsp;' )} </a></b><br />"
+      else
+        html_code << "<a name=\"#{code_line}\">#{code_line}: #{line.gsub(' ','&nbsp;' )} </a><br />"
+      end
+      code_line+=1
+    end
+    File.open(page, 'w') do |f2|
+      f2.puts html_code
+    end
+  end
+
+  def copy_code_file_to_test_case_report(file,folder,linen)
     begin
       FileUtils.mkdir_p(folder.to_s+'/stack_files') if File::directory?(folder.to_s+'/stack_files')==false
-      if File.directory?("#{Dir.pwd}/#{@report_folder}/#{folder}")
+      if File.directory?("#{Dir.pwd}/#{@report_folder}/#{folder}")        
+        write_stack_file_to_html(file,"#{Dir.pwd}/#{@report_folder}/#{folder}/stack_files/#{File.basename(file)}.html",linen)
         FileUtils.copy(file,"#{Dir.pwd}/#{@report_folder}/#{folder}/stack_files/#{File.basename(file)}")
       else
+        write_stack_file_to_html(file,"#{folder}/stack_files/#{File.basename(file)}.html",linen)
         FileUtils.copy(file,"#{folder}/stack_files/#{File.basename(file)}")
       end
+
     rescue Exception => e
       puts e.message
       puts e.backtrace
@@ -467,17 +485,17 @@ display: none;
   def reporter_link_to_code(log_line,folder=nil)
     begin
       log_line.gsub(/([\w\*\/\w\/\.-]+)\:(\d+)/) do |match|
-        match.gsub(/([\w\*\/\w\/\.-]+)/) do |f|
-          file="#{File.dirname(f.strip)}/#{File.basename(f.strip)}"
-          file = file if File.exist?(file)
-          file = "#{Dir.pwd}/#{file}" if File.exist?("#{Dir.pwd}/#{file}")
-          if File.exist?(file) && match.include?('testability-driver')==false
-            copy_code_file_to_test_case_report(file,folder)
-            link_to_stack='<a style="color: #FF0000" href="stack_files/'<<
-              File.basename(file.to_s)<<
-              '">'+match+'</a>'
-            log_line=log_line.gsub(match,link_to_stack)
-          end
+        line=match[/(\d+)/]
+        f=match[/([\w\*\/\w\/\.-]+)/]
+        file="#{File.dirname(f.strip)}/#{File.basename(f.strip)}"
+        file = file if File.exist?(file)
+        file = "#{Dir.pwd}/#{file}" if File.exist?("#{Dir.pwd}/#{file}")
+        if File.exist?(file) && match.include?('testability-driver')==false
+          copy_code_file_to_test_case_report(file,folder,line.strip)
+          link_to_stack='<a style="color: #FF0000" href="stack_files/'<<
+            File.basename(file.to_s)+'.html#'+line.to_s<<
+            '">'+match+'</a>'
+          log_line=log_line.gsub(match,link_to_stack)
         end
       end
     rescue Exception => e
