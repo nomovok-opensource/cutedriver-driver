@@ -113,7 +113,7 @@ module MobyUtil
 
     end
 
-    MobyUtil::Hooking.instance.hook_methods( self ) if defined?( MobyUtil::Hooking )
+    TDriver::Hooking.hook_methods( self ) if defined?( TDriver::Hooking )
 
   end # ParameterTemplates
 

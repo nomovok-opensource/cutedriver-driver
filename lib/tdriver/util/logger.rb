@@ -507,9 +507,9 @@ module MobyUtil
 
     def hook_methods( _base )
 
-      #STDOUT.puts "Use MobyUtil::Hooking instead of MobyUtil::Logging when calling hook_methods (#{ caller(1).first })"
+      #STDOUT.puts "Use TDriver::Hooking instead of MobyUtil::Logging.hook_methods (#{ caller(1).first })"
 
-      MobyUtil::Hooking.instance.hook_methods( _base ) #if @enabled
+      TDriver::Hooking.hook_methods( _base ) #if @enabled
 
     end
 

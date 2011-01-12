@@ -510,7 +510,7 @@ module MobyBase
     end
 
     # enable hoo./base/test_object/factory.rb:king for performance measurement & debug logging
-    MobyUtil::Hooking.instance.hook_methods( self ) if defined?( MobyUtil::Hooking )
+    TDriver::Hooking.hook_methods( self ) if defined?( TDriver::Hooking )
 
   end # TestObjectFactory
 
