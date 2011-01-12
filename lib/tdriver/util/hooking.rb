@@ -23,238 +23,236 @@ module TDriver
     # TODO: document me
     class << self
 
-  		@@non_wrappable_methods = [ 'instance' ]
+      @@non_wrappable_methods = [ 'instance' ]
 
-			# default values
-			@@wrapped_methods = {}
+      # default values
+      @@wrapped_methods = {}
+      @@wrappee_count = 0
 
-			@@wrappee_count = 0
-			@@benchmark = {}
+      @@benchmark = {}
 
-			@@logger_method = nil
-			@@logger_instance = nil
-			
-			$mobyutil_hooking_instance = TDriver::Hooking
-      $mobyutil_hooking_elapsed_time = []
-
-      $mobyutil_hooking_start_benchmark_time = Time.now  
-      $mobyutil_hooking_last_call_end_time = Time.now
-
-	  private
-
-		  # Function to hook a method 
-		  # == params
-		  # base:: Class or Module
-		  # method_name:: Name of the method  
-		  # method_type:: public, private or static
-		  # == returns
-		  def hook_method( base, method_name, method_type )
-
-			  # create only one wrapper for each method
-			  unless @@wrapped_methods.has_key?( "#{ base.name }::#{ method_name }" )
-
-				  # evaluate the generated wrapper source code
-				  eval("base.#{ base.class.name.downcase }_eval( \"#{ make_wrapper( base, method_name.to_s, method_type.to_s )}\" )") if [ Class, Module ].include?( base.class )
-
-			  end
-
-			  nil
-
-		  end
-
-		  # Function to hook static methods for given Class or Module
-		  # == params
-		  # base:: Target Class or Module
-		  # == returns
-		  def hook_static_methods( _base )
-
-			  if [ Class, Module ].include?( _base.class )
-
-				  _base.singleton_methods( false ).each { | method_name |
-
-					  hook_method( _base, method_name.to_s, "static" ) unless @@non_wrappable_methods.include?( method_name.to_s ) # method_name.to_s for ruby 1.9 compatibility
-
-				  } 
-
-			  end
-
-			  nil
-
-		  end
-
-		  # Function to hook instance methods for given Class or Module
-		  # == params
-		  # base:: Target Class or Module
-		  # == returns
-		  def hook_instance_methods( _base )
-
-			  if [ Class, Module ].include?( _base.class )        
-
-				  { :public => _base.public_instance_methods( false ), :private => _base.private_instance_methods( false ), :protected => _base.protected_instance_methods( false ) }.each { | method_type, methods |
-
-					  methods.each { | method_name | hook_method( _base, method_name.to_s, method_type.to_s ) unless /__wrappee_\d+/i.match( method_name.to_s ) } # method_name.to_s for ruby 1.9 compatibility
-
-				  }
-
-			  end
-
-			  nil
-		  end
-
-		  # Function to retrieve method path (e.g. Module1::Module2::Class1)
-		  # == params
-		  # base:: Target Class or Module
-		  # == returns
-		  # String:: Method path
-		  def method_path( _base )
-
-			  if [ Class, Module ].include?( _base.class )
-
-				  _base.name
-
-			  else
-
-				  _base.class.name
-
-			  end
-
-		  end
-
-		  # Function to generate unique name for wrappee method
-		  # == params
-		  # method_name:: Name of the target method
-		  # == returns
-		  # String:: Unique name for wrappee method
-		  def create_wrappee_name( method_name )
-
-			  wrappee_name = "non_pritanble_method_name" if ( wrappee_name = ( /[a-z0-9_]*/i.match( method_name ) ) ).length == 0 
-
-			  wrappee_name = "__wrappee_#{ @@wrappee_count }__#{ wrappee_name }"
-
-		  end
-
-		  # Function for create source code of wrapper for method 
-		  # == params
-		  # base:: Class or Module
-		  # method_name:: Name of the method  
-		  # method_type:: public, private or static
-		  # == returns
-		  # String:: source code
-		  def make_wrapper( base, method_name, method_type = nil )
-
-			  # method name with namespace
-			  base_and_method_name = "#{ base.name }::#{ method_name }"
-
-			  # add method to benchmark table
-			  @@benchmark[ base_and_method_name ] = { :time_elapsed => 0 , :times_called => 0, :time_elapsed_total => 0 } if ENV[ 'TDRIVER_BENCHMARK' ].to_s.downcase == 'true'
-
-			  # create new name for original method 
-			  original_method_name = create_wrappee_name( method_name )
-
-			  # add method to wrapper methods list
-			  @@wrapped_methods.merge!( base_and_method_name => nil )
-			  @@wrappee_count += 1
-
-			  case method_type
-
-				  when 'public', 'private', 'static'
-
-					  source = "
-							  #{
-							  # this is needed if method is static
-							  "class << self" if method_type == 'static' 
-
-							  }
-
-								  # create a copy of original method
-								  alias_method :#{ original_method_name }, :#{ method_name }
-
-								  #{ 
-
-									  if method_type == 'static'
-
-										  # undefine original version if static method
-										  "self.send( :undef_method, :#{ method_name } )"
-
-									  else
-
-										  # method visiblity unless method type is static
-										  "#{ method_type }"
-
-									  end
-
-						
-								  }
-
-								  def #{ method_name }( *args, &block )
-
-									  # log method call
-									  $mobyutil_hooking_instance.log( '#{ method_path( base ) }.#{ method_name }', nil )
-
-									  #{
-
-										  if ENV[ 'TDRIVER_BENCHMARK' ].to_s.downcase == 'true'
-							
-											  "# store start time for performance measurement
-											  start_time = Time.now
-                        
-                        # Time elapsed in sub calls
-                        $mobyutil_hooking_elapsed_time << 0.0
-
-                        begin
-
-											    # call original method
-											    result = send(:#{ original_method_name }, *args, &block )
-
-                        rescue Exception => exception
-
-                          raise exception
-                        
-                        ensure
+      @@logger_instance = nil
       
-                          # calculate actual elapsed time, including time elapsed in sub calls
-                          elapsed_time = ( ( $mobyutil_hooking_last_call_end_time = Time.now ) - start_time )
+      $tdriver_hooking = TDriver::Hooking
+      $tdriver_hooking_elapsed_time_stack = []
 
-                          # elapsed time in sub calls
-                          elapsed_time_in_subcalls = $mobyutil_hooking_elapsed_time.pop || 0
-                                                  
-                          # add elapsed time to caller method 
-                          $mobyutil_hooking_elapsed_time[ -1 ] += elapsed_time unless $mobyutil_hooking_elapsed_time.empty?
+    private
 
-											    # store performance results to benchmark hash
-											    $mobyutil_hooking_instance.update_method_benchmark( '#{ base_and_method_name }', elapsed_time_in_subcalls, elapsed_time )
+      # Function to hook a method 
+      # == params
+      # base:: Class or Module
+      # method_name:: Name of the method  
+      # method_type:: public, private or static
+      # == returns
+      def hook_method( base, method_name, method_type )
 
-                        end
+        # create only one wrapper for each method
+        unless @@wrapped_methods.has_key?( "#{ base.name }::#{ method_name }" )
 
-											  # return results
-											  result"
+          # evaluate the generated wrapper source code
+          eval("base.#{ base.class.name.downcase }_eval( \"#{ make_wrapper( base, method_name.to_s, method_type.to_s )}\" )") if [ Class, Module ].include?( base.class )
 
-										  else
+        end
 
-											  "# call original method
-    									  result = send(:#{ original_method_name }, *args, &block )"
+        nil
 
-										  end
+      end
 
-									  }
+      # Function to hook static methods for given Class or Module
+      # == params
+      # base:: Target Class or Module
+      # == returns
+      def hook_static_methods( _base )
 
-								  end
+        if [ Class, Module ].include?( _base.class )
 
-							  private :#{ original_method_name }
+          _base.singleton_methods( false ).each { | method_name |
 
-							  #{ 
+            hook_method( _base, method_name.to_s, "static" ) unless @@non_wrappable_methods.include?( method_name.to_s ) # method_name.to_s for ruby 1.9 compatibility
 
-							  # this is needed if method is static
-							  "end" if method_type == 'static' 
+          } 
 
-							  }" 
+        end
 
-			  end
+        nil
 
-		  end
+      end
 
+      # Function to hook instance methods for given Class or Module
+      # == params
+      # base:: Target Class or Module
+      # == returns
+      def hook_instance_methods( _base )
 
-    end
+        if [ Class, Module ].include?( _base.class )        
+
+          { 
+            :public    => _base.public_instance_methods( false ), 
+            :private   => _base.private_instance_methods( false ), 
+            :protected => _base.protected_instance_methods( false ) 
+            
+          }.each{ | method_type, methods |
+
+            # method_name.to_s for ruby 1.9 compatibility
+            methods.each { | method_name | hook_method( _base, method_name.to_s, method_type.to_s ) unless /__wrappee_\d+/i.match( method_name.to_s ) } 
+
+          }
+
+        end
+
+        nil
+        
+      end
+
+      # Function to retrieve method path (e.g. Module1::Module2::Class1)
+      # == params
+      # base:: Target Class or Module
+      # == returns
+      # String:: Method path
+      def method_path( _base )
+
+        [ Class, Module ].include?( _base.class ) ? _base.name : _base.class.name
+
+      end
+
+      # Function to generate unique name for wrappee method
+      # == params
+      # method_name:: Name of the target method
+      # == returns
+      # String:: Unique name for wrappee method
+      def create_wrappee_name( method_name )
+
+        wrappee_name = "non_pritanble_method_name" if ( wrappee_name = ( /[a-z0-9_]*/i.match( method_name ) ) ).length == 0 
+
+        "__wrappee_#{ @@wrappee_count }__#{ wrappee_name }"
+
+      end
+
+      # Function for create source code of wrapper for method 
+      # == params
+      # base:: Class or Module
+      # method_name:: Name of the method  
+      # method_type:: public, private or static
+      # == returns
+      # String:: source code
+      def make_wrapper( base, method_name, method_type = nil )
+
+        # method name with namespace
+        base_and_method_name = "#{ base.name }::#{ method_name }"
+
+        # add method to benchmark table if enabled
+        if ENV[ 'TDRIVER_BENCHMARK' ].to_s.downcase == 'true'
+
+          @@benchmark[ base_and_method_name ] = { 
+            :time_elapsed       => 0, 
+            :times_called       => 0, 
+            :time_elapsed_total => 0 
+          } 
+
+        end
+
+        # create new name for original method 
+        original_method_name = create_wrappee_name( method_name )
+
+        # add method to wrapper methods list
+        @@wrapped_methods[ base_and_method_name ] = nil
+
+        @@wrappee_count += 1
+
+        case method_type
+
+          when 'public', 'private', 'static'
+
+            "#{
+              # this is needed if method is static
+              "class << self" if method_type == 'static' 
+
+              }
+
+                # create a copy of original method
+                alias_method :#{ original_method_name }, :#{ method_name }
+
+                #{ 
+
+                  if method_type == 'static'
+
+                    # undefine original version if static method
+                    "self.send( :undef_method, :#{ method_name } )"
+
+                  else
+
+                    # method visiblity unless method type is static
+                    "#{ method_type }"
+
+                  end
+
+                }
+
+                def #{ method_name }( *args, &block )
+
+                  # log method call
+                  $tdriver_hooking.log( '#{ method_path( base ) }.#{ method_name }', nil )
+
+                  #{
+
+                    if ENV[ 'TDRIVER_BENCHMARK' ].to_s.downcase == 'true'
+            
+                      "# store start time for performance measurement
+                      start_time = Time.now
+                      
+                      # Time elapsed in sub calls
+                      $tdriver_hooking_elapsed_time_stack << 0.0
+
+                      begin
+
+                        # call and return result of original method
+                        send(:#{ original_method_name }, *args, &block )
+
+                      rescue 
+
+                        raise $!
+                      
+                      ensure
+    
+                        # calculate actual elapsed time, including time elapsed in sub calls
+                        elapsed_time = Time.now - start_time
+
+                        # elapsed time in sub calls
+                        elapsed_time_in_subcalls = $tdriver_hooking_elapsed_time_stack.pop || 0
+                                                
+                        # add elapsed time to caller method 
+                        $tdriver_hooking_elapsed_time_stack[ -1 ] += elapsed_time unless $tdriver_hooking_elapsed_time_stack.empty?
+
+                        # store performance results to benchmark hash
+                        $tdriver_hooking.update_method_benchmark( '#{ base_and_method_name }', elapsed_time_in_subcalls, elapsed_time )
+
+                      end"
+
+                    else
+
+                      "# call original method
+                      send(:#{ original_method_name }, *args, &block )"
+
+                    end
+
+                  }
+
+                end
+
+              private :#{ original_method_name }
+
+              #{ 
+
+              # this is needed if method is static
+              "end" if method_type == 'static' 
+
+              }" 
+
+        end # case
+
+      end # make_wrapper
+
+    end # self
 
     # TODO: document me
     def self.wrappee_count
@@ -300,159 +298,150 @@ module TDriver
     end
 
     # TODO: document me
-		def self.logger_instance
+    def self.logger_instance
 
-			@@logger_instance
+      @@logger_instance
 
-		end
+    end
 
-		# Function to set logger instance used by wrapper
-		# == params
-		# logger_instance:: Instance of TDriver logger
-		# == returns
-		def self.logger_instance=( logger_instance )
+    # Function to set logger instance used by wrapper
+    # == params
+    # logger_instance:: Instance of TDriver logger
+    # == returns
+    def self.logger_instance=( logger_instance )
 
-			@@logger_instance = logger_instance
+      @@logger_instance = logger_instance
 
-		end
+    end
 
-		# Function to create logger event - this method is called from wrapper
-		# == params
-		# text:: Text sent from wrapper
-		# arguments:: Not in use
-		# == returns
-		def self.log( text, *arguments )
+    # Function to create logger event - this method is called from wrapper
+    # == params
+    # text:: Text sent from wrapper
+    # arguments:: Not in use
+    # == returns
+    def self.log( text, *arguments )
 
-			@@logger_instance.debug( text.to_s ) unless @@logger_instance.nil?
+      @@logger_instance.debug( text.to_s ) if @@logger_instance
 
-			nil
+      nil
 
-		end
+    end
 
-		# Function to hook all instance and static methods of target Class/Module
-		# == params
-		# base:: Target Class or Module
-		# == returns
-		def self.hook_methods( _base )
+    # Function to hook all instance and static methods of target Class/Module
+    # == params
+    # base:: Target Class or Module
+    # == returns
+    def self.hook_methods( _base )
 
-			hook_static_methods( _base )
+      hook_static_methods( _base )
 
-			hook_instance_methods( _base )
+      hook_instance_methods( _base )
 
-			nil
+      nil
 
-		end
+    end
 
-    # TODO: document me
-		def self.add_wrapper( wrapper )
+    # Function to update method runtime & calls count for benchmark
+    # == params
+    # method_name:: Name of the target method
+    # time_elapsed_in_subcalls:: 
+    # total_time_elapsed:: 
+    def self.update_method_benchmark( method_name, time_elapsed_in_subcalls, total_time_elapsed )
 
-			@@wrapped_methods.merge!( wrapper )
+      @@benchmark[ method_name ].tap{ | hash | 
 
-			@@wrappee_count += 1
+        hash[ :time_elapsed       ] += total_time_elapsed - time_elapsed_in_subcalls
+        hash[ :time_elapsed_total ] += total_time_elapsed
+        hash[ :times_called       ] += 1  
 
-		end
+      }
 
-		# Function to update method runtime & calls count for benchmark
-		# == params
-		# method_name:: Name of the target method
-		# time_elapsed_in_subcalls:: 
-		# total_time_elapsed:: 
-		def self.update_method_benchmark( method_name, time_elapsed_in_subcalls, total_time_elapsed )
+    end
 
-			@@benchmark[ method_name ].tap{ | hash | 
-
-				hash[ :time_elapsed ] += ( total_time_elapsed - time_elapsed_in_subcalls ) 
-				hash[ :time_elapsed_total ] += total_time_elapsed
-				hash[ :times_called ] += 1  
-
-			}
-
-		end
-
-		def self.print_benchmark( rules = {} )
-
-		  #total_run_time = $mobyutil_hooking_last_call_end_time - $mobyutil_hooking_start_benchmark_time
+    def self.print_benchmark( rules = {} )
 
       total_run_time = 0
 
-			# :sort => :total_time || :times_called || :average_time
+      # :sort => :total_time || :times_called || :average_time
 
-			rules = { :sort => :total_time, :order => :ascending, :show_uncalled_methods => true }.merge( rules )
+      rules = { :sort => :total_time, :order => :ascending, :show_uncalled_methods => true }.merge( rules )
 
-			puts "%-80s %8s %15s %15s %9s %15s" % [ 'Name:', 'Calls:', 'Time total:', 'W/O subcalls:', '%/run', 'Total/call:' ]
-			puts "%-80s %8s %15s %15s %9s %15s" % [ '-' * 80, '-' * 8, '-' * 15, '-' * 15, '-' * 8, '-' * 15 ]
+      puts "%-80s %8s %15s %15s %9s %15s" % [ 'Name:',  'Calls:', 'Time total:', 'W/O subcalls:', '%/run', 'Total/call:' ]
+      puts "%-80s %8s %15s %15s %9s %15s" % [ '-' * 80, '-' * 8,  '-' * 15,      '-' * 15,        '-' * 8, '-' * 15      ]
 
-			# calculate average time for method
-			( table = @@benchmark ).each{ | key, value |
-			
-				table[ key ][ :average_time ] = ( value[ :times_elapsed_total ] == 0 || value[ :times_called ] == 0 ) ? 0 : value[ :time_elapsed_total ] / value[ :times_called ] 
-				
-	      total_run_time += value[ :time_elapsed ]
+      table = @@benchmark
 
-			}
-
-			table = table.sort{ | method_a, method_b | 
-
-			case rules[ :sort ]
-
-				when :name
-					method_a[ 0 ] <=> method_b[ 0 ]
-
-				when :times_called
-					method_a[ 1 ][ :times_called ] <=> method_b[ 1 ][ :times_called ]
-
-				when :total_time
-					method_a[ 1 ][ :time_elapsed_total ] <=> method_b[ 1 ][ :time_elapsed_total ]
-
-				when :total_time_no_subs
-					method_a[ 1 ][ :time_elapsed ] <=> method_b[ 1 ][ :time_elapsed ]
-
-        when :percentage
+      # calculate average time for method
+      table.each{ | key, value |
+      
+        table[ key ][ :average_time ] = ( value[ :times_elapsed_total ] == 0 || value[ :times_called ] == 0 ) ? 0 : value[ :time_elapsed_total ] / value[ :times_called ] 
         
-          ( ( method_a[ 1 ][ :time_elapsed ].to_f / total_run_time.to_f ) * 100 ) <=> ( ( method_b[ 1 ][ :time_elapsed ].to_f / total_run_time.to_f ) * 100 )
+        total_run_time += value[ :time_elapsed ]
 
-				when :average_time
-					method_a[ 1 ][ :average_time ] <=> method_b[ 1 ][ :average_time ]
+      }
 
-			else
+      table = table.sort{ | method_a, method_b | 
 
-				Kernel::raise ArgumentError.new("Invalid sorting rule, valid rules are :name, :times_called, :total_time, :total_time_no_subs, :percentage or :average_time")
+        case rules[ :sort ]
 
-			end
+          when :name
+            method_a[ 0 ] <=> method_b[ 0 ]
 
-			}
+          when :times_called
+            method_a[ 1 ][ :times_called ] <=> method_b[ 1 ][ :times_called ]
 
-			case rules[ :order ]
+          when :total_time
+            method_a[ 1 ][ :time_elapsed_total ] <=> method_b[ 1 ][ :time_elapsed_total ]
 
-				# do nothing
-				when :ascending
+          when :total_time_no_subs
+            method_a[ 1 ][ :time_elapsed ] <=> method_b[ 1 ][ :time_elapsed ]
 
-				when :descending
-					table = table.reverse
+          when :percentage
+          
+            ( ( method_a[ 1 ][ :time_elapsed ].to_f / total_run_time.to_f ) * 100 ) <=> ( ( method_b[ 1 ][ :time_elapsed ].to_f / total_run_time.to_f ) * 100 )
 
-			else
+          when :average_time
+            method_a[ 1 ][ :average_time ] <=> method_b[ 1 ][ :average_time ]
 
-				Kernel::raise ArgumentError.new("Invalid sort order rule, valid rules are :ascending, :descending")	
+        else
 
-			end
+          Kernel::raise ArgumentError.new("Invalid sorting rule, valid rules are :name, :times_called, :total_time, :total_time_no_subs, :percentage or :average_time")
+
+        end
+
+      }
+
+      case rules[ :order ]
+
+        # do nothing
+        when :ascending
+
+        when :descending
+          table = table.reverse
+
+      else
+
+        Kernel::raise ArgumentError.new("Invalid sort order rule, valid rules are :ascending, :descending")  
+
+      end
 
       total_percentage = 0.0
       total_time_elapsed_total = 0.0
       total_average = 0.0
       total_calls = 0
 
-			table.each{ | method | 
+      table.each{ | method | 
 
-				puts "%-80s %8s %15.8f %15.8f %8.3f%% %15.8f" % [ 
-				  method[ 0 ], 
-				  method[ 1 ][ :times_called ], 
-				  method[ 1 ][ :time_elapsed_total ], 
-				  method[ 1 ][ :time_elapsed ], 
-				  
+        puts "%-80s %8s %15.8f %15.8f %8.3f%% %15.8f" % [ 
+          method[ 0 ], 
+          method[ 1 ][ :times_called ], 
+          method[ 1 ][ :time_elapsed_total ], 
+          method[ 1 ][ :time_elapsed ], 
+          
           ( ( method[ 1 ][ :time_elapsed ].to_f / total_run_time.to_f ) * 100 ),
-				  
-				  method[ 1 ][ :average_time ] 
-			  ] unless !rules[ :show_uncalled_methods ] && method[ 1 ][ :times_called ] == 0
+          
+          method[ 1 ][ :average_time ] 
+        ] unless !rules[ :show_uncalled_methods ] && method[ 1 ][ :times_called ] == 0
 
         total_percentage += ( ( method[ 1 ][ :time_elapsed ].to_f / total_run_time.to_f ) * 100 )
 
@@ -460,13 +449,13 @@ module TDriver
         total_time_elapsed_total += method[ 1 ][ :time_elapsed_total ]        
         total_average += method[ 1 ][ :average_time ]
 
-			}
+      }
 
-			puts "%-80s %8s %15s %15s %9s %15s" % [ '-' * 80, '-' * 8, '-' * 15, '-' * 15, '-' * 8, '-' * 15 ]
+      puts "%-80s %8s %15s %15s %9s %15s" % [ '-' * 80, '-' * 8, '-' * 15, '-' * 15, '-' * 8, '-' * 15 ]
 
-			puts "%-80s %8s %15.6f %15.6f %8.3f%% %15.8f" % [ 'Total:', total_calls, total_time_elapsed_total, total_run_time, total_percentage, total_average ]
+      puts "%-80s %8s %15.6f %15.6f %8.3f%% %15.8f" % [ 'Total:', total_calls, total_time_elapsed_total, total_run_time, total_percentage, total_average ]
 
-		end
+    end
 
   end
 
@@ -474,197 +463,213 @@ end
 
 module MobyUtil
 
-	class Hooking
+  class Hooking
 
-		include Singleton
- 
-=begin
     def self.instance
 
       TDriver::Hooking
 
     end
-=end
 
-		attr_accessor :wrappee_count
-		attr_accessor :wrapped_methods
-		attr_accessor :benchmark
+  end
 
-		# list of non-wrappable methods
-		@@non_wrappable_methods = [ 'instance' ]
+end
 
-		def initialize
+=begin
 
-			# default values
-			@wrapped_methods = {}
+module MobyUtil
 
-			@wrappee_count = 0
-			@benchmark = {}
+  class Hooking
 
-			@logger_method = nil
-			@logger_instance = nil
-			
-			$mobyutil_hooking_instance = self
+    #include Singleton
+ 
+#=begin
+    def self.instance
+
+      TDriver::Hooking
+
+    end
+#=end
+
+    attr_accessor :wrappee_count
+    attr_accessor :wrapped_methods
+    attr_accessor :benchmark
+
+    # list of non-wrappable methods
+    @@non_wrappable_methods = [ 'instance' ]
+
+    def initialize
+
+      # default values
+      @wrapped_methods = {}
+
+      @wrappee_count = 0
+      @benchmark = {}
+
+      @logger_method = nil
+      @logger_instance = nil
+      
+      $mobyutil_hooking_instance = self
       $mobyutil_hooking_elapsed_time = []
 
       $mobyutil_hooking_start_benchmark_time = Time.now  
       $mobyutil_hooking_last_call_end_time = Time.now
   
-		end
+    end
 
-		# Function to set logger instance used by wrapper
-		# == params
-		# logger_instance:: Instance of TDriver logger
-		# == returns
-		def set_logger_instance( logger_instance )
+    # Function to set logger instance used by wrapper
+    # == params
+    # logger_instance:: Instance of TDriver logger
+    # == returns
+    def set_logger_instance( logger_instance )
 
-			@logger_instance = logger_instance
+      @logger_instance = logger_instance
 
-			nil
+      nil
 
-		end
+    end
 
-		# Function to create logger event - this method is called from wrapper
-		# == params
-		# text:: Text sent from wrapper
-		# arguments:: Not in use
-		# == returns
-		def log( text, *arguments )
+    # Function to create logger event - this method is called from wrapper
+    # == params
+    # text:: Text sent from wrapper
+    # arguments:: Not in use
+    # == returns
+    def log( text, *arguments )
 
 
-			unless @logger_instance.nil?
+      unless @logger_instance.nil?
 
-				@logger_instance.debug( "%s" % text ) # if @logger_instance.enabled
+        @logger_instance.debug( "%s" % text ) # if @logger_instance.enabled
 
-			end
+      end
 
-			#@logger_instance.log( "debug", "%s" % text ) unless @logger_instance.nil?
+      #@logger_instance.log( "debug", "%s" % text ) unless @logger_instance.nil?
 
-			nil
+      nil
 
-		end
+    end
 
-		# Function to hook all instance and static methods of target Class/Module
-		# == params
-		# base:: Target Class or Module
-		# == returns
-		def hook_methods( _base )
+    # Function to hook all instance and static methods of target Class/Module
+    # == params
+    # base:: Target Class or Module
+    # == returns
+    def hook_methods( _base )
 
-			hook_static_methods( _base )
-			hook_instance_methods( _base )
+      hook_static_methods( _base )
+      hook_instance_methods( _base )
 
-			nil
+      nil
 
-		end
+    end
 
-		def add_wrapper( wrapper )
+    def add_wrapper( wrapper )
 
-			@wrapped_methods.merge!( wrapper )
-			@wrappee_count += 1
+      @wrapped_methods.merge!( wrapper )
+      @wrappee_count += 1
 
-		end
+    end
 
-		# Function to update method runtime & calls count for benchmark
-		# == params
-		# method_name:: Name of the target method
-		# time_elapsed_in_subcalls:: 
-		# total_time_elapsed:: 
-		def update_method_benchmark( method_name, time_elapsed_in_subcalls, total_time_elapsed )
+    # Function to update method runtime & calls count for benchmark
+    # == params
+    # method_name:: Name of the target method
+    # time_elapsed_in_subcalls:: 
+    # total_time_elapsed:: 
+    def update_method_benchmark( method_name, time_elapsed_in_subcalls, total_time_elapsed )
 
-			@benchmark[ method_name ].tap{ | hash | 
+      @benchmark[ method_name ].tap{ | hash | 
 
-				hash[ :time_elapsed ] += ( total_time_elapsed - time_elapsed_in_subcalls ) 
-				hash[ :time_elapsed_total ] += total_time_elapsed
-				hash[ :times_called ] += 1  
+        hash[ :time_elapsed ] += ( total_time_elapsed - time_elapsed_in_subcalls ) 
+        hash[ :time_elapsed_total ] += total_time_elapsed
+        hash[ :times_called ] += 1  
 
-			}
+      }
 
-		end
+    end
 
-		def print_benchmark( rules = {} )
+    def print_benchmark( rules = {} )
 
-		  #total_run_time = $mobyutil_hooking_last_call_end_time - $mobyutil_hooking_start_benchmark_time
+      #total_run_time = $mobyutil_hooking_last_call_end_time - $mobyutil_hooking_start_benchmark_time
 
       total_run_time = 0
 
-			# :sort => :total_time || :times_called || :average_time
+      # :sort => :total_time || :times_called || :average_time
 
-			rules = { :sort => :total_time, :order => :ascending, :show_uncalled_methods => true }.merge( rules )
+      rules = { :sort => :total_time, :order => :ascending, :show_uncalled_methods => true }.merge( rules )
 
-			puts "%-80s %8s %15s %15s %9s %15s" % [ 'Name:', 'Calls:', 'Time total:', 'W/O subcalls:', '%/run', 'Total/call:' ]
-			puts "%-80s %8s %15s %15s %9s %15s" % [ '-' * 80, '-' * 8, '-' * 15, '-' * 15, '-' * 8, '-' * 15 ]
+      puts "%-80s %8s %15s %15s %9s %15s" % [ 'Name:', 'Calls:', 'Time total:', 'W/O subcalls:', '%/run', 'Total/call:' ]
+      puts "%-80s %8s %15s %15s %9s %15s" % [ '-' * 80, '-' * 8, '-' * 15, '-' * 15, '-' * 8, '-' * 15 ]
 
-			# calculate average time for method
-			( table = @benchmark ).each{ | key, value |
-			
-				table[ key ][ :average_time ] = ( value[ :times_elapsed_total ] == 0 || value[ :times_called ] == 0 ) ? 0 : value[ :time_elapsed_total ] / value[ :times_called ] 
-				
-	      total_run_time += value[ :time_elapsed ]
+      # calculate average time for method
+      ( table = @benchmark ).each{ | key, value |
+      
+        table[ key ][ :average_time ] = ( value[ :times_elapsed_total ] == 0 || value[ :times_called ] == 0 ) ? 0 : value[ :time_elapsed_total ] / value[ :times_called ] 
+        
+        total_run_time += value[ :time_elapsed ]
 
-			}
+      }
 
-			table = table.sort{ | method_a, method_b | 
+      table = table.sort{ | method_a, method_b | 
 
-			case rules[ :sort ]
+      case rules[ :sort ]
 
-				when :name
-					method_a[ 0 ] <=> method_b[ 0 ]
+        when :name
+          method_a[ 0 ] <=> method_b[ 0 ]
 
-				when :times_called
-					method_a[ 1 ][ :times_called ] <=> method_b[ 1 ][ :times_called ]
+        when :times_called
+          method_a[ 1 ][ :times_called ] <=> method_b[ 1 ][ :times_called ]
 
-				when :total_time
-					method_a[ 1 ][ :time_elapsed_total ] <=> method_b[ 1 ][ :time_elapsed_total ]
+        when :total_time
+          method_a[ 1 ][ :time_elapsed_total ] <=> method_b[ 1 ][ :time_elapsed_total ]
 
-				when :total_time_no_subs
-					method_a[ 1 ][ :time_elapsed ] <=> method_b[ 1 ][ :time_elapsed ]
+        when :total_time_no_subs
+          method_a[ 1 ][ :time_elapsed ] <=> method_b[ 1 ][ :time_elapsed ]
 
         when :percentage
         
           ( ( method_a[ 1 ][ :time_elapsed ].to_f / total_run_time.to_f ) * 100 ) <=> ( ( method_b[ 1 ][ :time_elapsed ].to_f / total_run_time.to_f ) * 100 )
 
-				when :average_time
-					method_a[ 1 ][ :average_time ] <=> method_b[ 1 ][ :average_time ]
+        when :average_time
+          method_a[ 1 ][ :average_time ] <=> method_b[ 1 ][ :average_time ]
 
-			else
+      else
 
-				Kernel::raise ArgumentError.new("Invalid sorting rule, valid rules are :name, :times_called, :total_time, :total_time_no_subs, :percentage or :average_time")
+        Kernel::raise ArgumentError.new("Invalid sorting rule, valid rules are :name, :times_called, :total_time, :total_time_no_subs, :percentage or :average_time")
 
-			end
+      end
 
-			}
+      }
 
-			case rules[ :order ]
+      case rules[ :order ]
 
-				when :ascending
-					# do nothing
+        when :ascending
+          # do nothing
 
-				when :descending
-					table = table.reverse
+        when :descending
+          table = table.reverse
 
-			else
+      else
 
-				Kernel::raise ArgumentError.new("Invalid sort order rule, valid rules are :ascending, :descending")	
+        Kernel::raise ArgumentError.new("Invalid sort order rule, valid rules are :ascending, :descending")  
 
-			end
+      end
 
       total_percentage = 0.0
       total_time_elapsed_total = 0.0
       total_average = 0.0
       total_calls = 0
 
-			table.each{ | method | 
+      table.each{ | method | 
 
-				puts "%-80s %8s %15.8f %15.8f %8.3f%% %15.8f" % [ 
-				  method[ 0 ], 
-				  method[ 1 ][ :times_called ], 
-				  method[ 1 ][ :time_elapsed_total ], 
-				  method[ 1 ][ :time_elapsed ], 
-				  
+        puts "%-80s %8s %15.8f %15.8f %8.3f%% %15.8f" % [ 
+          method[ 0 ], 
+          method[ 1 ][ :times_called ], 
+          method[ 1 ][ :time_elapsed_total ], 
+          method[ 1 ][ :time_elapsed ], 
+          
           ( ( method[ 1 ][ :time_elapsed ].to_f / total_run_time.to_f ) * 100 ),
-				  
-				  method[ 1 ][ :average_time ] 
-			  ] unless !rules[ :show_uncalled_methods ] && method[ 1 ][ :times_called ] == 0
+          
+          method[ 1 ][ :average_time ] 
+        ] unless !rules[ :show_uncalled_methods ] && method[ 1 ][ :times_called ] == 0
 
         total_percentage += ( ( method[ 1 ][ :time_elapsed ].to_f / total_run_time.to_f ) * 100 )
 
@@ -672,179 +677,179 @@ module MobyUtil
         total_time_elapsed_total += method[ 1 ][ :time_elapsed_total ]        
         total_average += method[ 1 ][ :average_time ]
 
-			}
+      }
 
-			puts "%-80s %8s %15s %15s %9s %15s" % [ '-' * 80, '-' * 8, '-' * 15, '-' * 15, '-' * 8, '-' * 15 ]
+      puts "%-80s %8s %15s %15s %9s %15s" % [ '-' * 80, '-' * 8, '-' * 15, '-' * 15, '-' * 8, '-' * 15 ]
 
-			puts "%-80s %8s %15.6f %15.6f %8.3f%% %15.8f" % [ 'Total:', total_calls, total_time_elapsed_total, total_run_time, total_percentage, total_average ]
+      puts "%-80s %8s %15.6f %15.6f %8.3f%% %15.8f" % [ 'Total:', total_calls, total_time_elapsed_total, total_run_time, total_percentage, total_average ]
 
-		end
+    end
 
 
-	private
+  private
 
-		# Function to hook a method 
-		# == params
-		# base:: Class or Module
-		# method_name:: Name of the method  
-		# method_type:: public, private or static
-		# == returns
-		def hook_method( base, method_name, method_type )
+    # Function to hook a method 
+    # == params
+    # base:: Class or Module
+    # method_name:: Name of the method  
+    # method_type:: public, private or static
+    # == returns
+    def hook_method( base, method_name, method_type )
 
-			# create only one wrapper for each method
-			unless MobyUtil::Hooking.instance.wrapped_methods.has_key?( "#{ base.name }::#{ method_name }" )
+      # create only one wrapper for each method
+      unless MobyUtil::Hooking.instance.wrapped_methods.has_key?( "#{ base.name }::#{ method_name }" )
 
-				# evaluate the generated wrapper source code
-				eval("base.#{ base.class.name.downcase }_eval( \"#{ make_wrapper( base, method_name.to_s, method_type.to_s )}\" )") if [ Class, Module ].include?( base.class )
+        # evaluate the generated wrapper source code
+        eval("base.#{ base.class.name.downcase }_eval( \"#{ make_wrapper( base, method_name.to_s, method_type.to_s )}\" )") if [ Class, Module ].include?( base.class )
 
-			end
+      end
 
-			nil
+      nil
 
-		end
+    end
 
-		# Function to hook static methods for given Class or Module
-		# == params
-		# base:: Target Class or Module
-		# == returns
-		def hook_static_methods( _base )
+    # Function to hook static methods for given Class or Module
+    # == params
+    # base:: Target Class or Module
+    # == returns
+    def hook_static_methods( _base )
 
-			if [ Class, Module ].include?( _base.class )
+      if [ Class, Module ].include?( _base.class )
 
-				_base.singleton_methods( false ).each { | method_name |
+        _base.singleton_methods( false ).each { | method_name |
 
-					hook_method( _base, method_name.to_s, "static" ) unless @@non_wrappable_methods.include?( method_name.to_s ) # method_name.to_s for ruby 1.9 compatibility
+          hook_method( _base, method_name.to_s, "static" ) unless @@non_wrappable_methods.include?( method_name.to_s ) # method_name.to_s for ruby 1.9 compatibility
 
-				} 
+        } 
 
-			end
+      end
 
-			nil
-		end
+      nil
+    end
 
-		# Function to hook instance methods for given Class or Module
-		# == params
-		# base:: Target Class or Module
-		# == returns
-		def hook_instance_methods( _base )
+    # Function to hook instance methods for given Class or Module
+    # == params
+    # base:: Target Class or Module
+    # == returns
+    def hook_instance_methods( _base )
 
-			if [ Class, Module ].include?( _base.class )        
+      if [ Class, Module ].include?( _base.class )        
 
-				{ :public => _base.public_instance_methods( false ), :private => _base.private_instance_methods( false ), :protected => _base.protected_instance_methods( false ) }.each { | method_type, methods |
+        { :public => _base.public_instance_methods( false ), :private => _base.private_instance_methods( false ), :protected => _base.protected_instance_methods( false ) }.each { | method_type, methods |
 
-					methods.each { | method_name | hook_method( _base, method_name.to_s, method_type.to_s ) unless /__wrappee_\d+/i.match( method_name.to_s ) } # method_name.to_s for ruby 1.9 compatibility
+          methods.each { | method_name | hook_method( _base, method_name.to_s, method_type.to_s ) unless /__wrappee_\d+/i.match( method_name.to_s ) } # method_name.to_s for ruby 1.9 compatibility
 
-				}
+        }
 
-			end
+      end
 
-			nil
-		end
+      nil
+    end
 
-		# Function to retrieve method path (e.g. Module1::Module2::Class1)
-		# == params
-		# base:: Target Class or Module
-		# == returns
-		# String:: Method path
-		def method_path( _base )
+    # Function to retrieve method path (e.g. Module1::Module2::Class1)
+    # == params
+    # base:: Target Class or Module
+    # == returns
+    # String:: Method path
+    def method_path( _base )
 
-			if [ Class, Module ].include?( _base.class )
+      if [ Class, Module ].include?( _base.class )
 
-				_base.name
+        _base.name
 
-			else
+      else
 
-				_base.class.name
+        _base.class.name
 
-			end
+      end
 
-		end
+    end
 
-		# Function to generate unique name for wrappee method
-		# == params
-		# method_name:: Name of the target method
-		# == returns
-		# String:: Unique name for wrappee method
-		def create_wrappee_name( method_name )
+    # Function to generate unique name for wrappee method
+    # == params
+    # method_name:: Name of the target method
+    # == returns
+    # String:: Unique name for wrappee method
+    def create_wrappee_name( method_name )
 
-			wrappee_name = "non_pritanble_method_name" if ( wrappee_name = ( /[a-z0-9_]*/i.match( method_name ) ) ).length == 0 
+      wrappee_name = "non_pritanble_method_name" if ( wrappee_name = ( /[a-z0-9_]*/i.match( method_name ) ) ).length == 0 
 
-			wrappee_name = "__wrappee_#{ @wrappee_count }__#{ wrappee_name }"
+      wrappee_name = "__wrappee_#{ @wrappee_count }__#{ wrappee_name }"
 
-		end
+    end
 
-		# Function for create source code of wrapper for method 
-		# == params
-		# base:: Class or Module
-		# method_name:: Name of the method  
-		# method_type:: public, private or static
-		# == returns
-		# String:: source code
-		def make_wrapper( base, method_name, method_type = nil )
+    # Function for create source code of wrapper for method 
+    # == params
+    # base:: Class or Module
+    # method_name:: Name of the method  
+    # method_type:: public, private or static
+    # == returns
+    # String:: source code
+    def make_wrapper( base, method_name, method_type = nil )
 
-			# method name with namespace
-			base_and_method_name = "#{ base.name }::#{ method_name }"
+      # method name with namespace
+      base_and_method_name = "#{ base.name }::#{ method_name }"
 
-			# add method to benchmark table
-			@benchmark[ base_and_method_name ] = { :time_elapsed => 0 , :times_called => 0, :time_elapsed_total => 0 } if ENV[ 'TDRIVER_BENCHMARK' ].to_s.downcase == 'true'
+      # add method to benchmark table
+      @benchmark[ base_and_method_name ] = { :time_elapsed => 0 , :times_called => 0, :time_elapsed_total => 0 } if ENV[ 'TDRIVER_BENCHMARK' ].to_s.downcase == 'true'
 
-			# create new name for original method 
-			original_method_name = create_wrappee_name( method_name )
+      # create new name for original method 
+      original_method_name = create_wrappee_name( method_name )
 
-			# add method to wrapper methods list
-			@wrapped_methods.merge!( base_and_method_name => nil )
-			@wrappee_count += 1
+      # add method to wrapper methods list
+      @wrapped_methods.merge!( base_and_method_name => nil )
+      @wrappee_count += 1
 
-			case method_type
+      case method_type
 
-				when 'public', 'private', 'static'
+        when 'public', 'private', 'static'
 
-					source = "
-							#{
-							# this is needed if method is static
-							"class << self" if method_type == 'static' 
+          source = "
+              #{
+              # this is needed if method is static
+              "class << self" if method_type == 'static' 
 
-							}
+              }
 
-								# create a copy of original method
-								alias_method :#{ original_method_name }, :#{ method_name }
+                # create a copy of original method
+                alias_method :#{ original_method_name }, :#{ method_name }
 
-								#{ 
+                #{ 
 
-									if method_type == 'static'
+                  if method_type == 'static'
 
-										# undefine original version if static method
-										"self.send( :undef_method, :#{ method_name } )"
+                    # undefine original version if static method
+                    "self.send( :undef_method, :#{ method_name } )"
 
-									else
+                  else
 
-										# method visiblity unless method type is static
-										"#{ method_type }"
+                    # method visiblity unless method type is static
+                    "#{ method_type }"
 
-									end
+                  end
 
-						
-								}
+            
+                }
 
-								def #{ method_name }( *args, &block )
+                def #{ method_name }( *args, &block )
 
-									# log method call
-									$mobyutil_hooking_instance.log( '#{ method_path( base ) }.#{ method_name }', nil )
+                  # log method call
+                  $mobyutil_hooking_instance.log( '#{ method_path( base ) }.#{ method_name }', nil )
 
-									#{
+                  #{
 
-										if ENV[ 'TDRIVER_BENCHMARK' ].to_s.downcase == 'true'
-							
-											"# store start time for performance measurement
-											start_time = Time.now
+                    if ENV[ 'TDRIVER_BENCHMARK' ].to_s.downcase == 'true'
+              
+                      "# store start time for performance measurement
+                      start_time = Time.now
                       
                       # Time elapsed in sub calls
                       $mobyutil_hooking_elapsed_time << 0.0
 
                       begin
 
-											  # call original method
-											  result = send(:#{ original_method_name }, *args, &block )
+                        # call original method
+                        result = send(:#{ original_method_name }, *args, &block )
 
                       rescue Exception => exception
 
@@ -861,38 +866,39 @@ module MobyUtil
                         # add elapsed time to caller method 
                         $mobyutil_hooking_elapsed_time[ -1 ] += elapsed_time unless $mobyutil_hooking_elapsed_time.empty?
 
-											  # store performance results to benchmark hash
-											  $mobyutil_hooking_instance.update_method_benchmark( '#{ base_and_method_name }', elapsed_time_in_subcalls, elapsed_time )
+                        # store performance results to benchmark hash
+                        $mobyutil_hooking_instance.update_method_benchmark( '#{ base_and_method_name }', elapsed_time_in_subcalls, elapsed_time )
 
                       end
 
-											# return results
-											result"
+                      # return results
+                      result"
 
-										else
+                    else
 
-											"# call original method
-  									  result = send(:#{ original_method_name }, *args, &block )"
+                      "# call original method
+                      result = send(:#{ original_method_name }, *args, &block )"
 
-										end
+                    end
 
-									}
+                  }
 
-								end
+                end
 
-							private :#{ original_method_name }
+              private :#{ original_method_name }
 
-							#{ 
+              #{ 
 
-							# this is needed if method is static
-							"end" if method_type == 'static' 
+              # this is needed if method is static
+              "end" if method_type == 'static' 
 
-							}" 
+              }" 
 
-			end
+      end
 
-		end
+    end
 
-	end # Hooking
+  end # Hooking
 
 end # MobyUtil
+=end

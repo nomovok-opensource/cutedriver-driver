@@ -456,7 +456,7 @@ module MobyUtil
           enable_raise_hooking
 
           # pass logger instance to hooking module
-          MobyUtil::Hooking.instance.set_logger_instance( MobyUtil::Logger.instance )
+          TDriver::Hooking.logger_instance = MobyUtil::Logger.instance
 
         end  
 
