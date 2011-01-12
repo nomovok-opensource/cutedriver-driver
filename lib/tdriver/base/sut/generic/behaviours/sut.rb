@@ -206,16 +206,19 @@ module MobyBehaviour
 
         @xml_data = xml
         @frozen = true
+        @forced_xml = true
 
       elsif xml.kind_of?( String )
 
         @xml_data = MobyUtil::XML.parse_string( xml ).root
         @frozen = true
+        @forced_xml = true
 
       elsif xml.kind_of?( NilClass )
 
         @xml_data = nil
         @frozen = false
+        @forced_xml = false
 
       end
 
