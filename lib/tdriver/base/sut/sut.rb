@@ -47,6 +47,8 @@ module MobyBase
 
       @object_behaviours = []
 
+      @forced_xml = false
+
     end  
 
     # Interface to forward command execution to sut specific controller (SutController#execute_command)
