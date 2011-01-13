@@ -802,7 +802,9 @@ module MobyBehaviour
           
             Kernel::raise MobyBase::AttributeNotFoundError.new(
             
-              "Could not find attribute #{ name.inspect } for test object of type #{ @type.to_s }"
+              #"Could not find attribute #{ name.inspect } for test object (name: #{ @name.to_s.inspect }, type: #{ @type.to_s.inspect }, id: #{ @id.inspect })"
+
+              "Test object does not have #{ name.inspect } attribute (name: #{ @name.to_s.inspect }, type: #{ @type.to_s.inspect }, id: #{ @id.inspect })"
               
             )
 
