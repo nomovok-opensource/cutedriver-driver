@@ -137,6 +137,7 @@ module MobyBehaviour
     #  example: -
     def freeze
 
+=begin
       if $parameters[ @id ][ :use_find_object, 'false' ] == 'true' && self.respond_to?( 'find_object' )
 
         warn("warning: SUT##{ __method__ } is not supported when use_find_objects optimization is enabled")
@@ -146,6 +147,10 @@ module MobyBehaviour
         @frozen = true
 
       end
+=end
+
+      @frozen = true
+
 
       nil
 
@@ -160,6 +165,7 @@ module MobyBehaviour
     #  example: -
     def unfreeze
 
+=begin
       if $parameters[ @id ][ :use_find_object, 'false' ] == 'true' && self.respond_to?( 'find_object' )
 
         warn("warning: SUT##{ __method__ } is not supported when use_find_objects optimization is enabled")
@@ -169,6 +175,9 @@ module MobyBehaviour
         @frozen = false
 
       end
+=end
+
+      @frozen = false
   
       nil
 
@@ -778,7 +787,7 @@ module MobyBehaviour
     #   description: Value matching the parameter name given as argument
     #   example: 'testability-driver-qt-sut-plugin'
     #
-    # $parametersHash
+    # MobyUtil::ParameterHash
     #   description: Hash of values, if no arguments is specified
     #   example: { :value => '1', :inner_hash => { :another_value => 100 } }
     #
