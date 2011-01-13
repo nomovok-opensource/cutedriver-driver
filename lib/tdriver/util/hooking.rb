@@ -457,9 +457,9 @@ module TDriver
 
     end
 
-  end
+  end # Hooking
 
-end
+end # TDriver
 
 # deprecated
 module MobyUtil
@@ -472,6 +472,6 @@ module MobyUtil
 
     end
 
-  end
+  end # Hooking
 
-end
+end # MobyUtil
