@@ -177,7 +177,7 @@ module TDriver
                   if method_type == 'static'
 
                     # undefine original version if static method
-                    "self.send( :undef_method, :#{ method_name } )"
+                    "self.__send__( :undef_method, :#{ method_name } )"
 
                   else
 
@@ -206,7 +206,7 @@ module TDriver
                       begin
 
                         # call and return result of original method
-                        send(:#{ original_method_name }, *args, &block )
+                        __send__(:#{ original_method_name }, *args, &block )
 
                       rescue 
 
@@ -231,7 +231,7 @@ module TDriver
                     else
 
                       "# call original method
-                      send(:#{ original_method_name }, *args, &block )"
+                      __send__(:#{ original_method_name }, *args, &block )"
 
                     end
 
