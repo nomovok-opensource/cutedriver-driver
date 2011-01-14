@@ -99,12 +99,24 @@ module MobyBehaviour
     # attributes_hash = @test_app.Triangle( :name => 'Triangle1' ).attributes # retrieve all attribute for triangle object
     def attributes
 
+      # retrieve sut parameters
+      sut_parameters = $parameters[ @sut.id ]
+
+      # retrieve sut attribute filter type
+      filter_type = sut_parameters[ :filter_type, 'none' ] 
+
+      # temporarly disable attribute filter to retrieve all test object attributes
+      sut_parameters[ :filter_type ] = 'none'
+
       begin
+
+        # raise exception to refresh test object ui state if filter_type was something else than 'none'
+        raise MobyBase::TestObjectNotFoundError unless filter_type == 'none'
 
         # retrieve xml data, performs xpath to sut xml_data
         _xml_data = xml_data
 
-      rescue MobyBase::TestObjectNotFoundError		
+      rescue MobyBase::TestObjectNotFoundError
 
         # attributes used to refresh parent application
         if @creation_attributes[ :type ] == 'application'
@@ -124,6 +136,11 @@ module MobyBehaviour
 
         # retrieve updated xml data
         _xml_data = xml_data
+
+      ensure
+
+        # restore attributes filter type
+        sut_parameters[ :filter_type ] = filter_type
 
       end
 
