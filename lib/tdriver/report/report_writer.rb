@@ -844,7 +844,7 @@ display: none;
     if @test_case_behaviour_log.length > 0
       html_body=html_body<<
         '<dl class="togList">'<<
-        '<dt onclick="tog(this)" style="background-color: #CCCCCC;"><b style="font-size: large"><span><input id="Button1" type="button" value="Open" class="btn" /></span> Behaviours</b></dt>'<<
+        '<dt onclick="tog(this)" style="background-color: #CCCCCC;"><b style="font-size: large"><span><input id="Button1" type="button" value="Close" class="btn" /></span> Behaviours</b></dt>'<<
         '<dd style="font-size: small">'<<
         format_behaviour_log(@test_case_behaviour_log)<<
         '</dd>'<<
@@ -853,7 +853,7 @@ display: none;
     if @test_case_user_data!=nil && !@test_case_user_data.empty?
       html_body=html_body<<
         '<dl class="togList">'<<
-        '<dt onclick="tog(this)" style="background-color: #CCCCCC;"><b style="font-size: large"><span><input id="Button1" type="button" value="Open" class="btn" /></span> User Data</b></dt>'<<
+        '<dt onclick="tog(this)" style="background-color: #CCCCCC;"><b style="font-size: large"><span><input id="Button1" type="button" value="Close" class="btn" /></span> User Data</b></dt>'<<
         '<dd style="font-size: small">'<<
         format_user_log_table( @test_case_user_data,@test_case_user_data_columns)<<
         '</dd>'<<

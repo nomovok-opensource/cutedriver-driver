@@ -32,7 +32,7 @@ module TDriverReportJavascript
       'toOpen =!dd.style.display;'<<
       "dd.style.display = toOpen? 'block':'';"<<
       "dt.getElementsByTagName('span')[0].innerHTML"<<
-      "= toOpen? '<input id=\"Button1\" type=\"button\" value=\"Close\" class=\"btn\" style=\"background-color: #FFFFFF\" />':'<input id=\"Button1\" type=\"button\" value=\"Open\" class=\"btn\" />' ;"<<
+      "= toOpen? '<input id=\"Button1\" type=\"button\" value=\"Open\" class=\"btn\" />':'<input id=\"Button1\" type=\"button\" value=\"Close\" class=\"btn\" style=\"background-color: #FFFFFF\" />' ;"<<
       '}'<<
       get_table_sorting_java_script <<
       'function init()
