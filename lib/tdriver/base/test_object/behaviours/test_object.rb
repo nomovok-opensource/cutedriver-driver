@@ -510,10 +510,29 @@ module MobyBehaviour
         # get first matching element
         _xml_data = _xml_data.first
 
-        unless _xml_data.eql?( xml_data )
+        #unless _xml_data.eql?( xml_data )
+
+          # store previous object environment value 
+          previous_environment = @env
 
           # update current test objects xml_data 
-          xml_data = _xml_data
+          __send__( :xml_data=, _xml_data )
+
+          # compare new environment value with previous 
+          if @env != previous_environment
+
+            # reapply behaviours to test object if environment value has changed
+            MobyBase::BehaviourFactory.instance.apply_behaviour!(
+
+              :object => self,
+              :object_type => [ '*', @type ], 
+              :input_type => [ '*', @sut.input.to_s ],
+              :env => [ '*', *@env.to_s.split(";") ],
+              :version => [ '*', @sut.ui_version.to_s ]
+
+            )
+            
+          end
 
           # update child objects
           @child_object_cache.each_object{ | test_object | 
@@ -524,7 +543,7 @@ module MobyBehaviour
             
           }
         
-        end
+        #end
                 
       rescue
 
