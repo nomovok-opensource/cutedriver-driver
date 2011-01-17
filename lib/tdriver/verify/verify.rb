@@ -73,13 +73,14 @@ module TDriverVerify
 
   def verify( timeout = nil, message = nil, &block )
 
-    logging_enabled = MobyUtil::Logger.instance.enabled
+    logging_enabled = $logger.enabled
 
     verify_caller = caller(1).first.to_s
 
     begin
 
-      MobyUtil::Logger.instance.enabled = false
+      $logger.enabled = false
+      
       Kernel::raise ArgumentError.new("No block was given.") unless block_given?
       Kernel::raise ArgumentError.new("Argument timeout was not an Integer.") unless timeout.nil? or timeout.kind_of?(Integer)
       Kernel::raise ArgumentError.new("Argument message was not a String.") unless message.nil? or message.kind_of?(String)
@@ -119,8 +120,8 @@ module TDriverVerify
 
             rescue Exception
               # failed to load line from file, do nothing
-              MobyUtil::Logger.instance.enabled = logging_enabled
-              MobyUtil::Logger.instance.log "behaviour" , "WARNING;Failed to load source line: #{e.backtrace.inspect}.;#{self.kind_of?(MobyBase::SUT) ? self.id.to_s + ';sut' : ';'};{};verify;"
+              $logger.enabled = logging_enabled
+              $logger.log "behaviour" , "WARNING;Failed to load source line: #{e.backtrace.inspect}.;#{self.kind_of?(MobyBase::SUT) ? self.id.to_s + ';sut' : ';'};{};verify;"
             end
 
             if !source_contents.empty?
@@ -147,8 +148,8 @@ module TDriverVerify
 
       raise if e.kind_of? MobyBase::ContinuousVerificationError
 
-      MobyUtil::Logger.instance.enabled = logging_enabled
-      MobyUtil::Logger.instance.log "behaviour" , "FAIL;Verification #{message.nil? ? '' : '\"' << message << '\" '}failed: #{e.to_s}#{timeout.nil? ? '' : ' using timeout ' + timeout.to_s}.;#{self.kind_of?(MobyBase::SUT) ? self.id.to_s + ';sut' : ';'};{};verify;"
+      $logger.enabled = logging_enabled
+      $logger.log "behaviour" , "FAIL;Verification #{message.nil? ? '' : '\"' << message << '\" '}failed: #{e.to_s}#{timeout.nil? ? '' : ' using timeout ' + timeout.to_s}.;#{self.kind_of?(MobyBase::SUT) ? self.id.to_s + ';sut' : ';'};{};verify;"
       Kernel::raise e
 
     ensure
@@ -157,8 +158,8 @@ module TDriverVerify
 
     end
 
-    MobyUtil::Logger.instance.enabled = logging_enabled
-    MobyUtil::Logger.instance.log "behaviour" , "PASS;Verification #{message.nil? ? '' : '\"' << message << '\" '}at #{verify_caller} was successful#{timeout.nil? ? '' : ' using timeout ' + timeout.to_s}.;#{self.kind_of?(MobyBase::SUT) ? self.id.to_s + ';sut' : ';'};{};verify;"
+    $logger.enabled = logging_enabled
+    $logger.log "behaviour" , "PASS;Verification #{message.nil? ? '' : '\"' << message << '\" '}at #{verify_caller} was successful#{timeout.nil? ? '' : ' using timeout ' + timeout.to_s}.;#{self.kind_of?(MobyBase::SUT) ? self.id.to_s + ';sut' : ';'};{};verify;"
 
     return nil
 
@@ -178,11 +179,11 @@ module TDriverVerify
   # VerificationError:: The verification failed.
   def verify_not( timeout = nil, message = nil, &block )
 
-    logging_enabled = MobyUtil::Logger.instance.enabled
+    logging_enabled = $logger.enabled
     verify_caller = caller(1).first.to_s
     begin
 
-      MobyUtil::Logger.instance.enabled = false
+      $logger.enabled = false
       Kernel::raise ArgumentError.new("No block was given.") unless block_given?
       Kernel::raise ArgumentError.new("Argument timeout was not an Integer.") unless timeout.nil? or timeout.kind_of?(Integer)
       Kernel::raise ArgumentError.new("Argument message was not a String.") unless message.nil? or message.kind_of?(String)
@@ -242,8 +243,8 @@ module TDriverVerify
 
       raise if e.kind_of? MobyBase::ContinuousVerificationError
 
-      MobyUtil::Logger.instance.enabled = logging_enabled
-      MobyUtil::Logger.instance.log "behaviour" , "FAIL;Verification #{message.nil? ? '' : '\"' << message << '\" '}failed: #{e.to_s}#{timeout.nil? ? '' : ' using timeout ' + timeout.to_s}.;#{self.kind_of?(MobyBase::SUT) ? self.id.to_s + ';sut' : ';'};{};verify_not;"
+      $logger.enabled = logging_enabled
+      $logger.log "behaviour" , "FAIL;Verification #{message.nil? ? '' : '\"' << message << '\" '}failed: #{e.to_s}#{timeout.nil? ? '' : ' using timeout ' + timeout.to_s}.;#{self.kind_of?(MobyBase::SUT) ? self.id.to_s + ';sut' : ';'};{};verify_not;"
       Kernel::raise e
 
     ensure
@@ -252,8 +253,8 @@ module TDriverVerify
 
     end
 
-    MobyUtil::Logger.instance.enabled = logging_enabled
-    MobyUtil::Logger.instance.log "behaviour" , "PASS;Verification #{message.nil? ? '' : '\"' << message << '\" '}at #{verify_caller} was successful#{timeout.nil? ? '' : ' using timeout ' + timeout.to_s}.;#{self.kind_of?(MobyBase::SUT) ? self.id.to_s + ';sut' : ';'};{};verify_not;"
+    $logger.enabled = logging_enabled
+    $logger.log "behaviour" , "PASS;Verification #{message.nil? ? '' : '\"' << message << '\" '}at #{verify_caller} was successful#{timeout.nil? ? '' : ' using timeout ' + timeout.to_s}.;#{self.kind_of?(MobyBase::SUT) ? self.id.to_s + ';sut' : ';'};{};verify_not;"
     return nil
 
   end
@@ -272,11 +273,11 @@ module TDriverVerify
   # RuntimeError:: An unexpected error was encountered during verification.
   def verify_true( timeout = nil, message = nil, &block )
 
-    logging_enabled = MobyUtil::Logger.instance.enabled
+    logging_enabled = $logger.enabled
     verify_caller = caller(1).first.to_s
 
     begin
-      MobyUtil::Logger.instance.enabled = false
+      $logger.enabled = false
       Kernel::raise ArgumentError.new("No block was given.") unless block_given?
       Kernel::raise ArgumentError.new("Argument timeout was not an Integer.") unless timeout.nil? or timeout.kind_of?(Integer)
       Kernel::raise ArgumentError.new("Argument message was not a String.") unless message.nil? or message.kind_of?(String)
@@ -348,7 +349,7 @@ module TDriverVerify
 
           raise if e.kind_of? MobyBase::ContinuousVerificationError
 
-          MobyUtil::Logger.instance.enabled = logging_enabled
+          $logger.enabled = logging_enabled
 
           # an unexpected error has occurred
           Kernel::raise RuntimeError.new("An unexpected error was encountered during verification:\n" << e.inspect )
@@ -359,15 +360,15 @@ module TDriverVerify
 
     rescue Exception => e
       raise if e.kind_of? MobyBase::ContinuousVerificationError
-      MobyUtil::Logger.instance.enabled = logging_enabled
-      MobyUtil::Logger.instance.log "behaviour" , "FAIL;Verification #{message.nil? ? '' : '\"' << message << '\" '}failed:#{e.to_s}.\n#{timeout.nil? ? '' : ' using timeout ' + timeout.to_s}.;#{self.kind_of?(MobyBase::SUT) ? self.id.to_s + ';sut' : ';'};{};verify_true;"
+      $logger.enabled = logging_enabled
+      $logger.log "behaviour" , "FAIL;Verification #{message.nil? ? '' : '\"' << message << '\" '}failed:#{e.to_s}.\n#{timeout.nil? ? '' : ' using timeout ' + timeout.to_s}.;#{self.kind_of?(MobyBase::SUT) ? self.id.to_s + ';sut' : ';'};{};verify_true;"
       Kernel::raise e
     ensure
       MobyBase::TestObjectFactory.instance.timeout = original_sync_timeout unless original_sync_timeout.nil?
     end
 
-    MobyUtil::Logger.instance.enabled = logging_enabled
-    MobyUtil::Logger.instance.log "behaviour" , "PASS;Verification #{message.nil? ? '' : '\"' << message << '\" '}at #{verify_caller} was successful#{timeout.nil? ? '' : ' using timeout ' + timeout.to_s}.;#{self.kind_of?(MobyBase::SUT) ? self.id.to_s + ';sut' : ';'};{};verify_true;"
+    $logger.enabled = logging_enabled
+    $logger.log "behaviour" , "PASS;Verification #{message.nil? ? '' : '\"' << message << '\" '}at #{verify_caller} was successful#{timeout.nil? ? '' : ' using timeout ' + timeout.to_s}.;#{self.kind_of?(MobyBase::SUT) ? self.id.to_s + ';sut' : ';'};{};verify_true;"
     return nil
 
   end
@@ -386,13 +387,13 @@ module TDriverVerify
   # RuntimeError:: An unexpected error was encountered during verification.
   def verify_false( timeout = nil, message = nil, &block )
 
-    logging_enabled = MobyUtil::Logger.instance.enabled
+    logging_enabled = $logger.enabled
 
     verify_caller = caller(1).first.to_s
 
     begin
 
-      MobyUtil::Logger.instance.enabled = false
+      $logger.enabled = false
 
       Kernel::raise ArgumentError.new("No block was given.") unless block_given?
 
@@ -445,7 +446,7 @@ module TDriverVerify
         rescue Exception => e
           raise if e.kind_of? MobyBase::ContinuousVerificationError
           # an unexpected error has occurred
-          MobyUtil::Logger.instance.enabled = logging_enabled
+          $logger.enabled = logging_enabled
           Kernel::raise RuntimeError.new("An unexpected error was encountered during verification:\n" << e.inspect )
 
         end # begin, catch any VerificationErrors
@@ -458,8 +459,8 @@ module TDriverVerify
 
       raise if e.kind_of? MobyBase::ContinuousVerificationError
 
-      MobyUtil::Logger.instance.enabled = logging_enabled
-      MobyUtil::Logger.instance.log "behaviour" , "FAIL;Verification #{message.nil? ? '' : '\"' << message << '\" '}failed:#{e.to_s}.\n #{timeout.nil? ? '' : ' using timeout ' + timeout.to_s}.;#{self.kind_of?(MobyBase::SUT) ? self.id.to_s + ';sut' : ';'};{};verify_false;"
+      $logger.enabled = logging_enabled
+      $logger.log "behaviour" , "FAIL;Verification #{message.nil? ? '' : '\"' << message << '\" '}failed:#{e.to_s}.\n #{timeout.nil? ? '' : ' using timeout ' + timeout.to_s}.;#{self.kind_of?(MobyBase::SUT) ? self.id.to_s + ';sut' : ';'};{};verify_false;"
 
       Kernel::raise e
 
@@ -467,8 +468,8 @@ module TDriverVerify
       MobyBase::TestObjectFactory.instance.timeout = original_sync_timeout unless original_sync_timeout.nil?
     end
 
-    MobyUtil::Logger.instance.enabled = logging_enabled
-    MobyUtil::Logger.instance.log "behaviour" , "PASS;Verification #{message.nil? ? '' : '\"' << message << '\" '}at #{verify_caller} was successful#{timeout.nil? ? '' : ' using timeout ' + timeout.to_s}.;#{self.kind_of?(MobyBase::SUT) ? self.id.to_s + ';sut' : ';'};{};verify_false;"
+    $logger.enabled = logging_enabled
+    $logger.log "behaviour" , "PASS;Verification #{message.nil? ? '' : '\"' << message << '\" '}at #{verify_caller} was successful#{timeout.nil? ? '' : ' using timeout ' + timeout.to_s}.;#{self.kind_of?(MobyBase::SUT) ? self.id.to_s + ';sut' : ';'};{};verify_false;"
     return nil
 
   end
@@ -487,10 +488,10 @@ module TDriverVerify
   # VerificationError:: The verification failed.
   # RuntimeError:: An unexpected error was encountered during verification.
   def verify_equal( expected, timeout = nil, message = nil, &block )
-    logging_enabled = MobyUtil::Logger.instance.enabled
+    logging_enabled = $logger.enabled
     verify_caller = caller(1).first.to_s
     begin
-      MobyUtil::Logger.instance.enabled = false
+      $logger.enabled = false
       Kernel::raise ArgumentError.new("No block was given.") unless block_given?
       Kernel::raise ArgumentError.new("Argument timeout was not an Integer.") unless timeout.nil? or timeout.kind_of?(Integer)
       Kernel::raise ArgumentError.new("Argument message was not a String.") unless message.nil? or message.kind_of?(String)
@@ -555,15 +556,15 @@ module TDriverVerify
 
       raise if e.kind_of? MobyBase::ContinuousVerificationError
 
-      MobyUtil::Logger.instance.enabled = logging_enabled
-      MobyUtil::Logger.instance.log "behaviour" , "FAIL;Verification #{message.nil? ? '' : '\"' << message << '\" '}failed:#{e.to_s}.\n#{timeout.nil? ? '' : ' using timeout ' + timeout.to_s}.;#{self.kind_of?(MobyBase::SUT) ? self.id.to_s + ';sut' : ';'};{};verify_equal;" << expected.to_s
+      $logger.enabled = logging_enabled
+      $logger.log "behaviour" , "FAIL;Verification #{message.nil? ? '' : '\"' << message << '\" '}failed:#{e.to_s}.\n#{timeout.nil? ? '' : ' using timeout ' + timeout.to_s}.;#{self.kind_of?(MobyBase::SUT) ? self.id.to_s + ';sut' : ';'};{};verify_equal;" << expected.to_s
       Kernel::raise e
     ensure
       MobyBase::TestObjectFactory.instance.timeout = original_sync_timeout unless original_sync_timeout.nil?
     end
 
-    MobyUtil::Logger.instance.enabled = logging_enabled
-    MobyUtil::Logger.instance.log "behaviour" , "PASS;Verification #{message.nil? ? '' : '\"' << message << '\" '}at #{verify_caller} was successful#{timeout.nil? ? '' : ' using timeout ' + timeout.to_s}.;#{self.kind_of?(MobyBase::SUT) ? self.id.to_s + ';sut' : ';'};{};verify_equal;" << expected.to_s
+    $logger.enabled = logging_enabled
+    $logger.log "behaviour" , "PASS;Verification #{message.nil? ? '' : '\"' << message << '\" '}at #{verify_caller} was successful#{timeout.nil? ? '' : ' using timeout ' + timeout.to_s}.;#{self.kind_of?(MobyBase::SUT) ? self.id.to_s + ';sut' : ';'};{};verify_equal;" << expected.to_s
     return nil
 
   end
@@ -582,12 +583,12 @@ module TDriverVerify
   # VerificationError:: The verification failed.
   def verify_signal( timeout, signal_name, message = nil, &block )
 
-    logging_enabled = MobyUtil::Logger.instance.enabled
+    logging_enabled = $logger.enabled
     verify_caller = caller(1).first.to_s
 
     begin
 
-      MobyUtil::Logger.instance.enabled = false
+      $logger.enabled = false
 
       Kernel::raise ArgumentError.new("Argument timeout was not a non negative Integer.") unless (timeout.kind_of?(Integer) && timeout >= 0)
       Kernel::raise ArgumentError.new("Argument message was not a non empty String.") unless (message.nil? || (message.kind_of?(String) && !message.empty?))
@@ -611,13 +612,13 @@ module TDriverVerify
 
       execute_on_error_verify_block unless @@on_error_verify_block.nil?
 
-      MobyUtil::Logger.instance.enabled = logging_enabled
-      MobyUtil::Logger.instance.log "behaviour" , "FAIL;Verification #{message.nil? ? '' : '\"' << message << '\" '}failed: #{e.to_s} using timeout '#{timeout}.;#{self.kind_of?(MobyBase::SUT) ? self.id.to_s + ';sut' : ';'};{};verify_signal;#{signal_name}"
+      $logger.enabled = logging_enabled
+      $logger.log "behaviour" , "FAIL;Verification #{message.nil? ? '' : '\"' << message << '\" '}failed: #{e.to_s} using timeout '#{timeout}.;#{self.kind_of?(MobyBase::SUT) ? self.id.to_s + ';sut' : ';'};{};verify_signal;#{signal_name}"
       Kernel::raise e
     end
 
-    MobyUtil::Logger.instance.enabled = logging_enabled
-    MobyUtil::Logger.instance.log "behaviour" , "PASS;Verification #{message.nil? ? '' : '\"' << message << '\" '}at #{verify_caller} was successful#{timeout.nil? ? '' : ' using timeout ' + timeout.to_s}.;#{self.kind_of?(MobyBase::SUT) ? self.id.to_s + ';sut' : ';'};{};verify_signal;#{signal_name}"
+    $logger.enabled = logging_enabled
+    $logger.log "behaviour" , "PASS;Verification #{message.nil? ? '' : '\"' << message << '\" '}at #{verify_caller} was successful#{timeout.nil? ? '' : ' using timeout ' + timeout.to_s}.;#{self.kind_of?(MobyBase::SUT) ? self.id.to_s + ';sut' : ';'};{};verify_signal;#{signal_name}"
     return nil
 
   end

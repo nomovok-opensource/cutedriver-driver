@@ -28,12 +28,12 @@ module MobyUtil
 
     attr_reader :include_behaviour_info
 
-    def initialize()
+    def initialize
 
       # Allow all levels to be reported - do not change this!
       @custom_levels = ['debug', 'behaviour', 'info', 'warning', 'error', 'fatal']
 
-      Log4r::Configurator.custom_levels( *@custom_levels.collect{ | level | level.upcase } )
+      Log4r::Configurator.custom_levels *@custom_levels.collect{ | level | level.upcase }
 
       Log4r::Logger.root.level = Log4r::DEBUG
 
@@ -45,7 +45,7 @@ module MobyUtil
 
     def include_behaviour_info=( value )
 
-      raise ArgumentError.new( "Unexpected variable type (%s) for 'include_behaviour_info' boolean, expected TrueClass or FalseClass" ) unless [ TrueClass, FalseClass ].include?( value.class )
+      value.check_type( [ TrueClass, FalseClass ], "wrong argument type $1 for include_behaviour_info (expected $2)" )
 
       @include_behaviour_info = value
 
@@ -54,9 +54,11 @@ module MobyUtil
     # allow reporting by passing level as method name, raise exception if method_id not found in @custom_levels array
     def method_missing( method_id, *method_arguments )
 
-      super unless @custom_levels.include?( method_id.to_s )
+      method_id_str = method_id.to_s
 
-      self.log( method_id.to_s, *method_arguments )
+      super unless @custom_levels.include? method_id_str
+
+      log method_id_str, *method_arguments
 
     end
 
@@ -101,7 +103,7 @@ module MobyUtil
     # TODO: add documentation
     def new_logger( logger_name )
 
-      Log4r::Logger.new( logger_name )
+      Log4r::Logger.new logger_name
 
     end
 
@@ -110,11 +112,11 @@ module MobyUtil
 
       begin
 
-        Log4r::Logger.get( logger_name )
+        Log4r::Logger.get logger_name
 
       rescue
 
-        Kernel::raise ArgumentError.new( "Logger '%s' not found" % logger_name )
+        Kernel::raise ArgumentError, "Logger #{ logger_name.inspect } not found"
 
       end
 
@@ -123,21 +125,21 @@ module MobyUtil
     # TODO: add documentation
     def create_outputter( outputter_class, *args )
 
-      outputter_class.new( *args ) 
+      outputter_class.new *args
 
     end
 
     # TODO: add documentation
     def add_outputter( logger_instance, outputter_instance )
 
-      logger_instance.add( outputter_instance )
+      logger_instance.add outputter_instance
 
     end
 
     # TODO: add documentation
     def remove_outputter( logger_instance, outputter_instance )
 
-      logger_instance.remove( outputter_instance )
+      logger_instance.remove outputter_instance
 
     end
 
@@ -145,13 +147,13 @@ module MobyUtil
     def set_outputter_pattern( outputter_instance, pattern )
 
       # Allow only FileOutputter instances
-      Kernel::raise ArgumentError.new("Outputter instance not valid") if ![ Log4r::FileOutputter ].include?( outputter_instance.class )
+      Kernel::raise ArgumentError, 'Outputter instance not valid' if ![ Log4r::FileOutputter ].include?( outputter_instance.class )
 
       # Allow only FileOutputter instances
-      Kernel::raise ArgumentError.new("Outputter pattern not valid, %M required by minimum") if !/\%M/.match( pattern ) 
+      Kernel::raise ArgumentError, 'Outputter pattern not valid, %M required by minimum' if !/\%M/.match( pattern ) 
 
       # create pattern for outputter
-      outputter_instance.formatter = Log4r::PatternFormatter.new( :pattern => pattern )
+      outputter_instance.formatter = Log4r::PatternFormatter.new :pattern => pattern
 
     end
 
@@ -159,7 +161,7 @@ module MobyUtil
     # return logger instance
     def self.[]( key )
 
-      self.instance.get_logger( key )
+      get_logger key
 
     end
 
@@ -173,7 +175,7 @@ module MobyUtil
     # TODO: add documentation
     def log( level, *text_array )
 
-      if self.enabled && @logger_instance
+      if @logger_instance && enabled
 
         # convert to lowercase string
         level = level.to_s.downcase
@@ -208,9 +210,9 @@ module MobyUtil
         # log text to given level if logging enabled
         text_array.each{ | text |
 
-          @logger_instance.send( level, ( include_behaviour_info && !text.empty? ) ? ( "%s in %s" % [ text, log_caller ] ) : ( "%s" % text ) ) 
+          @logger_instance.send level, ( include_behaviour_info && !text.empty? ) ? "#{ text.to_s } in #{ log_caller.to_s }" : text.to_s
 
-        } 
+        }
 
       end
 
@@ -223,17 +225,15 @@ module MobyUtil
 
         begin
 
-          super( *exception )
+          super *exception
 
         rescue => raised_exception
 
           raised_exception.backtrace.slice!( 0 )
 
-          warn_array = [ '', "(%s) %s" % [ raised_exception.class, raised_exception.message.split("\n") ], '', raised_exception.backtrace, '' ].flatten
+          $logger.log 'warning', *[ '', "(#{ raised_exception.class }) #{ raised_exception.message.split("\n") }", '', raised_exception.backtrace, '' ].flatten
 
-          MobyUtil::Logger.instance.log( 'warning', *warn_array )
-
-          super( raised_exception )
+          super raised_exception
 
         end
 
@@ -243,20 +243,21 @@ module MobyUtil
 
     def set_debug_exceptions
 
-      if ARGV.include?( '--debug_exceptions' ) || TDriver.parameter[ :debug_exceptions, 'false' ].to_s.downcase == 'true'
+      if ARGV.include?( '--debug_exceptions' ) || $parameters[ :debug_exceptions, 'false' ].to_s.downcase == 'true'
 
         ARGV.delete('--debug_exceptions')
-         # for debugging to see every occured exception
+
+        # for debugging to see every occured exception
         def Kernel.raise( *args )
           #begin
-            # raise and catch exception  
-            super( *args )
+          # raise and catch exception  
+          super( *args )
           #rescue
-            # remove wrapper call from backtrace 
-           # $!.backtrace.shift
-            #puts "%s: %s\nBacktrace: \n%s\n\n" % [ $!.class, $!.message, $!.backtrace.collect{ | line | "  %s" % line }.join("\n") ]
-            # raise exception again
-           # super $!          
+          # remove wrapper call from backtrace 
+          # $!.backtrace.shift
+          #puts "%s: %s\nBacktrace: \n%s\n\n" % [ $!.class, $!.message, $!.backtrace.collect{ | line | "  %s" % line }.join("\n") ]
+          # raise exception again
+          # super $!          
           #end
         end
 
@@ -315,13 +316,13 @@ module MobyUtil
       return nil if logging_level.nil?
 
       # raise exception if wrong format for logging level
-      Kernel::raise RuntimeError.new( "Wrong logging level format '#{ logging_level }' defined in TDriver parameter/template XML (expected numeric string)" ) unless logging_level.numeric?
+      Kernel::raise RuntimeError, "Wrong logging level format '#{ logging_level }' defined in TDriver parameter/template XML (expected numeric string)" unless logging_level.numeric?
 
       # convert to integer
       logging_level = logging_level.to_i
 
       # raise exception if unsupported logging level
-      Kernel::raise RuntimeError.new( "Unsupported logging level '#{ logging_level }' defined in TDriver parameter/template XML (expected 0..5)" ) unless ( 0..5 ).include?( logging_level )
+      Kernel::raise RuntimeError, "Unsupported logging level '#{ logging_level }' defined in TDriver parameter/template XML (expected 0..5)" unless ( 0..5 ).include?( logging_level )
 
       @include_behaviour_info = $parameters[ :logging_include_behaviour_info, 'false' ].to_s.to_boolean
 
@@ -396,7 +397,7 @@ module MobyUtil
           MobyUtil::FileHelper.mkdir_path( outputter_path )
 
           # create new logger instance
-          MobyUtil::Logger.instance.new_logger( 'TDriver' )
+          new_logger( 'TDriver' )
 
           # get logger object reference
           @logger_instance = get_logger( 'TDriver' )
@@ -516,3 +517,6 @@ module MobyUtil
   end # Logger
   
 end # MobyUtil
+
+# set global variable pointing to parameter class
+$logger = MobyUtil::Logger.instance

@@ -654,7 +654,7 @@ module MobyBehaviour
       ) if dynamic_attributes.has_key?( :__logging )
 
       # disable logging if requested, remove pair from creation_hash
-      MobyUtil::Logger.instance.push_enabled( dynamic_attributes[ :__logging ] || TDriver.logger.enabled )
+      $logger.push_enabled( dynamic_attributes[ :__logging ] || TDriver.logger.enabled )
 
 	    # check if the hash contains symbols as values and translate those into strings
 	    translate!( creation_hash, attributes[ :__fname ], attributes[ :__plurality ], attributes[ :__numerus ], attributes[ :__lengthvariant ] )
@@ -715,7 +715,7 @@ module MobyBehaviour
       ensure
 
         # restore original logger state
-        MobyUtil::Logger.instance.pop_enabled
+        $logger.pop_enabled
 
       end
 

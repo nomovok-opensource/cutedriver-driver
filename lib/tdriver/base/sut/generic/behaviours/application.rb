@@ -162,7 +162,7 @@ module MobyBehaviour
         end
 
         # Disable logging
-        MobyUtil::Logger.instance.enabled = false if ( original_logger_state = MobyUtil::Logger.instance.enabled )
+        $logger.enabled = false if ( original_logger_state = $logger.enabled )
 
         # verify close results
         begin
@@ -232,18 +232,18 @@ module MobyBehaviour
         ensure
 
           # restore original state
-          MobyUtil::Logger.instance.enabled = original_logger_state
+          $logger.enabled = original_logger_state
 
         end
 
       rescue Exception => exception
 
-        MobyUtil::Logger.instance.log "behaviour", "FAIL;Failed when closing.;#{ identity };close;"
+        $logger.log "behaviour", "FAIL;Failed when closing.;#{ identity };close;"
         Kernel::raise exception
 
       end
 
-      MobyUtil::Logger.instance.log "behaviour", "PASS;Closed successfully.;#{ identity };close;"
+      $logger.log "behaviour", "PASS;Closed successfully.;#{ identity };close;"
 
       #@sut.application
             

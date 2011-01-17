@@ -109,14 +109,15 @@ module TDriver
 	# Wrapper for MobyUtil::ParameterUserAPI class with methods e.g. [] and []=, files and load_xml etc.
 	def self.parameter
 
-		@matti_parameter_instance || ( @matti_parameter_instance = MobyUtil::ParameterUserAPI )
-
+    $parameters_api
+    
 	end
 
+	# Wrapper for MobyUtil::Logger class
 	def self.logger
 
-		@tdriver_logger_instance || ( @tdriver_logger_instance = MobyUtil::Logger.instance )
-
+    $logger
+    
 	end
 
 	# enable hooking for performance measurement & debug logging
@@ -125,7 +126,7 @@ module TDriver
 end # TDriver
 
 # enable logging engine
-MobyUtil::Logger.instance.enable_logging()
+$logger.enable_logging
 
 # initialization done, everything is ready
 $TDRIVER_INITIALIZED = true

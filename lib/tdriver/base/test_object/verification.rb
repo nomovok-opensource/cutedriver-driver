@@ -64,7 +64,7 @@ module TDriver
 
         @@inside_verify = true
 
-        logging_enabled = MobyUtil::Logger.instance.enabled
+        logging_enabled = $logger.enabled
 
         sut.verify_blocks.each do | verify |
 
@@ -72,7 +72,7 @@ module TDriver
 
           begin
 
-            MobyUtil::Logger.instance.enabled = false
+            $logger.enabled = false
 
             begin
             
@@ -103,8 +103,8 @@ module TDriver
 
                 TDriverReportAPI::tdriver_report_log("<hr />")
                 
-                MobyUtil::Logger.instance.enabled = logging_enabled
-                MobyUtil::Logger.instance.log "behaviour" , "FAIL;Verification #{verify.message.nil? ? '' : '\"' << verify.message << '\" '}failed:#{e.to_s}.\n#{verify.timeout.nil? ? '' : ' using timeout ' + verify.timeout.to_s}.;#{sut.id.to_s+';sut'};{};verify_always;" << verify.expected.to_s
+                $logger.enabled = logging_enabled
+                $logger.log "behaviour", "FAIL;Verification #{verify.message.nil? ? '' : '\"' << verify.message << '\" '}failed:#{e.to_s}.\n#{verify.timeout.nil? ? '' : ' using timeout ' + verify.timeout.to_s}.;#{sut.id.to_s+';sut'};{};verify_always;" << verify.expected.to_s
 
               end
 
@@ -142,9 +142,9 @@ module TDriver
                 
                 TDriverReportAPI::tdriver_report_log("<hr />")
 
-                MobyUtil::Logger.instance.enabled = logging_enabled
+                $logger.enabled = logging_enabled
                 
-                MobyUtil::Logger.instance.log "behaviour" , "FAIL;Verification #{verify.message.nil? ? '' : '\"' << verify.message << '\" '}failed:#{e.to_s}.\n#{verify.timeout.nil? ? '' : ' using timeout ' + verify.timeout.to_s}.;#{sut.id.to_s+';sut'};{};verify_always;" << verify.expected.to_s
+                $logger.log "behaviour", "FAIL;Verification #{verify.message.nil? ? '' : '\"' << verify.message << '\" '}failed:#{e.to_s}.\n#{verify.timeout.nil? ? '' : ' using timeout ' + verify.timeout.to_s}.;#{sut.id.to_s+';sut'};{};verify_always;" << verify.expected.to_s
 
               end
             
@@ -152,9 +152,9 @@ module TDriver
 
           rescue Exception => e
 
-            MobyUtil::Logger.instance.enabled = logging_enabled
+            $logger.enabled = logging_enabled
 
-            MobyUtil::Logger.instance.log "behaviour" , "FAIL;Verification #{verify.message.nil? ? '' : '\"' << verify.message << '\" '}failed:#{e.to_s}.\n#{verify.timeout.nil? ? '' : ' using timeout ' + verify.timeout.to_s}.;#{sut.id.to_s+';sut'};{};verify_always;" << verify.expected.to_s
+            $logger.log "behaviour", "FAIL;Verification #{verify.message.nil? ? '' : '\"' << verify.message << '\" '}failed:#{e.to_s}.\n#{verify.timeout.nil? ? '' : ' using timeout ' + verify.timeout.to_s}.;#{sut.id.to_s+';sut'};{};verify_always;" << verify.expected.to_s
 
             @@inside_verify = false
 
@@ -169,7 +169,7 @@ module TDriver
 
       ensure
 
-        MobyUtil::Logger.instance.enabled = logging_enabled
+        $logger.enabled = logging_enabled
         @@inside_verify = false      
 
       end

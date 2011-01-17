@@ -100,11 +100,11 @@ module MobyBehaviour
       MobyUtil::Retryable.until( :timeout => 60, :retry_timeout => 5 ) {
         system(str_commands_after_powerup) if str_commands_after_powerup != nil
         if $parameters[ :ats4_error_recovery_enabled, false ]!='true'
-          MobyUtil::Logger.instance.log "behaviour" , "PASS;TDriver attempting reconnect"
+          $logger.log "behaviour", "PASS;TDriver attempting reconnect"
           self.connect(self.id)
-          MobyUtil::Logger.instance.log "behaviour" , "PASS;TDriver connected"
+          $logger.log "behaviour", "PASS;TDriver connected"
         else
-          MobyUtil::Logger.instance.log "behaviour" , "PASS;ATS4 handling reconnection"
+          $logger.log "behaviour", "PASS;ATS4 handling reconnection"
         end
 
       }
@@ -138,9 +138,9 @@ module MobyBehaviour
 
       #execute switchbox command
       str_command_arr.each do |foobox_command|
-        MobyUtil::Logger.instance.log "behaviour" , "PASS;Executing powerdown command #{foobox_command}"
+        $logger.log "behaviour", "PASS;Executing powerdown command #{foobox_command}"
         std_out = system(foobox_command)
-        MobyUtil::Logger.instance.log "behaviour" , "PASS;Powerdown command #{foobox_command} executed"
+        $logger.log "behaviour", "PASS;Powerdown command #{foobox_command} executed"
         sleep switchbox_sequence_timeout.to_i
         Kernel::raise BehaviourError.new("power_down", "Failed to power down") unless std_out.to_s.downcase.include?(str_result.to_s.downcase)
       end
@@ -175,9 +175,9 @@ module MobyBehaviour
 
       #execute switchbox command
       str_command_arr.each do |foobox_command|
-        MobyUtil::Logger.instance.log "behaviour" , "PASS;Executing powerup command #{foobox_command}"
+        $logger.log "behaviour", "PASS;Executing powerup command #{foobox_command}"
         std_out = system(foobox_command)
-        MobyUtil::Logger.instance.log "behaviour" , "PASS;Ppowerup command #{foobox_command} executed"
+        $logger.log "behaviour", "PASS;Ppowerup command #{foobox_command} executed"
         sleep switchbox_sequence_timeout.to_i
         Kernel::raise BehaviourError.new("power_up", "Failed to power up") unless std_out.to_s.downcase.include?(str_result.to_s.downcase)
       end
