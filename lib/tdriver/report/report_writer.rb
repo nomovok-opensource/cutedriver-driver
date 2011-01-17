@@ -326,11 +326,10 @@ a:hover { color:White; background-color:#005B9A;}
 }
 #statistics_table th
 {
-	font-size: 13px;
-	font-weight: normal;
 	padding: 8px;
-	background: #b9c9fe;
-	color: #039;
+	border-bottom: 1px solid Black;
+	color: #669;
+	border-top: 1px solid transparent;
 }
 #statistics_table td
 {
@@ -410,7 +409,7 @@ FORM { DISPLAY:inline; }
 
 html.isJS .togList dd
 {
-display: none;
+display: block;
 }
     input.btn {
 	  color:#050;
