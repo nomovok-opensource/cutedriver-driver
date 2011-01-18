@@ -121,19 +121,13 @@ module MobyBase
         )
         
         # raise exception if no matching object(s) found
-        raise MobyBase::TestObjectNotFoundError, "Cannot find object with rule:\n%s" % rules[ :object_attributes_hash ].inspect if matches.empty?
+        raise MobyBase::TestObjectNotFoundError, "Cannot find object with rule:\n#{ rules[ :object_attributes_hash ].inspect }" if matches.empty?
 
         # raise exception if multiple matches found and only one expected 
         if ( !directives[ :__multiple_objects ] ) && ( matches.count > 1 && !directives[ :__index_given ] )
 
           # raise exception (with list of paths to all matching objects) if multiple objects flag is false and more than one match found
-          raise MobyBase::MultipleTestObjectsIdentifiedError.new( 
-          
-            "Multiple test objects found with rule: %s\nMatching objects:\n%s\n" % [ 
-              rules[ :object_attributes_hash ].inspect,
-              list_matching_test_objects( matches ).each_with_index.collect{ | object, object_index | "%3s) %s" % [ object_index + 1, object ] }.join( "\n" )
-            ]
-          ) 
+          raise MobyBase::MultipleTestObjectsIdentifiedError, "Multiple test objects found with rule: #{ rules[ :object_attributes_hash ].inspect }\nMatching objects:\n#{ list_matching_test_objects_as_list( matches ) }\n"
             
         end
 
@@ -485,6 +479,13 @@ module MobyBase
       
       }.sort
     
+    end
+
+    # TODO: document me
+    def list_matching_test_objects_as_list( matches )
+
+      list_matching_test_objects( matches ).each_with_index.collect{ | object, object_index | "%3s) %s" % [ object_index + 1, object ] }.join( "\n" )
+
     end
 
   public # deprecated methods
