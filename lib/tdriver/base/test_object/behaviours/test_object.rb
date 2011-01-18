@@ -178,7 +178,7 @@ module MobyBehaviour
       # TODO: add behaviour logging?
 
       # raise exception if attribute name variable type is other than string
-      name.check_type( [ String, Symbol ], "Wrong argument type %s for attribute (expected $2)" )
+      name.check_type( [ String, Symbol ], "Wrong argument type $1 for attribute (expected $2)" )
 	  	
       # convert name to string if variable type is symbol
       name = name.to_s if name.kind_of?( Symbol )
