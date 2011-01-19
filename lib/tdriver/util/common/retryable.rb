@@ -21,6 +21,13 @@ module MobyUtil
 
   class Retryable
 
+    # TODO: document me
+    def self.sleep_retry_interval( time )
+
+      sleep( time )
+
+    end
+
     # Function to retry code block for x times if exception raises
     # == params
     # options:: Hash of options 
@@ -44,7 +51,7 @@ module MobyUtil
 
         if ( attempt < options[ :tries ] ) && ![ *options[ :unless ] ].include?( $!.class )
 
-          sleep( options[ :interval ] ) if options[ :interval ] > 0
+          sleep_retry_interval( options[ :interval ] ) if options[ :interval ] > 0
 
           attempt += 1
 
@@ -56,8 +63,6 @@ module MobyUtil
         Kernel::raise $!
 
       end
-
-      #nil
       
     end
 
@@ -88,7 +93,7 @@ module MobyUtil
 
         if (Time.now - start_time) <= options[ :timeout ] && ![ *options[ :unless ] ].include?( $!.class )
 
-          sleep( options[ :interval ] ) if options[ :interval ] > 0
+          sleep_retry_interval( options[ :interval ] ) if options[ :interval ] > 0
 
           attempt += 1
 
@@ -100,13 +105,11 @@ module MobyUtil
         Kernel::raise $!
 
       end
-      
-      #nil
 
     end
 
     # enable hooking for performance measurement & debug logging
-    MobyUtil::Hooking.instance.hook_methods( self ) if defined?( MobyUtil::Hooking )
+    TDriver::Hooking.hook_methods( self ) if defined?( TDriver::Hooking )
 
   end # Retryable
 

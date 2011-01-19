@@ -162,7 +162,7 @@ module MobyBehaviour
         end
 
         # Disable logging
-        MobyUtil::Logger.instance.enabled = false if ( original_logger_state = MobyUtil::Logger.instance.enabled )
+        $logger.enabled = false if ( original_logger_state = $logger.enabled )
 
         # verify close results
         begin
@@ -170,8 +170,8 @@ module MobyBehaviour
           application_identification_hash = { :type => 'application', :id => @id }
 
           MobyUtil::Retryable.until(
-            :timeout => MobyUtil::Parameter[ self.sut.id ][ :application_synchronization_timeout, '60' ].to_f,
-            :interval => MobyUtil::Parameter[ self.sut.id ][ :application_synchronization_retry_interval, '0.25' ].to_f,
+            :timeout => $parameters[ self.sut.id ][ :application_synchronization_timeout, '60' ].to_f,
+            :interval => $parameters[ self.sut.id ][ :application_synchronization_retry_interval, '0.25' ].to_f,
             :exception => MobyBase::VerificationError,
             :unless => [MobyBase::TestObjectNotFoundError, MobyBase::ApplicationNotAvailableError] ) {
 
@@ -232,18 +232,18 @@ module MobyBehaviour
         ensure
 
           # restore original state
-          MobyUtil::Logger.instance.enabled = original_logger_state
+          $logger.enabled = original_logger_state
 
         end
 
       rescue Exception => exception
 
-        MobyUtil::Logger.instance.log "behaviour", "FAIL;Failed when closing.;#{ identity };close;"
+        $logger.log "behaviour", "FAIL;Failed when closing.;#{ identity };close;"
         Kernel::raise exception
 
       end
 
-      MobyUtil::Logger.instance.log "behaviour", "PASS;Closed successfully.;#{ identity };close;"
+      $logger.log "behaviour", "PASS;Closed successfully.;#{ identity };close;"
 
       #@sut.application
             
@@ -362,7 +362,7 @@ module MobyBehaviour
 
 
     # enable hooking for performance measurement & debug logging
-    MobyUtil::Hooking.instance.hook_methods( self ) if defined?( MobyUtil::Hooking )
+    TDriver::Hooking.hook_methods( self ) if defined?( TDriver::Hooking )
 
   end # ApplicationBehaviour
 

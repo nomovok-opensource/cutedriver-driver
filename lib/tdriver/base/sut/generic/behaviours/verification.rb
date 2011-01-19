@@ -97,38 +97,38 @@ module MobyBehaviour
 			#translate the symbol values into string using sut's localisation setting
 			translate!( attributes_with_type )
 
-			original_logging = MobyUtil::Logger.instance.enabled
+			original_logging = $logger.enabled
 			desired_logging = (attributes[:__logging] == nil || attributes[:__logging] == 'false') ? false : true
-			MobyUtil::Logger.instance.enabled = false      
+			$logger.enabled = false      
 
 			begin
 
 				self.child( attributes_with_type )
 
-				MobyUtil::Logger.instance.enabled = desired_logging
-				MobyUtil::Logger.instance.log "behaviour" , "PASS;Test object of type #{type} with attributes #{attributes.inspect} was found.;#{self.kind_of?(MobyBase::SUT) ? self.id.to_s : ''};test_object_exist;"
+				$logger.enabled = desired_logging
+				$logger.log "behaviour", "PASS;Test object of type #{type} with attributes #{attributes.inspect} was found.;#{self.kind_of?(MobyBase::SUT) ? self.id.to_s : ''};test_object_exist;"
 
 			rescue MobyBase::MultipleTestObjectsIdentifiedError
 
-				MobyUtil::Logger.instance.enabled = desired_logging
-				MobyUtil::Logger.instance.log "behaviour" , "PASS;Multiple objects of type #{type} with attributes #{attributes.inspect} were found.;#{self.kind_of?(MobyBase::SUT) ? self.id.to_s : ''};test_object_exist;"
+				$logger.enabled = desired_logging
+				$logger.log "behaviour", "PASS;Multiple objects of type #{type} with attributes #{attributes.inspect} were found.;#{self.kind_of?(MobyBase::SUT) ? self.id.to_s : ''};test_object_exist;"
 				return true
 
 			rescue MobyBase::TestObjectNotFoundError
 
-				MobyUtil::Logger.instance.enabled = desired_logging
-				MobyUtil::Logger.instance.log "behaviour" , "FAIL;Test object of type #{type} with attributes #{attributes.inspect} was not found.;#{self.kind_of?(MobyBase::SUT) ? self.id.to_s : ''};test_object_exist;"
+				$logger.enabled = desired_logging
+				$logger.log "behaviour", "FAIL;Test object of type #{type} with attributes #{attributes.inspect} was not found.;#{self.kind_of?(MobyBase::SUT) ? self.id.to_s : ''};test_object_exist;"
 				return false    
 
 			rescue Exception => e
 
-				MobyUtil::Logger.instance.enabled = desired_logging
-				MobyUtil::Logger.instance.log "behaviour" , "FAIL;Test object of type #{type} with attributes #{attributes.inspect} was not found.;#{self.kind_of?(MobyBase::SUT) ? self.id.to_s : ''};test_object_exist;"
+				$logger.enabled = desired_logging
+				$logger.log "behaviour", "FAIL;Test object of type #{type} with attributes #{attributes.inspect} was not found.;#{self.kind_of?(MobyBase::SUT) ? self.id.to_s : ''};test_object_exist;"
 				Kernel::raise e
 
 			ensure
 
-				MobyUtil::Logger.instance.enabled = original_logging
+				$logger.enabled = original_logging
 
 			end
 
@@ -137,7 +137,7 @@ module MobyBehaviour
 		end
 
 		# enable hooking for performance measurement & debug logging
-		MobyUtil::Hooking.instance.hook_methods( self ) if defined?( MobyUtil::Hooking )
+		TDriver::Hooking.hook_methods( self ) if defined?( TDriver::Hooking )
 
 	end # module VerificationBehaviour
 

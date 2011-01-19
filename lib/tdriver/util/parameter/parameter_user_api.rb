@@ -21,63 +21,71 @@ module MobyUtil
 
   class ParameterUserAPI
 
-    include Singleton
+    #include Singleton
 
-    def []=( key, value )
+    def self.instance
 
-      MobyUtil::Parameter[ key ] = value
+      warn("warning: #{ self.name } is static class, use MobyUtil::ParameterUserAPI#method instead of using instance method")
 
-    end
-
-    def []( *args )
-
-      MobyUtil::Parameter[ *args ]
+      MobyUtil::ParameterUserAPI
 
     end
 
-    def fetch( *args, &block )
+    def self.[]=( key, value )
 
-      MobyUtil::Parameter.fetch( *args, &block )
-
-    end
-
-    def files
-
-      MobyUtil::Parameter.files
+      $parameters[ key ] = value
 
     end
 
-    def clear
+    def self.[]( *args )
 
-      MobyUtil::Parameter.instance.clear
-
-    end
-
-    def load_xml( filename )
-
-      MobyUtil::Parameter.instance.load_parameters_xml( filename )
+      $parameters[ *args ]
 
     end
 
-    def reset( *keys )
+    def self.fetch( *args, &block )
 
-      MobyUtil::Parameter.instance.reset_parameters
-
-    end
-
-    def inspect
-
-      MobyUtil::Parameter.inspect
+      $parameters.fetch( *args, &block )
 
     end
 
-    def to_s
+    def self.files
 
-      MobyUtil::Parameter.to_s
+      $parameters.files
 
     end
 
-    MobyUtil::Hooking.instance.hook_methods( self ) if defined?( MobyUtil::Hooking )
+    def self.clear
+
+      $parameters.instance.clear
+
+    end
+
+    def self.load_xml( filename )
+
+      $parameters.instance.load_parameters_xml( filename )
+
+    end
+
+    def self.reset( *keys )
+
+      $parameters.instance.reset_parameters
+
+    end
+
+    def self.inspect
+
+      $parameters.inspect
+
+    end
+
+    def self.to_s
+
+      $parameters.to_s
+
+    end
+
+    TDriver::Hooking.hook_methods( self ) if defined?( TDriver::Hooking )
 
   end # ParameterUserAPI
 

@@ -102,7 +102,7 @@ class ReportingGroups
       test_statistics=tog_list_statistics(tc_arr,name,status)
       if test_statistics != 0
         html_body='<dl class="togList">'<<
-          '<dt onclick="tog(this)" style="background-color: #CCCCCC;"><b><span><input id="Button1" type="button" value="Open" class="btn" /></span> '<<
+          '<dt onclick="tog(this)" style="background-color: #CCCCCC;"><b><span><input id="Button1" type="button" value="Close" class="btn" /></span> '<<
           name.to_s<<
           '</b> '<<
           '</dt>'<<
@@ -115,7 +115,7 @@ class ReportingGroups
       end
     else
       html_body='<dl class="togList">'<<
-        '<dt onclick="tog(this)" style="background-color: #CCCCCC;"><b><span><input id="Button1" type="button" value="Open" class="btn" /></span> '<<
+        '<dt onclick="tog(this)" style="background-color: #CCCCCC;"><b><span><input id="Button1" type="button" value="Close" class="btn" /></span> '<<
         name.to_s<<
         '</b> '<<
         '</dt>'<<

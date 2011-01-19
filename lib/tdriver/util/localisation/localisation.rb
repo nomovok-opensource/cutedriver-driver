@@ -310,11 +310,11 @@ module MobyUtil
 				language += "_"
 			end
 			
-			db_type =  MobyUtil::Parameter[ :localisation_db_type, nil ]
-			host =  MobyUtil::Parameter[ :localisation_server_ip ]
-			username = MobyUtil::Parameter[ :localisation_server_username ]
-			password = MobyUtil::Parameter[ :localisation_server_password ]
-			database_name = MobyUtil::Parameter[ :localisation_server_database_name ]
+			db_type =  $parameters[ :localisation_db_type, nil ]
+			host =  $parameters[ :localisation_server_ip ]
+			username = $parameters[ :localisation_server_username ]
+			password = $parameters[ :localisation_server_password ]
+			database_name = $parameters[ :localisation_server_database_name ]
 			
 			db_connection = DBConnection.new(  db_type, host, database_name, username, password )
 			
@@ -393,11 +393,11 @@ module MobyUtil
 
 			# Get a connection to the DB
 			if db_connection.nil? or !db_connection.kind_of? MobyUtil::DBConnection
-				db_type =  MobyUtil::Parameter[ :localisation_db_type ]
-				host =  MobyUtil::Parameter[ :localisation_server_ip ]
-				database_name = MobyUtil::Parameter[ :localisation_server_database_name ]
-				username = MobyUtil::Parameter[ :localisation_server_username ]
-				password = MobyUtil::Parameter[ :localisation_server_password ]
+				db_type =  $parameters[ :localisation_db_type ]
+				host =  $parameters[ :localisation_server_ip ]
+				database_name = $parameters[ :localisation_server_database_name ]
+				username = $parameters[ :localisation_server_username ]
+				password = $parameters[ :localisation_server_password ]
 				
 				db_connection = DBConnection.new(  db_type, host, database_name, username, password )
 			end

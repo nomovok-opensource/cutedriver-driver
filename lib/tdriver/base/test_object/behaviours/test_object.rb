@@ -99,12 +99,24 @@ module MobyBehaviour
     # attributes_hash = @test_app.Triangle( :name => 'Triangle1' ).attributes # retrieve all attribute for triangle object
     def attributes
 
+      # retrieve sut parameters
+      sut_parameters = $parameters[ @sut.id ]
+
+      # retrieve sut attribute filter type
+      filter_type = sut_parameters[ :filter_type, 'none' ] 
+
+      # temporarly disable attribute filter to retrieve all test object attributes
+      sut_parameters[ :filter_type ] = 'none'
+
       begin
+
+        # raise exception to refresh test object ui state if filter_type was something else than 'none'
+        raise MobyBase::TestObjectNotFoundError unless filter_type == 'none'
 
         # retrieve xml data, performs xpath to sut xml_data
         _xml_data = xml_data
 
-      rescue MobyBase::TestObjectNotFoundError		
+      rescue MobyBase::TestObjectNotFoundError
 
         # attributes used to refresh parent application
         if @creation_attributes[ :type ] == 'application'
@@ -124,6 +136,11 @@ module MobyBehaviour
 
         # retrieve updated xml data
         _xml_data = xml_data
+
+      ensure
+
+        # restore attributes filter type
+        sut_parameters[ :filter_type ] = filter_type
 
       end
 
@@ -161,7 +178,7 @@ module MobyBehaviour
       # TODO: add behaviour logging?
 
       # raise exception if attribute name variable type is other than string
-      name.check_type( [ String, Symbol ], "Wrong argument type %s for attribute (expected $2)" )
+      name.check_type( [ String, Symbol ], "Wrong argument type $1 for attribute (expected $2)" )
 	  	
       # convert name to string if variable type is symbol
       name = name.to_s if name.kind_of?( Symbol )
@@ -493,10 +510,29 @@ module MobyBehaviour
         # get first matching element
         _xml_data = _xml_data.first
 
-        unless _xml_data.eql?( xml_data )
+        #unless _xml_data.eql?( xml_data )
+
+          # store previous object environment value 
+          previous_environment = @env
 
           # update current test objects xml_data 
-          xml_data = _xml_data
+          __send__( :xml_data=, _xml_data )
+
+          # compare new environment value with previous 
+          if @env != previous_environment
+
+            # reapply behaviours to test object if environment value has changed
+            MobyBase::BehaviourFactory.instance.apply_behaviour!(
+
+              :object => self,
+              :object_type => [ '*', @type ], 
+              :input_type => [ '*', @sut.input.to_s ],
+              :env => [ '*', *@env.to_s.split(";") ],
+              :version => [ '*', @sut.ui_version.to_s ]
+
+            )
+            
+          end
 
           # update child objects
           @child_object_cache.each_object{ | test_object | 
@@ -507,7 +543,7 @@ module MobyBehaviour
             
           }
         
-        end
+        #end
                 
       rescue
 
@@ -521,7 +557,7 @@ module MobyBehaviour
     # TODO: document me
 	  def disable_optimizer
 
-      sut_parameters = MobyUtil::Parameter[ @sut.id ]
+      sut_parameters = $parameters[ @sut.id ]
 
 	    # disable optimizer for this call since it will not work
 	    @_enable_optimizer = false
@@ -541,7 +577,7 @@ module MobyBehaviour
     # TODO: document me
 	  def enable_optimizer
 
-	    MobyUtil::Parameter[ @sut.id ][ :use_find_object ] = 'true' if @_enable_optimizer
+	    $parameters[ @sut.id ][ :use_find_object ] = 'true' if @_enable_optimizer
 
 	    @_enable_optimizer = false
 
@@ -618,7 +654,7 @@ module MobyBehaviour
       ) if dynamic_attributes.has_key?( :__logging )
 
       # disable logging if requested, remove pair from creation_hash
-      MobyUtil::Logger.instance.push_enabled( dynamic_attributes[ :__logging ] || TDriver.logger.enabled )
+      $logger.push_enabled( dynamic_attributes[ :__logging ] || TDriver.logger.enabled )
 
 	    # check if the hash contains symbols as values and translate those into strings
 	    translate!( creation_hash, attributes[ :__fname ], attributes[ :__plurality ], attributes[ :__numerus ], attributes[ :__lengthvariant ] )
@@ -679,7 +715,7 @@ module MobyBehaviour
       ensure
 
         # restore original logger state
-        MobyUtil::Logger.instance.pop_enabled
+        $logger.pop_enabled
 
       end
 
@@ -801,9 +837,7 @@ module MobyBehaviour
           rescue MobyBase::AttributeNotFoundError
           
             Kernel::raise MobyBase::AttributeNotFoundError.new(
-            
               "Could not find attribute #{ name.inspect } for test object of type #{ @type.to_s }"
-              
             )
 
           end
@@ -875,7 +909,7 @@ module MobyBehaviour
     end
 
     # enable hooking for performance measurement & debug logging
-    MobyUtil::Hooking.instance.hook_methods( self ) if defined?( MobyUtil::Hooking )
+    TDriver::Hooking.hook_methods( self ) if defined?( TDriver::Hooking )
 
   end # TestObject 
 

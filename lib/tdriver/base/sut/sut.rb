@@ -47,6 +47,8 @@ module MobyBase
 
       @object_behaviours = []
 
+      @forced_xml = false
+
     end  
 
     # Interface to forward command execution to sut specific controller (SutController#execute_command)
@@ -70,7 +72,7 @@ module MobyBase
     end
 
     # enable hooking for performance measurement & debug logging
-    MobyUtil::Hooking.instance.hook_methods( self ) if defined?( MobyUtil::Hooking )
+    TDriver::Hooking.hook_methods( self ) if defined?( TDriver::Hooking )
 
   end # SUT
  

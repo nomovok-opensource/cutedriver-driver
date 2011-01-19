@@ -102,30 +102,31 @@ module TDriver
 	# Wrapper for MobyUtil::Parameter.configured_suts to retrieve all configured sut names
 	def self.suts
 
-		MobyUtil::Parameter.configured_suts
+		$parameters.configured_suts
 
 	end
 
 	# Wrapper for MobyUtil::ParameterUserAPI class with methods e.g. [] and []=, files and load_xml etc.
 	def self.parameter
 
-		@matti_parameter_instance || ( @matti_parameter_instance = MobyUtil::ParameterUserAPI.instance )
-
+    $parameters_api
+    
 	end
 
+	# Wrapper for MobyUtil::Logger class
 	def self.logger
 
-		@tdriver_logger_instance || ( @tdriver_logger_instance = MobyUtil::Logger.instance )
-
+    $logger
+    
 	end
 
 	# enable hooking for performance measurement & debug logging
-	MobyUtil::Hooking.instance.hook_methods( self ) if defined?( MobyUtil::Hooking )
+	TDriver::Hooking.hook_methods( self ) if defined?( TDriver::Hooking )
 
 end # TDriver
 
 # enable logging engine
-MobyUtil::Logger.instance.enable_logging()
+$logger.enable_logging
 
 # initialization done, everything is ready
 $TDRIVER_INITIALIZED = true

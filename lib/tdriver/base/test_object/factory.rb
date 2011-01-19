@@ -33,10 +33,10 @@ module MobyBase
     def initialize
 
       # get timeout from parameters, use default value if parameter not found
-      @timeout = MobyUtil::Parameter[ :application_synchronization_timeout, "20" ].to_f
+      @timeout = $parameters[ :application_synchronization_timeout, "20" ].to_f
 
       # get timeout retry interval from parameters, use default value if parameter not found
-      @_retry_interval = MobyUtil::Parameter[ :application_synchronization_retry_interval, "1" ].to_f
+      @_retry_interval = $parameters[ :application_synchronization_retry_interval, "1" ].to_f
 
     end
 
@@ -121,19 +121,13 @@ module MobyBase
         )
         
         # raise exception if no matching object(s) found
-        raise MobyBase::TestObjectNotFoundError, "Cannot find object with rule:\n%s" % rules[ :object_attributes_hash ].inspect if matches.empty?
+        raise MobyBase::TestObjectNotFoundError, "Cannot find object with rule:\n#{ rules[ :object_attributes_hash ].inspect }" if matches.empty?
 
         # raise exception if multiple matches found and only one expected 
         if ( !directives[ :__multiple_objects ] ) && ( matches.count > 1 && !directives[ :__index_given ] )
 
           # raise exception (with list of paths to all matching objects) if multiple objects flag is false and more than one match found
-          raise MobyBase::MultipleTestObjectsIdentifiedError.new( 
-          
-            "Multiple test objects found with rule: %s\nMatching objects:\n%s\n" % [ 
-              rules[ :object_attributes_hash ].inspect,
-              list_matching_test_objects( matches ).each_with_index.collect{ | object, object_index | "%3s) %s" % [ object_index + 1, object ] }.join( "\n" )
-            ]
-          ) 
+          raise MobyBase::MultipleTestObjectsIdentifiedError, "Multiple test objects found with rule: #{ rules[ :object_attributes_hash ].inspect }\nMatching objects:\n#{ list_matching_test_objects_as_list( matches ) }\n"
             
         end
 
@@ -329,7 +323,7 @@ module MobyBase
         object_type = TDriver::TestObjectAdapter.test_object_element_attribute( xml_object, 'type' ){ nil }.to_s 
 
         # retrieve test object type from xml
-    	  env = TDriver::TestObjectAdapter.test_object_element_attribute( xml_object, 'env' ){ MobyUtil::Parameter[ sut.id ][ :env ] }.to_s
+    	  env = TDriver::TestObjectAdapter.test_object_element_attribute( xml_object, 'env' ){ $parameters[ sut.id ][ :env ] }.to_s
     	  
       else
       
@@ -340,7 +334,7 @@ module MobyBase
         
         object_id = 0
 
-        env = MobyUtil::Parameter[ sut.id ][ :env ].to_s
+        env = $parameters[ sut.id ][ :env ].to_s
 
       end
       
@@ -487,6 +481,13 @@ module MobyBase
     
     end
 
+    # TODO: document me
+    def list_matching_test_objects_as_list( matches )
+
+      list_matching_test_objects( matches ).each_with_index.collect{ | object, object_index | "%3s) %s" % [ object_index + 1, object ] }.join( "\n" )
+
+    end
+
   public # deprecated methods
 
     def set_timeout( new_timeout )
@@ -510,7 +511,7 @@ module MobyBase
     end
 
     # enable hoo./base/test_object/factory.rb:king for performance measurement & debug logging
-    MobyUtil::Hooking.instance.hook_methods( self ) if defined?( MobyUtil::Hooking )
+    TDriver::Hooking.hook_methods( self ) if defined?( TDriver::Hooking )
 
   end # TestObjectFactory
 

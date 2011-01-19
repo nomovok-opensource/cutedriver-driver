@@ -83,19 +83,19 @@ module MobyBehaviour
 
 			rescue Exception => e
 
-				MobyUtil::Logger.instance.log "behaviour" , "FAIL;Failed to find test object.;#{id.to_s};sut;{};find;" << ( attributes.kind_of?( Hash ) ? attributes.inspect : attributes.class.to_s )
+				$logger.log "behaviour", "FAIL;Failed to find test object.;#{id.to_s};sut;{};find;" << ( attributes.kind_of?( Hash ) ? attributes.inspect : attributes.class.to_s )
 
 				Kernel::raise e
 
 			end
 
-			MobyUtil::Logger.instance.log "behaviour" , "PASS;Test object found.;#{id.to_s};sut;{};application;" << attributes.inspect 
+			$logger.log "behaviour", "PASS;Test object found.;#{id.to_s};sut;{};application;" << attributes.inspect 
 
 			search_result
 		end
 
 		# enable hooking for performance measurement & debug logging
-		MobyUtil::Hooking.instance.hook_methods( self ) if defined?( MobyUtil::Hooking )
+		TDriver::Hooking.hook_methods( self ) if defined?( TDriver::Hooking )
 
 	end # Find
 

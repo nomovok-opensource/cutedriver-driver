@@ -137,7 +137,8 @@ module MobyBehaviour
     #  example: -
     def freeze
 
-      if MobyUtil::Parameter[ @id ][ :use_find_object, 'false' ] == 'true' && self.respond_to?( 'find_object' )
+=begin
+      if $parameters[ @id ][ :use_find_object, 'false' ] == 'true' && self.respond_to?( 'find_object' )
 
         warn("warning: SUT##{ __method__ } is not supported when use_find_objects optimization is enabled")
 
@@ -146,6 +147,10 @@ module MobyBehaviour
         @frozen = true
 
       end
+=end
+
+      @frozen = true
+
 
       nil
 
@@ -160,7 +165,8 @@ module MobyBehaviour
     #  example: -
     def unfreeze
 
-      if MobyUtil::Parameter[ @id ][ :use_find_object, 'false' ] == 'true' && self.respond_to?( 'find_object' )
+=begin
+      if $parameters[ @id ][ :use_find_object, 'false' ] == 'true' && self.respond_to?( 'find_object' )
 
         warn("warning: SUT##{ __method__ } is not supported when use_find_objects optimization is enabled")
 
@@ -169,6 +175,9 @@ module MobyBehaviour
         @frozen = false
 
       end
+=end
+
+      @frozen = false
   
       nil
 
@@ -206,16 +215,19 @@ module MobyBehaviour
 
         @xml_data = xml
         @frozen = true
+        @forced_xml = true
 
       elsif xml.kind_of?( String )
 
         @xml_data = MobyUtil::XML.parse_string( xml ).root
         @frozen = true
+        @forced_xml = true
 
       elsif xml.kind_of?( NilClass )
 
         @xml_data = nil
         @frozen = false
+        @forced_xml = false
 
       end
 
@@ -267,7 +279,7 @@ module MobyBehaviour
       ) if identification_directives.has_key?( :__logging )
 
       # disable logging if requested, remove pair from creation_hash
-      MobyUtil::Logger.instance.push_enabled( identification_directives[ :__logging ] || TDriver.logger.enabled )
+      $logger.push_enabled( identification_directives[ :__logging ] || TDriver.logger.enabled )
 
       begin
 
@@ -305,7 +317,7 @@ module MobyBehaviour
       ensure
 
         # restore original logger state
-        MobyUtil::Logger.instance.pop_enabled
+        $logger.pop_enabled
 
       end
 
@@ -508,8 +520,8 @@ module MobyBehaviour
       begin
 
         # set the refresh interval to zero while the application is launched
-        #orig_interval = MobyUtil::Parameter[ @id ][ :refresh_interval ]
-        #MobyUtil::Parameter[ @id ][ :refresh_interval ] = '0'
+        #orig_interval = $parameters[ @id ][ :refresh_interval ]
+        #$parameters[ @id ][ :refresh_interval ] = '0'
 
         # raise exception if argument type other than hash
         target.check_type( Hash, "Wrong argument type $1 for run method (expected $2)" )
@@ -632,10 +644,10 @@ module MobyBehaviour
             expected_attributes,
 
             # timeout to for application synchronization
-            MobyUtil::Parameter[ @id ][ :application_synchronization_timeout, '5' ].to_f,
+            $parameters[ @id ][ :application_synchronization_timeout, '5' ].to_f,
 
             # wait retry interval and try again if application was not found
-            MobyUtil::Parameter[ @id ][ :application_synchronization_retry_interval, '0.5' ].to_f
+            $parameters[ @id ][ :application_synchronization_retry_interval, '0.5' ].to_f
 
           )
 
@@ -793,13 +805,13 @@ module MobyBehaviour
 
       if ( arguments.count == 0 )
 
-        MobyUtil::ParameterUserAPI.instance[ @id ]
+        MobyUtil::ParameterUserAPI[ @id ]
 
       else
 
         #$stderr.puts "%s:%s warning: deprecated method usage convention, please use sut#parameter[] instead of sut#parameter()" % ( caller.first || "%s:%s" % [ __FILE__, __LINE__ ] ).split(":")[ 0..1 ]
 
-        MobyUtil::ParameterUserAPI.instance[ @id ][ *arguments ]
+        MobyUtil::ParameterUserAPI[ @id ][ *arguments ]
 
       end
 
@@ -872,7 +884,7 @@ module MobyBehaviour
     translation_type = "localisation"
     
     # Check for User Information prefix( "uif_...")
-    MobyUtil::Parameter[ :user_data_logical_string_identifier, 'uif_' ].split('|').each do |identifier|
+    $parameters[ :user_data_logical_string_identifier, 'uif_' ].split('|').each do |identifier|
 
       if logical_name.to_s.index(identifier)==0
 
@@ -883,7 +895,7 @@ module MobyBehaviour
     end
     
     # Check for Operator Data prefix( "operator_...")
-    MobyUtil::Parameter[ :operator_data_logical_string_identifier, 'operator_' ].split('|').each do |identifier|
+    $parameters[ :operator_data_logical_string_identifier, 'operator_' ].split('|').each do |identifier|
 
       if logical_name.to_s.index(identifier)==0
 
@@ -907,7 +919,7 @@ module MobyBehaviour
 
         language=nil
         
-        if ( MobyUtil::Parameter[ self.id ][:read_lang_from_app]=='true')
+        if ( $parameters[ self.id ][:read_lang_from_app]=='true')
 
           #read localeName app
           language=self.application.attribute("localeName")
@@ -917,7 +929,7 @@ module MobyBehaviour
 
         else
 
-          language=MobyUtil::Parameter[ self.id ][ :language ]
+          language=$parameters[ self.id ][ :language ]
 
         end
         
@@ -926,7 +938,7 @@ module MobyBehaviour
         translation = MobyUtil::Localisation.translation( 
           logical_name, 
           language,
-          MobyUtil::Parameter[ self.id ][ :localisation_server_database_tablename ], 
+          $parameters[ self.id ][ :localisation_server_database_tablename ], 
           file_name, 
           plurality, 
           lengthvariant 
@@ -1005,10 +1017,10 @@ module MobyBehaviour
       user_data_lname, 
       
       # language
-      MobyUtil::Parameter[ self.id ][ :language ],
+      $parameters[ self.id ][ :language ],
         
       # table name
-      MobyUtil::Parameter[ self.id ][ :user_data_server_database_tablename ] 
+      $parameters[ self.id ][ :user_data_server_database_tablename ] 
       
     )
 
@@ -1048,10 +1060,10 @@ module MobyBehaviour
       operator_data_lname, 
 
       # operator 
-      MobyUtil::Parameter[ self.id ][ :operator_selected ],
+      $parameters[ self.id ][ :operator_selected ],
 
       # table name 
-      MobyUtil::Parameter[ self.id ][ :operator_data_server_database_tablename ]
+      $parameters[ self.id ][ :operator_data_server_database_tablename ]
       
     )
 
@@ -1191,7 +1203,7 @@ module MobyBehaviour
 
       if !@frozen && ( @_previous_refresh.nil? || ( current_time - @_previous_refresh ).to_f >= @refresh_interval )
 
-        use_find_objects = MobyUtil::Parameter[ @id ][ :use_find_object, 'false' ] == 'true' and self.respond_to?( 'find_object' )
+        use_find_objects = $parameters[ @id ][ :use_find_object, 'false' ] == 'true' and self.respond_to?( 'find_object' )
         
         refresh_arguments = refresh_args.clone
 
@@ -1407,19 +1419,19 @@ module MobyBehaviour
       @childs_updated = false
 
       # id not found from parameters
-      if MobyUtil::Parameter[ @id, nil ] != nil
+      if $parameters[ @id, nil ] != nil
 
-        @input = MobyUtil::Parameter[ @id ][ :input_type, "key" ].to_sym
+        @input = $parameters[ @id ][ :input_type, "key" ].to_sym
 
-        @refresh_tries = MobyUtil::Parameter[ @id ][ :ui_state_refresh_tries, @refresh_tries ].to_f
+        @refresh_tries = $parameters[ @id ][ :ui_state_refresh_tries, @refresh_tries ].to_f
 
-        @refresh_interval = MobyUtil::Parameter[ @id ][ :refresh_interval, @refresh_interval ].to_f
+        @refresh_interval = $parameters[ @id ][ :refresh_interval, @refresh_interval ].to_f
 
       end
     
       @last_xml_data = nil
     
-      ruby_file = MobyUtil::Parameter[ @id ][ :verify_blocks ] 
+      ruby_file = $parameters[ @id ][ :verify_blocks ] 
 
       @verify_blocks = []
 
@@ -1471,7 +1483,7 @@ module MobyBehaviour
     end
 
     # enable hooking for performance measurement & debug logging
-    MobyUtil::Hooking.instance.hook_methods( self ) if defined?( MobyUtil::Hooking )
+    TDriver::Hooking.hook_methods( self ) if defined?( TDriver::Hooking )
 
   end # SUT
   

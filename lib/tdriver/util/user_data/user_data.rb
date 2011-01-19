@@ -64,12 +64,12 @@ module MobyUtil
 			Kernel::raise UserDataNotFoundError.new( "User data logical name can't be empty" ) if user_data_lname == nil
 
 			# Get Localization parameters for DB Connection
-			db_type =  MobyUtil::Parameter[ :user_data_db_type, nil ].to_s.downcase
-			host =  MobyUtil::Parameter[ :user_data_server_ip ]
-			username = MobyUtil::Parameter[ :user_data_server_username ]
-			password = MobyUtil::Parameter[ :user_data_server_password ]
-			database_name = MobyUtil::Parameter[ :user_data_server_database_name ]
-      table_name = MobyUtil::Parameter[:user_data_server_database_tablename] if table_name.nil? or table_name.empty?
+			db_type =  $parameters[ :user_data_db_type, nil ].to_s.downcase
+			host =  $parameters[ :user_data_server_ip ]
+			username = $parameters[ :user_data_server_username ]
+			password = $parameters[ :user_data_server_password ]
+			database_name = $parameters[ :user_data_server_database_name ]
+      table_name = $parameters[:user_data_server_database_tablename] if table_name.nil? or table_name.empty?
 			
 			db_connection = DBConnection.new(  db_type, host, database_name, username, password )
 

@@ -278,8 +278,14 @@ module MobyUtil
 
     end
 
-    MobyUtil::Hooking.instance.hook_methods( self ) if defined?( MobyUtil::Hooking )
+    TDriver::Hooking.hook_methods( self ) if defined?( TDriver::Hooking )
 
   end # Parameter
 
 end # MobyUtil
+
+# set global variable pointing to parameter class
+$parameters = MobyUtil::Parameter
+
+# set global variable pointing to parameter API class
+$parameters_api = MobyUtil::ParameterUserAPI

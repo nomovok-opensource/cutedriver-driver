@@ -9,13 +9,13 @@ module TDriver
       # TODO: Document me (TestObjectFactory::check_verify_always_reporting_settings)
       def check_verify_always_reporting_settings
 
-        @@reporter_attached = MobyUtil::Parameter[ :report_attach_continuous_verification_to_reporter, 'false' ]
+        @@reporter_attached = $parameters[ :report_attach_continuous_verification_to_reporter, 'false' ]
 
-        @@rcv_raise_errors = MobyUtil::Parameter[ :report_continuous_verification_raise_errors, 'true' ]
+        @@rcv_raise_errors = $parameters[ :report_continuous_verification_raise_errors, 'true' ]
 
-        @@rcv_fail_test_case = MobyUtil::Parameter[ :report_continuous_verification_fail_test_case_on_error, 'true' ]
+        @@rcv_fail_test_case = $parameters[ :report_continuous_verification_fail_test_case_on_error, 'true' ]
 
-        @@rvc_capture_screen = MobyUtil::Parameter[ :report_continuous_verification_capture_screen_on_error, 'true' ]
+        @@rvc_capture_screen = $parameters[ :report_continuous_verification_capture_screen_on_error, 'true' ]
 
       end
 
@@ -35,13 +35,13 @@ module TDriver
       def initialize_settings
 
         # defaults
-        @@global_reporter_attached = MobyUtil::Parameter[ :report_attach_continuous_verification_to_reporter, 'false' ]
+        @@global_reporter_attached = $parameters[ :report_attach_continuous_verification_to_reporter, 'false' ]
 
-        @@rcv_global_raise_errors = MobyUtil::Parameter[ :report_continuous_verification_raise_errors, 'true' ]
+        @@rcv_global_raise_errors = $parameters[ :report_continuous_verification_raise_errors, 'true' ]
 
-        @@rcv_global_fail_test_case = MobyUtil::Parameter[ :report_continuous_verification_fail_test_case_on_error, 'true' ]
+        @@rcv_global_fail_test_case = $parameters[ :report_continuous_verification_fail_test_case_on_error, 'true' ]
 
-        @@rvc_global_capture_screen = MobyUtil::Parameter[ :report_continuous_verification_capture_screen_on_error, 'true' ]
+        @@rvc_global_capture_screen = $parameters[ :report_continuous_verification_capture_screen_on_error, 'true' ]
 
         @@inside_verify = false
 
@@ -64,7 +64,7 @@ module TDriver
 
         @@inside_verify = true
 
-        logging_enabled = MobyUtil::Logger.instance.enabled
+        logging_enabled = $logger.enabled
 
         sut.verify_blocks.each do | verify |
 
@@ -72,7 +72,7 @@ module TDriver
 
           begin
 
-            MobyUtil::Logger.instance.enabled = false
+            $logger.enabled = false
 
             begin
             
@@ -103,8 +103,8 @@ module TDriver
 
                 TDriverReportAPI::tdriver_report_log("<hr />")
                 
-                MobyUtil::Logger.instance.enabled = logging_enabled
-                MobyUtil::Logger.instance.log "behaviour" , "FAIL;Verification #{verify.message.nil? ? '' : '\"' << verify.message << '\" '}failed:#{e.to_s}.\n#{verify.timeout.nil? ? '' : ' using timeout ' + verify.timeout.to_s}.;#{sut.id.to_s+';sut'};{};verify_always;" << verify.expected.to_s
+                $logger.enabled = logging_enabled
+                $logger.log "behaviour", "FAIL;Verification #{verify.message.nil? ? '' : '\"' << verify.message << '\" '}failed:#{e.to_s}.\n#{verify.timeout.nil? ? '' : ' using timeout ' + verify.timeout.to_s}.;#{sut.id.to_s+';sut'};{};verify_always;" << verify.expected.to_s
 
               end
 
@@ -142,9 +142,9 @@ module TDriver
                 
                 TDriverReportAPI::tdriver_report_log("<hr />")
 
-                MobyUtil::Logger.instance.enabled = logging_enabled
+                $logger.enabled = logging_enabled
                 
-                MobyUtil::Logger.instance.log "behaviour" , "FAIL;Verification #{verify.message.nil? ? '' : '\"' << verify.message << '\" '}failed:#{e.to_s}.\n#{verify.timeout.nil? ? '' : ' using timeout ' + verify.timeout.to_s}.;#{sut.id.to_s+';sut'};{};verify_always;" << verify.expected.to_s
+                $logger.log "behaviour", "FAIL;Verification #{verify.message.nil? ? '' : '\"' << verify.message << '\" '}failed:#{e.to_s}.\n#{verify.timeout.nil? ? '' : ' using timeout ' + verify.timeout.to_s}.;#{sut.id.to_s+';sut'};{};verify_always;" << verify.expected.to_s
 
               end
             
@@ -152,9 +152,9 @@ module TDriver
 
           rescue Exception => e
 
-            MobyUtil::Logger.instance.enabled = logging_enabled
+            $logger.enabled = logging_enabled
 
-            MobyUtil::Logger.instance.log "behaviour" , "FAIL;Verification #{verify.message.nil? ? '' : '\"' << verify.message << '\" '}failed:#{e.to_s}.\n#{verify.timeout.nil? ? '' : ' using timeout ' + verify.timeout.to_s}.;#{sut.id.to_s+';sut'};{};verify_always;" << verify.expected.to_s
+            $logger.log "behaviour", "FAIL;Verification #{verify.message.nil? ? '' : '\"' << verify.message << '\" '}failed:#{e.to_s}.\n#{verify.timeout.nil? ? '' : ' using timeout ' + verify.timeout.to_s}.;#{sut.id.to_s+';sut'};{};verify_always;" << verify.expected.to_s
 
             @@inside_verify = false
 
@@ -169,7 +169,7 @@ module TDriver
 
       ensure
 
-        MobyUtil::Logger.instance.enabled = logging_enabled
+        $logger.enabled = logging_enabled
         @@inside_verify = false      
 
       end

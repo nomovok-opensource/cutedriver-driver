@@ -90,7 +90,7 @@ module MobyPlugin
 			end
 
 			# enable hooking for performance measurement & debug logging
-			MobyUtil::Hooking.instance.hook_methods( self ) if defined?( MobyUtil::Hooking )
+			TDriver::Hooking.hook_methods( self ) if defined?( TDriver::Hooking )
 
 			# register plugin
 			MobyUtil::PluginService.instance.register_plugin( self ) # Note: self is MobyPlugin::Generic::SUT
