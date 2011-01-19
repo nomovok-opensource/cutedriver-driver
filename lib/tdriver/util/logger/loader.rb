@@ -17,19 +17,6 @@
 ## 
 ############################################################################
 
+# logger module
+require File.expand_path( File.join( File.dirname( __FILE__ ), 'logger.rb' ) )
 
-module MobyUtil
-
-    # This error should be raised when no database type is defined
-	class DbTypeNotDefinedError < CustomError; end;
-
-	# This error should be raised when not supported db type is defined
-	class DbTypeNotSupportedError < CustomError; end;
-	
-	# This error should be raised when there is connectivity problem with sql database
-	class SqlConnectError < CustomError; end;
-	
-	# This error should be raised when there is problem with sql query
-	class SqlError < CustomError; end;
-	
-end

@@ -17,9 +17,9 @@
 ## 
 ############################################################################
 
-# Recorder module - load only if needed
-MobyUtil.autoload( :Recorder, File.expand_path( File.join( File.dirname( __FILE__ ), 'recorder.rb' ) ) )
+# Recorder module
+require File.expand_path( File.join( File.dirname( __FILE__ ), 'recorder.rb' ) )
 
-# Scripter module - load only if needed
-MobyUtil.autoload( :Scripter, File.expand_path( File.join( File.dirname( __FILE__ ), 'scripter.rb' ) ) )
+# Scripter module
+require File.expand_path( File.join( File.dirname( __FILE__ ), 'scripter.rb' ) )
 

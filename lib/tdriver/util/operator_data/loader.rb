@@ -17,10 +17,11 @@
 ## 
 ############################################################################
 
-
 # user data inputs related errors
 require File.expand_path( File.join( File.dirname( __FILE__ ), 'error.rb' ) )
-
-# user data inputs  module implementation 
+#
+# user data inputs module implementation
 require File.expand_path( File.join( File.dirname( __FILE__ ), 'operator_data.rb' ) )
+#
+
 

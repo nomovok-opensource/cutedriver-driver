@@ -17,17 +17,18 @@
 ##
 ############################################################################
 
+# TODO: refactor to use MobyUtil::XML
 require 'nokogiri'
 
 # Utility for handling localisation database
-
 module MobyUtil
 
 	class Localisation
     
     # == Language maping cross-referenced from Nokia Shared Lancuage Codes and Symbian 
-    # http://developer.symbian.org/main/documentation/reference/s3/pdk/GUID-31C133DE-F245-5992-9A41-20A99291E72A.html
-    # http://www2.connecting.nokia.com/nokia/terminology/terms.nsf/document/ES346PMF37?OpenDocument&ExpandSection=1#_Section1
+    #
+    # Please follow Nokia Language Guidelines.
+    #
     # Its also enumerated by TLanguage in e32lang.h in the Symbian code.
     # The ones only on e32lang.h are commented out
     @language_code_map = {
@@ -39,7 +40,7 @@ module MobyUtil
       "Swedish" => ["sv", "06"],
       "Danish" => ["da", "07"],
       "Norwegian" => ["no", "08"], 
-      "Finish" => ["fi", "09"],
+      "Finnish" => ["fi", "09"],
       "English US" => ["en_US", "10"],
       # "Swiss French" => ["SF", "11"],
       # "Swiss German" => ["SG", "12"],

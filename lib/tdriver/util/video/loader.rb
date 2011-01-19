@@ -17,16 +17,15 @@
 ## 
 ############################################################################
 
-
-# Video utils module
+# video utils module
 require File.expand_path( File.join( File.dirname( __FILE__ ), 'video_utils.rb' ) )
 
-# camera windows implementation
-MobyUtil.autoload( :TDriverCam, File.expand_path( File.join( File.dirname( __FILE__ ), 'camera.rb' ) ) )
+# camera implementation
+require File.expand_path( File.join( File.dirname( __FILE__ ), 'camera.rb' ) )
 
 # camera windows implementation
-MobyUtil.autoload( :TDriverWinCam, File.expand_path( File.join( File.dirname( __FILE__ ), 'camera_windows.rb' ) ) )
+require File.expand_path( File.join( File.dirname( __FILE__ ), 'camera_windows.rb' ) )
 
 # camera linux implementation
-MobyUtil.autoload( :TDriverLinuxCam, File.expand_path( File.join( File.dirname( __FILE__ ), 'camera_linux.rb' ) ) )
+require File.expand_path( File.join( File.dirname( __FILE__ ), 'camera_linux.rb' ) )
 

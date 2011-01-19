@@ -17,8 +17,12 @@
 ## 
 ############################################################################
 
+# dbaccess related errors
+require File.expand_path( File.join( File.dirname( __FILE__ ), 'error.rb' ) )
 
-STDOUT.puts "Please require 'util/localisation/loader.rb' instead of 'util/localisation.rb'"
+# database access module implementation
+require File.expand_path( File.join( File.dirname( __FILE__ ), 'access.rb' ) )
 
-require File.expand_path( File.join( File.dirname( __FILE__ ), 'localisation/loader.rb' ) )
+# database connection module implementation
+require File.expand_path( File.join( File.dirname( __FILE__ ), 'connection.rb' ) )
 

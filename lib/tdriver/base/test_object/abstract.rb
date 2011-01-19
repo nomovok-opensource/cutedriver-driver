@@ -94,7 +94,6 @@ module MobyBase
     end
 
     # Function to calculate HASH value for a TestObject
-    # as required by, e.g. Set
     #
     # This is required, as eql? method is being overwritten.
     # === returns

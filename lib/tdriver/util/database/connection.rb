@@ -18,12 +18,27 @@
 ############################################################################
 
 
+module MobyUtil
 
+	class DBConnection
+		attr_accessor :db_type, :host, :database_name, :username, :password, :dbh
+		
+		# == description
+		# Initialize connection object
+		#
+		def initialize( db_type, host, database_name, username, password )
+			@db_type = db_type.to_s.downcase
+			@host = host.to_s.downcase
+			@database_name = database_name
+			@username = username
+			@password = password
+			@dbh = nil		
+		end
 
-# dbaccess related errors
-require File.expand_path( File.join( File.dirname( __FILE__ ), 'error.rb' ) )
+    # enable hoo./base/test_object/factory.rb:king for performance measurement & debug logging
+    TDriver::Hooking.hook_methods( self ) if defined?( TDriver::Hooking )
+		
+	end # class
 
-# dbaccess module implementation 
-require File.expand_path( File.join( File.dirname( __FILE__ ), 'dbaccess.rb' ) )
-require File.expand_path( File.join( File.dirname( __FILE__ ), 'dbconnection.rb' ) )
+end # module
 
