@@ -569,6 +569,146 @@ module TDriverVerify
 
   end
 
+  # Verifies that the block given to return value matches with expected regular expression pattern. Verification is synchronized with all connected suts.
+  # If this method is called for a sut, synchronization is only done with that sut.
+  #
+  # === params
+  # expected:: Regular expression
+  # timeout:: (optional) Integer defining the amount of seconds during which the verification must pass.
+  # message:: (optional) A String that is displayed as additional information if the verification fails.
+  # === returns
+  # nil
+  # === raises
+  # ArgumentError:: message was not a String or timeout an integer, or no block was given.
+  # TypeError:: if block result not type of String.
+  # VerificationError:: The verification failed.
+  # RuntimeError:: An unexpected error was encountered during verification.
+  def verify_regexp( expected, timeout = nil, message = nil, &block )
+
+    logging_enabled = $logger.enabled
+
+    verify_caller = caller( 1 ).first.to_s
+
+    begin
+
+      raise ArgumentError, "No block was given." unless block_given?
+
+      # verify argument types
+      timeout.check_type [ Integer, NilClass ], "wrong argument type $1 for timeout (expected $2)"
+      message.check_type [ String, NilClass ], "wrong argument type $1 for message (expected $2)"
+      expected.check_type Regexp, "wrong argument type $1 for expected result (expected $2)"
+
+      $logger.enabled = false
+
+      #Set the testobject timeout to 0 for the duration of the verify call
+      original_sync_timeout = MobyBase::TestObjectFactory.instance.timeout
+
+      MobyBase::TestObjectFactory.instance.timeout = 0
+
+      timeout_time = get_end_time( timeout )
+
+      loop do
+      
+        counter = ref_counter
+        
+        # catch errors thrown due to verification results
+        begin
+        
+          # catch errors thrown in the provided block
+          begin 
+          
+            # execute block
+            result = yield
+
+          rescue Exception
+
+            raise if $!.kind_of?( MobyBase::ContinuousVerificationError )
+
+            error_msg = "Verification #{ message.nil? ? '' : '"' << message.to_s << '" '}at #{ verify_caller } failed as an exception was thrown when the verification block was executed."
+
+            error_msg << MobyUtil::KernelHelper.find_source( verify_caller )
+
+            error_msg << "\nDetails: \n#{ $!.inspect }"
+
+            raise MobyBase::VerificationError, error_msg
+
+          end
+
+          # verify that result value is type of string
+          result.check_type String, "wrong variable type $1 for result (expected $2)" 
+          
+          # result verification
+          unless result =~ expected
+
+            error_msg = "Verification #{ message.nil? ? '' : '"' << message.to_s << '" '}at #{ verify_caller } failed:"
+            
+            error_msg << MobyUtil::KernelHelper.find_source( verify_caller )
+            
+            error_msg << "\nThe block did not match with pattern #{ expected.inspect }. It returned: #{ result.inspect }" 
+
+            raise MobyBase::VerificationError, error_msg
+
+          end
+
+          # break loop if no exceptions thrown
+          break
+
+        rescue MobyBase::VerificationError
+
+          # refresh and retry unless timeout reached
+
+          raise $! if Time.new > timeout_time
+
+          sleep TIMEOUT_CYCLE_SECONDS
+
+          refresh_suts if counter == ref_counter
+          
+        rescue MobyBase::ContinuousVerificationError
+        
+          raise
+
+        rescue TypeError
+        
+          raise $!
+          
+        rescue Exception
+        
+          raise if $!.kind_of?( MobyBase::ContinuousVerificationError )
+
+          # an unexpected error has occurred
+          raise RuntimeError, "An unexpected error was encountered during verification:\n#{ $!.inspect }"
+
+        end # begin, catch any VerificationErrors
+
+      end # do
+
+    rescue Exception
+
+      execute_on_error_verify_block unless @@on_error_verify_block.nil?
+
+      raise if $!.kind_of?( MobyBase::ContinuousVerificationError )
+
+      $logger.enabled = logging_enabled
+            
+      $logger.log "behaviour" , "FAIL;Verification #{message.nil? ? '' : '\"' << message << '\" '}failed:#{ $!.to_s }.\n#{ timeout.nil? ? '' : ' using timeout ' + timeout.to_s }.;#{ self.kind_of?( MobyBase::SUT ) ? "#{ self.id.to_s };sut" : ';' };{};verify_regexp;#{ expected.inspect }" 
+
+      raise $!
+
+    ensure
+    
+      MobyBase::TestObjectFactory.instance.timeout = original_sync_timeout
+
+      $logger.enabled = logging_enabled
+      
+    end
+
+    $logger.log "behaviour", "PASS;Verification #{ message.nil? ? '' : '\"' << message << '\" ' }at #{ verify_caller } was successful#{ timeout.nil? ? '' : ' using timeout ' + timeout.to_s}.;#{ self.kind_of?( MobyBase::SUT ) ? "#{ self.id.to_s };sut" : ';'};{};verify_regexp;#{ expected.inspect }"
+
+    nil
+
+  end
+
+
   # Verifies that the given signal is emitted.
   #
   # === params
