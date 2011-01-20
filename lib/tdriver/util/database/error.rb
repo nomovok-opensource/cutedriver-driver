@@ -17,8 +17,18 @@
 ## 
 ############################################################################
 
+module MobyUtil
 
-STDOUT.puts "Please require 'util/common/loader.rb' instead of 'util/common.rb'"
+    # This error should be raised when no database type is defined
+	class DbTypeNotDefinedError < CustomError; end;
 
-require File.expand_path( File.join( File.dirname( __FILE__ ), 'common/loader.rb' ) )
-
+	# This error should be raised when not supported db type is defined
+	class DbTypeNotSupportedError < CustomError; end;
+	
+	# This error should be raised when there is connectivity problem with sql database
+	class SqlConnectError < CustomError; end;
+	
+	# This error should be raised when there is problem with sql query
+	class SqlError < CustomError; end;
+	
+end

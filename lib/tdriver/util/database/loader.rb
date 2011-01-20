@@ -17,19 +17,12 @@
 ## 
 ############################################################################
 
+# dbaccess related errors
+require File.expand_path( File.join( File.dirname( __FILE__ ), 'error.rb' ) )
 
-module MobyUtil
+# database access module implementation
+require File.expand_path( File.join( File.dirname( __FILE__ ), 'access.rb' ) )
 
-    # This error should be raised when no database type is defined
-	class DbTypeNotDefinedError < CustomError; end;
+# database connection module implementation
+require File.expand_path( File.join( File.dirname( __FILE__ ), 'connection.rb' ) )
 
-	# This error should be raised when not supported db type is defined
-	class DbTypeNotSupportedError < CustomError; end;
-	
-	# This error should be raised when there is connectivity problem with sql database
-	class SqlConnectError < CustomError; end;
-	
-	# This error should be raised when there is problem with sql query
-	class SqlError < CustomError; end;
-	
-end

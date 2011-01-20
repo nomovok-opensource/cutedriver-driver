@@ -17,12 +17,6 @@
 ## 
 ############################################################################
 
-require 'rubygems'
-require 'net/http'
-require 'socket'
-require 'uri'
-require 'date'
-
 # Utility for storing statistics regarding TDriver usage
 #
 #
@@ -48,6 +42,12 @@ module MobyUtil
 		def self.report( action, message )
 
 			return nil if defined?( $_TDRIVER_DISABLE_STATS_REPORTING )
+
+      require 'rubygems'
+      require 'uri'
+      require 'socket'
+      require 'net/http'
+      require 'date'
 
 			report_thread = Thread.new{
 

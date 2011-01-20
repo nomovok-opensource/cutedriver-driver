@@ -19,18 +19,29 @@
 
 # load globally used external modules
 require 'singleton'
-require 'set'
 
-# load native extensions if available
-begin; require File.expand_path( File.join( File.dirname( __FILE__ ), 'native_extensions' ) ); rescue LoadError; end
+#require 'set'
 
-# generic utility modules
-require File.expand_path( File.join( File.dirname( __FILE__ ), 'util/loader' ) )
+begin
+
+  # load native extensions if available
+  require File.expand_path( File.join( File.dirname( __FILE__ ), 'native_extensions' ) )
+
+rescue LoadError
+
+  # do nothing
+
+end
+
+# utility modules
+require File.expand_path( File.join( File.dirname( __FILE__ ), 'util/loader.rb' ) )
 
 # base modules
-require File.expand_path( File.join( File.dirname( __FILE__ ), 'base/loader' ) )
+require File.expand_path( File.join( File.dirname( __FILE__ ), 'base/loader.rb' ) )
 
-# misc modules
-require File.expand_path( File.join( File.dirname( __FILE__ ), 'report/report' ) )
-require File.expand_path( File.join( File.dirname( __FILE__ ), 'verify/verify' ) )
+# reporting modules
+require File.expand_path( File.join( File.dirname( __FILE__ ), 'report/report.rb' ) )
+
+# verify module
+require File.expand_path( File.join( File.dirname( __FILE__ ), 'verify/verify.rb' ) )
 

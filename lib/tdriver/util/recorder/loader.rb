@@ -17,8 +17,9 @@
 ## 
 ############################################################################
 
+# Recorder module
+require File.expand_path( File.join( File.dirname( __FILE__ ), 'recorder.rb' ) )
 
-STDOUT.puts "Please require 'util/localisation/loader.rb' instead of 'util/localisation.rb'"
-
-require File.expand_path( File.join( File.dirname( __FILE__ ), 'localisation/loader.rb' ) )
+# Scripter module
+require File.expand_path( File.join( File.dirname( __FILE__ ), 'scripter.rb' ) )
 

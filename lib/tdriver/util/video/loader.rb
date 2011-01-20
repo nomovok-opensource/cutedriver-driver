@@ -17,8 +17,15 @@
 ## 
 ############################################################################
 
+# video utils module
+require File.expand_path( File.join( File.dirname( __FILE__ ), 'video_utils.rb' ) )
 
-STDOUT.puts "Please require 'util/parameter/loader.rb' instead of 'util/parameter.rb'"
+# camera implementation
+require File.expand_path( File.join( File.dirname( __FILE__ ), 'camera.rb' ) )
 
-require File.expand_path( File.join( File.dirname( __FILE__ ), 'parameter/loader.rb' ) )
+# camera windows implementation
+require File.expand_path( File.join( File.dirname( __FILE__ ), 'camera_windows.rb' ) )
+
+# camera linux implementation
+require File.expand_path( File.join( File.dirname( __FILE__ ), 'camera_linux.rb' ) )
 

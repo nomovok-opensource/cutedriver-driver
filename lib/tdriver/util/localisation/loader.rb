@@ -17,12 +17,9 @@
 ## 
 ############################################################################
 
-
-
-
 # localisation related errors
 require File.expand_path( File.join( File.dirname( __FILE__ ), 'error.rb' ) )
 
-# localisation module implementation 
+# localisation module implementation - load only if needed
 require File.expand_path( File.join( File.dirname( __FILE__ ), 'localisation.rb' ) )
 

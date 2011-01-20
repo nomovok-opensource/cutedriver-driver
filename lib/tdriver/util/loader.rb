@@ -17,27 +17,27 @@
 ## 
 ############################################################################
 
-
 require 'singleton'
+
 require 'rubygems'
 
 # Hooking module - should be loaded first due to above modules uses its functions
-require File.expand_path( File.join( File.dirname( __FILE__ ), 'hooking.rb' ) )
+require File.expand_path( File.join( File.dirname( __FILE__ ), 'hooking/hooking.rb' ) )
 
 # generic/common utility modules
 require File.expand_path( File.join( File.dirname( __FILE__ ), 'common/loader.rb' ) )
 
 # Logger module
-require File.expand_path( File.join( File.dirname( __FILE__ ), 'logger.rb' ) )
+require File.expand_path( File.join( File.dirname( __FILE__ ), 'logger/logger.rb' ) )
 
 # Parameter modules
 require File.expand_path( File.join( File.dirname( __FILE__ ), 'xml/loader.rb' ) )
 
 # Statistics module
-require File.expand_path( File.join( File.dirname( __FILE__ ), 'stats.rb' ) )
+require File.expand_path( File.join( File.dirname( __FILE__ ), 'statistics/statistics.rb' ) )
 
 # Dynamic attribute filter module
-require File.expand_path( File.join( File.dirname( __FILE__ ), 'dynamic_attribute_filter' ) )
+require File.expand_path( File.join( File.dirname( __FILE__ ), 'filters/dynamic_attributes.rb' ) )
 
 # Plugin service & abstract class
 require File.expand_path( File.join( File.dirname( __FILE__ ), 'plugin/loader.rb' ) )
@@ -46,7 +46,7 @@ require File.expand_path( File.join( File.dirname( __FILE__ ), 'plugin/loader.rb
 require File.expand_path( File.join( File.dirname( __FILE__ ), 'parameter/loader.rb' ) )
 
 # DBAccess module
-require File.expand_path( File.join( File.dirname( __FILE__ ), 'dbaccess/loader.rb' ) )
+require File.expand_path( File.join( File.dirname( __FILE__ ), 'database/loader.rb' ) )
 
 # Localisation module
 require File.expand_path( File.join( File.dirname( __FILE__ ), 'localisation/loader.rb' ) )
@@ -58,8 +58,7 @@ require File.expand_path( File.join( File.dirname( __FILE__ ), 'user_data/loader
 require File.expand_path( File.join( File.dirname( __FILE__ ), 'operator_data/loader.rb' ) )
 
 # Recorder module
-require File.expand_path( File.join( File.dirname( __FILE__ ), 'recorder.rb' ) )
+require File.expand_path( File.join( File.dirname( __FILE__ ), 'recorder/loader.rb' ) )
 
 # Video utils module
-require File.expand_path( File.join( File.dirname( __FILE__ ), 'video_utils.rb' ) )
-
+require File.expand_path( File.join( File.dirname( __FILE__ ), 'video/loader.rb' ) )

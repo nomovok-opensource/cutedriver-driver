@@ -17,9 +17,6 @@
 ## 
 ############################################################################
 
-require 'log4r'
-require 'log4r/configurator'
-
 module MobyUtil
 
   class Logger
@@ -33,13 +30,15 @@ module MobyUtil
       # Allow all levels to be reported - do not change this!
       @custom_levels = ['debug', 'behaviour', 'info', 'warning', 'error', 'fatal']
 
-      Log4r::Configurator.custom_levels *@custom_levels.collect{ | level | level.upcase }
+      #Log4r::Configurator.custom_levels *@custom_levels.collect{ | level | level.upcase }
 
-      Log4r::Logger.root.level = Log4r::DEBUG
+      #Log4r::Logger.root.level = Log4r::DEBUG
 
       @enabled_stack = [ false ]
 
       @logger_instance = nil
+
+      @logger_engine_loaded = false
 
     end
 
@@ -56,9 +55,16 @@ module MobyUtil
 
       method_id_str = method_id.to_s
 
-      super unless @custom_levels.include? method_id_str
+      if @custom_levels.include?( method_id_str )
 
-      log method_id_str, *method_arguments
+        log method_id_str, *method_arguments
+
+      else
+
+        # raise exception
+        super
+
+      end
 
     end
 
@@ -96,14 +102,30 @@ module MobyUtil
     # TODO: add documentation
     def set_report_level( report_level )
 
-      Log4r::Logger.root.level = report_level
+      if @logger_engine_loaded
+
+        Log4r::Logger.root.level = report_level
+
+      else
+
+        nil
+
+      end
 
     end
 
     # TODO: add documentation
     def new_logger( logger_name )
 
-      Log4r::Logger.new logger_name
+      if @logger_engine_loaded
+
+        Log4r::Logger.new( logger_name )
+
+      else
+
+        nil
+
+      end
 
     end
 
@@ -112,7 +134,15 @@ module MobyUtil
 
       begin
 
-        Log4r::Logger.get logger_name
+        if @logger_engine_loaded
+
+          Log4r::Logger.get( logger_name )
+
+        else
+
+          nil
+
+        end
 
       rescue
 
@@ -146,14 +176,18 @@ module MobyUtil
     # TODO: add documentation
     def set_outputter_pattern( outputter_instance, pattern )
 
-      # Allow only FileOutputter instances
-      Kernel::raise ArgumentError, 'Outputter instance not valid' if ![ Log4r::FileOutputter ].include?( outputter_instance.class )
+      if @logger_engine_loaded
 
-      # Allow only FileOutputter instances
-      Kernel::raise ArgumentError, 'Outputter pattern not valid, %M required by minimum' if !/\%M/.match( pattern ) 
+        # Allow only FileOutputter instances
+        Kernel::raise ArgumentError, 'Outputter instance not valid' if ![ Log4r::FileOutputter ].include?( outputter_instance.class )
 
-      # create pattern for outputter
-      outputter_instance.formatter = Log4r::PatternFormatter.new :pattern => pattern
+        # Allow only FileOutputter instances
+        Kernel::raise ArgumentError, 'Outputter pattern not valid, %M required by minimum' if !/\%M/.match( pattern ) 
+
+        # create pattern for outputter
+        outputter_instance.formatter = Log4r::PatternFormatter.new :pattern => pattern
+
+      end
 
     end
 
@@ -168,7 +202,15 @@ module MobyUtil
     # TODO: add documentation
     def root
 
-      Log4r::Logger.global
+      if @logger_engine_loaded
+
+        Log4r::Logger.global
+
+      else 
+
+        nil
+
+      end
 
     end
 
@@ -389,6 +431,16 @@ module MobyUtil
 
         # logger output path
         outputter_path = MobyUtil::FileHelper.expand_path( $parameters[ :logging_outputter_path ] )
+
+        require 'log4r'
+
+        require 'log4r/configurator'
+
+        Log4r::Configurator.custom_levels *@custom_levels.collect{ | level | level.upcase }
+
+        Log4r::Logger.root.level = Log4r::DEBUG
+
+        @logger_engine_loaded = true
 
         # disable logging if exception is raised during 
         begin

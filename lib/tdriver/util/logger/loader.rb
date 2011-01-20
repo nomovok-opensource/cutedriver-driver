@@ -17,13 +17,6 @@
 ## 
 ############################################################################
 
-
-
-
-# dbaccess related errors
-require File.expand_path( File.join( File.dirname( __FILE__ ), 'error.rb' ) )
-
-# dbaccess module implementation 
-require File.expand_path( File.join( File.dirname( __FILE__ ), 'dbaccess.rb' ) )
-require File.expand_path( File.join( File.dirname( __FILE__ ), 'dbconnection.rb' ) )
+# logger module
+require File.expand_path( File.join( File.dirname( __FILE__ ), 'logger.rb' ) )
 

@@ -34,8 +34,16 @@ $KCODE = 'u'
 # prevent Object#id Warnings
 Object.send( :undef_method, :id ) if Object.respond_to?( :id )
 
+# TODO: document me
+def require_relative( file )
+
+  # require with full expanded path
+  require File.expand_path( File.join( File.dirname( caller.first.scan( /(.*?):/ ).to_s ), file ) )
+
+end
+
 # load all required components
-require File.expand_path( File.join( File.dirname( __FILE__ ), 'loader' ) )
+require File.expand_path( File.join( File.dirname( __FILE__ ), 'loader.rb' ) )
 
 module TDriver
 

@@ -34,6 +34,9 @@ module MobyUtil
 			@password = password
 			@dbh = nil		
 		end
+
+    # enable hoo./base/test_object/factory.rb:king for performance measurement & debug logging
+    TDriver::Hooking.hook_methods( self ) if defined?( TDriver::Hooking )
 		
 	end # class
 

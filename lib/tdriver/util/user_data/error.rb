@@ -17,7 +17,6 @@
 ## 
 ############################################################################
 
-
 module MobyUtil
 	
 	# This error should be raised when the desired user data is not found

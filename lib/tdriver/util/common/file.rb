@@ -65,7 +65,7 @@ module MobyUtil
 
         require_files = Dir.glob( MobyUtil::FileHelper.fix_path( path ) )
 
-        Kernel::raise RuntimeError.new( "File not found %s" % [ path ] ) if !File.directory?( path ) && !File.file?( path ) && require_files.empty?
+        Kernel::raise RuntimeError, "File not found #{ path }" if !File.directory?( path ) && !File.file?( path ) && require_files.empty?
 
         # load each module found from given folder
         require_files.each { | module_name | 
@@ -99,7 +99,7 @@ module MobyUtil
     # == params
     # == returns
     # String:: String presentation of TDriver home directory
-    def self.tdriver_home()
+    def self.tdriver_home
 
       File.expand_path(
         MobyUtil::FileHelper.fix_path( 
@@ -155,7 +155,7 @@ module MobyUtil
 
       _file_path = MobyUtil::FileHelper.fix_path( _file_path )
 
-      MobyUtil::FileHelper.is_relative_path?( _file_path ) ? File.join( MobyUtil::FileHelper.tdriver_home, _file_path ) : _file_path
+      File.expand_path( MobyUtil::FileHelper.is_relative_path?( _file_path ) ? File.join( MobyUtil::FileHelper.tdriver_home, _file_path ) : _file_path )
 
     end
 
@@ -170,8 +170,12 @@ module MobyUtil
     # ParameterFileParseError:: If parsing failes
     def self.get_file( file_path )
 
+      #p __method__, file_path, caller
+
+      #file_path.check_type( String, "wrong argument type $1 for get_file method (expected $2)")
+
       # raise exception if file name is empty or nil
-      Kernel::raise EmptyFilenameError.new( "File name is empty or not defined" ) if file_path.nil? || file_path.to_s.empty?
+      Kernel::raise EmptyFilenameError, "File name is empty or not defined" if file_path.nil? || file_path.to_s.empty?
 
       # raise exception if file name is file_path variable format other than string
       Kernel::raise UnexpectedVariableTypeError.new( "Invalid filename format %s (Expected: %s)" % [ file_path.class, "String"] )  if !file_path.kind_of?( String )
