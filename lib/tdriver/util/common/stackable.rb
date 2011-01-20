@@ -138,6 +138,23 @@ module TDriver
 
     end
 
+    # TODO: document me
+    def []=( position, value )
+
+      # return last one if index is too high
+      value = -1 if ( position > @stack.count - 1 )
+
+      @stack[ position ] = value
+
+    end
+
+    # TODO: document me
+    def set( value )
+
+      @stack[ -1 ] = value
+
+    end
+
     def ==( value )
 
       @stack.last == value
@@ -158,6 +175,10 @@ module TDriver
     alias_method :<<, :push
 
     alias_method :eql?, :==
+
+    alias_method :value=, :set
+
+    alias_method :value, :last
 
   end # StackableValue
 
