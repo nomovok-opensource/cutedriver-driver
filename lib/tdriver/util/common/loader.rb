@@ -36,8 +36,11 @@ require 'rbconfig'  # ??
   'file.rb', 
   'gem.rb', 
   'kernel.rb', 
-  'retryable.rb' ].each{ | filename |
+  'retryable.rb',
+  'stackable.rb' 
 
-  require File.expand_path( File.join( File.dirname( __FILE__ ), filename ) )  
+].each{ | filename |
+
+  require File.expand_path( File.join( File.dirname( __FILE__ ), filename ) )
 
 }
