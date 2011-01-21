@@ -226,7 +226,7 @@ module MobyBehaviour
 
       current_time = Time.now
 
-      if !@frozen && ( @_previous_refresh.nil? || ( current_time - @_previous_refresh ).to_f > @refresh_interval )
+      if !@frozen #&& ( @_previous_refresh.nil? || ( current_time - @_previous_refresh ).to_f > @refresh_interval )
 
         MobyUtil::Retryable.while(
           :tries => @refresh_tries,
