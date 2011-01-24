@@ -48,23 +48,19 @@ module MobyBehaviour
     # Checks if a child test object matching the given criteria can be found, under this application object or test object.
     #
     # == arguments
-    # type
-    #  String
-    #   description: String defining the type of the object
-    #   example: "Button"
-    #
-    # attributes
+    # *attributes
     #  Hash
-    #   description: Optional hash containing attributes that the object must have
+    #   description: Hash containing attributes that the object must have
     #   example: {}
     #
     # == returns
     # TrueClass
-    #   description: if the object exists on the sut display
-    #   example: true
+    #  description: if the object exists on the sut display
+    #  example: true
+    #
     # FalseClass
-    #   description: if the object exists on the sut display
-    #   example: false
+    #  description: if the object exists on the sut display
+    #  example: false
     #
     # == exceptions
     # TypeError
@@ -73,73 +69,162 @@ module MobyBehaviour
     # ArgumentError
     #  description: The test object type argument must not be empty
     #
+    # ArgumentError
+    #  description: Test object attributes hash argument must not be empty
+    #
     # TypeError
     #  description: Wrong argument type %s for test object attributes (expected Hash)
-    def test_object_exists?( type, attributes = {} )
-
-      # verify type
-      type.check_type( String, "Wrong argument type $1 for test object type (expected $2)" )
-
-      # verify that type is not empty string
-      type.not_empty( "The test object type argument must not be empty" )
-
-      # verify attributes argument type
-      attributes.check_type( Hash, "Wrong argument type $1 for test object attributes (expected $2)")
-
-      attributes_with_type = attributes.clone
-
-      attributes_with_type[ :type ] = type
-
-      attributes_with_type.delete( :__logging )
-
-      #translate the symbol values into string using sut's localisation setting
-      @sut.translate_values!( attributes_with_type )
-
-      original_logging = $logger.enabled
-      
-      desired_logging = ( attributes[ :__logging ] == nil || attributes[ :__logging ] == 'false') ? false : true
-      
-      $logger.enabled = false      
+    def test_object_exists?( *attributes )
 
       begin
 
-        self.child( attributes_with_type )
+        # store original number of arguments
+        arguments_count = attributes.count
 
-        $logger.enabled = desired_logging
+        # verify that correct number of arguments were given
+        if ( 1..2 ).include?( arguments_count )
+
+          # retrieve and remove first argument from array
+          first = attributes.shift
+                
+          if first.kind_of?( Hash )
+
+            # wrong number of arguments were given
+            raise ArgumentError if attributes.count > 0
+         
+            # store first argument as attributes hash 
+            attributes = first
+          
+            # verify that attributes hash is not empty
+            attributes.not_empty( 'Test object attributes hash argument must not be empty' )
+          
+          elsif first.kind_of?( String )
+
+            # print deprecated method usage warning  
+            warn "deprecated method usage; use object#test_object_exists?( Hash ) instead of object#test_object_exists?( String, [ Hash ] )"
+
+            # verify that type is not empty string
+            first.not_empty( 'The test object type argument must not be empty' )
+
+            # retrieve attributes from argument; optional argument when type is kind of String
+            attributes = attributes.shift || {}
+
+            # verify that attributes argument type is correct (Hash)
+            attributes.check_type Hash, 'wrong argument type $1 for test object attributes (expected $2)'
+            
+            # store test object type to attributes hash
+            attributes[ :type ] = first
+            
+          else
+
+            # verify that first argument type is correct (Hash or String)
+            first.check_type Hash, 'wrong argument type $1 for test object type (expected $2)'
+            
+          end
+          
+        else
+
+          # wrong number of arguments were given
+          raise ArgumentError
+          
+        end
+      
+      rescue ArgumentError
+
+        # raise argument error; pass with proper description
+        raise ArgumentError, "wrong number of arguments (#{ arguments_count } for 1)"
         
-        $logger.log "behaviour", "PASS;Test object of type #{type} with attributes #{attributes.inspect} was found.;#{self.kind_of?(MobyBase::SUT) ? self.id.to_s : ''};test_object_exist;"
+      end
 
-      rescue MobyBase::MultipleTestObjectsIdentifiedError
+      # make clone of original attributes
+      attributes_clone = attributes.clone
 
-        $logger.enabled = desired_logging
-        
-        $logger.log "behaviour", "PASS;Multiple objects of type #{ type } with attributes #{attributes.inspect} were found.;#{self.kind_of?(MobyBase::SUT) ? self.id.to_s : ''};test_object_exist;"
+      # If empty or only special attributes then add :type => '*' to search all
+      attributes_clone[ :type ] = '*' if attributes_clone.select{ | key, value | key.to_s !~ /^__/ ? true : false }.empty?
 
-        return true
+      # translate the symbol values into string using sut's localisation setting
+      @sut.translate_values!( attributes_clone )
 
-      rescue MobyBase::TestObjectNotFoundError
+      # default result (raises exception)
+      result = nil
 
-        $logger.enabled = desired_logging
-        
-        $logger.log "behaviour", "FAIL;Test object of type #{type} with attributes #{attributes.inspect} was not found.;#{self.kind_of?(MobyBase::SUT) ? self.id.to_s : ''};test_object_exist;"
+      # disable logging temporarly      
+      $logger.push_enabled( false )
 
-        return false
+      begin
+              
+        # raise exception if multiple objects found; call child method, disable logging and allow multiple objects  
+        raise MobyBase::MultipleTestObjectsIdentifiedError if child( attributes_clone.merge( :__logging => false, :__multiple_objects => true ) ).count > 1
+
+        # return true as return value
+        result = true
+
+        # result behaviour description
+        description = "Test object with attributes #{ attributes.inspect } was found."
 
       rescue Exception
-
-        $logger.enabled = desired_logging
         
-        $logger.log "behaviour", "FAIL;Test object of type #{type} with attributes #{attributes.inspect} was not found.;#{self.kind_of?(MobyBase::SUT) ? self.id.to_s : ''};test_object_exist;"
+        case $!
+        
+          when MobyBase::MultipleTestObjectsIdentifiedError
+          
+            # return true as return value
+            result = true
+            
+            # result behaviour description
+            description = "Multiple objects with attributes #{ attributes.inspect } were found."
+          
+          when MobyBase::TestObjectNotFoundError
 
-        Kernel::raise $!
+            # return false as return value
+            result = false
+            
+            # result behaviour description
+            description = "Test object with attributes #{ attributes.inspect } was not found."
+
+          else
+          
+            # store exception to be raised
+            result = $!
+            
+            # result behaviour description
+            description = "Test object with attributes #{ attributes.inspect } was not found due to unexpected error (#{ $!.class }: #{ $!.message.inspect })"
+        
+        end
 
       ensure
 
-        $logger.enabled = original_logging
+        # determines that will result be logged to behaviour level 
+        $logger.enabled = ( attributes[ :__logging ] == 'true' ? true : false )
+
+        # behaviour logging
+        $logger.behaviour(
+        
+          "%s;%s;%s;test_object_exists?;" % [
+          
+            # status
+            ( result == true ? 'PASS' : 'FAIL' ),
+            
+            # description
+            description,
+            
+            # sut id 
+            ( self.kind_of?( MobyBase::SUT ) ? self.id.to_s : '' )
+          
+          ]
+        
+        )
+        
+        # raise exception if neccessery
+        raise result if result.kind_of?( Exception )
+
+        # restore original logger state
+        $logger.pop_enabled
 
       end
 
-      return true
+      # return value
+      result
 
     end
 

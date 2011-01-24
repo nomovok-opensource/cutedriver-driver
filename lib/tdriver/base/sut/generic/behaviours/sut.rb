@@ -781,7 +781,7 @@ module MobyBehaviour
     #
     # == arguments
     # *arguments
-    #   String
+    #  String
     #   description: Optional argument which is the name of parameter.
     #   example: 'new_parameter'
     #  Symbol

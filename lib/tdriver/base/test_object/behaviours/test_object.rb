@@ -430,7 +430,7 @@ module MobyBehaviour
       find_all_children.check_type( [ TrueClass, FalseClass ], "Wrong argument type $1 for find_all_children (expected $2)" )
 
       # If empty or only special attributes then add :type => '*' to search all
-      attributes.merge!( :type => '*' ) if attributes.select{ | key, value | key.to_s !~ /^__/ ? true : false }.empty?
+      attributes[ :type ] = '*' if attributes.select{ | key, value | key.to_s !~ /^__/ ? true : false }.empty?
 
       # children method specific settings
       attributes.merge!( :__multiple_objects => true, :__find_all_children => find_all_children )
@@ -662,7 +662,7 @@ module MobyBehaviour
 
         end
 
-        TDriver.logger.behaviour(
+        $logger.behaviour(
 
           "%s;%s;%s;%s;%s" % [ 
             "FAIL", 
