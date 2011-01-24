@@ -179,7 +179,7 @@ module MobyBehaviour
 
       # raise exception if attribute name variable type is other than string
       name.check_type( [ String, Symbol ], "Wrong argument type $1 for attribute (expected $2)" )
-	  	
+      
       # convert name to string if variable type is symbol
       name = name.to_s if name.kind_of?( Symbol )
 
@@ -351,42 +351,6 @@ module MobyBehaviour
 
     end
 
-    # == nodoc
-    # == description
-	  # Translates all symbol values in hash using SUT's translate method.
-    #
-	  # == arguments
-	  # hash
-    #  Hash
-    #   description: containing key and value pairs. The hash will get modified if symbols are found from values
-    #   example: {:text=>:translate_me}
-    #
-    # == returns
-    # Hash
-    #  description: Translated hash
-    #  example: {:text=>'translated_text'}
-	  # == exceptions
-	  # LanguageNotFoundError
-    #   description: In case of language is not found
-    #
-	  # LogicalNameNotFoundError
-    #  description: In case of logical name is not found for current language
-    #
-	  # MySqlConnectError
-    #  description: In case problems with the db connectivity
-    #
-	  def translate!( hash, file_name = nil, plurality = nil, numerus = nil, lengthvariant = nil )
-
-      hash.each_pair do | _key, _value |
-
-        next if [ :name, :type, :id ].include?( _key )
-
-        hash[ _key ] = sut.translate( _value, file_name, plurality, numerus, lengthvariant ) if _value.kind_of?( Symbol )  
-
-      end if !hash.nil?
-
-    end
-
     # == description
     # Creates a child test object of this test object. Caller object will be associated as child test objects parent.\n
     # \n
@@ -472,13 +436,13 @@ module MobyBehaviour
       attributes.merge!( :__multiple_objects => true, :__find_all_children => find_all_children )
 
       # disable optimizer state if enabled
-	    disable_optimizer
+      disable_optimizer
 
       # retrieve child objects
       result = get_child_objects( attributes )
 
       # restore optimizer state if it was enabled
-	    enable_optimizer
+      enable_optimizer
 
       # return results
       result
@@ -555,33 +519,33 @@ module MobyBehaviour
     end 
 
     # TODO: document me
-	  def disable_optimizer
+    def disable_optimizer
 
       sut_parameters = $parameters[ @sut.id ]
 
-	    # disable optimizer for this call since it will not work
-	    @_enable_optimizer = false
+      # disable optimizer for this call since it will not work
+      @_enable_optimizer = false
 
-	    if sut_parameters[ :use_find_object, 'false' ] == 'true' and @sut.respond_to?( 'find_object' )
+      if sut_parameters[ :use_find_object, 'false' ] == 'true' and @sut.respond_to?( 'find_object' )
 
-  		  sut_parameters[ :use_find_object ] = 'false'
+        sut_parameters[ :use_find_object ] = 'false'
 
-  		  @_enable_optimizer = true
+        @_enable_optimizer = true
 
-	    end
+      end
 
-	    @_enable_optimizer
+      @_enable_optimizer
 
-	  end
+    end
 
     # TODO: document me
-	  def enable_optimizer
+    def enable_optimizer
 
-	    $parameters[ @sut.id ][ :use_find_object ] = 'true' if @_enable_optimizer
+      $parameters[ @sut.id ][ :use_find_object ] = 'true' if @_enable_optimizer
 
-	    @_enable_optimizer = false
+      @_enable_optimizer = false
 
-	  end
+    end
 
     # TODO: document me
     # Tries to use the missing method id as a child object type and find an object based on it
@@ -656,15 +620,15 @@ module MobyBehaviour
       # disable logging if requested, remove pair from creation_hash
       $logger.push_enabled( dynamic_attributes[ :__logging ] || TDriver.logger.enabled )
 
-	    # check if the hash contains symbols as values and translate those into strings
-	    translate!( creation_hash, attributes[ :__fname ], attributes[ :__plurality ], attributes[ :__numerus ], attributes[ :__lengthvariant ] )
+      # check if the hash contains symbols as values and translate those into strings
+      @sut.translate_values!( creation_hash, attributes[ :__fname ], attributes[ :__plurality ], attributes[ :__numerus ], attributes[ :__lengthvariant ] )
 
       begin
 
         # TODO: refactor me
         child_test_object = @test_object_factory.get_test_objects(
 
-          # current object as parent, can be either TestObject or SUT
+          # current objec  t as parent, can be either TestObject or SUT
           :parent => self,
  
           # pass parent application
@@ -803,7 +767,7 @@ module MobyBehaviour
             # retrieve xml data, performs xpath to sut xml_data
             _xml_data = xml_data
 
-          rescue MobyBase::TestObjectNotFoundError		
+          rescue MobyBase::TestObjectNotFoundError    
 
             # attributes used to refresh parent application
             if @creation_attributes[ :type ] == 'application'

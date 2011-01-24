@@ -38,107 +38,114 @@ module MobyBehaviour
   # *
   #
   # == objects
-  # *
+  # *;application;sut
   #
-	module Verification
+  module Verification
 
-		include MobyBehaviour::Behaviour
+    include MobyBehaviour::Behaviour
 
-		# == description
-		# Checks if a child test object matching the given criteria can be found, under this application object or test object.
-		#
-		# == arguments
-		# type
-		#  String
-		#   description: String defining the type of the object
-		#   example: "Button"
-		#
-		# attributes
-		#  Hash
-		#   description: Optional hash containing attributes that the object must have
-		#   example: {}
-		#
-		# == returns
-		# TrueClass
-		#   description: if the object exists on the sut display
-		#   example: true
-		# FalseClass
-		#   description: if the object exists on the sut display
-		#   example: false
+    # == description
+    # Checks if a child test object matching the given criteria can be found, under this application object or test object.
     #
-		# == exceptions
-		# TypeError
-		#  description: Wrong argument type %s for test object type (expected String)
-		#
-		# ArgumentError
-		#  description: The test object type argument must not be empty
-		#
-		# TypeError
-		#  description: Wrong argument type %s for test object attributes (expected Hash)
-		def test_object_exists?(type, attributes = {} )
+    # == arguments
+    # type
+    #  String
+    #   description: String defining the type of the object
+    #   example: "Button"
+    #
+    # attributes
+    #  Hash
+    #   description: Optional hash containing attributes that the object must have
+    #   example: {}
+    #
+    # == returns
+    # TrueClass
+    #   description: if the object exists on the sut display
+    #   example: true
+    # FalseClass
+    #   description: if the object exists on the sut display
+    #   example: false
+    #
+    # == exceptions
+    # TypeError
+    #  description: Wrong argument type %s for test object type (expected String)
+    #
+    # ArgumentError
+    #  description: The test object type argument must not be empty
+    #
+    # TypeError
+    #  description: Wrong argument type %s for test object attributes (expected Hash)
+    def test_object_exists?( type, attributes = {} )
 
       # verify type
-			#Kernel::raise ArgumentError.new "The type argument must be a non empty String." unless (type.kind_of? String and !type.empty?) 
       type.check_type( String, "Wrong argument type $1 for test object type (expected $2)" )
 
       # verify that type is not empty string
       type.not_empty( "The test object type argument must not be empty" )
 
-      # verify type
-			#Kernel::raise ArgumentError.new "The attributes argument must be a Hash." unless attributes.kind_of?( Hash )
+      # verify attributes argument type
       attributes.check_type( Hash, "Wrong argument type $1 for test object attributes (expected $2)")
 
-			#attributes_with_type = {}.merge attributes
+      attributes_with_type = attributes.clone
 
-			attributes_with_type = attributes.clone
-			attributes_with_type[:type] = type
-			attributes_with_type.delete(:__logging)
+      attributes_with_type[ :type ] = type
 
-			#translate the symbol values into string using sut's localisation setting
-			translate!( attributes_with_type )
+      attributes_with_type.delete( :__logging )
 
-			original_logging = $logger.enabled
-			desired_logging = (attributes[:__logging] == nil || attributes[:__logging] == 'false') ? false : true
-			$logger.enabled = false      
+      #translate the symbol values into string using sut's localisation setting
+      @sut.translate_values!( attributes_with_type )
 
-			begin
+      original_logging = $logger.enabled
+      
+      desired_logging = ( attributes[ :__logging ] == nil || attributes[ :__logging ] == 'false') ? false : true
+      
+      $logger.enabled = false      
 
-				self.child( attributes_with_type )
+      begin
 
-				$logger.enabled = desired_logging
-				$logger.log "behaviour", "PASS;Test object of type #{type} with attributes #{attributes.inspect} was found.;#{self.kind_of?(MobyBase::SUT) ? self.id.to_s : ''};test_object_exist;"
+        self.child( attributes_with_type )
 
-			rescue MobyBase::MultipleTestObjectsIdentifiedError
+        $logger.enabled = desired_logging
+        
+        $logger.log "behaviour", "PASS;Test object of type #{type} with attributes #{attributes.inspect} was found.;#{self.kind_of?(MobyBase::SUT) ? self.id.to_s : ''};test_object_exist;"
 
-				$logger.enabled = desired_logging
-				$logger.log "behaviour", "PASS;Multiple objects of type #{type} with attributes #{attributes.inspect} were found.;#{self.kind_of?(MobyBase::SUT) ? self.id.to_s : ''};test_object_exist;"
-				return true
+      rescue MobyBase::MultipleTestObjectsIdentifiedError
 
-			rescue MobyBase::TestObjectNotFoundError
+        $logger.enabled = desired_logging
+        
+        $logger.log "behaviour", "PASS;Multiple objects of type #{ type } with attributes #{attributes.inspect} were found.;#{self.kind_of?(MobyBase::SUT) ? self.id.to_s : ''};test_object_exist;"
 
-				$logger.enabled = desired_logging
-				$logger.log "behaviour", "FAIL;Test object of type #{type} with attributes #{attributes.inspect} was not found.;#{self.kind_of?(MobyBase::SUT) ? self.id.to_s : ''};test_object_exist;"
-				return false    
+        return true
 
-			rescue Exception => e
+      rescue MobyBase::TestObjectNotFoundError
 
-				$logger.enabled = desired_logging
-				$logger.log "behaviour", "FAIL;Test object of type #{type} with attributes #{attributes.inspect} was not found.;#{self.kind_of?(MobyBase::SUT) ? self.id.to_s : ''};test_object_exist;"
-				Kernel::raise e
+        $logger.enabled = desired_logging
+        
+        $logger.log "behaviour", "FAIL;Test object of type #{type} with attributes #{attributes.inspect} was not found.;#{self.kind_of?(MobyBase::SUT) ? self.id.to_s : ''};test_object_exist;"
 
-			ensure
+        return false
 
-				$logger.enabled = original_logging
+      rescue Exception
 
-			end
+        $logger.enabled = desired_logging
+        
+        $logger.log "behaviour", "FAIL;Test object of type #{type} with attributes #{attributes.inspect} was not found.;#{self.kind_of?(MobyBase::SUT) ? self.id.to_s : ''};test_object_exist;"
 
-			return true
+        Kernel::raise $!
 
-		end
+      ensure
 
-		# enable hooking for performance measurement & debug logging
-		TDriver::Hooking.hook_methods( self ) if defined?( TDriver::Hooking )
+        $logger.enabled = original_logging
 
-	end # module VerificationBehaviour
+      end
+
+      return true
+
+    end
+
+    # enable hooking for performance measurement & debug logging
+    TDriver::Hooking.hook_methods( self ) if defined?( TDriver::Hooking )
+
+  end # module VerificationBehaviour
 
 end # module MobyBase

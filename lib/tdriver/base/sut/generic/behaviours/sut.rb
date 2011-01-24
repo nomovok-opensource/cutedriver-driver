@@ -980,6 +980,42 @@ module MobyBehaviour
 
   end
   
+  # == nodoc
+  # == description
+  # Translates all symbol values in hash using SUT's translate method.
+  #
+  # == arguments
+  # hash
+  #  Hash
+  #   description: containing key and value pairs. The hash will get modified if symbols are found from values
+  #   example: {:text=>:translate_me}
+  #
+  # == returns
+  # Hash
+  #  description: Translated hash
+  #  example: {:text=>'translated_text'}
+  # == exceptions
+  # LanguageNotFoundError
+  #   description: In case of language is not found
+  #
+  # LogicalNameNotFoundError
+  #  description: In case of logical name is not found for current language
+  #
+  # MySqlConnectError
+  #  description: In case problems with the db connectivity
+  #
+  def translate_values!( hash, file_name = nil, plurality = nil, numerus = nil, lengthvariant = nil )
+
+    hash.each_pair do | _key, _value |
+
+      next if [ :name, :type, :id ].include?( _key )
+
+      hash[ _key ] = translate( _value, file_name, plurality, numerus, lengthvariant ) if _value.kind_of?( Symbol )  
+
+    end unless hash.nil?
+
+  end
+    
   # == description
   # Wrapper function to retrieve user information for this SUT from the user information database.
   #

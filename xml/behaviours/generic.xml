@@ -130,7 +130,7 @@
 				<example>method_missing</example>
 			</method>
 
-			<method name="translate!">
+			<method name="translate_values!">
 				<description>desc</description>
 				<example>example</example>
 			</method>
@@ -455,7 +455,7 @@
 
     </behaviour>
 
-    <behaviour name="GenericVerification" object_type="*;application" sut_type="*" input_type="*" version="*">
+    <behaviour name="GenericVerification" object_type="*;application;sut" sut_type="*" input_type="*" version="*">
 
         <module name="MobyBehaviour::Verification" />
 
