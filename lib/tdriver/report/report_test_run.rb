@@ -606,7 +606,7 @@ module TDriverReportCreator
       MobyUtil::Logger.instance.enabled=false
       lang_version='-'
       begin
-        if MobyUtil::Parameter[sut_id][:type]=='S60' || MobyUtil::Parameter[sut_id][:type]=='S60QT'
+        if MobyUtil::Parameter[sut_id][:type]=='S60' || MobyUtil::Parameter[sut_id][:type]=='Symbian'
           lang_version=sut_attributes[:sut].sysinfo( :Lang_version )
         end
         if MobyUtil::Parameter[sut_id][:type]=='QT'
@@ -637,7 +637,7 @@ module TDriverReportCreator
       MobyUtil::Logger.instance.enabled=false
       sw_version='-'
       begin
-        if MobyUtil::Parameter[sut_id][:type]=='S60' || MobyUtil::Parameter[sut_id][:type]=='S60QT'
+        if MobyUtil::Parameter[sut_id][:type]=='S60' || MobyUtil::Parameter[sut_id][:type]=='Symbian'
           sw_version=sut_attributes[:sut].sysinfo( :Sw_version )
         end
         if MobyUtil::Parameter[sut_id][:type]=='QT'
@@ -668,7 +668,7 @@ module TDriverReportCreator
       MobyUtil::Logger.instance.enabled=false
       memory=0
       begin
-        if MobyUtil::Parameter[sut_id][:type]=='S60' || MobyUtil::Parameter[sut_id][:type]=='S60QT'
+        if MobyUtil::Parameter[sut_id][:type]=='S60' || MobyUtil::Parameter[sut_id][:type]=='Symbian'
           memory=sut_attributes[:sut].sysinfo( :Get_used_ram )
         end
         if MobyUtil::Parameter[sut_id][:type]=='QT'
@@ -700,7 +700,7 @@ module TDriverReportCreator
       MobyUtil::Logger.instance.enabled=false
       memory=0
       begin
-        if MobyUtil::Parameter[sut_id][:type]=='S60' || MobyUtil::Parameter[sut_id][:type]=='S60QT'
+        if MobyUtil::Parameter[sut_id][:type]=='S60' || MobyUtil::Parameter[sut_id][:type]=='Symbian'
           memory=sut_attributes[:sut].sysinfo( :Get_total_ram )
         end
         if MobyUtil::Parameter[sut_id][:type]=='QT'
