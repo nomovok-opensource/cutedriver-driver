@@ -498,7 +498,13 @@ module MobyBehaviour
     #  |Key|Type|Description|Example|
     #  |:uid|String or Integer|Unique ID of the application|{ :uid => 268458181 }|
     #  |:name|String|Executable name of the application|{ :name => 'calculator' }|
-    #  |:arguments|String|Comma separated list of arguments passed to application when starting|{ :arguments => '--nogui,-v' }|
+    #  |:arguments|String|Comma separated list of arguments passed to the application when it is started|{ :arguments => '--nogui,-v' }|
+    #	|:sleep_time|Integer|Number of seconds to sleep immediately after launching the process|{ :sleep_time => 10 }|
+    #	|:start_command|String|When set, the run method will execute this command and expect the application provided by the :name key to be launched eventually. Note that applications launched this way can't be sent a Kill message and its start up events and signals may not be recorded.|{ :start_command => 'start_app.bat',:name => 'calculator' }|
+    #	|:try_attach|Boolean|If set to true, run will attempt to attach to an existing application with the given name or id. If not found the application will be launched as normal. If more than 1 are found then an exception is thrown|{:try_attach => true,:name => 'calculator'}|
+    #	|:environment|String|Environment variables you want to pass to started process, passed as key value pairs separated by '=' and pairs separated by spaces |{ :environment => 'LC_ALL=en SPECIAL_VAR=value' }|
+    #	|:events_to_listen|String|List of events you want to start listening to when application starts, passed as comma separated string|{ :events_to_listen => 'Paint,Show' }|
+    #	|:signals_to_listen|String|List of signals you want to start listening to when application starts, passed as comma separated string. Check your application class what signals it can emit.|{ :signals_to_listen => 'applicationReady()' }|	
     #
     # == returns
     # TestObject
