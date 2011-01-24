@@ -61,9 +61,9 @@ module MobyBase
   
       # retrieve test object identification directives; e.g. :__index, :__xy_sorting etc 
       directives = rules[ :identification_directives ]
-
+      
       # retrieve sut object
-      sut = rules[ :parent ].kind_of?( MobyBase::SUT ) ? rules[ :parent ] : rules[ :parent ].sut
+      sut = rules[ :parent ].instance_variable_get( :@sut )
 
       # search parameters for find_objects feature    
       search_parameters = make_object_search_params( rules[ :parent ], rules[ :object_attributes_hash ] )
@@ -224,9 +224,9 @@ module MobyBase
           application_test_object_xml = TDriver::TestObjectAdapter.retrieve_parent_application( test_object_xml )
 
           unless application_test_object_xml.nil?
-          
+
             # retrieve sut object
-            sut = rules[ :parent ].kind_of?( MobyBase::SUT ) ? rules[ :parent ] : rules[ :parent ].instance_variable_get( :@sut )
+            sut = rules[ :parent ].instance_variable_get( :@sut )
 
             # retrieve test object id from xml
             object_id = TDriver::TestObjectAdapter.test_object_element_attribute( application_test_object_xml, 'id' ){ nil }.to_i
@@ -248,7 +248,7 @@ module MobyBase
               rules[ :parent_application ] = parent_cache[ hash_key ]
               
             else
-                                  
+              
               # create application test object            
               rules[ :parent_application ] = make_test_object( 
             
@@ -269,7 +269,7 @@ module MobyBase
 
           # store application test object to new test object 
           rules[ :parent_application ].instance_variable_set( :@parent_application, rules[ :parent_application ] )
-                  
+          
         end
         
         # create new test object
@@ -301,9 +301,9 @@ module MobyBase
                   
       # get parent object from hash
       parent = rules[ :parent ]
-      
+
       # retrieve sut object
-      sut = parent.kind_of?( MobyBase::SUT ) ? parent : parent.sut
+      sut = parent.instance_variable_get( :@sut )
       
       # xml object element      
       xml_object = rules[ :xml_object ]
@@ -323,8 +323,8 @@ module MobyBase
         object_type = TDriver::TestObjectAdapter.test_object_element_attribute( xml_object, 'type' ){ nil }.to_s 
 
         # retrieve test object type from xml
-    	  env = TDriver::TestObjectAdapter.test_object_element_attribute( xml_object, 'env' ){ $parameters[ sut.id ][ :env ] }.to_s
-    	  
+        env = TDriver::TestObjectAdapter.test_object_element_attribute( xml_object, 'env' ){ $parameters[ sut.id ][ :env ] }.to_s
+        
       else
       
         # defaults - refactor this
