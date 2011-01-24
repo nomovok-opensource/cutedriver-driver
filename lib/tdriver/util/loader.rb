@@ -21,44 +21,51 @@ require 'singleton'
 
 require 'rubygems'
 
-# Hooking module - should be loaded first due to above modules uses its functions
-require File.expand_path( File.join( File.dirname( __FILE__ ), 'hooking/hooking.rb' ) )
+[ 
+  # hooking module - should be loaded first due to above modules uses its functions
+  'hooking/hooking.rb', 
 
-# generic/common utility modules
-require File.expand_path( File.join( File.dirname( __FILE__ ), 'common/loader.rb' ) )
+  # common utility modules
+  'common/loader.rb',
 
-# Logger module
-require File.expand_path( File.join( File.dirname( __FILE__ ), 'logger/logger.rb' ) )
+  # logger module
+  'logger/logger.rb',
 
-# Parameter modules
-require File.expand_path( File.join( File.dirname( __FILE__ ), 'xml/loader.rb' ) )
+  # parameter modules
+  'xml/loader.rb',
 
-# Statistics module
-require File.expand_path( File.join( File.dirname( __FILE__ ), 'statistics/statistics.rb' ) )
+  # statistics module
+  'statistics/statistics.rb',
 
-# Dynamic attribute filter module
-require File.expand_path( File.join( File.dirname( __FILE__ ), 'filters/dynamic_attributes.rb' ) )
+  # dynamic attribute filter module
+  'filters/dynamic_attributes.rb', 
 
-# Plugin service & abstract class
-require File.expand_path( File.join( File.dirname( __FILE__ ), 'plugin/loader.rb' ) )
+  # plugin service modules
+  'plugin/loader.rb', 
 
-# Parameter modules
-require File.expand_path( File.join( File.dirname( __FILE__ ), 'parameter/loader.rb' ) )
+  # parameter modules
+  'parameter/loader.rb', 
 
-# DBAccess module
-require File.expand_path( File.join( File.dirname( __FILE__ ), 'database/loader.rb' ) )
+  # database access module
+  'database/loader.rb', 
 
-# Localisation module
-require File.expand_path( File.join( File.dirname( __FILE__ ), 'localisation/loader.rb' ) )
+  # localisation module
+  'localisation/loader.rb', 
 
-# User Data module
-require File.expand_path( File.join( File.dirname( __FILE__ ), 'user_data/loader.rb' ) )
+  # user data module
+  'user_data/loader.rb', 
 
-# Operator Data module
-require File.expand_path( File.join( File.dirname( __FILE__ ), 'operator_data/loader.rb' ) )
+  # operator data module
+  'operator_data/loader.rb', 
 
-# Recorder module
-require File.expand_path( File.join( File.dirname( __FILE__ ), 'recorder/loader.rb' ) )
+  # recorder and scripter modules
+  'recorder/loader.rb', 
 
-# Video utils module
-require File.expand_path( File.join( File.dirname( __FILE__ ), 'video/loader.rb' ) )
+  # video capture/util modules
+  'video/loader.rb'
+
+].each{ | filename |
+
+  require File.expand_path( File.join( File.dirname( __FILE__ ), filename ) )
+
+}

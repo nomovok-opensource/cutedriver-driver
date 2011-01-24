@@ -300,7 +300,7 @@ module MobyBase
     # check if direct match exists
     return sut_id if $parameters[ sut_id ]
 
-    rescue $parametersNotFoundError
+    rescue MobyUtil::ParameterNotFoundError
 
     # check if a mapping is defined for the id
     begin        
@@ -311,7 +311,7 @@ module MobyBase
       # check if the mapped to sut id exists
       return mapped_id if $parameters[ ( mapped_id = mapped_id.to_sym ) ]
 
-    rescue $parametersNotFoundError
+    rescue MobyUtil::ParameterNotFoundError
 
       # no mappings defined in tdriver_parameters.xml or the mapped to sut was not found
       return nil
