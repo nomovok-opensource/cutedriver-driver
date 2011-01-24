@@ -473,7 +473,7 @@ module TDriverReportCreator
         write_page_start(@report_folder+'/cases/statistics_index.html','Statistics')
         write_page_end(@report_folder+'/cases/statistics_index.html')
       rescue Exception => e
-        Kernel::raise e, "Unable to create report folder", caller
+        Kernel::raise e, "Unable to create report folder: #{@report_folder}", caller
       end
       return nil
     end
