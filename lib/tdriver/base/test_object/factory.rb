@@ -555,18 +555,25 @@ module MobyBase
       # verify given identification directives, only documented end-user directives is checked
       identification_directives.each{ | key, value |
       
+        # do not verify type by default
+        type = nil
+      
         case key
 
           # Fixnum          
-          when :__index, :__timeout, :__logging 
-            value.check_type( Fixnum, "Wrong variable type $1 for #{ key.inspect } test object identification directive (expected $2)" )
+          when :__index, :__timeout
           
-          # TrueClass, FalseClass
-          when :__xy_sorting
-            value.check_type( [ TrueClass, FalseClass ], "Wrong variable type $1 for #{ key.inspect } test object identification directive (expected $2)" )
+            type = Fixnum
+                    
+          when :__logging, :__xy_sorting
+          
+            type = [ TrueClass, FalseClass ]
           
         end
-      
+
+        # verify hash value if type defined 
+        value.check_type( type, "Wrong variable type $1 for #{ key.inspect } test object identification directive (expected $2)" ) unless type.nil?
+
       }
       
       # get parent object

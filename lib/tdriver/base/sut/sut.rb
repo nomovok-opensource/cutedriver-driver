@@ -40,9 +40,14 @@ module MobyBase
       @_sutController = sut_controller
       
       @test_object_factory = test_object_factory || TDriver::TestObjectFactory.new( :test_object_adapter => TDriver::TestObjectAdapter )
-
+      
       @id = sut_id
-      @input = :key
+
+      # reference to self; easier to access (parent) SUT in shared behaviours applied to test object/sut/application 
+      @sut = self
+      
+      # default values
+      @input = :key      
       @type = "sut"
 
     end  
