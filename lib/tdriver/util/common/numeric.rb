@@ -20,20 +20,71 @@
 # extend Ruby Numeric class functionality
 class Numeric
 
+  # TODO: document me
   def positive?
+
     self > 0
+
   end
-  
+
+  # TODO: document me  
   def non_negative?
+
     self >= 0
+
   end
-  
+
+  # TODO: document me  
   def non_positive?
+
     self <= 0  
+
   end
-  
+
+  # TODO: document me  
   def negative?
+
     self < 0
+
+  end
+
+  # TODO: document me
+  def limit( minimum_value, maximum_value )
+
+    value = self    
+
+    value.min( minimum_value ).max( maximum_value )
+
+  end
+
+  # TODO: document me
+  def max( value )
+
+    if value.kind_of?( Numeric )
+
+      self > value ? value : self
+
+    else
+
+      raise TypeError, 'wrong type %2 for value (expected Numeric)'
+
+    end
+
+  end
+
+  # TODO: document me
+  def min( value )
+
+    if value.kind_of?( Numeric )
+
+      self < value ? value : self
+
+    else
+
+      raise TypeError, 'wrong type %2 for value (expected Numeric)'
+
+    end
+
   end
 
 end
