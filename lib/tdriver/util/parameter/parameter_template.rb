@@ -31,7 +31,7 @@ module MobyUtil
 
     def load_templates()
 
-      content = MobyUtil::ParameterXml.instance.merge_files( 'templates/', 'templates', '/templates/*' )
+      content = MobyUtil::ParameterXml.merge_files( 'templates/', 'templates', '/templates/*' )
 
       @@templates = MobyUtil::XML::parse_string( content )
 
@@ -94,7 +94,7 @@ module MobyUtil
             ).merge!( 
 
               # merge template to hash
-              MobyUtil::ParameterXml.instance.parse( template_node.to_s ) 
+              MobyUtil::ParameterXml.parse( template_node.to_s ) 
 
             )
           }

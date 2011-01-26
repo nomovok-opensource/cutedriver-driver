@@ -147,9 +147,9 @@ module MobyUtil
       @@default_parameters_loaded = true
 
       # load default parameter values
-      MobyUtil::ParameterXml.instance.parse(
+      MobyUtil::ParameterXml.parse(
 
-        MobyUtil::ParameterXml.instance.merge_files( 'defaults/', 'parameters', '/parameters/*' ){  | filename |
+        MobyUtil::ParameterXml.merge_files( 'defaults/', 'parameters', '/parameters/*' ){  | filename |
 
           @@loaded_parameter_files << filename unless @@loaded_parameter_files.include?( filename )
 
@@ -164,7 +164,7 @@ module MobyUtil
     # reset parameters class
     def reset_parameters
 
-      MobyUtil::ParameterXml.instance.reset
+      MobyUtil::ParameterXml.reset
 
       reset( true, true, true, true )
 
@@ -181,7 +181,7 @@ module MobyUtil
 
       @@parameters.merge_with_hash!(
 
-        MobyUtil::ParameterXml.instance.parse_file( filename )
+        MobyUtil::ParameterXml.parse_file( filename )
 
       )
 
@@ -192,7 +192,7 @@ module MobyUtil
     # empty parameters hash
     def clear
 
-      MobyUtil::ParameterXml.instance.reset
+      MobyUtil::ParameterXml.reset
 
       reset_flags
 
@@ -268,7 +268,7 @@ module MobyUtil
 
       self.instance unless @@initialized
 
-      MobyUtil::ParameterXml.instance.sut_list
+      MobyUtil::ParameterXml.sut_list
 
     end
 

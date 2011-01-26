@@ -21,27 +21,17 @@ module MobyUtil
 
   class ParameterXml
 
-    include Singleton
+    # default values
+    @@sut_list = []
 
-    @@initialized = false
-
-    # initialize class with default values
-    def initialize
-
-      reset
-
-      @@initialized = true
-
-    end
-
-    def reset
+    def self.reset
 
       @@sut_list = []
 
     end
 
     # return list of configured suts
-    def sut_list
+    def self.sut_list
 
       @@sut_list
 
@@ -56,10 +46,10 @@ module MobyUtil
     # === raises
     # SyntaxError:: if parameter-element does not have a name
     # ParameterError:: if loading subfile fails, see get_xmldocument_from_file function
-    def parse( xml )
+    def self.parse( xml )
 
       # default results 
-      results = ParameterHash.new()
+      results = MobyUtil::ParameterHash.new
 
       # retrieve platform name
       platform = MobyUtil::EnvironmentHelper.platform
@@ -70,16 +60,19 @@ module MobyUtil
       begin
 
         # create new xml document
-        document = MobyUtil::XML::parse_string( xml )
+        document = XML::parse_string( xml )
 
       rescue Exception => exception
 
-        Kernel::raise ParameterFileParseError.new( "Error occured while parsing XML. Reason: %s (%s)" % [ exception.message, exception.class ] )
+        raise ParameterFileParseError, "Error occured while parsing XML. Reason: \"#{ exception.message }\" (#{ exception.class })"
 
       end
 
       # go through each element in xml
-      document.xpath( "/#{ document.root.name }/*" ).each{ | element |
+      #document.xpath( "/#{ document.root.name }/*" ).each{ | element |
+
+      # go through each element in xml
+      document.root.xpath( "*" ).each{ | element |
 
         attribute = element.attributes.to_hash
 
@@ -89,7 +82,7 @@ module MobyUtil
         value = attribute[ "value" ].to_s
 
         # generic posix value - overwrites attribute["value"] if found
-        value = attribute["posix"].to_s unless attribute[ "posix" ].nil? if is_posix
+        value = attribute[ "posix" ].to_s unless attribute[ "posix" ].nil? if is_posix
 
         # platform specific value - overwrites existing value
         value = attribute[ platform.to_s ].to_s unless attribute[ platform.to_s ].nil?
@@ -99,20 +92,18 @@ module MobyUtil
           when 'fixture'
 
             plugin = attribute[ "plugin" ].to_s
-		    env = attribute[ "env" ].to_s unless attribute[ "env" ].nil?
 
-            Kernel::raise SyntaxError.new( "No name defined for fixture with value %s" % name ) if name.empty?
-            Kernel::raise SyntaxError.new( "No plugin defined for fixture with name %s" % name ) if plugin.empty?
+    		    env = attribute[ "env" ].to_s unless attribute[ "env" ].nil?
 
-   		    value = {:plugin => plugin, :env => env}
+            raise SyntaxError, "No name defined for fixture with value #{ name }" if name.empty?
+
+            raise SyntaxError, "No plugin defined for fixture with name #{ name }" if plugin.empty?
+
+   		      value = { :plugin => plugin, :env => env }
 
           when 'parameter'
 
-            Kernel::raise SyntaxError.new( 
-
-              "No name defined for parameter with value %s" % attribute[ 'value' ]
-
-            ) unless attribute[ "name" ]
+            raise SyntaxError, "No name defined for parameter with value #{ attribute[ 'value' ] }" unless attribute[ "name" ]
 
         else
 
@@ -128,11 +119,17 @@ module MobyUtil
           # get template name(s) if given
           templates = attribute[ "template" ].to_s
 
-          # empty value by default - content will be retrieved above
-          value = ParameterHash.new()
+          if templates.empty?
 
-          # use template if defined
-          value = MobyUtil::ParameterTemplates.instance.get_template_from_xml( templates.to_s ) unless templates.empty?
+            # empty value by default - content will be retrieved above
+            value = ParameterHash.new()
+
+          else
+
+            # use template if defined
+            value = MobyUtil::ParameterTemplates.instance.get_template_from_xml( templates ) unless templates.empty?
+
+          end
 
           # read xml file from given location if defined - otherwise pass content as is
           if element.attribute( "xml_file" )
@@ -145,6 +142,7 @@ module MobyUtil
 
           end
 
+          # merge hash values (value type of hash)
           value.merge_with_hash!( content )
 
           name = ( element.attribute( "id" ) || element.name ).to_s
@@ -156,15 +154,13 @@ module MobyUtil
 
       }
 
-      # dispose xml document
-      document = nil
-
       # return results hash
       results
 
     end
 
-    def load_file( filename )
+    # TODO: document me
+    def self.load_file( filename )
 
       filename = MobyUtil::FileHelper.expand_path( filename )
 
@@ -192,7 +188,8 @@ module MobyUtil
 
     end
 
-    def parse_file( filename )
+    # TODO: document me
+    def self.parse_file( filename )
 
       begin
       
@@ -214,7 +211,8 @@ module MobyUtil
 
     end
 
-    def merge_files( path, root_element_name, xpath_to_element = '/*', &block )
+    # TODO: document me
+    def self.merge_files( path, root_element_name, xpath_to_element = '/*', &block )
 
       @filename = ""
 
