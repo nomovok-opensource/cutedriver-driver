@@ -411,8 +411,8 @@ module TDriver
       # iterate through each child object type attribute and create accessor method  
       source_data.xpath( 'objects/object/@type' ).each{ | object_type |
 
-        # skip if object type value is nil (element)
-        next if object_type.nil?
+        # skip if object type value is nil or empty due to child accessor cannot be created
+        next if object_type.nil? || object_type.to_s.empty?
 
         # convert attribute node value to string
         object_type = object_type.content
@@ -423,7 +423,7 @@ module TDriver
         # create child accessor method to test object unless already exists
         test_object.instance_eval(
 
-          "def #{object_type}(rules={}); raise TypeError,'parameter <rules> should be hash' unless rules.kind_of?(Hash); rules[:type]=:#{object_type}; child(rules); end;"
+          "def #{ object_type }( rules = {} ); raise TypeError,'parameter <rules> should be hash' unless rules.kind_of?( Hash ); rules[ :type ]=:#{ object_type }; child( rules ); end;"
 
         ) unless object_type.empty?
 
