@@ -235,6 +235,7 @@ module MobyBehaviour
 
     end
 
+
     # TODO: merge TestObject#child and SUT#child 
     # == description
     # Creates a child test object from this SUT. SUT object will be associated as child test objects parent.\n
@@ -1243,7 +1244,7 @@ module MobyBehaviour
 
       current_time = Time.now
 
-      if !@frozen && ( @_previous_refresh.nil? || ( current_time - @_previous_refresh ).to_f >= @refresh_interval )
+      if !@frozen #&& ( @_previous_refresh.nil? || ( current_time - @_previous_refresh ).to_f >= @refresh_interval )
 
         use_find_objects = $parameters[ @id ][ :use_find_object, 'false' ] == 'true' and self.respond_to?( 'find_object' )
         
