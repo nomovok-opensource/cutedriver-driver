@@ -21,68 +21,18 @@ module MobyUtil
 
   module XML
 
-    class NilElement
+    module Nokogiri
 
-      include Abstraction
+      module Comment # behaviour
 
-      def method_missing( method, *method_arguments )
+        include Node
 
-        raise RuntimeError.new( "Method '%s' is not supported by %s (%s)" % [ method, self.class, @parser ] )
+        # enable hooking for performance measurement & debug logging
+        TDriver::Hooking.hook_methods( self ) if defined?( TDriver::Hooking )
 
-      end
+      end # Comment
 
-      def xml=( value )
-
-        @xml = nil
-
-      end
-
-      def name
-
-        nil
-
-      end
-
-      def size
-
-        0
-
-      end
-
-      def nil?
-
-        true
-
-      end
-
-      def eql?( object )
-
-        nil == object.xml.content
-
-      end
-
-      def empty?
-
-        true
-
-      end
-
-      def to_s
-
-        ""
-
-      end
-
-      def inner_xml
-
-        ""
-
-      end
-
-      # enable hooking for performance measurement & debug logging
-      TDriver::Hooking.hook_methods( self ) if defined?( TDriver::Hooking )
-
-    end # NilElement
+    end # Nokogiri
 
   end # XML
 

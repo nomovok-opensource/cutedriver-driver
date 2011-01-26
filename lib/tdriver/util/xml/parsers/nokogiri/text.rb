@@ -25,25 +25,7 @@ module MobyUtil
 
       module Text # behaviour
 
-        include Abstraction 
-
-        def parent
-        
-          element_object( @xml.parent )
-        
-        end
-
-        def to_s
-  
-          @xml.content
-
-        end
-
-        def content
-
-          @xml.content
-
-        end
+        include Node
 
         # enable hooking for performance measurement & debug logging
         TDriver::Hooking.hook_methods( self ) if defined?( TDriver::Hooking )

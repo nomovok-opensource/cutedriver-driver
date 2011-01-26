@@ -17,6 +17,5 @@
 ## 
 ############################################################################
 
-
 # nokogiri parser wrapper
 require File.expand_path( File.join( File.dirname( __FILE__ ), 'nokogiri/loader.rb' ) )

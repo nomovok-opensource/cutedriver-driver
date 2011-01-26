@@ -117,7 +117,6 @@ module MobyUtil
           @xml.empty?
 
         end
-
         
         def length
 

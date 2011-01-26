@@ -40,9 +40,15 @@ module MobyUtil
         # support all Nokogiri::XML::Builder class instance methods
         def method_missing( method, *args )
 
-          Kernel::raise NoMethodError.new( "Method '%s' is not supported by %s" % [ method, self.class ] ) unless @xml.respond_to?( method )
+          if @xml.respond_to?( method )
 
-          @xml.send( method.to_sym, *args )
+            @xml.send( method.to_sym, *args )
+
+          else
+
+            raise NoMethodError, "Method #{ method.to_s.inspect } is not supported by #{ self.class }" 
+
+          end
 
         end
 

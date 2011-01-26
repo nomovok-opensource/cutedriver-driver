@@ -17,36 +17,46 @@
 ## 
 ############################################################################
 
-# load parser implementation(s)
-require File.expand_path( File.join( File.dirname( __FILE__ ), 'parsers/loader.rb' ) )
+[ 
 
-# xml related errors
-require File.expand_path( File.join( File.dirname( __FILE__ ), 'error.rb' ) )
+  # load parser implementations
+  'parsers/loader.rb',
 
-# abstraction module for document, element and nodeset
-require File.expand_path( File.join( File.dirname( __FILE__ ), 'abstraction.rb' ) )
+  # xml related errors
+  'error.rb',
 
-# document object
-require File.expand_path( File.join( File.dirname( __FILE__ ), 'document.rb' ) )
+  # abstraction module for document, element and nodeset
+  'abstraction.rb',
 
-# element object
-require File.expand_path( File.join( File.dirname( __FILE__ ), 'element.rb' ) )
+  # comment object
+  'comment.rb',
 
-# text object
-require File.expand_path( File.join( File.dirname( __FILE__ ), 'text.rb' ) )
+  # document object
+  'document.rb',
 
-# attribute object
-require File.expand_path( File.join( File.dirname( __FILE__ ), 'attribute.rb' ) )
+  # element object
+  'element.rb',
 
-# nil element object
-require File.expand_path( File.join( File.dirname( __FILE__ ), 'nil_node.rb' ) )
+  # text object
+  'text.rb',
 
-# nodeset object
-require File.expand_path( File.join( File.dirname( __FILE__ ), 'nodeset.rb' ) )
+  # attribute object
+  'attribute.rb',
 
-# xml Builder module
-require File.expand_path( File.join( File.dirname( __FILE__ ), 'builder.rb' ) )
+  # nil element object
+  'nil_node.rb',
 
-# xml api
-require File.expand_path( File.join( File.dirname( __FILE__ ), 'xml.rb' ) )
+  # nodeset object
+  'nodeset.rb',
 
+  # xml Builder module
+  'builder.rb',
+
+  # xml api
+  'xml.rb'
+
+].each{ | filename |
+
+  require File.expand_path( File.join( File.dirname( __FILE__ ), filename ) )
+
+}

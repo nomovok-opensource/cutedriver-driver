@@ -21,40 +21,12 @@ module MobyUtil
 
   module XML
 
-    module Nokogiri
+    class Comment
 
-      module Attribute
+      include Abstraction
 
-        include Abstraction
-
-        # TODO: document me
-        def value
-
-          @xml.value
-
-        end
-
-        # TODO: document me
-        def value=( content )
-
-          @xml.value = content
-
-        end
-
-        # alias for value=
-        alias_method :content=, :value=
-
-        # alias for value
-        alias_method :content, :value
-
-        # enable hooking for performance measurement & debug logging
-        TDriver::Hooking.hook_methods( self ) if defined?( TDriver::Hooking )
-
-      end      
-
-    end # Nokogiri
+    end # Comment
 
   end # XML
 
 end # MobyUtil
-

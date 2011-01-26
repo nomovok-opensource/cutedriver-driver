@@ -17,7 +17,6 @@
 ## 
 ############################################################################
 
-
 module MobyUtil
 
   module XML
@@ -26,23 +25,19 @@ module MobyUtil
 
       module Document # behaviour
 
-        include Abstraction 
+        include Node
 
+        # TODO: document me
         def parse( xml_string )
 
           ::Nokogiri::XML.parse( xml_string, nil, 'UTF-8', ::Nokogiri::XML::ParseOptions::STRICT )
 
         end
 
+        # TODO: document me
         def root
 
-          element_object( @xml.root )
-
-        end
-
-        def xpath( xpath_query, *args, &block )
-
-          nodeset_object( @xml.xpath( xpath_query ), *args, &block )
+          node_object( @xml.root )
 
         end
 

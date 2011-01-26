@@ -53,7 +53,8 @@ module MobyUtil
         MobyUtil::XML::Nodeset, 
         MobyUtil::XML::Attribute, 
         MobyUtil::XML::Text, 
-        MobyUtil::XML::Builder ].each do | _module |
+        MobyUtil::XML::Builder,
+        MobyUtil::XML::Comment ].each do | _module |
           
           _module.module_exec{ 
 
@@ -83,7 +84,7 @@ module MobyUtil
 
       begin
 
-        MobyUtil::XML::Document.new( nil, @@parser ).tap{ | document | 
+        MobyUtil::XML::Document.new( nil ).tap{ | document | 
 
           # parse given string
           document.xml = document.parse( xml_string ) 

@@ -27,7 +27,7 @@ module MobyUtil
 
       def method_missing( method, *method_arguments )
 
-        raise RuntimeError.new( "Method '%s' is not supported by %s (%s)" % [ method, self.class, @parser ] )
+        raise RuntimeError, "Method #{ method.to_s.inspect } is not supported by #{ self.class } object (#{ MobyUtil::XML.current_parser })"
 
       end
 

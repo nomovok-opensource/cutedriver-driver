@@ -23,17 +23,68 @@ module MobyUtil
 
     module Abstraction
 
-      attr_accessor :xml, :parser
+      attr_accessor :xml
 
-      def initialize( xml = nil, parser = nil )
+      # TODO: document me
+      def initialize( xml = nil )
 
-        @xml, @parser = xml, parser
+        @xml = xml
 
       end
 
+      # TODO: document me
+      def comment?
+
+        self.kind_of?( MobyUtil::XML::Comment )
+
+      end
+
+      # TODO: document me
+      def text?
+
+        self.kind_of?( MobyUtil::XML::Text )
+
+      end
+
+      # TODO: document me
+      def attribute?
+
+        self.kind_of?( MobyUtil::XML::Attribute )
+
+      end
+
+      # TODO: document me
+      def nodeset?
+
+        self.kind_of?( MobyUtil::XML::Nodeset )
+
+      end
+
+      # TODO: document me
+      def element?
+
+        self.kind_of?( MobyUtil::XML::Element )
+
+      end
+
+      # TODO: document me
+      def document?
+
+        self.kind_of?( MobyUtil::XML::Document )
+
+      end
+
+      # TODO: document me
+      def nil?
+
+        self.kind_of?( MobyUtil::XML::NilNode )
+
+      end
+
+      # TODO: document me
       def method_missing( *args )
 
-        Kernel::raise RuntimeError.new( "This is abstraction class of %s - XML parser type was not specified correctly" % self.class ) 
+        raise RuntimeError, "This is abstraction class of #{ self.class } - XML parser type was not specified correctly" 
 
       end      
 

@@ -28,7 +28,7 @@ module MobyUtil
         # TODO: Documentation
         def empty?
 
-          @xml.empty?
+          @xml.nil?
 
         end
 
@@ -69,76 +69,46 @@ module MobyUtil
 
             when ::Nokogiri::XML::Element
 
-              element_object( object )
+              XML::Element.new( object )
+
+            when ::Nokogiri::XML::NodeSet
+
+              XML::Nodeset.new( object )
 
             when ::Nokogiri::XML::Text
 
-              text_object( object )
+              XML::Text.new( object )
 
             when ::Nokogiri::XML::Attr
 
-              attribute_object( object )
+              XML::Attribute.new( object )
+
+            when ::Nokogiri::XML::Comment
+
+              XML::Comment.new( object )
 
             when ::NilClass
 
-              nil_node
+              #nil_node
+              MobyUtil::XML::NilNode.new( nil )
 
             # do not create wrapper object if already wrapped
-            when ::MobyUtil::XML::Element, ::MobyUtil::XML::Nodeset, ::MobyUtil::XML::Text, ::MobyUtil::XML::Attribute, ::MobyUtil::XML::NilNode 
+            when ::MobyUtil::XML::Element, ::MobyUtil::XML::Nodeset, ::MobyUtil::XML::Text, ::MobyUtil::XML::Attribute, ::MobyUtil::XML::NilNode, ::MobyUtil::XML::Comment
             
               object
 
           else
 
-             raise NotImplementedError.new( "Object wrapper for node type of #{ object.class } not implemented - Please contact TDriver support" )
+             raise NotImplementedError, "Object wrapper for #{ object.class } not implemented - Please contact TDriver support"
 
           end
-
-        end
-
-        # method to create MobyUtil::XML::Attribute object
-        def attribute_object( xml_data )
-
-          #MobyUtil::XML::Attribute.new( xml_data, @parser ).extend( Attribute )
-          MobyUtil::XML::Attribute.new( xml_data, @parser )
-
-        end
-
-        # method to create MobyUtil::XML::Element 
-        def element_object( xml_data )
-
-          #MobyUtil::XML::Element.new( xml_data, @parser ).extend( Element )
-          MobyUtil::XML::Element.new( xml_data, @parser )
-
-        end
-
-        # method to create MobyUtil::XML::NilNode
-        def nil_node
-
-            MobyUtil::XML::NilNode.new( nil, @parser )
-
-        end
-
-        # method to create MobyUtil::XML::Text
-        def text_object( xml_data )
-
-          #MobyUtil::XML::Text.new( xml_data, @parser ).extend( Text )
-          MobyUtil::XML::Text.new( xml_data, @parser )
-
-        end
-
-        # method to create MobyUtil::XML::Nodeset object
-        def nodeset_object( xml_data )
-
-          #MobyUtil::XML::Nodeset.new( xml_data, @parser ).extend( Nodeset )
-          MobyUtil::XML::Nodeset.new( xml_data, @parser )
 
         end
 
         # TODO: Documentation
         def method_missing( method, *args, &block )
 
-          raise RuntimeError, "Method '#{ method }' is not supported by #{ self.class } (#{ @parser })"
+          raise RuntimeError, "Method #{ method.to_s.inspect } is not supported by #{ self.class } object (#{ MobyUtil::XML.current_parser })"
 
         end
 

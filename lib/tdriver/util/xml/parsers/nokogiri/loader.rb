@@ -23,26 +23,36 @@ require 'nokogiri'
 # for utf-8/unicode support
 require 'kconv'
 
-# abstraction for document, nodeset and element
-require File.expand_path( File.join( File.dirname( __FILE__ ), 'abstraction.rb' ) )
+[ 
 
-# nokogiri parser wrapper
-require File.expand_path( File.join( File.dirname( __FILE__ ), 'document.rb' ) )
+  # abstraction for document, nodeset and element
+  'abstraction.rb', 
 
-# nokogiri parser wrapper
-require File.expand_path( File.join( File.dirname( __FILE__ ), 'nodeset.rb' ) )
+  'node.rb',
 
-# nokogiri parser wrapper
-require File.expand_path( File.join( File.dirname( __FILE__ ), 'element.rb' ) )
+  # nokogiri parser wrapper
+  'comment.rb', 
 
-# nokogiri parser wrapper
-require File.expand_path( File.join( File.dirname( __FILE__ ), 'text.rb' ) )
+  # nokogiri parser wrapper
+  'document.rb', 
 
-# nokogiri parser wrapper
-require File.expand_path( File.join( File.dirname( __FILE__ ), 'attribute.rb' ) )
+  # nokogiri parser wrapper
+  'nodeset.rb', 
 
-# nokogiri parser wrapper
-require File.expand_path( File.join( File.dirname( __FILE__ ), 'builder.rb' ) )
+  # nokogiri parser wrapper
+  'element.rb', 
 
-# nokogiri parser wrapper
-#require File.expand_path( File.join( File.dirname( __FILE__ ), 'attribute.rb' ) )
+  # nokogiri parser wrapper
+  'text.rb', 
+
+  # nokogiri parser wrapper
+  'attribute.rb', 
+
+  # nokogiri parser wrapper
+  'builder.rb', 
+
+].each{ | filename |
+
+  require File.expand_path( File.join( File.dirname( __FILE__ ), filename ) )
+
+}
