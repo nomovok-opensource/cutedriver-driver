@@ -170,4 +170,43 @@ class Hash
 
   end # strip_dynamic_attributes!
 
+  # TODO: document me
+  def recursive_merge( other )
+  
+    self.merge( other ){ | key, old_value, new_value |
+
+      new_value
+
+      if old_value.kind_of?( Hash ) && new_value.kind_of?( Hash )
+      
+        # merge hashes, call self recursively
+        old_value.recursive_merge( new_value )
+
+      elsif old_value.kind_of?( Array ) && new_value.kind_of?( Array )
+
+        # concatenate arrays
+        old_value.clone.concat( new_value ).uniq
+      
+      else
+
+        # return new value as is
+        new_value
+      
+      end
+
+    }
+  
+  end # recursive_merge
+
+  # TODO: document me
+  def recursive_merge!( other )
+  
+    self.replace( 
+    
+      recursive_merge( other )
+      
+    )
+  
+  end # recursive_merge!
+
 end

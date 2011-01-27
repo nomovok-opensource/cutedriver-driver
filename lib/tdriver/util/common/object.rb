@@ -20,8 +20,15 @@
 # extend Ruby Object class functionality
 class Object
 
+  # TODO: document me
+  def blank?
+  
+    respond_to?( :empty? ) ? empty? : !self
+  
+  end
+
   # define method to class instance
-  def meta_def method_name, &block
+  def meta_def( method_name, &block )
   
     ( class << self; self; end ).instance_eval{ define_method method_name, &block }
     
@@ -31,7 +38,7 @@ class Object
   def check_type( types, message = "wrong argument type $1 (expected $2)" )
 
     # raise exception if message is not type of String
-    raise TypeError.new( "wrong argument type %s for message (expected String)" % [ message.class ] ) unless message.kind_of?( String )
+    raise TypeError, "wrong argument type #{ message.class } for message (expected String)" unless message.kind_of?( String )
 
     # create array of types
     type_array = types.kind_of?( Array ) ? types : [ types ]
@@ -42,23 +49,29 @@ class Object
     # collect verbose type list
     verbose_type_list = type_array.each_with_index.collect{ | type, index | 
 
-      raise TypeError.new( "invalid argument type #{ type } for check_type. Did you mean #{ type.class }?" ) unless type.kind_of?( Class )
+      raise TypeError, "invalid argument type #{ type } for check_type. Did you mean #{ type.class }?" unless type.kind_of?( Class )
 
-      found = true if self.kind_of?( type )
+      if self.kind_of?( type )
+
+        found = true 
+
+        break
+
+      end
 
       # result string, separate types if multiple types given
       "#{ ( ( index > 0 ) ? ( index + 1 < type_array.count ? ", " : " or " ) : "" ) }#{ type.to_s }"
           
-    }.join
+    }
 
     # raise exception if type did not match
     unless found
 
       # convert macros
-      [ self.class, verbose_type_list, self.inspect ].each_with_index{ | param, index | message.gsub!( "$#{ index + 1 }", param.to_s ) }
+      [ self.class, verbose_type_list.join, self.inspect ].each_with_index{ | param, index | message.gsub!( "$#{ index + 1 }", param.to_s ) }
 
       # raise the exception
-      raise TypeError.new( message )
+      raise TypeError, message
 
     end
 
@@ -69,14 +82,14 @@ class Object
 
   def not_nil( message = "Value must not be nil", exception = ArgumentError )
 
-    raise exception.new( message ) if self.nil? 
+    raise exception, message unless self
 
   end
 
   def validate( values, message = "Unexpected value $3 for $1 (expected $2)" )
 
     # raise exception if message is not type of String
-    raise TypeError.new( "wrong argument type %s for message (expected String)" % [ message.class ] ) unless message.kind_of?( String )
+    raise TypeError, "wrong argument type #{ message.class } for message (expected String)" unless message.kind_of?( String )
 
     # create array of values
     values_array = values.kind_of?( Array ) ? values : [ values ]
@@ -89,18 +102,24 @@ class Object
 
       raise TypeError.new( "Invalid argument type #{ value.class } for value (expected #{ self.class })" ) unless value.kind_of?( self.class )
 
-      found = true if self == value
+      if self == value
+      
+        found = true 
+        
+        break
+        
+      end
 
       # result string, separate types if multiple types given
       "#{ ( ( index > 0 ) ? ( index + 1 < values_array.count ? ", " : " or " ) : "" ) }#{ value.inspect }"
           
-    }.join
+    }
 
     # raise exception if value was not found
     unless found
 
       # convert macros
-      [ self.class, verbose_values_list, self.inspect ].each_with_index{ | param, index | message.gsub!( "$#{ index + 1 }", param.to_s ) }
+      [ self.class, verbose_values_list.join, self.inspect ].each_with_index{ | param, index | message.gsub!( "$#{ index + 1 }", param.to_s ) }
 
       # raise the exception
       raise ArgumentError.new( message )
