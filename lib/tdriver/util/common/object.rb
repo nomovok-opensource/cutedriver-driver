@@ -41,7 +41,7 @@ class Object
     raise TypeError, "wrong argument type #{ message.class } for message (expected String)" unless message.kind_of?( String )
 
     # create array of types
-    type_array = types.kind_of?( Array ) ? types : [ types ]
+    type_array = Array( types )
 
     # default result value
     found = false
@@ -92,7 +92,7 @@ class Object
     raise TypeError, "wrong argument type #{ message.class } for message (expected String)" unless message.kind_of?( String )
 
     # create array of values
-    values_array = values.kind_of?( Array ) ? values : [ values ]
+    values_array = Array( values )
 
     # default result value
     found = false
@@ -122,7 +122,7 @@ class Object
       [ self.class, verbose_values_list.join, self.inspect ].each_with_index{ | param, index | message.gsub!( "$#{ index + 1 }", param.to_s ) }
 
       # raise the exception
-      raise ArgumentError.new( message )
+      raise ArgumentError, message
 
     end
 
