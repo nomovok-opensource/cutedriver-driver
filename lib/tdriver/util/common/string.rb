@@ -21,7 +21,7 @@ class String
 
   def not_empty( message = "String must not be empty", exception = ArgumentError )
 
-    raise exception.new( message ) if self.empty? 
+    raise exception, message if empty? 
 
   end
 

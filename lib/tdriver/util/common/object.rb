@@ -27,6 +27,12 @@ class Object
   
   end
 
+  def not_blank( message = "Object must not be blank", exception = ArgumentError )
+
+    raise exception, message if blank? 
+
+  end
+
   # define method to class instance
   def meta_def( method_name, &block )
   
