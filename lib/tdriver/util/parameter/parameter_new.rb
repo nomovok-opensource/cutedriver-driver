@@ -21,8 +21,9 @@ module MobyUtil
 
   class ParameterHash < Hash
 
+=begin
     # TODO: document me
-    def initialize( hash = {} )
+    def initialize #( hash = {} )
 
       hash.check_type( [ Hash, ParameterHash ], "Wrong argument type $1 for hash (expected $2)" )
 
@@ -33,33 +34,34 @@ module MobyUtil
       ) unless hash.empty?
 
     end
+=end
 
     # TODO: document me
     def convert_hash( value )
 
-      if value.kind_of?( ParameterHash )
-      
-        value
+=begin
+      if value.kind_of?( Hash )
         
-      elsif value.kind_of?( Hash )
-
         # convert hash to parameter hash                
         ParameterHash[
         
           value.collect{ | key, value |
           
-            [ key, convert_hash( value ) ]
+            [ key, value.kind_of?( Hash ) ? convert_hash( value ) : value ]
             
           }
 
         ]
-
+        
       else
-      
-        # return as is if not kind of hash/parameter hash
+
+        # return as is
         value
-      
+        
       end
+=end
+
+      value.kind_of?( Hash ) ? ParameterHash[ value.collect{ | key, value | [ key, value.kind_of?( Hash ) ? convert_hash( value ) : value ] } ] : value
 
     end
 
@@ -78,9 +80,13 @@ module MobyUtil
         else
         
           raise ArgumentError, "Only one default value allowed for parameter (#{ default.join(", ") })" unless default.size == 1
+          
+          # convert_hash( default.first )
 
-          convert_hash( default.first )
-
+          result = default.first
+          
+          result.kind_of?( Hash ) ? convert_hash( result ) : result
+          
         end
 
       }
@@ -92,7 +98,7 @@ module MobyUtil
 
       raise ParameterNotFoundError, "Parameter key nil is not valid." unless key
 
-      store key, convert_hash( value )
+      super key, value.kind_of?( Hash ) ? convert_hash( value ) : value
 
     end
 
@@ -482,4 +488,3 @@ $parameters_api = MobyUtil::ParameterUserAPI
 
 # initialize parameters
 $parameters.init
-
