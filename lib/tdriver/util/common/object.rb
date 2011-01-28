@@ -31,6 +31,8 @@ class Object
 
     raise exception, message if blank? 
 
+    self
+
   end
 
   # define method to class instance
@@ -89,6 +91,8 @@ class Object
   def not_nil( message = "Value must not be nil", exception = ArgumentError )
 
     raise exception, message unless self
+
+    self
 
   end
 

@@ -24,6 +24,8 @@ class Hash
 
     raise exception, message if empty? 
 
+    self
+
   end
 
   # Verify that received object contains one of given keys. Raises exception is key not found.

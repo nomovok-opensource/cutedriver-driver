@@ -17,11 +17,14 @@
 ## 
 ############################################################################
 
+# extend Ruby String class functionality
 class String
 
   def not_empty( message = "String must not be empty", exception = ArgumentError )
 
     raise exception, message if empty? 
+
+    self
 
   end
 
