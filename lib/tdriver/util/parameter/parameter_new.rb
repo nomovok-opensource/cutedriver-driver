@@ -21,6 +21,7 @@ module MobyUtil
 
   class ParameterHash < Hash
 
+    # TODO: document me
     def initialize( hash = {} )
 
       hash.check_type( [ Hash, ParameterHash ], "Wrong argument type $1 for hash (expected $2)" )
@@ -29,10 +30,11 @@ module MobyUtil
 
         convert_hash( hash )
 
-      )
+      ) unless hash.empty?
 
     end
 
+    # TODO: document me
     def convert_hash( value )
 
       if value.kind_of?( ParameterHash )
@@ -40,7 +42,8 @@ module MobyUtil
         value
         
       elsif value.kind_of?( Hash )
-      
+
+        # convert hash to parameter hash                
         ParameterHash[
         
           value.collect{ | key, value |
@@ -60,6 +63,7 @@ module MobyUtil
 
     end
 
+    # TODO: document me
     def []( key, *default, &block )
 
       $last_parameter = fetch( key ){ 
@@ -83,6 +87,7 @@ module MobyUtil
 
     end
 
+    # TODO: document me
     def []=( key, value )
 
       raise ParameterNotFoundError, "Parameter key nil is not valid." unless key
@@ -102,12 +107,13 @@ module MobyUtil
     
       private
 
+      # TODO: document me
       def initialize_class
       
         # default values
         @@parameters = MobyUtil::ParameterHash.new
 
-        @@templates = MobyUtil::ParameterHash.new
+        @@templates_hash = MobyUtil::ParameterHash.new
 
         @@platform = nil
         
@@ -115,16 +121,17 @@ module MobyUtil
         
         @@sut_list = []
 
+        @@cache = {}
+
       end
 
+      # TODO: document me
       def load_default_parameters
       
         # collect all templates
         Dir.glob( MobyUtil::FileHelper.expand_path( 'defaults/*.xml' ) ).each { | filename | 
 
-          content = MobyUtil::FileHelper.get_file( filename )
-
-          MobyUtil::XML::parse_string( content ).xpath( '*' ).each{ | element |
+          MobyUtil::XML::parse_string( load_file( filename ) ).xpath( '*' ).each{ | element |
 
             @@parameters.recursive_merge!( 
             
@@ -143,15 +150,19 @@ module MobyUtil
 
         @@parameters = MobyUtil::ParameterHash.new if reset == true
 
-        filename = MobyUtil::FileHelper.expand_path( filename )
-
-        raise MobyUtil::FileNotFoundError, "Parameters file #{ filename } does not exist" unless File.exist?( filename )
+        begin
 
         @@parameters.recursive_merge!(
 
           parse_file( filename )
 
         )
+        
+        rescue MobyUtil::FileNotFoundError
+
+          raise $!, "Parameters file #{ MobyUtil::FileHelper.expand_path( filename ) } does not exist"
+        
+        end
 
         #@@loaded_parameter_files << filename
 
@@ -164,23 +175,23 @@ module MobyUtil
 
         begin
 
-          file_content = MobyUtil::FileHelper.get_file( filename )
+          MobyUtil::FileHelper.get_file( filename )
 
-        rescue EmptyFilenameError
+        rescue MobyUtil::EmptyFilenameError
 
-          Kernel::raise EmptyFilenameError.new( "Unable to load parameters xml file due to filename is empty or nil" )
+          raise $!, "Unable to load parameters xml file due to filename is empty or nil"
 
-        rescue FileNotFoundError => exception
+        rescue MobyUtil::FileNotFoundError
 
-          Kernel::raise exception
+          raise $!
 
-        rescue IOError => exception
+        rescue IOError
 
-          Kernel::raise IOError.new( "Error occured while loading xml file. Reason: %s (%s)"  % [ exception.message, exception.class ] )
+          raise $!, "Error occured while loading xml file. Reason: #{ $!.message }"
 
-        rescue => exception
+        rescue
 
-          Kernel::raise ParameterFileParseError.new("Error occured while parsing parameters xml file %s\nDescription: %s" % [ filename, exception.message ] )
+          raise MobyUtil::ParameterFileParseError, "Error occured while parsing parameters xml file #{ filename }\nDescription: #{ $!.message }"
 
         end
 
@@ -201,75 +212,94 @@ module MobyUtil
 
           )
 
-        rescue Exception
+        rescue
 
-          raise ParameterFileParseError, "Error occured while parsing parameters xml file #{ filename }. Reason: #{ $!.message } (#{ $!.class })"
+          raise MobyUtil::ParameterFileParseError, "Error occured while parsing parameters xml file #{ filename }. Reason: #{ $!.message } (#{ $!.class })"
 
         end
 
       end
-      
-      
-      
+            
+      # TODO: document me
       def parse_element( xml )
-    
+                
+        # calculate xml hash
+        xml_hash = xml.to_s.hash
+                
+        return @@cache[ xml_hash ] if @@cache.has_key?( xml_hash )
+
         # default results 
         results = MobyUtil::ParameterHash.new
 
         # go through each element in xml
         xml.xpath( "*" ).each{ | element |
 
-          attribute = element.attributes.to_hash
+          # retrieve element attributes as hash
+          attributes = element.attributes
 
           # default value
-          value = attribute[ "value" ].to_s
+          value = attributes[ "value" ]
 
           # generic posix value - overwrites attribute["value"] if found
-          value = attribute[ "posix" ].to_s unless attribute[ "posix" ].nil? if @@is_posix
+          value = attributes[ "posix" ] unless attributes[ "posix" ].nil? if @@is_posix
 
           # platform specific value - overwrites existing value
-          value = attribute[ @@platform.to_s ].to_s unless attribute[ @@platform.to_s ].nil?
+          value = attributes[ @@platform.to_s ] unless attributes[ @@platform.to_s ].nil?
+
+          # retrieve name attribute
+          name = attributes[ "name" ]
 
           case element.name
               
             when 'fixture'
 
-              name = attribute[ "name" ].to_s
+              name.not_blank( "No name defined for fixture \"#{ element.to_s }\"", SyntaxError )
 
-              plugin = attribute[ "plugin" ].to_s
-
-      		    env = attribute[ "env" ].to_s unless attribute[ "env" ].nil?
-
-              raise SyntaxError, "No name defined for fixture with value #{ name }" if name.empty?
-
-              raise SyntaxError, "No plugin defined for fixture with name #{ name }" if plugin.empty?
-
-     		      value = { :plugin => plugin, :env => env }
-
+     		      value = { 
+     		      
+     		        :plugin => attributes[ "plugin" ].not_blank( "No name defined for fixture with value #{ name }", SyntaxError ),
+     		         
+     		        :env => attributes[ "env" ]
+     		        
+   		        }
+   		        
             when 'parameter'
 
-              name = attribute[ "name" ].to_s
+              # verify that name attribute is defined
+              name.not_blank( "No name defined for parameter with value #{ value }", SyntaxError )
 
-              raise SyntaxError, "No name defined for parameter with value #{ value }" if name.empty?
+              # return value as is
+              #value.not_nil( "No value defined for parameter with name #{ name }", SyntaxError )
+
+              value = "" if value.nil?
 
             when 'sut'
 
-              name = attribute[ 'id' ].to_s
+              # use id as parameter name
+              name = attributes[ 'id' ]
+
+              # verify that name attribute is defined
+              name.not_blank( "No name defined for SUT \"#{ element.to_s }\"", SyntaxError )
             
+              # add SUT to found sut list
               @@sut_list << name unless @@sut_list.include?( name ) 
    
-              templates = attribute[ "template" ].to_s         
+              # retrieve names of used templates 
+              templates = attributes[ "template" ]
 
               # empty value by default
               value = ParameterHash.new
 
-              unless templates.empty?
+              unless templates.blank?
 
+                # retrieve each defined template
                 templates.split(";").each{ | template |
                 
+                  # merge template with current value hash
                   value.recursive_merge!( 
-                  
-                    get_template( templates )
+        
+                    # retrieve template          
+                    get_template( template )
                   
                   )
                 
@@ -277,44 +307,36 @@ module MobyUtil
 
               end
 
+              # merge sut content with template values
               value.recursive_merge!( parse_element( element ) )
 
           else
 
-            value = ParameterHash.new
-
-            xml_file = element.attribute( "xml_file" )
+            # use element name as parameter name (e.g. fixture, keymap etc)
+            name = element.name
 
             # read xml file from given location if defined - otherwise pass content as is
-            if element.attribute( "xml_file" )
+            if attributes[ "xml_file" ]
 
-              content = parse_element( 
-              
-                MobyUtil::XML.parse_string(
-                  
-                  MobyUtil::FileHelper.get_file( xml_file.to_s )
-                  
-                )
-                
-              )
+              # merge hash values (value type of hash)
+              value = parse_file( attributes[ "xml_file" ] )
 
             else
 
-              content = parse_element( element )
+              # use element content as value
+              value = parse_element( element )
 
             end
-
-            # merge hash values (value type of hash)
-            value.recursive_merge!( content )
             
-            name = element.name
-
           end
 
           # store values to parameters
           results[ name.to_sym ] = value
 
         }
+
+        # store to cache
+        @@cache[ xml_hash ] = results
 
         # return results hash
         results
@@ -327,8 +349,9 @@ module MobyUtil
         
         unless template.kind_of?( Hash )
         
-          result = MobyUtil::ParameterHash.new
-              
+          result = ParameterHash.new
+          
+          # retrieve each inherited template
           template[ 'inherits' ].to_s.split(";").each{ | inherited_template |
                 
             result.recursive_merge!( 
@@ -339,30 +362,28 @@ module MobyUtil
           
           }
           
+          # merge template content with inherited templates and store to templates hash table 
           @@templates_hash[ name ] = result.recursive_merge!( 
           
             parse_element( template ) 
           
           )
-        
+   
         else
-
+        
+          # template is already parsed, pass template hash as is 
           template
-
+                
         end
       
-      end    
+      end
 
-      def load_template_files( reset = true )
-
-        @@templates_hash = MobyUtil::ParameterHash.new if reset
+      def load_template_files
 
         # collect all templates
         Dir.glob( MobyUtil::FileHelper.expand_path( 'templates/*.xml' ) ).each { | filename | 
 
-          content = MobyUtil::FileHelper.get_file( filename )
-
-          MobyUtil::XML::parse_string( content ).root.xpath( 'template' ).each{ | template |
+          MobyUtil::XML::parse_string( load_file( filename ) ).root.xpath( 'template' ).each{ | template |
 
             # store template element to hash
             @@templates_hash[ template[ 'name' ] ] = template
