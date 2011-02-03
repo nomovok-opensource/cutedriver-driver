@@ -115,10 +115,18 @@ module TDriver
 	end
 
 	# Wrapper for MobyUtil::ParameterUserAPI class with methods e.g. [] and []=, files and load_xml etc.
-	def self.parameter
+	def self.parameter( *arguments )
 
-    $parameters_api
+    if arguments.count == 0
     
+      $parameters_api
+          
+    else
+    
+      $parameters_api[ *arguments ]
+    
+    end
+
 	end
 
 	# Wrapper for MobyUtil::Logger class
