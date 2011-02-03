@@ -224,6 +224,12 @@ module MobyUtil
 
     end
 
+    def self.delete( key )
+    
+      @@parameters.delete( key )
+    
+    end
+
     # Function for setting the value of a parameter. If the parameters is not yet populated it populates
     # it with default file (tdriver_home/tdriver_parameters.xml)
     # == params
