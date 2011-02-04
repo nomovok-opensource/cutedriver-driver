@@ -46,7 +46,7 @@ module MobyUtil
       @@user_defined_parameters_file_defined_in_command_line_arguments = false
 
       filename = Array.new
-      delete_values=Array.new
+      delete_values = Array.new
 
       # use command line argument if one exists.
       ARGV.each_index do | index |
@@ -88,7 +88,7 @@ module MobyUtil
 
     end
 
-    protected
+  protected
 
     def reset_flags
 
@@ -206,6 +206,31 @@ module MobyUtil
     def self.parse_file( *args )
     
       self.instance.load_parameters_xml( *args )
+    
+    end
+
+    # TODO: document me
+    def self.parse_string( source, merge_hashes = true )
+
+      self.instance unless @@initialized
+    
+      if merge_hashes
+
+        @@parameters.merge_with_hash!(
+
+          MobyUtil::ParameterXml.parse( source )
+
+        )
+      
+      else
+
+        @@parameters.merge!(
+
+          MobyUtil::ParameterXml.parse( source )
+
+        )
+      
+      end
     
     end
 
