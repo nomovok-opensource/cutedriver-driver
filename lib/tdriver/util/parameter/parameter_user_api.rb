@@ -23,6 +23,7 @@ module MobyUtil
 
     #include Singleton
 
+    # TODO: document me
     def self.instance
 
       warn("warning: #{ self.name } is static class, use MobyUtil::ParameterUserAPI#method instead of using instance method")
@@ -31,57 +32,80 @@ module MobyUtil
 
     end
 
+    # TODO: document me
     def self.[]=( key, value )
 
       $parameters[ key ] = value
 
     end
 
+    # TODO: document me
     def self.[]( *args )
 
       $parameters[ *args ]
 
     end
 
+    # TODO: document me
     def self.fetch( *args, &block )
 
       $parameters.fetch( *args, &block )
 
     end
 
+    # TODO: document me
     def self.files
 
       $parameters.files
 
     end
 
+    # TODO: document me
     def self.clear
 
       $parameters.instance.clear
 
     end
 
+    # TODO: document me
     def self.load_xml( filename )
 
       $parameters.instance.load_parameters_xml( filename )
 
     end
 
+    # TODO: document me
     def self.reset( *keys )
 
       $parameters.instance.reset_parameters
 
     end
 
+    # TODO: document me
     def self.inspect
 
       $parameters.inspect
 
     end
 
+    # TODO: document me
     def self.to_s
 
       $parameters.to_s
+
+    end
+
+    # TODO: document me
+    def self.keys
+
+      $parameters.keys
+
+    end
+
+    # TODO: document me
+    def self.values
+
+      $parameters.values
 
     end
 
