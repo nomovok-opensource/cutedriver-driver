@@ -159,7 +159,7 @@ module MobyUtil
 
     end
 
-    public
+  public
 
     # reset parameters class
     def reset_parameters
@@ -200,7 +200,28 @@ module MobyUtil
 
     end
 
-    public # singleton methods
+  public # singleton methods
+
+    # TODO: document me
+    def self.parse_file( *args )
+    
+      self.instance.load_parameters_xml( *args )
+    
+    end
+
+    # TODO: document me
+    def self.clear
+    
+      self.instance.clear
+    
+    end
+    
+    # TODO: document me
+    def self.reset
+    
+      self.instance.reset_parameters
+    
+    end
 
     # Function for returning the value of a parameter. If the parameters is not yet populated it populates
     # it with default file (tdriver_home/tdriver_parameters.xml)
