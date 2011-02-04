@@ -438,7 +438,7 @@ display: block;
   end
 
   def format_duration(seconds)
-    if Gem.available?('chronic_duration')      
+    if Gem.available?('chronic_duration')
       duration_str=ChronicDuration.output(seconds)
     else
       m, s = seconds.divmod(60)
@@ -467,7 +467,7 @@ display: block;
   def copy_code_file_to_test_case_report(file,folder,linen)
     begin
       FileUtils.mkdir_p(folder.to_s+'/stack_files') if File::directory?(folder.to_s+'/stack_files')==false
-      if File.directory?("#{Dir.pwd}/#{@report_folder}/#{folder}")        
+      if File.directory?("#{Dir.pwd}/#{@report_folder}/#{folder}")
         write_stack_file_to_html(file,"#{Dir.pwd}/#{@report_folder}/#{folder}/stack_files/#{File.basename(file)}.html",linen)
         FileUtils.copy(file,"#{Dir.pwd}/#{@report_folder}/#{folder}/stack_files/#{File.basename(file)}")
       else
@@ -483,14 +483,14 @@ display: block;
 
   def reporter_link_to_code(log_line,folder=nil)
     begin
-      log_line.gsub(/([\w\*\/\w\/\.-]+)\:(\d+)/) do |match|
-        line=match[/(\d+)/]
-        f=match[/([\w\*\/\w\/\.-]+)/]
+      log_line.gsub(/([\w \*\/\w\/\.-]+)\:(\d+)/) do |match|
+        line=match[/\:(\d+)/]
+        f=match[/([\w \*\/\w\/\.-]+)/]
         file="#{File.dirname(f.strip)}/#{File.basename(f.strip)}"
         file = file if File.exist?(file)
         file = "#{Dir.pwd}/#{file}" if File.exist?("#{Dir.pwd}/#{file}")
         if File.exist?(file) && match.include?('testability-driver')==false
-          copy_code_file_to_test_case_report(file,folder,line.strip)
+          copy_code_file_to_test_case_report(file,folder,line.gsub(':','').strip)
           link_to_stack='<a style="color: #FF0000" href="stack_files/'<<
             File.basename(file.to_s)+'.html#'+line.to_s<<
             '">'+match+'</a>'
