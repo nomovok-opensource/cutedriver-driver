@@ -270,6 +270,18 @@ module MobyUtil
 
     end
 
+    def self.keys
+
+      @@initialized ? @@parameters.keys : []
+
+    end
+
+    def self.values
+
+      @@initialized ? @@parameters.values : []
+
+    end
+
     def self.configured_suts
 
       self.instance unless @@initialized
