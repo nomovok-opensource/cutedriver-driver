@@ -36,6 +36,9 @@ module MobyUtil
 	# This error should be raised when parameter file parsing fails
 	class ParameterFileParseError < CustomError; end
 
+	# This error should be raised when parameter file parsing fails
+	class ParameterXmlParseError < CustomError; end
+
 	# This error should be raised when desired template was not found
 	class TemplateNotFoundError < CustomError; end
 

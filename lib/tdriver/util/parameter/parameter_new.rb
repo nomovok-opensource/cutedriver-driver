@@ -441,6 +441,12 @@ module MobyUtil
     
     end
 
+    def self.values
+    
+      @@parameters.values
+    
+    end
+
     def self.[]( key, *default )
     
       @@parameters[ key, *default ]

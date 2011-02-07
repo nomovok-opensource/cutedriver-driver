@@ -64,7 +64,7 @@ module MobyUtil
 
       rescue Exception => exception
 
-        raise ParameterFileParseError, "Error occured while parsing XML. Reason: \"#{ exception.message }\" (#{ exception.class })"
+        raise ParameterXmlParseError, "Error occured while parsing XML. Reason: \"#{ exception.message }\" (#{ exception.class })"
 
       end
 

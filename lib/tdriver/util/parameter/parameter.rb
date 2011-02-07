@@ -30,7 +30,7 @@ module MobyUtil
     def initialize
 
       # this can be done only once due to following method removes --tdriver_parameters argument from ARGV
-      @@filename_from_command_list_arguments = parse_command_line_arguments
+      parse_command_line_arguments
 
       # initialize and load templates, default parameters and user defined parameter file
       reset( true, true, true, true )
@@ -46,6 +46,7 @@ module MobyUtil
       @@user_defined_parameters_file_defined_in_command_line_arguments = false
 
       filename = Array.new
+
       delete_values = Array.new
 
       # use command line argument if one exists.
@@ -79,10 +80,16 @@ module MobyUtil
       end
 
       if filename
+
         filename.each do | parameter_file |
-          Kernel::raise MobyUtil::FileNotFoundError.new( "User defined TDriver parameters file %s does not exist" % [ parameter_file ] ) if !File.exist?( parameter_file )
+          
+          raise MobyUtil::FileNotFoundError, "User defined TDriver parameters file #{ parameter_file } does not exist" unless File.exist?( parameter_file )
+          
         end
+        
       end
+
+      @@filename_from_command_list_arguments = filename
 
       filename
 
@@ -124,11 +131,13 @@ module MobyUtil
 
       # load parameters files unless file does not exist
       if filename
-        filename.each do |parameter_file|
+      
+        filename.each do | parameter_file |
 
-          load_parameters_xml( parameter_file ) if File.exist?( parameter_file )
+          load_parameters_xml( parameter_file ) #if File.exist?( parameter_file )
 
         end
+        
       end
 
 
