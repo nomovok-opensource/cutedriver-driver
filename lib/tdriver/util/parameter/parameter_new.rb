@@ -72,7 +72,7 @@ module MobyUtil
 
         if default.empty?
 
-          raise ParameterNotFoundError, "Parameter #{ key } not found." unless block_given?
+          raise ParameterNotFoundError, "Parameter #{ key } not found" unless block_given?
 
           # yield with key if block given
           yield( key )
@@ -96,7 +96,7 @@ module MobyUtil
     # TODO: document me
     def []=( key, value )
 
-      raise ParameterNotFoundError, "Parameter key nil is not valid." unless key
+      raise ParameterNotFoundError, "Parameter key nil is not valid" unless key
 
       super key, value.kind_of?( Hash ) ? convert_hash( value ) : value
 
@@ -110,24 +110,149 @@ module MobyUtil
   
     # private methods
     class << self
+
+      public 
+
+      # TODO: document me
+      def instance
+      
+        # get caller methods file name and line number   
+        file, line = caller.first.split(":")
+      
+        warn "#{ file }:#{ line } warning: deprecated method #{ self.name }##{ __method__ }; use #{ self.name } class static methods instead"
+        
+        self
+      
+      end
+
+      # TODO: document me
+      def init
+
+        # initialize only once 
+        return if defined?( @initalized )
+
+        # retrieve platform name
+        @platform = MobyUtil::EnvironmentHelper.platform
+
+        # detect is posix platform
+        @is_posix = MobyUtil::EnvironmentHelper.posix?
+
+        # reset templates and parameters
+        reset_hashes
+      
+        # indicates that class is already initialized - templates and parameters will not reset
+        @initialized = true
+      
+      end
     
       private
+
+      def parse_command_line_arguments
+
+        # reset command line argument files list
+        @command_line_argument_files = [] 
+
+        capture_elements = false
+
+        ARGV.each_with_index do | value, index |
+        
+          value = value.to_s
+        
+          case value
+          
+            when '--tdriver_parameters', '--matti_parameters'
+
+              warn "warning: #{ value } is deprecated, use -tdriver_parameters instead" if value == '--matti_parameters' 
+            
+              # capture following xml filenames
+              capture_elements = true
+
+              # mark element to be removed
+              ARGV[ index ] = nil
+            
+          else
+
+            # process the string if capturing arguments
+            if capture_elements
+
+              # stop capturing if is a option (e.g. --version)
+              if [ '-' ].include?( value[ 0 ].chr ) 
+
+                capture_elements = false
+              
+              # add argument to parameters list if meets the regexp and capture_element is true
+              elsif /\.xml$/i.match( value )
+             
+                # expand filename
+                value = File.expand_path( value )
+              
+                # raise exception if given file does not found
+                raise MobyUtil::FileNotFoundError, "User defined TDriver parameters file #{ value } does not exist" unless File.exist?( value )
+
+                # add file to command line arguments files
+                @command_line_argument_files << value
+
+                # mark element to be removed
+                ARGV[ index ] = nil
+              
+              end # if
+
+            end # else
+          
+          end # case
+        
+        end # each_with_index
+
+        # raise exception if "--tdriver_parameters" option found but no filenames defined 
+        if capture_elements && @command_line_argument_files.empty? 
+        
+          raise ArgumentError, "TDriver parameters command line argument given without a filename"
+        
+        end
+        
+        # remove nil elements from array
+        ARGV.compact!
+        
+        # return collected filenames
+        @command_line_argument_files
+      
+      end
 
       # TODO: document me
       def initialize_class
       
-        # default values
-        @@parameters = MobyUtil::ParameterHash.new
+        # initialize only once
+        return if defined?( @parameters )
+      
+        # class variables not used; read below article: 
+        # http://www.oreillynet.com/ruby/blog/2007/01/nubygems_dont_use_class_variab_1.html
+      
+        # parameters container
+        @parameters = ParameterHash.new
 
-        @@templates_hash = MobyUtil::ParameterHash.new
+        # templates container
+        @templates = ParameterHash.new
 
-        @@platform = nil
+        # platform enum 
+        @platform = nil
         
-        @@is_posix = nil
+        # determine if platform is type of posix
+        @is_posix = nil
         
-        @@sut_list = []
+        # list of loaded SUT's
+        @sut_list = []
 
-        @@cache = {}
+        # list of loaded parameter filenames
+        @parameter_files = []
+
+        # list of loaded template filenames
+        @template_files = []
+        
+        # files defined in command line arguments
+        @command_line_argument_files = [] 
+
+        # templates cache
+        @cache = {}
 
       end
 
@@ -137,41 +262,25 @@ module MobyUtil
         # collect all templates
         Dir.glob( MobyUtil::FileHelper.expand_path( 'defaults/*.xml' ) ).each { | filename | 
 
-          MobyUtil::XML::parse_string( load_file( filename ) ).xpath( '*' ).each{ | element |
+          file_content = load_file( filename )
+          
+          MobyUtil::XML.parse_string( file_content ).xpath( '*' ).each{ | element |
 
-            @@parameters.recursive_merge!( 
+            # merge new hash to parameters hash
+            @parameters.recursive_merge!( 
             
-              parse_element( element )
+              # parse element and convert it to hash 
+              process_element( element )
               
             )
             
           }
+          
+          # add file to loaded parameter files list
+          @parameter_files << filename
 
         }
       
-      end
-
-      # load additional parameter xml files
-      def load_parameters_xml( filename, reset = false )
-
-        @@parameters = MobyUtil::ParameterHash.new if reset == true
-
-        begin
-
-        @@parameters.recursive_merge!(
-
-          parse_file( filename )
-
-        )
-        
-        rescue MobyUtil::FileNotFoundError
-
-          raise $!, "Parameters file #{ MobyUtil::FileHelper.expand_path( filename ) } does not exist"
-        
-        end
-
-        #@@loaded_parameter_files << filename
-
       end
 
       # TODO: document me
@@ -185,7 +294,7 @@ module MobyUtil
 
         rescue MobyUtil::EmptyFilenameError
 
-          raise $!, "Unable to load parameters xml file due to filename is empty or nil"
+          raise $!, "Unable to load parameters XML file due to filename is empty or nil"
 
         rescue MobyUtil::FileNotFoundError
 
@@ -202,37 +311,14 @@ module MobyUtil
         end
 
       end
-
+      
       # TODO: document me
-      def parse_file( filename )
-
-        begin
-        
-          parse_element(
-
-            MobyUtil::XML.parse_string( 
-            
-              load_file( filename )
-              
-            ).root
-
-          )
-
-        rescue
-
-          raise MobyUtil::ParameterFileParseError, "Error occured while parsing parameters xml file #{ filename }. Reason: #{ $!.message } (#{ $!.class })"
-
-        end
-
-      end
-            
-      # TODO: document me
-      def parse_element( xml )
+      def process_element( xml )
                 
         # calculate xml hash
         xml_hash = xml.to_s.hash
-                
-        return @@cache[ xml_hash ] if @@cache.has_key?( xml_hash )
+        
+        return @cache[ xml_hash ] if @cache.has_key?( xml_hash )
 
         # default results 
         results = MobyUtil::ParameterHash.new
@@ -247,10 +333,10 @@ module MobyUtil
           value = attributes[ "value" ]
 
           # generic posix value - overwrites attribute["value"] if found
-          value = attributes[ "posix" ] unless attributes[ "posix" ].nil? if @@is_posix
+          value = attributes[ "posix" ] unless attributes[ "posix" ].nil? if @is_posix
 
           # platform specific value - overwrites existing value
-          value = attributes[ @@platform.to_s ] unless attributes[ @@platform.to_s ].nil?
+          value = attributes[ @platform.to_s ] unless attributes[ @platform.to_s ].nil?
 
           # retrieve name attribute
           name = attributes[ "name" ]
@@ -261,14 +347,14 @@ module MobyUtil
 
               name.not_blank( "No name defined for fixture \"#{ element.to_s }\"", SyntaxError )
 
-     		      value = { 
-     		      
-     		        :plugin => attributes[ "plugin" ].not_blank( "No name defined for fixture with value #{ name }", SyntaxError ),
-     		         
-     		        :env => attributes[ "env" ]
-     		        
-   		        }
-   		        
+               value = { 
+               
+                 :plugin => attributes[ "plugin" ].not_blank( "No name defined for fixture with value #{ name }", SyntaxError ),
+                  
+                 :env => attributes[ "env" ]
+                 
+               }
+               
             when 'parameter'
 
               # verify that name attribute is defined
@@ -288,7 +374,7 @@ module MobyUtil
               name.not_blank( "No name defined for SUT \"#{ element.to_s }\"", SyntaxError )
             
               # add SUT to found sut list
-              @@sut_list << name unless @@sut_list.include?( name ) 
+              @sut_list << name unless @sut_list.include?( name ) 
    
               # retrieve names of used templates 
               templates = attributes[ "template" ]
@@ -314,7 +400,7 @@ module MobyUtil
               end
 
               # merge sut content with template values
-              value.recursive_merge!( parse_element( element ) )
+              value.recursive_merge!( process_element( element ) )
 
           else
 
@@ -325,12 +411,12 @@ module MobyUtil
             if attributes[ "xml_file" ]
 
               # merge hash values (value type of hash)
-              value = parse_file( attributes[ "xml_file" ] )
+              value = process_file( attributes[ "xml_file" ] )
 
             else
 
               # use element content as value
-              value = parse_element( element )
+              value = process_element( element )
 
             end
             
@@ -341,17 +427,15 @@ module MobyUtil
 
         }
 
-        # store to cache
-        @@cache[ xml_hash ] = results
-
-        # return results hash
-        results
+        # store to cache and return hash as result
+        @cache[ xml_hash ] = results
 
       end
       
+      # TODO: document me
       def parse_template( name )
       
-        template = @@templates_hash[ name ]
+        template = @templates[ name ]
         
         unless template.kind_of?( Hash )
         
@@ -369,9 +453,9 @@ module MobyUtil
           }
           
           # merge template content with inherited templates and store to templates hash table 
-          @@templates_hash[ name ] = result.recursive_merge!( 
+          @templates[ name ] = result.recursive_merge!( 
           
-            parse_element( template ) 
+            process_element( template ) 
           
           )
    
@@ -384,99 +468,349 @@ module MobyUtil
       
       end
 
-      def load_template_files
+      # TODO: document me
+      def load_templates
 
         # collect all templates
         Dir.glob( MobyUtil::FileHelper.expand_path( 'templates/*.xml' ) ).each { | filename | 
 
-          MobyUtil::XML::parse_string( load_file( filename ) ).root.xpath( 'template' ).each{ | template |
+          unless @template_files.include?( filename )
 
-            # store template element to hash
-            @@templates_hash[ template[ 'name' ] ] = template
-            
-          }
+            # read file content
+            file_content = load_file( filename )
+
+            MobyUtil::XML.parse_string( file_content ).root.xpath( 'template' ).each{ | template |
+
+              # store template element to hash
+              @templates[ template[ 'name' ] ] = template
+              
+            }
+
+            # add file to loaded templates files list
+            @template_files << filename
+
+          end
 
         }
         
         # parse templates hash; convert elements to hash
-        @@templates_hash.each_pair{ | name, template | 
+        @templates.each_pair{ | name, template | 
         
+          # convert element to hash
           parse_template( name )
         
         }
       
       end
 
+      # TODO: document me
       def get_template( name )
       
-        @@templates_hash.fetch( name )
+        @templates.fetch( name )
       
       end
 
-    end # self
+      # TODO: document me
+      def reset_hashes( options = {} )
+        
+        # default options
+        options.default_values( 
+        
+          :reset_templates => true,
+          :reset_parameters => true,
+          
+          :load_default_parameters => true,
+          :load_user_parameters => true,
+          :load_command_line_parameters => true
+        
+        )
+        
+        # empty parameters hash        
+        if options[ :reset_parameters ] == true
 
-    def self.init
+          @parameter_files.clear
 
-      # retrieve platform name
-      @@platform = MobyUtil::EnvironmentHelper.platform
+          @parameters.clear 
 
-      # detect is posix platform
-      @@is_posix = MobyUtil::EnvironmentHelper.posix?
+        end
 
-      # load parameter templates
-      load_template_files
+        if options[ :reset_templates ] == true
+        
+          @template_files.clear
+        
+          # empty templates hash        
+          @templates.clear
 
-      # apply global parameters to root level (e.g. MobyUtil::Parameter[ :logging_outputter_enabled ])
-      @@parameters.recursive_merge!( get_template( 'global' ) )
+          # load parameter templates
+          load_templates
 
-      load_default_parameters
+        end
 
-      load_parameters_xml( 'tdriver_parameters.xml' )
+        # apply global parameters to root level (e.g. MobyUtil::Parameter[ :logging_outputter_enabled ])
+        @parameters.recursive_merge!( get_template( 'global' ) )
+
+        # load and apply default parameter values
+        load_default_parameters if options[ :load_default_parameters ] == true
+
+        # load main parameter configuraion file
+        load_parameters_file( 'tdriver_parameters.xml' ) if options[ :load_user_parameters ] == true
+
+        if options[ :load_command_line_parameters ] == true
+
+          # retrieve parameter filenames from command line arguments
+          #parse_command_line_arguments
+
+          @command_line_argument_files.each{ | filename |
+          
+            load_parameters_file( filename )
+          
+          }
+
+        end
+
+      end
+
+      # TODO: document me
+      def process_file( filename )
+
+        begin
+        
+          # load content from file
+          file_content = load_file( filename )
+        
+          # parse file content and retrieve root element
+          root_element = MobyUtil::XML.parse_string( file_content ).root
+        
+          # parse root element
+          process_element( root_element )
+
+        rescue MobyUtil::FileNotFoundError
+
+          raise $!, "Parameters file #{ MobyUtil::FileHelper.expand_path( filename ) } does not exist"
+
+        rescue
+
+          raise MobyUtil::ParameterFileParseError, "Error occured while parsing parameters XML file #{ filename }. Reason: #{ $!.message } (#{ $!.class })"
+
+        end
+
+      end
+      
+      def process_string( source )
+
+        begin
+                
+          # parse file content and retrieve root element
+          root_element = MobyUtil::XML.parse_string( source ).root
+
+          # parse root element
+          process_element( root_element )
+
+        rescue
+
+          raise MobyUtil::ParameterXmlParseError, "Error occured while parsing parameters XML string. Reason: #{ $!.message } (#{ $!.class })"
+
+        end
+      
+      end
+      
+      def load_parameters_file( filename )
+
+        filename = MobyUtil::FileHelper.expand_path( filename )
   
+        unless @parameter_files.include?( filename )
+
+          begin
+
+            @parameters.recursive_merge!(
+
+              process_file( filename )
+
+            )
+
+          rescue MobyUtil::FileNotFoundError
+
+            raise $!, "Parameters file #{ filename } does not exist"
+          
+          end
+
+          # add file to loaded parameter files list
+          @parameter_files << filename
+
+        end # unless
+      
+      end # def
+      
+    end # self
+    
+    # TODO: document me
+    def self.parse_file( filename, reset_parameters = false )
+
+      # check argument type for filename
+      filename.check_type [ String ], 'wrong argument type $1 for filename argument (expected $2)'
+
+      # check argument type for filename
+      reset_parameters.check_type [ TrueClass, FalseClass ], 'wrong argument type $1 for reset_parameters boolean argument (expected $2)'
+
+      # reset parameter hash if requested
+      @parameters.clear if reset_parameters == true
+    
+      # load and parse given file
+      load_parameters_file( filename )
+    
+    end
+    
+    # TODO: document me
+    def self.parse_string( source, merge_hashes = true )
+    
+      # check argument type for source
+      source.check_type [ String ], 'wrong argument type $1 for source XML argument (expected $2)'
+
+      # check argument type for merge_hashes
+      merge_hashes.check_type [ TrueClass, FalseClass ], 'wrong argument type $1 for merge_hashes argument (expected $2)'
+
+      # process xml string, returns hash as result
+      hash = process_string( source )  
+
+      if merge_hashes
+      
+        @parameters.recursive_merge!( hash )
+      
+      else
+
+        @parameters.merge!( hash )
+      
+      end
+    
+    end
+        
+    # TODO: document me
+    def self.clear
+    
+      @parameter_files.clear
+    
+      @parameters.clear
+    
     end
 
+    # TODO: document me
+    def self.files
+    
+      # return loaded parameter files list
+      @parameter_files
+    
+    end
+
+    # TODO: document me
+    def self.template_files
+    
+      # return loaded parameter files list
+      @template_files
+    
+    end
+
+    # TODO: document me
     def self.keys
     
-      @@parameters.keys
+      @parameters.keys
     
     end
 
+    # TODO: document me
     def self.values
     
-      @@parameters.values
+      @parameters.values
     
     end
 
+    # TODO: document me
     def self.[]( key, *default )
     
-      @@parameters[ key, *default ]
+      @parameters[ key, *default ]
           
     end
 
+    # TODO: document me
     def self.[]=( key, value )
     
-      @@parameters[ key ] = value
-    
-    end
-    
-    def self.inspect
-    
-      @@parameters.inspect
+      @parameters[ key ] = value
     
     end
 
+    # TODO: document me
     def self.fetch( key, *default, &block )
 
-      @@parameters.__send__( :[], key, *default, &block )
+      @parameters.__send__( :[], key, *default, &block )
 
     end
 
+    # TODO: document me
+    def self.delete( key )
+    
+      @parameters.delete( key )
+    
+    end
+    
+    # TODO: document me
+    def self.inspect
+    
+      @parameters.inspect
+    
+    end
+
+    # TODO: document me
     def self.templates
     
-      @@templates_hash
+      @templates
     
     end
+
+    def self.parameters
+
+      warn "warning: deprecated method #{ self.name }##{ __method__ }; please use #{ self.name }#hash instead"
     
+      hash
+      
+    end
+
+    def self.hash
+    
+      @parameters
+      
+    end
+
+    # TODO: document me
+    def self.reset
+
+      reset_hashes
+          
+    end
+
+    # TODO: document me
+    def self.configured_suts
+    
+      @sut_list
+    
+    end
+  
+    # deprecated methods
+    def self.reset_parameters
+    
+      warn "warning: deprecated method #{ self.name }##{ __method__ }; please use #{ self.name }#reset instead"
+    
+      reset
+    
+    end
+
+    # load parameter xml files
+    def self.load_parameters_xml( filename, reset = false )
+
+      warn "warning: deprecated method #{ self.name }##{ __method__ }; please use #{ self.name }#parse_file instead"
+
+      parse_file( filename, reset )
+
+    end
+  
     TDriver::Hooking.hook_methods( self ) if defined?( TDriver::Hooking )
 
     # initialize parameters class

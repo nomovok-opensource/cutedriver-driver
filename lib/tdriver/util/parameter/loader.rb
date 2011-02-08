@@ -20,6 +20,11 @@
 # Parameter related errors
 require File.expand_path( File.join( File.dirname( __FILE__ ), 'error.rb' ) )
 
+require File.expand_path( File.join( File.dirname( __FILE__ ), 'parameter_user_api.rb' ) )
+
+require File.expand_path( File.join( File.dirname( __FILE__ ), 'parameter_new.rb' ) )
+
+=begin
 # Parameter hash class 
 require File.expand_path( File.join( File.dirname( __FILE__ ), 'parameter_hash.rb' ) )
 
@@ -34,4 +39,4 @@ require File.expand_path( File.join( File.dirname( __FILE__ ), 'parameter_user_a
 
 # Parameter API etc
 require File.expand_path( File.join( File.dirname( __FILE__ ), 'parameter.rb' ) )
-
+=end
