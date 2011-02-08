@@ -375,7 +375,7 @@ module MobyUtil
 
           if $parameters[ :logging_xml_parse_error_dump_path, nil ].nil?
 
-            warn("Warning: Configuration parameter :logging_xml_parse_error_dump_path missing, disabling the feature...") 
+            warn("warning: Configuration parameter :logging_xml_parse_error_dump_path missing, disabling the feature...") 
 
             # disable feature
             raise ArgumentError
@@ -389,7 +389,7 @@ module MobyUtil
 
             rescue #Exception
 
-              warn("Warning: Unable to create log folder #{ $parameters[ :logging_xml_parse_error_dump_path ] } for corrupted XML UI state files")
+              warn("warning: Unable to create log folder #{ $parameters[ :logging_xml_parse_error_dump_path ] } for corrupted XML UI state files")
 
               # disable feature
               raise ArgumentError
@@ -400,7 +400,7 @@ module MobyUtil
 
           if $parameters[ :logging_xml_parse_error_dump_overwrite, nil ].nil?
 
-            warn("Warning: Configuration parameter :logging_xml_parse_error_dump_overwrite missing, using 'false' as default value")
+            warn("warning: Configuration parameter :logging_xml_parse_error_dump_overwrite missing, using 'false' as default value")
 
             $parameters[ :logging_xml_parse_error_dump_overwrite ] = 'false'
 
@@ -414,7 +414,7 @@ module MobyUtil
         rescue #Exception => exception
 
           # disable xml logging
-          warn( "Warning: Disabling logging due to failure (#{ $!.class }: #{ $!.message })" )
+          warn( "warning: Disabling logging due to failure (#{ $!.class }: #{ $!.message })" )
 
           $parameters[ :logging_xml_parse_error_dump ] = 'false'
 
@@ -422,7 +422,7 @@ module MobyUtil
 
       else
 
-        warn("Warning: Configuration parameter :logging_xml_parse_error_dump missing, disabling the feature...") 
+        warn("warning: Configuration parameter :logging_xml_parse_error_dump missing, disabling the feature...") 
         $parameters[ :logging_xml_parse_error_dump ] = 'false'
 
       end
@@ -496,7 +496,7 @@ module MobyUtil
 
           @enabled_stack = [ false ]
 
-          warn("Warning: Disabling logging due to failure (#{ $!.class }: #{ $!.message })")
+          warn("warning: Disabling logging due to failure (#{ $!.class }: #{ $!.message })")
 
           return nil
 

@@ -61,7 +61,7 @@ module MobyBehaviour
 		# === raises
 		def add_parent( parent_object )
 
-      warn("Warning: Deprecated method, use store to @parent instead of using this method") 
+      warn("warning: Deprecated method, use store to @parent instead of using this method") 
 
 			@parent = parent_object
 
@@ -75,7 +75,7 @@ module MobyBehaviour
 		# ?
 		def remove_parent()
 
-      warn("Warning: Deprecated method, set @parent to nil instead of using this method") 
+      warn("warning: Deprecated method, set @parent to nil instead of using this method") 
 
 			@parent = nil
 
@@ -90,7 +90,7 @@ module MobyBehaviour
 		# === raises
 		def add_child( new_child_object ) 
 
-      warn("Warning: Deprecated method, use @child_object_cache.add_object instead of this method")
+      warn("warning: Deprecated method, use @child_object_cache.add_object instead of this method")
 
 			@_child_object_cache.merge!( new_child_object.hash => new_child_object )
 
@@ -105,7 +105,7 @@ module MobyBehaviour
 		# === raises
 		def remove_child( target_child_object )
 
-      warn("Warning: Deprecated method, use @child_object_cache.add_object instead of this method")
+      warn("warning: Deprecated method, use @child_object_cache.add_object instead of this method")
 
 			@_child_object_cache.delete( target_child_object.hash )
 

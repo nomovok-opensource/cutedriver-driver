@@ -95,7 +95,7 @@ module TDriver
       test_object_hash = test_object.hash
 
       if @objects.has_key?( test_object_hash )
-        warn( "Warning: Test object (#{ test_object_hash }) already exists in cache" )
+        warn( "warning: Test object (#{ test_object_hash }) already exists in cache" )
       end
     
       @objects[ test_object_hash ] = test_object

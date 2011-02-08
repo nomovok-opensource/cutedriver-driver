@@ -119,7 +119,7 @@ module MobyUtil
         # get caller methods file name and line number   
         file, line = caller.first.split(":")
       
-        warn "#{ file }:#{ line } warning: deprecated method #{ self.name }##{ __method__ }; use #{ self.name } class static methods instead"
+        warn "#{ file }:#{ line } warning: deprecated method #{ self.name }##{ __method__ }; please use #{ self.name } class static methods instead"
         
         self
       

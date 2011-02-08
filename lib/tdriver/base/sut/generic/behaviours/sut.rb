@@ -1503,9 +1503,9 @@ module MobyBehaviour
     # TODO: Document me when I'm ready
     def get_object( object_id )
 
-      warn("deprecated: use SUT#child instead of SUT#get_object in order to retrieve child test objects")
+      warn "warning: deprecated method SUT#get_object; please use SUT#child instead"
 
-      child( object_id )
+      child object_id
 
     end
     

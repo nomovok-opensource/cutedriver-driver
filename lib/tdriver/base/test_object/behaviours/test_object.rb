@@ -178,7 +178,7 @@ module MobyBehaviour
       # TODO: add behaviour logging?
 
       # raise exception if attribute name variable type is other than string
-      name.check_type( [ String, Symbol ], "Wrong argument type $1 for attribute (expected $2)" )
+      name.check_type( [ String, Symbol ], "wrong argument type $1 for attribute (expected $2)" )
       
       # convert name to string if variable type is symbol
       name = name.to_s if name.kind_of?( Symbol )
@@ -384,7 +384,7 @@ module MobyBehaviour
     def child( attributes )
 
       # verify attributes argument format
-      attributes.check_type( Hash, "Wrong argument type $1 for attributes (expected $2)" )
+      attributes.check_type( Hash, "wrong argument type $1 for attributes (expected $2)" )
     
       get_child_objects( attributes )
     
@@ -424,10 +424,10 @@ module MobyBehaviour
     def children( attributes, find_all_children = true )
 
       # verify attributes argument format
-      attributes.check_type( Hash, "Wrong argument type $1 for attributes (expected $2)" )
+      attributes.check_type( Hash, "wrong argument type $1 for attributes (expected $2)" )
 
       # verify find_all_children argument format
-      find_all_children.check_type( [ TrueClass, FalseClass ], "Wrong argument type $1 for find_all_children (expected $2)" )
+      find_all_children.check_type( [ TrueClass, FalseClass ], "wrong argument type $1 for find_all_children (expected $2)" )
 
       # If empty or only special attributes then add :type => '*' to search all
       attributes[ :type ] = '*' if attributes.select{ | key, value | key.to_s !~ /^__/ ? true : false }.empty?
@@ -603,6 +603,20 @@ module MobyBehaviour
       #  NOTICE: Please do not add anything unnessecery to this method, it might cause a major performance impact
       #
             
+      # for backwards compatibility
+      if attributes.has_key?( :__logging )
+
+        # for backward compatibility          
+        if attributes[ :__logging ].kind_of?( String )
+          
+          warn "warning: deprecated variable type String for :__logging test object creation directive (expected TrueClass or FalseClass)"          
+
+          attributes[ :__logging ] = attributes[ :__logging ].to_boolean 
+          
+        end
+      
+      end
+            
       # store original hash
       creation_hash = attributes.clone
 
@@ -613,7 +627,7 @@ module MobyBehaviour
 
         [ TrueClass, FalseClass ], 
 
-        "Wrong value type $1 for :__logging test object creation directive (expected $2)" 
+        "wrong value type $1 for :__logging test object creation directive (expected $2)" 
 
       ) if dynamic_attributes.has_key?( :__logging )
 

@@ -178,17 +178,37 @@ module MobyBase
 
           # Fixnum          
           when :__index, :__timeout
+
+            # for backward compatibility          
+            if value.kind_of?( String )
+            
+              warn "warning: deprecated variable type String for #{ key.inspect } test object identification directive (expected TrueClass or FalseClass)"          
+          
+              raise ArgumentError, "deprecated and wrong variable content format for #{ key.inspect } test object identification directive (expected Numeric string)" unless value.numeric?
+          
+              value = value.to_i
+              
+            end
           
             type = Fixnum
                     
           when :__logging, :__xy_sorting
+
+            # for backward compatibility          
+            if value.kind_of?( String )
+              
+              warn "warning: deprecated variable type String for #{ key.inspect } test object identification directive (expected TrueClass or FalseClass)"          
+
+              value = value.to_boolean 
+              
+            end
           
             type = [ TrueClass, FalseClass ]
           
         end
 
         # verify hash value if type defined 
-        value.check_type( type, "Wrong variable type $1 for #{ key.inspect } test object identification directive (expected $2)" ) unless type.nil?
+        value.check_type( type, "wrong variable type $1 for #{ key.inspect } test object identification directive (expected $2)" ) unless type.nil?
 
       }
             
@@ -499,7 +519,7 @@ module MobyBase
 
     def set_timeout( new_timeout )
 
-      warn( "Deprecated method: use timeout=(value) instead of TestObjectFactory#set_timeout( value )" )
+      warn "warning: deprecated method TestObjectFactory#set_timeout( value ); please use TestObjectFactory#timeout=( value ) instead"
 
       self.timeout = new_timeout
 
@@ -511,7 +531,7 @@ module MobyBase
     # Numeric:: Timeout
     def get_timeout
 
-      warn( "Deprecated method: use timeout instead of TestObjectFactory#get_timeout" )
+      warn "warning: deprecated method TestObjectFactory#get_timeout; please use TestObjectFactory#timeout instead"
 
       @timeout
 

@@ -68,7 +68,8 @@ module MobyUtil
 		# app.Object.attribute(var)
 		def add_hardcoded_symbol( symbol )
 
-			$stderr.puts "warning: DynamicAttributeFilter#add_hardcoded_symbol is deprecated, please use DynamicAttributeFilter#add_attribute instead."
+			#$stderr.puts "warning: DynamicAttributeFilter#add_hardcoded_symbol is deprecated; please use DynamicAttributeFilter#add_attribute instead."
+      warn "warning: deprecated method DynamicAttributeFilter#add_hardcoded_symbol; please use DynamicAttributeFilter#add_attribute instead"
 
 			# update filter if new symbols added
 			update_filter_string if add_attribute_to_filter( symbol )
