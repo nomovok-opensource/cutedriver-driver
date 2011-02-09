@@ -63,21 +63,21 @@ module MobyUtil
     # TODO: document me
     def self.clear
 
-      $parameters.instance.clear
+      $parameters.clear
 
     end
 
     # TODO: document me
     def self.load_xml( filename )
 
-      $parameters.instance.load_parameters_xml( filename )
+      $parameters.parse_file( filename )
 
     end
 
     # TODO: document me
     def self.reset( *keys )
 
-      $parameters.instance.reset_parameters
+      $parameters.reset
 
     end
 
