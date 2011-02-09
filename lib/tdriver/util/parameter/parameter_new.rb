@@ -142,7 +142,10 @@ module MobyUtil
       
         # indicates that class is already initialized - templates and parameters will not reset
         @initialized = true
-      
+
+        # parse command lines      
+        parse_command_line_arguments
+
       end
     
       private
@@ -506,7 +509,12 @@ module MobyUtil
       # TODO: document me
       def get_template( name )
       
-        @templates.fetch( name )
+        @templates.fetch( name ){ 
+
+          # return empty hash if template not found
+          ParameterHash.new
+
+        }
       
       end
 
