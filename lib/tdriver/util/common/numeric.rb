@@ -49,11 +49,32 @@ class Numeric
   end
 
   # TODO: document me
+  def check_range( range, message = "value $1 is out of range ($2)"  )
+
+    # check that given argument is type of Range
+    raise TypeError, 'wrong argument type #{ range.class } for range (expected Range)' unless range.kind_of?( Range )
+
+    # check that given argument is type of Range
+    raise TypeError, 'wrong argument type #{ message.class } for exception message (expected String)' unless message.kind_of?( String )
+
+    # replace macros
+    message.gsub!( '$1', self.inspect )
+    
+    message.gsub!( '$2', range.inspect )
+
+    # raise exception if number is out of range
+    raise RangeError, message unless range.include?( self )
+    
+    # return self
+    self
+    
+  end
+
+  # TODO: document me
   def limit( minimum_value, maximum_value )
 
-    value = self    
-
-    value.min( minimum_value ).max( maximum_value )
+    # limit current value
+    self.min( minimum_value ).max( maximum_value )
 
   end
 
@@ -66,7 +87,7 @@ class Numeric
 
     else
 
-      raise TypeError, 'wrong type %2 for value (expected Numeric)'
+      raise TypeError, "wrong type #{ value.class } for value (expected Numeric)"
 
     end
 
@@ -81,7 +102,7 @@ class Numeric
 
     else
 
-      raise TypeError, 'wrong type %2 for value (expected Numeric)'
+      raise TypeError, "wrong type #{ value.class } for value (expected Numeric)"
 
     end
 
