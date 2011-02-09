@@ -137,14 +137,14 @@ module MobyUtil
         # detect is posix platform
         @is_posix = MobyUtil::EnvironmentHelper.posix?
 
+        # retrieve parameter filenames from command line arguments
+        parse_command_line_arguments
+
         # reset templates and parameters
         reset_hashes
       
         # indicates that class is already initialized - templates and parameters will not reset
         @initialized = true
-
-        # parse command lines      
-        parse_command_line_arguments
 
       end
     
@@ -564,9 +564,6 @@ module MobyUtil
         load_parameters_file( 'tdriver_parameters.xml' ) if options[ :load_user_parameters ] == true
 
         if options[ :load_command_line_parameters ] == true
-
-          # retrieve parameter filenames from command line arguments
-          #parse_command_line_arguments
 
           @command_line_argument_files.each{ | filename |
           
