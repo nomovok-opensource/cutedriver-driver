@@ -44,12 +44,12 @@ module TDriver
               if @@partial_match_allowed.include?( [ object_type, key ] )
                 
                 prefix_value = "[contains(.,#{ value })]"
-                attribute_value = "contains(value/text(),#{ value })"
+                attribute_value = "contains(value/.,#{ value })"
               
               else
 
                 prefix_value = "=#{ value }"
-                attribute_value = "value/text()=#{ value }"
+                attribute_value = "value/.=#{ value }"
               
               end
 
