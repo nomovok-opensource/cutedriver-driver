@@ -1,3 +1,9 @@
+libtestability-driver-ruby (1.0.5-1) unstable; urgency=low
+
+  * Fixes: NB#226928 - Regression in the object finding with empty attributes
+
+ -- Testability Driver Team <testabilitydriver@nokia.com>  Thu, 10 Feb 2011 15:45:00 +0200
+
 libtestability-driver-ruby (1.0.4-1) unstable; urgency=low
 
   * new release version
