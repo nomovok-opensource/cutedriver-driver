@@ -52,8 +52,9 @@ class ReportingStatistics
     @total_statistics_arr << ["dump count",0]
     @total_statistics_arr << ["sent bytes",0]
     @total_statistics_arr << ["received bytes",0]
-    @total_statistics_arr << ["used mem difference",0]
-    @all_statuses << "reboots" << "crashes" << "duration" << "dump count" << "sent bytes" << "received bytes" << "used mem difference"
+    @total_statistics_arr << ["used mem",0]
+    @total_statistics_arr << ["pass rate",0]
+    @all_statuses << "reboots" << "crashes" << "duration" << "dump count" << "sent bytes" << "received bytes" << "used mem" << "pass rate"
   end
 
   def generate_statistics_headers()
@@ -74,90 +75,106 @@ class ReportingStatistics
     status_heads << "<th abbr=\"link_column\"><b>Sent bytes</b></th>"
     status_heads << "<th abbr=\"link_column\"><b>Received bytes</b></th>"
     status_heads << "<th abbr=\"link_column\"><b>Used mem</b></th>"
+    status_heads << "<th abbr=\"link_column\"><b>Pass %</b></th>"
     status_heads
   end
 
   def update_total_execution_statistics(tc_status,reboots,crashes,dump_count,sent_bytes,received_bytes,memory_usage)
     current_index=0
     @total_statistics_arr.each do |total_status|
-        if tc_status==total_status[0]
-          @total_statistics_arr[current_index]=[tc_status,total_status[1].to_i+1]
-        end
-        if total_status[0]=="reboots"
-          @total_statistics_arr[current_index]=["reboots",total_status[1].to_i+reboots.to_i]
-        end
-        if total_status[0]=="crashes"
-          @total_statistics_arr[current_index]=["crashes",total_status[1].to_i+crashes.to_i]
-        end
-        if total_status[0]=="total"
-          @total_statistics_arr[current_index]=["total",total_status[1].to_i+1]
-        end
-        if total_status[0]=="duration"
-          @total_statistics_arr[current_index]=["duration",""]
-        end
-        if total_status[0]=="dump count"          
-          @total_statistics_arr[current_index]=["dump count",total_status[1].to_i+dump_count.to_i]
-        end
-        if total_status[0]=="sent bytes"
-          @total_statistics_arr[current_index]=["sent bytes",total_status[1].to_i+sent_bytes.to_i]
-        end
-        if total_status[0]=="received bytes"
-          @total_statistics_arr[current_index]=["received bytes",total_status[1].to_i+received_bytes.to_i]
-        end
-        if total_status[0]=="used mem difference"
-          @total_statistics_arr[current_index]=["used mem difference",""]
-        end
-        current_index+=1
+      if tc_status==total_status[0]
+        @total_statistics_arr[current_index]=[tc_status,total_status[1].to_i+1]
       end
+      if total_status[0]=="reboots"
+        @total_statistics_arr[current_index]=["reboots",total_status[1].to_i+reboots.to_i]
+      end
+      if total_status[0]=="crashes"
+        @total_statistics_arr[current_index]=["crashes",total_status[1].to_i+crashes.to_i]
+      end
+      if total_status[0]=="total"
+        @total_statistics_arr[current_index]=["total",total_status[1].to_i+1]
+      end
+      if total_status[0]=="duration"
+        @total_statistics_arr[current_index]=["duration",""]
+      end
+      if total_status[0]=="dump count"
+        @total_statistics_arr[current_index]=["dump count",total_status[1].to_i+dump_count.to_i]
+      end
+      if total_status[0]=="sent bytes"
+        @total_statistics_arr[current_index]=["sent bytes",total_status[1].to_i+sent_bytes.to_i]
+      end
+      if total_status[0]=="received bytes"
+        @total_statistics_arr[current_index]=["received bytes",total_status[1].to_i+received_bytes.to_i]
+      end
+      if total_status[0]=="used mem"
+        @total_statistics_arr[current_index]=["used mem",""]
+      end
+      if total_status[0]=="pass rate"
+        @total_statistics_arr[current_index]=["pass rate",""]
+      end
+      current_index+=1
+    end
   end
 
   def update_test_case_execution_statistics(tc_name,tc_status,tc_execution,duration,tc_link,reboots,crashes,dump_count,sent_bytes,received_bytes,memory_usage)
     b_test_in_statistics=false
     current_index=0
+    total_run=0
+    total_not_run=0
+    total_passed=0
     @statistics_arr.each do |total_status|
-        if total_status[1]==tc_status && total_status[0]==tc_name
-          b_test_in_statistics=true
-          @statistics_arr[current_index]=[tc_name,tc_status,total_status[2].to_i+1,tc_execution,tc_link]
-        end
-        if total_status[1]=="reboots" && total_status[0]==tc_name
-          b_test_in_statistics=true
-          @statistics_arr[current_index]=[tc_name,"reboots",total_status[2].to_i+reboots.to_i,tc_execution,tc_link]
-        end
-        if total_status[1]=="crashes" && total_status[0]==tc_name
-          b_test_in_statistics=true
-          @statistics_arr[current_index]=[tc_name,"crashes",total_status[2].to_i+crashes.to_i,tc_execution,tc_link]
-        end
-        if total_status[1]=="total" && total_status[0]==tc_name
-          b_test_in_statistics=true
-          @statistics_arr[current_index]=[tc_name,"total",total_status[2].to_i+1,tc_execution,tc_link]
-        end
-        if total_status[1]=="duration" && total_status[0]==tc_name
-          b_test_in_statistics=true
-          @statistics_arr[current_index]=[tc_name,"duration",duration,tc_execution,tc_link]
-        end
-        if total_status[1]=="dump count" && total_status[0]==tc_name
-          b_test_in_statistics=true
-          @statistics_arr[current_index]=[tc_name,"dump count",total_status[2].to_i+dump_count.to_i,tc_execution,tc_link]
-        end
-        if total_status[1]=="sent bytes" && total_status[0]==tc_name
-          b_test_in_statistics=true
-          @statistics_arr[current_index]=[tc_name,"sent bytes",total_status[2].to_i+sent_bytes.to_i,tc_execution,tc_link]
-        end
-        if total_status[1]=="received bytes" && total_status[0]==tc_name
-          b_test_in_statistics=true
-          @statistics_arr[current_index]=[tc_name,"received bytes",total_status[2].to_i+received_bytes.to_i,tc_execution,tc_link]
-        end
-        if total_status[1]=="used mem difference" && total_status[0]==tc_name
-          b_test_in_statistics=true
-          @statistics_arr[current_index]=[tc_name,"used mem difference",total_status[2].to_i,tc_execution,tc_link]
-        end
-        current_index+=1
+      if total_status[1]==tc_status && total_status[0]==tc_name
+        b_test_in_statistics=true
+        @statistics_arr[current_index]=[tc_name,tc_status,total_status[2].to_i+1,tc_execution,tc_link]
+        total_passed=total_status[2].to_i+1 if @pass_statuses.include?(total_status[1])
+        total_not_run=total_status[2].to_i+1 if @not_run_statuses.include?(total_status[1])
       end
-      b_test_in_statistics
+      if total_status[1]=="reboots" && total_status[0]==tc_name
+        b_test_in_statistics=true
+        @statistics_arr[current_index]=[tc_name,"reboots",total_status[2].to_i+reboots.to_i,tc_execution,tc_link]
+      end
+      if total_status[1]=="crashes" && total_status[0]==tc_name
+        b_test_in_statistics=true
+        @statistics_arr[current_index]=[tc_name,"crashes",total_status[2].to_i+crashes.to_i,tc_execution,tc_link]
+      end
+      if total_status[1]=="total" && total_status[0]==tc_name
+        b_test_in_statistics=true
+        @statistics_arr[current_index]=[tc_name,"total",total_status[2].to_i+1,tc_execution,tc_link]
+        total_run=total_status[2].to_i+1
+      end
+      if total_status[1]=="duration" && total_status[0]==tc_name
+        b_test_in_statistics=true
+        @statistics_arr[current_index]=[tc_name,"duration",duration,tc_execution,tc_link]
+      end
+      if total_status[1]=="dump count" && total_status[0]==tc_name
+        b_test_in_statistics=true
+        @statistics_arr[current_index]=[tc_name,"dump count",total_status[2].to_i+dump_count.to_i,tc_execution,tc_link]
+      end
+      if total_status[1]=="sent bytes" && total_status[0]==tc_name
+        b_test_in_statistics=true
+        @statistics_arr[current_index]=[tc_name,"sent bytes",total_status[2].to_i+sent_bytes.to_i,tc_execution,tc_link]
+      end
+      if total_status[1]=="received bytes" && total_status[0]==tc_name
+        b_test_in_statistics=true
+        @statistics_arr[current_index]=[tc_name,"received bytes",total_status[2].to_i+received_bytes.to_i,tc_execution,tc_link]
+      end
+      if total_status[1]=="used mem" && total_status[0]==tc_name
+        b_test_in_statistics=true
+        @statistics_arr[current_index]=[tc_name,"used mem",total_status[2].to_i,tc_execution,tc_link]
+      end
+      if total_status[1]=="pass rate" && total_status[0]==tc_name
+        b_test_in_statistics=true
+        pass_rate=(total_passed.to_f/(total_run.to_f-total_not_run.to_f))*100
+        pass_rate="%0.2f" % pass_rate
+        @statistics_arr[current_index]=[tc_name,"pass rate",pass_rate,tc_execution,tc_link]
+      end
+      current_index+=1
+    end
+    b_test_in_statistics
   end
 
   def collect_test_case_statistics()
-    total_duration = 0.0   
+    total_duration = 0.0
     @group_test_case_arr.each do |test_case|
       tc_status=test_case[7]
       tc_name=test_case[0].to_s.gsub('_',' ')
@@ -171,7 +188,7 @@ class ReportingStatistics
       memory_usage=test_case[6].to_i
 
       duration=test_case[5].to_f
-      total_duration = total_duration + duration      
+      total_duration = total_duration + duration
       b_test_in_statistics=false
 
       #Update total statistics
@@ -181,14 +198,20 @@ class ReportingStatistics
       b_test_in_statistics=update_test_case_execution_statistics(tc_name,tc_status,tc_execution,duration,tc_link,reboots,crashes,dump_count,sent_bytes,received_bytes,memory_usage)
 
       if b_test_in_statistics==false
+        total_run=0
+        total_not_run=0
+        total_passed=0
         @all_statuses.each do |status|
           if status==tc_status
             @statistics_arr << [tc_name,tc_status,1,tc_execution,tc_link]
+            total_passed=1 if @pass_statuses.include?(tc_status)
+            total_not_run=1 if @not_run_statuses.include?(tc_status)
           elsif status=="reboots"
             @statistics_arr << [tc_name,"reboots",reboots.to_i,tc_execution,tc_link]
           elsif status=="crashes"
             @statistics_arr << [tc_name,"crashes",crashes.to_i,tc_execution,tc_link]
           elsif status=="total"
+            total_run=1
             @statistics_arr << [tc_name,"total",1,tc_execution,tc_link]
           elsif status=="duration"
             @statistics_arr << [tc_name,"duration",duration,tc_execution,tc_link]
@@ -198,8 +221,12 @@ class ReportingStatistics
             @statistics_arr << [tc_name,"sent bytes",sent_bytes,tc_execution,tc_link]
           elsif status=="received bytes"
             @statistics_arr << [tc_name,"received bytes",received_bytes,tc_execution,tc_link]
-          elsif status=="used mem difference"
-            @statistics_arr << [tc_name,"used mem difference",memory_usage,tc_execution,tc_link]
+          elsif status=="used mem"
+            @statistics_arr << [tc_name,"used mem",memory_usage,tc_execution,tc_link]
+          elsif status=="pass rate"
+            pass_rate=(total_passed.to_f/(total_run.to_f-total_not_run.to_f))*100
+            pass_rate="%0.2f" % pass_rate
+            @statistics_arr << [tc_name,"pass rate",pass_rate,tc_execution,tc_link]
           else
             @statistics_arr << [tc_name,status,0,tc_execution,tc_link]
           end

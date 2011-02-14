@@ -17,6 +17,8 @@
 ##
 ############################################################################
 
+require 'fileutils'
+require 'date'
 require File.expand_path( File.join( File.dirname( __FILE__ ), 'error_recovery/tdriver_error_recovery_settings' ) )
 require File.expand_path( File.join( File.dirname( __FILE__ ), 'error_recovery/tdriver_error_recovery' ) )
 require File.expand_path( File.join( File.dirname( __FILE__ ), 'error_recovery/tdriver_custom_error_recovery' ) )
