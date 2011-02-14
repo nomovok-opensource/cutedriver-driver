@@ -359,6 +359,23 @@ module MobyBehaviour
 
 	end
 
+	# == description
+	# Returns the mem usage of the application if the information is available.
+	# Will return -1 if the information is not available.
+	# 
+	# == returns
+	# Integer
+	#   description: Current memory usage
+	#   example: 124354
+	#
+	def mem_usage
+	  mem = -1
+	  begin
+		mem = self.attribute('memUsage')
+	  rescue
+	  end
+	  mem
+	end
 
 
     # enable hooking for performance measurement & debug logging
