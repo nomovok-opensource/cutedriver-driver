@@ -159,10 +159,7 @@ module TDriverReportCreator
       $new_test_case.test_case_total_data_sent,
       $new_test_case.test_case_total_data_received
     )
-
-    #Update test case summary pages
-    $tdriver_reporter.update_test_case_summary_page(current_status,false,"Test: #{test_case_name} Result: #{current_status}",test_case_name)
-
+    
 
     $tdriver_reporter.set_end_time(Time.now)
     $tdriver_reporter.set_total_run(1)
@@ -173,6 +170,8 @@ module TDriverReportCreator
         $run_status_thread_active=true
         Thread.new do
           begin
+            #Update test case summary pages
+            $tdriver_reporter.update_test_case_summary_page(current_status,false,"Test: #{test_case_name} Result: #{current_status}",test_case_name)
             $tdriver_reporter.update_test_case_summary_pages('all')
             $tdriver_reporter.update_test_case_summary_pages('passed')
             $tdriver_reporter.update_test_case_summary_pages('failed')
