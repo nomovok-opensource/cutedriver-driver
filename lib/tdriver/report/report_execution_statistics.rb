@@ -258,16 +258,16 @@ class ReportingStatistics
       tc_link='<a href="cases/'+result_page.to_i.to_s+'_chronological_total_run_index.html">'
       tc_link='<a href="cases/1_reboot_index.html">' if status=="reboots" && total>0
       tc_link='<a href="cases/1_crash_index.html">' if status=="crashes" && total>0
-      tc_link='<a href="cases/1_'+@pass_statuses.first+'_'+test_case.gsub(' ','_')+'_index.html">' if @pass_statuses.include?(status) && total>0
-      tc_link='<a href="cases/1_'+@fail_statuses.first+'_'+test_case.gsub(' ','_')+'_index.html">' if @fail_statuses.include?(status) && total>0
-      tc_link='<a href="cases/1_'+@not_run_statuses.first+'_'+test_case.gsub(' ','_')+'_index.html">' if @not_run_statuses.include?(status) && total>0
+      tc_link='<a href="cases/1_'+@pass_statuses.first.gsub(' ','_')+'_'+test_case.gsub(' ','_')+'_index.html">' if @pass_statuses.include?(status) && total>0
+      tc_link='<a href="cases/1_'+@fail_statuses.first.gsub(' ','_')+'_'+test_case.gsub(' ','_')+'_index.html">' if @fail_statuses.include?(status) && total>0
+      tc_link='<a href="cases/1_'+@not_run_statuses.first.gsub(' ','_')+'_'+test_case.gsub(' ','_')+'_index.html">' if @not_run_statuses.include?(status) && total>0
     else
       tc_link='<a href="'+result_page.to_i.to_s+'_chronological_total_run_index.html">'
       tc_link='<a href="1_reboot_index.html">' if status=="reboots" && total>0
       tc_link='<a href="1_crash_index.html">' if status=="crashes" && total>0
-      tc_link='<a href="1_'+@pass_statuses.first+'_'+test_case.gsub(' ','_')+'_index.html">' if @pass_statuses.include?(status) && total>0
-      tc_link='<a href="1_'+@fail_statuses.first+'_'+test_case.gsub(' ','_')+'_index.html">' if @fail_statuses.include?(status) && total>0
-      tc_link='<a href="1_'+@not_run_statuses.first+'_'+test_case.gsub(' ','_')+'_index.html">' if @not_run_statuses.include?(status) && total>0
+      tc_link='<a href="1_'+@pass_statuses.first.gsub(' ','_')+'_'+test_case.gsub(' ','_')+'_index.html">' if @pass_statuses.include?(status) && total>0
+      tc_link='<a href="1_'+@fail_statuses.first.gsub(' ','_')+'_'+test_case.gsub(' ','_')+'_index.html">' if @fail_statuses.include?(status) && total>0
+      tc_link='<a href="1_'+@not_run_statuses.first.gsub(' ','_')+'_'+test_case.gsub(' ','_')+'_index.html">' if @not_run_statuses.include?(status) && total>0
     end
     tc_link
 

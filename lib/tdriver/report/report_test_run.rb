@@ -969,7 +969,7 @@ module TDriverReportCreator
             ]
             case results
             when 'passed'
-              if case_name                
+              if case_name
                 if @pass_statuses.include?(status) && value==case_name
                   result_storage << current_record
                 end
@@ -1019,7 +1019,7 @@ module TDriverReportCreator
               else
                 result_storage << current_record
               end
-              
+
             end
           end
           xml_data=nil
@@ -1096,9 +1096,9 @@ module TDriverReportCreator
     # === raises
     def update_test_case_summary_page(status,rewrite=false,title="",test_case_name=nil)
       @cases_arr=Array.new
-
+      status=status.gsub(' ','_')
       if test_case_name
-        @cases_arr=read_result_storage(status,test_case_name)        
+        @cases_arr=read_result_storage(status,test_case_name)
       else
         @cases_arr=read_result_storage(status)
       end
@@ -1106,6 +1106,7 @@ module TDriverReportCreator
       splitted_arr=split_array(@cases_arr,@pages.to_i)
       page=1
       splitted_arr.each do |case_arr|
+
         if test_case_name
           if @report_pages_ready.include?("#{page}_#{status}_#{test_case_name}")==false || rewrite==true
             write_page_start(@report_folder+"/cases/#{page}_#{status}_#{test_case_name}_index.html",title,page,splitted_arr.length)
