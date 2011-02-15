@@ -440,7 +440,7 @@ module TDriverReportCreator
     # === returns
     # nil
     # === raises
-    def update_test_case_page()
+    def update_test_case_page(rewrite=false)
       begin
         #Calculate run time
         @test_case_run_time=Time.now-@test_case_start_time
@@ -467,6 +467,7 @@ module TDriverReportCreator
           @test_case_total_data_received
         )
         write_page_end(@test_case_folder+'/index.html')
+                
       rescue Exception => e
         Kernel::raise e
       end

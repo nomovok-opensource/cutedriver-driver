@@ -492,7 +492,7 @@ display: block;
         if File.exist?(file) && match.include?('testability-driver')==false
           copy_code_file_to_test_case_report(file,folder,line.gsub(':','').strip)
           link_to_stack='<a style="color: #FF0000" href="stack_files/'<<
-            File.basename(file.to_s)+'.html#'+line.to_s<<
+            File.basename(file.to_s)+'.html#'+line.to_s.gsub(':','')<<
             '">'+match+'</a>'
           log_line=log_line.gsub(match,link_to_stack)
         end
@@ -645,7 +645,12 @@ display: block;
     when "TDriver test environment","Total run","Statistics","Passed","Failed","Not run","Crash","Reboot","TDriver log"
       stylesheet='<link rel="stylesheet" title="TDriverReportStyle" href="../tdriver_report_style.css"/>'
     else
-      stylesheet='<link rel="stylesheet" title="TDriverReportStyle" href="../../tdriver_report_style.css"/>'
+      if title.include?("Test:")
+        stylesheet='<link rel="stylesheet" title="TDriverReportStyle" href="../tdriver_report_style.css"/>'
+      else
+        stylesheet='<link rel="stylesheet" title="TDriverReportStyle" href="../../tdriver_report_style.css"/>'
+      end
+      
     end
     html_start='<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">' <<
       '<html xmlns="http://www.w3.org/1999/xhtml">'<<
@@ -898,7 +903,7 @@ display: block;
     html_body=nil
     GC.start
   end
-  def write_test_case_summary_body(page,status,tc_arr,chronological_page=nil,report_page=nil)
+  def write_test_case_summary_body(page,status,tc_arr,chronological_page=nil,report_page=nil,test_case_name=nil)
     html_body=Array.new
     case status
     when 'passed'
@@ -1310,14 +1315,25 @@ display: block;
       failed_link="#{report_page}_failed_index.html\""
       not_run_link="#{report_page}_not_run_index.html\""
     else
-      tdriver_test_results_link='../../index.html"'
-      tdriver_test_environment_link='../../environment/index.html"'
-      tdriver_log_link='../tdriver_log_index.html"'
-      total_run_link="../1_total_run_index.html\""
-      statistics_link='../statistics_index.html"'
-      passed_link="../1_passed_index.html\""
-      failed_link="../1_failed_index.html\""
-      not_run_link="../1_not_run_index.html\""
+      if title.include?("Test:")
+        tdriver_test_results_link='../index.html"'
+        tdriver_test_environment_link='../environment/index.html"'
+        tdriver_log_link='tdriver_log_index.html"'
+        total_run_link="1_total_run_index.html\""
+        statistics_link='statistics_index.html"'
+        passed_link="1_passed_index.html\""
+        failed_link="#{report_page}_failed_index.html\" class=\"current\""
+        not_run_link="1_not_run_index.html\""
+      else
+        tdriver_test_results_link='../../index.html"'
+        tdriver_test_environment_link='../../environment/index.html"'
+        tdriver_log_link='../tdriver_log_index.html"'
+        total_run_link="../1_total_run_index.html\""
+        statistics_link='../statistics_index.html"'
+        passed_link="../1_passed_index.html\""
+        failed_link="../1_failed_index.html\""
+        not_run_link="../1_not_run_index.html\""
+      end
     end
     html_body='<div class="navigation_section"><div class="navigation_tabs">'<<
       '<ul id="navigation_tabs_ul">'<<

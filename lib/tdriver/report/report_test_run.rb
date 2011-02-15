@@ -88,7 +88,7 @@ module TDriverReportCreator
       @total_received_data=Hash.new
       @total_sent_data=Hash.new
       $result_storage_in_use=false
-      @pages=MobyUtil::Parameter[ :report_results_per_page, 10]
+      @pages=MobyUtil::Parameter[ :report_results_per_page, 50]
       @duration_graph=MobyUtil::Parameter[ :report_generate_duration_graph, false]
       @pass_statuses=MobyUtil::Parameter[ :report_passed_statuses, "passed" ].split('|')
       @fail_statuses=MobyUtil::Parameter[ :report_failed_statuses, "failed" ].split('|')
@@ -912,7 +912,7 @@ module TDriverReportCreator
       end
     end
 
-    def read_result_storage(results)
+    def read_result_storage(results,case_name=nil)
       while $result_storage_in_use==true
         sleep 1
       end
@@ -950,125 +950,76 @@ module TDriverReportCreator
               user_data[value_name] = val
             end
 
+            current_record=[value,
+              group,
+              reboots,
+              crashes,
+              start_time,
+              duration,
+              memory_usage,
+              status,
+              index,
+              log,
+              comment,
+              link,
+              user_data,
+              dump_count,
+              sent_bytes,
+              received_bytes
+            ]
             case results
             when 'passed'
-              if @pass_statuses.include?(status)
-                result_storage << [value,
-                  group,
-                  reboots,
-                  crashes,
-                  start_time,
-                  duration,
-                  memory_usage,
-                  status,
-                  index,
-                  log,
-                  comment,
-                  link,
-                  user_data,
-                  dump_count,
-                  sent_bytes,
-                  received_bytes
-                ]
+              if case_name                
+                if @pass_statuses.include?(status) && value==case_name
+                  result_storage << current_record
+                end
+              else
+                if @pass_statuses.include?(status)
+                  result_storage << current_record
+                end
               end
+
             when 'failed'
-              if @fail_statuses.include?(status)
-                result_storage << [value,
-                  group,
-                  reboots,
-                  crashes,
-                  start_time,
-                  duration,
-                  memory_usage,
-                  status,
-                  index,
-                  log,
-                  comment,
-                  link,
-                  user_data,
-                  dump_count,
-                  sent_bytes,
-                  received_bytes
-                ]
+              if case_name
+                if @fail_statuses.include?(status) && value==case_name
+                  result_storage << current_record
+                end
+              else
+                if @fail_statuses.include?(status)
+                  result_storage << current_record
+                end
               end
+
             when 'not_run'
-              if @not_run_statuses.include?(status)
-                result_storage << [value,
-                  group,
-                  reboots,
-                  crashes,
-                  start_time,
-                  duration,
-                  memory_usage,
-                  status,
-                  index,
-                  log,
-                  comment,
-                  link,
-                  user_data,
-                  dump_count,
-                  sent_bytes,
-                  received_bytes
-                ]
+              if case_name
+                if @not_run_statuses.include?(status) && value==case_name
+                  result_storage << current_record
+                end
+              else
+                if @not_run_statuses.include?(status)
+                  result_storage << current_record
+                end
               end
+
             when 'crash'
               if crashes.to_i > 0
-                result_storage << [value,
-                  group,
-                  reboots,
-                  crashes,
-                  start_time,
-                  duration,
-                  memory_usage,
-                  status,
-                  index,
-                  log,
-                  comment,
-                  link,
-                  user_data,
-                  dump_count,
-                  sent_bytes,
-                  received_bytes
-                ]
+                result_storage << current_record
               end
+
             when 'reboot'
               if reboots.to_i > 0
-                result_storage << [value,
-                  group,
-                  reboots,
-                  crashes,
-                  start_time,
-                  duration,
-                  memory_usage,
-                  status,
-                  index,
-                  log,
-                  comment,
-                  link,
-                  user_data,
-                  dump_count,
-                  sent_bytes,
-                  received_bytes
-                ]
+                result_storage << current_record
               end
+
             when 'all'
-              result_storage << [value,
-                group,
-                reboots,
-                crashes,
-                start_time,
-                duration,
-                memory_usage,
-                status,
-                index,
-                log,
-                comment,
-                link,
-                user_data,
-                dump_count,
-                sent_bytes,
-                received_bytes
-              ]
+              if case_name
+                if value==case_name
+                  result_storage << current_record
+                end
+              else
+                result_storage << current_record
+              end
+              
             end
           end
           xml_data=nil
@@ -1143,18 +1094,30 @@ module TDriverReportCreator
     # === returns
     # nil
     # === raises
-    def update_test_case_summary_page(status,rewrite=false,title="")
+    def update_test_case_summary_page(status,rewrite=false,title="",test_case_name=nil)
       @cases_arr=Array.new
 
-      @cases_arr=read_result_storage(status)
+      if test_case_name
+        @cases_arr=read_result_storage(status,test_case_name)        
+      else
+        @cases_arr=read_result_storage(status)
+      end
       splitted_arr=Array.new
       splitted_arr=split_array(@cases_arr,@pages.to_i)
       page=1
       splitted_arr.each do |case_arr|
-        if @report_pages_ready.include?("#{page}_passed")==false || rewrite==true
-          write_page_start(@report_folder+"/cases/#{page}_#{status}_index.html",title,page,splitted_arr.length)
-          write_test_case_summary_body(@report_folder+"/cases/#{page}_#{status}_index.html",status,case_arr,nil)
-          page_ready=write_page_end(@report_folder+"/cases/#{page}_#{status}_index.html",page,splitted_arr.length)
+        if test_case_name
+          if @report_pages_ready.include?("#{page}_#{status}_#{test_case_name}")==false || rewrite==true
+            write_page_start(@report_folder+"/cases/#{page}_#{status}_#{test_case_name}_index.html",title,page,splitted_arr.length)
+            write_test_case_summary_body(@report_folder+"/cases/#{page}_#{status}_#{test_case_name}_index.html",status,case_arr,nil)
+            page_ready=write_page_end(@report_folder+"/cases/#{page}_#{status}_#{test_case_name}_index.html",page,splitted_arr.length)
+          end
+        else
+          if @report_pages_ready.include?("#{page}_#{status}")==false || rewrite==true
+            write_page_start(@report_folder+"/cases/#{page}_#{status}_index.html",title,page,splitted_arr.length)
+            write_test_case_summary_body(@report_folder+"/cases/#{page}_#{status}_index.html",status,case_arr,nil)
+            page_ready=write_page_end(@report_folder+"/cases/#{page}_#{status}_index.html",page,splitted_arr.length)
+          end
         end
         if page_ready!=nil
           @report_pages_ready << "#{page_ready}_#{status}"

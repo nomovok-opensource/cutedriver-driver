@@ -25,7 +25,7 @@ class ReportingStatistics
     @pass_statuses=MobyUtil::Parameter[ :report_passed_statuses, "passed" ].split('|')
     @fail_statuses=MobyUtil::Parameter[ :report_failed_statuses, "failed" ].split('|')
     @not_run_statuses=MobyUtil::Parameter[ :report_not_run_statuses, "not run" ].split('|')
-    @test_results_per_page=MobyUtil::Parameter[ :report_results_per_page, 10]
+    @test_results_per_page=MobyUtil::Parameter[ :report_results_per_page, 50]
     @statistics_arr=Array.new
     @total_statistics_arr=Array.new
     @summary=summary
@@ -122,12 +122,12 @@ class ReportingStatistics
     total_run=0
     total_not_run=0
     total_passed=0
-    @statistics_arr.each do |total_status|
-      if total_status[1]==tc_status && total_status[0]==tc_name
+    @statistics_arr.each do |total_status|        
+      if total_status[1]==tc_status && total_status[0]==tc_name    
         b_test_in_statistics=true
         @statistics_arr[current_index]=[tc_name,tc_status,total_status[2].to_i+1,tc_execution,tc_link]
         total_passed=total_status[2].to_i+1 if @pass_statuses.include?(total_status[1])
-        total_not_run=total_status[2].to_i+1 if @not_run_statuses.include?(total_status[1])
+        total_not_run=total_status[2].to_i+1 if @not_run_statuses.include?(total_status[1])        
       end
       if total_status[1]=="reboots" && total_status[0]==tc_name
         b_test_in_statistics=true
@@ -174,7 +174,7 @@ class ReportingStatistics
   end
 
   def collect_test_case_statistics()
-    total_duration = 0.0
+    total_duration = 0.0   
     @group_test_case_arr.each do |test_case|
       tc_status=test_case[7]
       tc_name=test_case[0].to_s.gsub('_',' ')
@@ -188,7 +188,7 @@ class ReportingStatistics
       memory_usage=test_case[6].to_i
 
       duration=test_case[5].to_f
-      total_duration = total_duration + duration
+      total_duration = total_duration + duration      
       b_test_in_statistics=false
 
       #Update total statistics
@@ -258,16 +258,16 @@ class ReportingStatistics
       tc_link='<a href="cases/'+result_page.to_i.to_s+'_chronological_total_run_index.html">'
       tc_link='<a href="cases/1_reboot_index.html">' if status=="reboots" && total>0
       tc_link='<a href="cases/1_crash_index.html">' if status=="crashes" && total>0
-      tc_link='<a href="cases/'+result_page.to_i.to_s+'_chronological_total_run_index.html#'+test_case.gsub(' ','_')+'_' + @pass_statuses.first + '">' if @pass_statuses.include?(status) && total>0
-      tc_link='<a href="cases/'+result_page.to_i.to_s+'_chronological_total_run_index.html#'+test_case.gsub(' ','_')+'_' + @fail_statuses.first + '">' if @fail_statuses.include?(status) && total>0
-      tc_link='<a href="cases/'+result_page.to_i.to_s+'_chronological_total_run_index.html#'+test_case.gsub(' ','_')+'_' + @not_run_statuses.first + '">' if @not_run_statuses.include?(status) && total>0
+      tc_link='<a href="cases/1_'+@pass_statuses.first+'_'+test_case.gsub(' ','_')+'_index.html">' if @pass_statuses.include?(status) && total>0
+      tc_link='<a href="cases/1_'+@fail_statuses.first+'_'+test_case.gsub(' ','_')+'_index.html">' if @fail_statuses.include?(status) && total>0
+      tc_link='<a href="cases/1_'+@not_run_statuses.first+'_'+test_case.gsub(' ','_')+'_index.html">' if @not_run_statuses.include?(status) && total>0
     else
       tc_link='<a href="'+result_page.to_i.to_s+'_chronological_total_run_index.html">'
       tc_link='<a href="1_reboot_index.html">' if status=="reboots" && total>0
       tc_link='<a href="1_crash_index.html">' if status=="crashes" && total>0
-      tc_link='<a href="'+result_page.to_i.to_s+'_chronological_total_run_index.html#'+test_case.gsub(' ','_')+'_' + @pass_statuses.first + '">' if @pass_statuses.include?(status) && total>0
-      tc_link='<a href="'+result_page.to_i.to_s+'_chronological_total_run_index.html#'+test_case.gsub(' ','_')+'_' + @fail_statuses.first + '">' if @fail_statuses.include?(status) && total>0
-      tc_link='<a href="'+result_page.to_i.to_s+'_chronological_total_run_index.html#'+test_case.gsub(' ','_')+'_' + @not_run_statuses.first + '">' if @not_run_statuses.include?(status) && total>0
+      tc_link='<a href="1_'+@pass_statuses.first+'_'+test_case.gsub(' ','_')+'_index.html">' if @pass_statuses.include?(status) && total>0
+      tc_link='<a href="1_'+@fail_statuses.first+'_'+test_case.gsub(' ','_')+'_index.html">' if @fail_statuses.include?(status) && total>0
+      tc_link='<a href="1_'+@not_run_statuses.first+'_'+test_case.gsub(' ','_')+'_index.html">' if @not_run_statuses.include?(status) && total>0
     end
     tc_link
 
