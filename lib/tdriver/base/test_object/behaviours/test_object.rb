@@ -485,6 +485,9 @@ module MobyBehaviour
           # compare new environment value with previous 
           if @env != previous_environment
 
+            # remove cached behaviour module 
+            MobyBase::BehaviourFactory.instance.reset_modules_cache
+
             # reapply behaviours to test object if environment value has changed
             MobyBase::BehaviourFactory.instance.apply_behaviour!(
 
