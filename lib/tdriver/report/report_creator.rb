@@ -65,6 +65,7 @@ module TDriverReportCreator
         $tdriver_reporter.update_test_case_summary_pages('failed')
         $tdriver_reporter.update_test_case_summary_pages('not run')
         $tdriver_reporter.update_test_case_summary_pages('statistics')
+        $tdriver_reporter.group_results_by_test_case()
         $tdriver_reporter.create_csv if MobyUtil::Parameter[ :create_run_table_csv, false ]=='true'
         $new_junit_xml_results.create_junit_xml()
         #$tdriver_reporter.delete_result_storage()
@@ -160,7 +161,6 @@ module TDriverReportCreator
       $new_test_case.test_case_total_data_received
     )
     
-    $tdriver_reporter.update_test_case_summary_page(current_status,false,"Test: #{test_case_name} Result: #{current_status}",test_case_name)
     
     $tdriver_reporter.set_end_time(Time.now)
     $tdriver_reporter.set_total_run(1)
@@ -177,6 +177,7 @@ module TDriverReportCreator
             $tdriver_reporter.update_test_case_summary_pages('failed')
             $tdriver_reporter.update_test_case_summary_pages('not run')
             $tdriver_reporter.update_test_case_summary_pages('statistics')
+            $tdriver_reporter.group_results_by_test_case()
             $new_junit_xml_results.create_junit_xml()
             #tdriver_log_page $tdriver_reporter.update_tdriver_log_page()
             #ML: Update summary every 10 seconds improves performance during execution
