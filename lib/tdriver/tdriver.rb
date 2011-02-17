@@ -57,7 +57,7 @@ module TDriver
 	# ArgumentError:: SUT type not defined
 	# ArgumentError:: SUT type '%s' not supported
 	# ArgumentError:: Sut id not given
-	# MobyUtil::ParameterFileNotFoundError:: if paramter file 'tdriver_home'/tdriver_parameters.xml is not found
+	# MobyUtil::ParameterFileNotFoundError:: if paramter file (tdriver_parameters.xml in TDriver home directory) is not found
 	# === returns
 	# Object:: Object that SutFactory returns 
 	# === example
@@ -143,6 +143,9 @@ end # TDriver
 
 # enable logging engine
 $logger.enable_logging
+
+# initialize parameters
+$parameters.init
 
 # initialization done, everything is ready
 $TDRIVER_INITIALIZED = true

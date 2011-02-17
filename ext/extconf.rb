@@ -17,7 +17,7 @@
 ## 
 ############################################################################
 
-require File.join( File.dirname(__FILE__), '../lib/tdriver/util/loader' )
+require File.join( File.dirname(__FILE__), '../lib/tdriver/util/loader.rb' )
 
 MobyUtil::GemHelper.install( MobyUtil::FileHelper.tdriver_home ){ | tdriver_home_folder |
 

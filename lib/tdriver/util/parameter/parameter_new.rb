@@ -830,6 +830,3 @@ $parameters = MobyUtil::Parameter
 
 # set global variable pointing to parameter API class
 $parameters_api = MobyUtil::ParameterUserAPI
-
-# initialize parameters
-$parameters.init
