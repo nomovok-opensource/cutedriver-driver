@@ -331,7 +331,7 @@ module MobyBehaviour
     # == description
     # Method for executing sut specific setup method
     # == returns
-    # The result of the executed setup method
+    # -
     #  description: -
     #  example: -
     # == exceptions
@@ -359,7 +359,7 @@ module MobyBehaviour
     # == description
     # Method for executing sut specific teardown method
     # == returns
-    # The result of the executed teardown method
+    # -
     #  description: -
     #  example: -
     # == exceptions
