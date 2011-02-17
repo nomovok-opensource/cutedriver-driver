@@ -47,24 +47,24 @@ module MobyBehaviour
     # == nodoc
     attr_accessor(
 
-        :dump_count,                # number of UI dump requests done to current SUT
-        :current_application_id,    # id of the current appication if set
-        :input,                     # the input method used for interacting with this sut as a symbol, eg. :key or :touch.
-        :refresh_tries,             # number of retries for ui dump on error case
-        :refresh_timeout           # timeout between timeout retry
+      :dump_count,                # number of UI dump requests done to current SUT
+      :current_application_id,    # id of the current appication if set
+      :input,                     # the input method used for interacting with this sut as a symbol, eg. :key or :touch.
+      :refresh_tries,             # number of retries for ui dump on error case
+      :refresh_timeout           # timeout between timeout retry
 
     )
 
     # == nodoc
     attr_reader(
 
-        :xml_data,      # sut xml_data
-        :x_path,        # x_path pattern for xml_data
-        :ui_type,       # type of the UI used on the sut, ie. s60, qt, windows
-        :ui_version,    # version of the ui used on the sut, ie 3.2.3
-        :frozen,        # flag that tells if the ui dump getting is disabled
-        :xml_data_crc,  # crc of the previous ui state message
-        :verify_blocks  # verify blocks              
+      :xml_data,      # sut xml_data
+      :x_path,        # x_path pattern for xml_data
+      :ui_type,       # type of the UI used on the sut, ie. s60, qt, windows
+      :ui_version,    # version of the ui used on the sut, ie 3.2.3
+      :frozen,        # flag that tells if the ui dump getting is disabled
+      :xml_data_crc,  # crc of the previous ui state message
+      :verify_blocks  # verify blocks
 
     )
 
@@ -324,6 +324,57 @@ module MobyBehaviour
 
       # return child test object
       child_test_object
+
+    end
+
+
+    # == description
+    # Method for executing sut specific setup method
+    # == returns
+    # The result of the executed setup method
+    #  description: -
+    #  example: -
+    # == exceptions
+    # Raises the exceptions caused by the setup method
+    #  description: Any exception thrown by the setup method
+    def setup
+
+      if self.parameter[ :sut_setup, nil ]
+
+        require self.parameter[ :sut_setup ]        
+
+        TDriver.logger.behaviour "PASS;sut.setup method found"
+
+        self.setup
+
+        TDriver.logger.behaviour "PASS;sut.setup executed"
+
+      end
+
+    end
+
+    # == description
+    # Method for executing sut specific teardown method
+    # == returns
+    # The result of the executed teardown method
+    #  description: -
+    #  example: -
+    # == exceptions
+    # Raises the exceptions caused by the teardown method
+    #  description: Any exception thrown by the teardown method
+    def teardown
+
+      if self.parameter[ :sut_teardown, nil ]
+
+        require self.parameter[ :sut_teardown ]
+
+        TDriver.logger.behaviour "PASS;sut.teardown method found"
+
+        self.teardown
+
+        TDriver.logger.behaviour "PASS;sut.teardown executed"
+
+      end
 
     end
 
@@ -694,7 +745,7 @@ module MobyBehaviour
 
         end
 
-      # raise behaviour error if any exception is raised
+        # raise behaviour error if any exception is raised
       rescue # Exception => e
 
         TDriver.logger.behaviour "FAIL;Failed to launch application.;#{ id.to_s };sut;{};run;#{ target.kind_of?( Hash ) ? target.inspect : target.class.to_s }"
@@ -825,95 +876,95 @@ module MobyBehaviour
 
     end
 
-  # == description
-  # Wrapper function to return translated string for this SUT to read the values from localisation database.
-  #
-  # == arguments
-  # logical_name
-  #  String
-  #   description: Logical name (LNAME) of the item to be translated. If prefix for User Information or Operator Data are used then the appropiate retrieve methods will be called
-  #   example: "txt_button_ok"
-  #  Symbol
-  #   description: Symbol form of the logical name (LNAME) of the item to be translated.
-  #   example: :txt_button_ok
-  #
-  # file_name
-  #  String
-  #   description: Optional FNAME search argument for the translation
-  #   example: "agenda"
-  #   default: nil
-  #
-  # plurality
-  #  String
-  #   description: Optional PLURALITY search argument for the translation
-  #   example: "a" or "singular"
-  #  default: nil
-  #
-  # numerus
-  #  String
-  #   description: Optional numeral replacement of an '%Ln | %1' tag on the translated string
-  #   example: "1"
-  #   default: nil
-  #  Integer
-  #   description: Optional numeral replacement of an '%Ln | %1' tag on the translated string
-  #   example: 1
-  #  Array
-  #   description: Optional numeral replacements for multiple '%L1 | %1, %L2 | %2, ...' tags on the translated string
-  #   example: [ 3, 2]
-  # 
-  # lengthvariant
-  #  String
-  #   description: Optional argument to specify a length variant with its priority number (1-9). Translations with no length variants are considered a variant of priority "1". The default 'nil' value will retrieve all variants available.
-  #   example: "1"
-  #   default: nil
-  #
-  # == returns
-  # String
-  #  description: Translation matching the logical_name
-  #  example: "Ok"
-  # Array
-  #  description: If multiple translations have been found for the search conditions an Array with all Strings be returned
-  #  example: ["Ok", "OK"]
-  # 
-  # == exceptions
-  # LanguageNotFoundError
-  #  description: In case language is not found
-  #
-  # LogicalNameNotFoundError
-  #  description: In case no logical name is not found for current language
-  #
-  # SqlError
-  #  description: In case there are problems with the database connectivity
-  #
-  def translate( logical_name, file_name = nil, plurality = nil, numerus = nil, lengthvariant = nil )
+    # == description
+    # Wrapper function to return translated string for this SUT to read the values from localisation database.
+    #
+    # == arguments
+    # logical_name
+    #  String
+    #   description: Logical name (LNAME) of the item to be translated. If prefix for User Information or Operator Data are used then the appropiate retrieve methods will be called
+    #   example: "txt_button_ok"
+    #  Symbol
+    #   description: Symbol form of the logical name (LNAME) of the item to be translated.
+    #   example: :txt_button_ok
+    #
+    # file_name
+    #  String
+    #   description: Optional FNAME search argument for the translation
+    #   example: "agenda"
+    #   default: nil
+    #
+    # plurality
+    #  String
+    #   description: Optional PLURALITY search argument for the translation
+    #   example: "a" or "singular"
+    #  default: nil
+    #
+    # numerus
+    #  String
+    #   description: Optional numeral replacement of an '%Ln | %1' tag on the translated string
+    #   example: "1"
+    #   default: nil
+    #  Integer
+    #   description: Optional numeral replacement of an '%Ln | %1' tag on the translated string
+    #   example: 1
+    #  Array
+    #   description: Optional numeral replacements for multiple '%L1 | %1, %L2 | %2, ...' tags on the translated string
+    #   example: [ 3, 2]
+    #
+    # lengthvariant
+    #  String
+    #   description: Optional argument to specify a length variant with its priority number (1-9). Translations with no length variants are considered a variant of priority "1". The default 'nil' value will retrieve all variants available.
+    #   example: "1"
+    #   default: nil
+    #
+    # == returns
+    # String
+    #  description: Translation matching the logical_name
+    #  example: "Ok"
+    # Array
+    #  description: If multiple translations have been found for the search conditions an Array with all Strings be returned
+    #  example: ["Ok", "OK"]
+    #
+    # == exceptions
+    # LanguageNotFoundError
+    #  description: In case language is not found
+    #
+    # LogicalNameNotFoundError
+    #  description: In case no logical name is not found for current language
+    #
+    # SqlError
+    #  description: In case there are problems with the database connectivity
+    #
+    def translate( logical_name, file_name = nil, plurality = nil, numerus = nil, lengthvariant = nil )
 
-    Kernel::raise LogicalNameNotFoundError, "Logical name is nil" if logical_name.nil?
+      Kernel::raise LogicalNameNotFoundError, "Logical name is nil" if logical_name.nil?
 
-    translation_type = "localisation"
+      translation_type = "localisation"
     
-    # Check for User Information prefix( "uif_...")
-    $parameters[ :user_data_logical_string_identifier, 'uif_' ].split('|').each do |identifier|
+      # Check for User Information prefix( "uif_...")
+      $parameters[ :user_data_logical_string_identifier, 'uif_' ].split('|').each do |identifier|
 
-      if logical_name.to_s.index(identifier)==0
+        if logical_name.to_s.index(identifier)==0
 
-        translation_type="user_data"
+          translation_type="user_data"
+
+        end
 
       end
-
-    end
     
-    # Check for Operator Data prefix( "operator_...")
-    $parameters[ :operator_data_logical_string_identifier, 'operator_' ].split('|').each do |identifier|
+      # Check for Operator Data prefix( "operator_...")
+      $parameters[ :operator_data_logical_string_identifier, 'operator_' ].split('|').each do |identifier|
 
-      if logical_name.to_s.index(identifier)==0
+        if logical_name.to_s.index(identifier)==0
 
-        translation_type="operator_data"
+          translation_type="operator_data"
+
+        end
 
       end
-
-    end
     
-    case translation_type
+      case translation_type
 
       when "user_data"
 
@@ -984,134 +1035,134 @@ module MobyBehaviour
 
         translation
 
+      end
+
     end
-
-  end
   
-  # == nodoc
-  # == description
-  # Translates all symbol values in hash using SUT's translate method.
-  #
-  # == arguments
-  # hash
-  #  Hash
-  #   description: containing key and value pairs. The hash will get modified if symbols are found from values
-  #   example: {:text=>:translate_me}
-  #
-  # == returns
-  # Hash
-  #  description: Translated hash
-  #  example: {:text=>'translated_text'}
-  # == exceptions
-  # LanguageNotFoundError
-  #   description: In case of language is not found
-  #
-  # LogicalNameNotFoundError
-  #  description: In case of logical name is not found for current language
-  #
-  # MySqlConnectError
-  #  description: In case problems with the db connectivity
-  #
-  def translate_values!( hash, file_name = nil, plurality = nil, numerus = nil, lengthvariant = nil )
+    # == nodoc
+    # == description
+    # Translates all symbol values in hash using SUT's translate method.
+    #
+    # == arguments
+    # hash
+    #  Hash
+    #   description: containing key and value pairs. The hash will get modified if symbols are found from values
+    #   example: {:text=>:translate_me}
+    #
+    # == returns
+    # Hash
+    #  description: Translated hash
+    #  example: {:text=>'translated_text'}
+    # == exceptions
+    # LanguageNotFoundError
+    #   description: In case of language is not found
+    #
+    # LogicalNameNotFoundError
+    #  description: In case of logical name is not found for current language
+    #
+    # MySqlConnectError
+    #  description: In case problems with the db connectivity
+    #
+    def translate_values!( hash, file_name = nil, plurality = nil, numerus = nil, lengthvariant = nil )
 
-    hash.each_pair do | _key, _value |
+      hash.each_pair do | _key, _value |
 
-      next if [ :name, :type, :id ].include?( _key )
+        next if [ :name, :type, :id ].include?( _key )
 
-      hash[ _key ] = translate( _value, file_name, plurality, numerus, lengthvariant ) if _value.kind_of?( Symbol )  
+        hash[ _key ] = translate( _value, file_name, plurality, numerus, lengthvariant ) if _value.kind_of?( Symbol )
 
-    end unless hash.nil?
+      end unless hash.nil?
 
-  end
+    end
     
-  # == description
-  # Wrapper function to retrieve user information for this SUT from the user information database.
-  #
-  # == arguments
-  # user_data_lname
-  #  String
-  #   description: Logical name (LNAME) of the user information item to be retrieved.
-  #   example: "uif_first_name"
-  #  Symbol
-  #   description: Symbol form of the logical name (LNAME) of the user information item to be retrieved.
-  #   example: :uif_first_name
-  #
-  # == returns
-  # String
-  #  description: User data string
-  #  example: "Ivan"
-  # Array
-  #  description: Array of Strings when multiple user data strings found.
-  #  example: ["Ivan", "Manolo"]
-  # 
-  # == exceptions
-  # UserDataNotFoundError
-  #  description: In case the desired user data is not found
-  #
-  # UserDataColumnNotFoundError
-  #  description: In case the desired data column name to be used for the output is not found
-  #
-  # SqlError
-  #  description: In case there are problems with the database connectivity
-  #
-  def get_user_information( user_data_lname )
+    # == description
+    # Wrapper function to retrieve user information for this SUT from the user information database.
+    #
+    # == arguments
+    # user_data_lname
+    #  String
+    #   description: Logical name (LNAME) of the user information item to be retrieved.
+    #   example: "uif_first_name"
+    #  Symbol
+    #   description: Symbol form of the logical name (LNAME) of the user information item to be retrieved.
+    #   example: :uif_first_name
+    #
+    # == returns
+    # String
+    #  description: User data string
+    #  example: "Ivan"
+    # Array
+    #  description: Array of Strings when multiple user data strings found.
+    #  example: ["Ivan", "Manolo"]
+    #
+    # == exceptions
+    # UserDataNotFoundError
+    #  description: In case the desired user data is not found
+    #
+    # UserDataColumnNotFoundError
+    #  description: In case the desired data column name to be used for the output is not found
+    #
+    # SqlError
+    #  description: In case there are problems with the database connectivity
+    #
+    def get_user_information( user_data_lname )
 
-    MobyUtil::UserData.retrieve( 
+      MobyUtil::UserData.retrieve(
       
-      user_data_lname, 
+        user_data_lname,
       
-      # language
-      $parameters[ self.id ][ :language ],
+        # language
+        $parameters[ self.id ][ :language ],
         
-      # table name
-      $parameters[ self.id ][ :user_data_server_database_tablename ] 
+        # table name
+        $parameters[ self.id ][ :user_data_server_database_tablename ]
       
-    )
+      )
 
-  end
+    end
   
-  # == description
-  # Wrapper function to retrieve operator data for this SUT from the operator data database.
-  #
-  # == arguments
-  # operator_data_lname
-  #  String
-  #   description: Logical name (LNAME) of the operator data item to be retrieved.
-  #   example: "operator_welcome_message"
-  #  Symbol
-  #   description: Symbol form of the logical name (LNAME) of the operator data item to be retrieved.
-  #   example: :operator_welcome_message
-  #
-  # == returns
-  # String
-  #  description: User data string
-  #  example: "Welcome to Orange"
-  # 
-  # == exceptions
-  # OperatorDataNotFoundError
-  #  description: In case the desired operator data is not found
-  #
-  # OperatorDataColumnNotFoundError
-  #  description: In case the desired data column name to be used for the output is not found
-  #
-  # SqlError
-  #  description: In case there are problems with the database connectivity
-  #
-  def get_operator_data( operator_data_lname )
+    # == description
+    # Wrapper function to retrieve operator data for this SUT from the operator data database.
+    #
+    # == arguments
+    # operator_data_lname
+    #  String
+    #   description: Logical name (LNAME) of the operator data item to be retrieved.
+    #   example: "operator_welcome_message"
+    #  Symbol
+    #   description: Symbol form of the logical name (LNAME) of the operator data item to be retrieved.
+    #   example: :operator_welcome_message
+    #
+    # == returns
+    # String
+    #  description: User data string
+    #  example: "Welcome to Orange"
+    #
+    # == exceptions
+    # OperatorDataNotFoundError
+    #  description: In case the desired operator data is not found
+    #
+    # OperatorDataColumnNotFoundError
+    #  description: In case the desired data column name to be used for the output is not found
+    #
+    # SqlError
+    #  description: In case there are problems with the database connectivity
+    #
+    def get_operator_data( operator_data_lname )
 
-    MobyUtil::OperatorData.retrieve( 
+      MobyUtil::OperatorData.retrieve(
 
-      operator_data_lname, 
+        operator_data_lname,
 
-      # operator 
-      $parameters[ self.id ][ :operator_selected ],
+        # operator
+        $parameters[ self.id ][ :operator_selected ],
 
-      # table name 
-      $parameters[ self.id ][ :operator_data_server_database_tablename ]
+        # table name
+        $parameters[ self.id ][ :operator_data_server_database_tablename ]
       
-    )
+      )
 
-  end
+    end
 
     # == nodoc
     # Function to update all children of current SUT
@@ -1227,7 +1278,7 @@ module MobyBehaviour
 
     end
 
-  private
+    private
 
     # TODO: document me
     def update_childs
@@ -1348,25 +1399,25 @@ module MobyBehaviour
 
               subdata =
                 MobyUtil::XML.parse_string( 
-                                           execute_command( 
-                                                           MobyCommand::Application.new(
-                                                                                        :State,
-                                                                                        nil,
-                                                                                        pid,
-                                                                                        self,
-                                                                                        nil,
-                                                                                        nil,
-                                                                                        nil,
-                                                                                        nil,
-                                                                                        {
-                                                                                          'x_parent_absolute' => x_prev,
-                                                                                          'y_parent_absolute' => y_prev,
-                                                                                          'embedded' => 'true',
-                                                                                          'parent_size' => winSize
-                                                                                        }
-                                                                                        )
-                                                           )[ 0 ]
-                                           )
+                execute_command(
+                  MobyCommand::Application.new(
+                    :State,
+                    nil,
+                    pid,
+                    self,
+                    nil,
+                    nil,
+                    nil,
+                    nil,
+                    {
+                      'x_parent_absolute' => x_prev,
+                      'y_parent_absolute' => y_prev,
+                      'embedded' => 'true',
+                      'parent_size' => winSize
+                    }
+                  )
+                )[ 0 ]
+              )
 
               child = subdata.root.xpath('//object')[0]
 
@@ -1494,7 +1545,7 @@ module MobyBehaviour
 
     end
 
-  public # deprecated
+    public # deprecated
 
     # == nodoc
     # function to get TestObject
