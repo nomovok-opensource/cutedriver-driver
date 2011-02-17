@@ -112,6 +112,14 @@ module MobyBase
     end
 
   end
+  
+  # TODO: document me
+  def reset_modules_cache
+  
+    # reset modules cache hash; needed if new behaviour plugins loaded later than when initializing TDriver/SUT
+    @@modules_cache.clear
+  
+  end
 
   def apply_behaviour!( rules = {} )
 
