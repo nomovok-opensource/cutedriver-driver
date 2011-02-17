@@ -341,7 +341,7 @@ module MobyBehaviour
 
       if self.parameter[ :sut_setup, nil ]
 
-        require self.parameter[ :sut_setup ]        
+        require MobyUtil::FileHelper.expand_path(self.parameter[ :sut_setup ])
 
         TDriver.logger.behaviour "PASS;sut.setup method found"
 
@@ -366,7 +366,7 @@ module MobyBehaviour
 
       if self.parameter[ :sut_teardown, nil ]
 
-        require self.parameter[ :sut_teardown ]
+        require MobyUtil::FileHelper.expand_path(self.parameter[ :sut_teardown ])
 
         TDriver.logger.behaviour "PASS;sut.teardown method found"
 
