@@ -335,8 +335,8 @@ module MobyBehaviour
     #  description: -
     #  example: -
     # == exceptions
-    # Raises the exceptions caused by the setup method
-    #  description: Any exception thrown by the setup method
+    # BehaviourError
+    #  description: If the implementation is missing for the method
     def setup
 
       if self.parameter[ :sut_setup, nil ]
@@ -348,7 +348,10 @@ module MobyBehaviour
         self.setup
 
         TDriver.logger.behaviour "PASS;sut.setup executed"
+      else
+        TDriver.logger.behaviour "FAIL;No method found for sut.setup"
 
+        Kernel::raise MobyBase::BehaviourError.new("Setup", "Failed to load sut.setup method check the :sut_setup parameter")
       end
 
     end
@@ -360,8 +363,8 @@ module MobyBehaviour
     #  description: -
     #  example: -
     # == exceptions
-    # Raises the exceptions caused by the teardown method
-    #  description: Any exception thrown by the teardown method
+    # BehaviourError
+    #  description: If the implementation is missing for the method
     def teardown
 
       if self.parameter[ :sut_teardown, nil ]
@@ -374,6 +377,10 @@ module MobyBehaviour
 
         TDriver.logger.behaviour "PASS;sut.teardown executed"
 
+      else
+        TDriver.logger.behaviour "FAIL;No method found for sut.teardown"
+
+        Kernel::raise MobyBase::BehaviourError.new("Teardown", "Failed to load sut.teardown method check the :sut_teardown parameter")
       end
 
     end
