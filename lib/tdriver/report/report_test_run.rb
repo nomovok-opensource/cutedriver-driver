@@ -478,6 +478,27 @@ module TDriverReportCreator
       return nil
     end
 
+    #This method generates the tdriver test run summary page grouped by test case
+    #
+    # === params
+    # nil
+    # === returns
+    # nil
+    # === raises
+    def group_results_by_test_case()
+      @all_cases_arr=read_result_storage('all')
+      created_grouped_test_result=[]
+      tc=[]
+      @all_cases_arr.each do |test_case|
+        #name, status
+        tc=[test_case[7],test_case[0]]
+        if !created_grouped_test_result.include?(tc)
+          update_test_case_summary_page(test_case[7],false,"Test: #{test_case[0]} Result: #{test_case[7]}",test_case[0])
+          created_grouped_test_result << tc
+        end
+      end      
+    end
+
     #This method updates the tdriver test run summary page
     #
     # === params
