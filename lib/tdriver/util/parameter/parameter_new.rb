@@ -371,7 +371,7 @@ module MobyUtil
               env = 'default' if env.empty?
 
               # store keymap as hash
-              value = { env.to_sym => value, :default_keymap => env.to_sym }
+              value = { env.to_sym => value, :all => value, :default_keymap => env.to_sym }
               
             when 'fixture'
 

@@ -30,7 +30,7 @@ module TDriver
       keycode_string = keycode.to_s
 
       # collect all loaded keymaps, exclude :default_keymap key from hash
-      keymaps = keymap_hash.keys.select{ | item | item != :default_keymap  } 
+      keymaps = keymap_hash.keys.select{ | item | ![ :default_keymap, :all ].include?( item ) } 
 
       begin
 
@@ -47,10 +47,26 @@ module TDriver
 
           end
 
-        end
+          # retrieve symbol from keymap
+          keymap_hash[ keymap ][ keycode ]
 
-        # retrieve symbol from keymap
-        keymap_hash[ keymap ][ keycode ]
+        else
+
+          begin
+
+            # try to retrieve from default keymap; raises exception if key not found
+            keymap_hash[ keymap ][ keycode ]
+
+          rescue 
+
+            # if we didn't find the key, let's try finding from mixed keymap; mixed keymap has all loaded keycodes
+            # keycodes are merged to existing hash when loading new keymap on top
+            # raises exception if key not found
+            keymap_hash[ :all ][ keycode ]
+
+          end
+
+        end
 
       rescue
 
