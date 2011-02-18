@@ -345,6 +345,33 @@ module MobyUtil
           name = attributes[ "name" ]
 
           case element.name
+
+            when 'keymap'
+
+              # use element name as parameter name ("keymap")
+              name = element.name
+
+              # read xml file from given location if defined - otherwise pass content as is
+              if attributes[ "xml_file" ]
+
+                # merge hash values (value type of hash)
+                value = process_file( attributes[ "xml_file" ] )
+
+              else
+
+                # use element content as value
+                value = process_element( element )
+
+              end
+
+              # retrieve environment attribute from xml
+              env = attributes[ 'env' ].to_s
+
+              # set environment to 'default' unless defined in xml element
+              env = 'default' if env.empty?
+
+              # store keymap as hash
+              value = { env.to_sym => value, :default_keymap => env.to_sym }
               
             when 'fixture'
 

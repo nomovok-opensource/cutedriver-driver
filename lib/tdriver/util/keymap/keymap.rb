@@ -21,7 +21,7 @@ module TDriver
 
   class KeymapUtilities
 
-    def self.fetch_symbol( keycode, keymap_hash )
+    def self.fetch_keycode( keycode, keymap_hash )
 
       # retrieve default keymap name from hash
       keymap = keymap_hash[ :default_keymap ]
@@ -49,12 +49,12 @@ module TDriver
 
         end
 
-        # retrieve symbol from default keymap
+        # retrieve symbol from keymap
         keymap_hash[ keymap ][ keycode ]
 
       rescue
 
-			  raise ArgumentError, "Scan code for #{ keycode.inspect } not defined in #{ keymap.inspect } keymap" # unless scancode.kind_of?( Fixnum )
+			  raise ArgumentError, "Scan code for #{ keycode.inspect } not defined in #{ keymap } keymap"
 
       end
 
