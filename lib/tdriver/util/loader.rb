@@ -62,7 +62,10 @@ require 'rubygems'
   'recorder/loader.rb', 
 
   # video capture/util modules
-  'video/loader.rb'
+  'video/loader.rb',
+
+  # keymap utility modules
+  'keymap/keymap.rb'
 
 ].each{ | filename |
 
