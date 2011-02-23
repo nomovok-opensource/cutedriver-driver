@@ -88,7 +88,7 @@ module TDriverErrorRecovery
         current_reconnect_attempt+=1
       end
     end
-    Kernel::raise BehaviourError.new("Error Recovery", "Error recovery failed after #{attempt_reconnects} recovry attemprs") if b_error_recovery_succesful==false
+    Kernel::raise BehaviourError.new("Error Recovery", "Error recovery failed after #{attempt_reconnects} recovery attempts") if b_error_recovery_succesful==false
   end
 
   # Reconnects the devices without ping
@@ -96,7 +96,7 @@ module TDriverErrorRecovery
   # === returns
   # === raises
   def reconnect_devices()
-    begin
+
       MobyBase::SUTFactory.instance.connected_suts.each do |sut_id, sut_attributes|
         suts=@recovery_settings.get_monitored_sut
         suts.each do |monitored_sut|
@@ -105,8 +105,7 @@ module TDriverErrorRecovery
           end
         end
       end
-    rescue
-    end
+
   end
 
   # Ping the current SUT by querying xml state
@@ -141,7 +140,6 @@ module TDriverErrorRecovery
   def ping_devices_and_reconnect()
     resetted=false
     MobyBase::SUTFactory.instance.connected_suts.each do |sut_id, sut_attributes|
-      begin
         suts=@recovery_settings.get_monitored_sut
         suts.each do |monitored_sut|
           if sut_id.to_s==monitored_sut.to_s
@@ -151,8 +149,6 @@ module TDriverErrorRecovery
             end
           end
         end
-      rescue
-      end
     end
     resetted
   end
