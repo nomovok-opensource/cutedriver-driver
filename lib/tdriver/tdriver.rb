@@ -141,11 +141,11 @@ module TDriver
 
 end # TDriver
 
-# enable logging engine
-$logger.enable_logging
-
 # initialize parameters
 $parameters.init
+
+# enable logging engine
+$logger.enable_logging
 
 # initialization done, everything is ready
 $TDRIVER_INITIALIZED = true

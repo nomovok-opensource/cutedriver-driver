@@ -395,6 +395,16 @@ module MobyUtil
 
               value = "" if value.nil?
 
+            when 'method'
+
+              # verify that name attribute is defined
+              name.not_blank( "No name defined for parameter with value #{ value }", SyntaxError )
+
+              # return value as is
+              #value.not_nil( "No value defined for parameter with name #{ name }", SyntaxError )
+
+              value = attributes[ "args" ]
+
             when 'sut'
 
               # use id as parameter name

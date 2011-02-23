@@ -357,7 +357,11 @@ module MobyBehaviour
           methods.each do |method|
             m=method[0].to_s
             args=method[1]
-            eval ("self.#{m}(:#{args.to_sym})")
+            if args.to_s == ""
+              eval("self.#{m}")
+            else
+              eval("self.#{m}(:#{args.to_sym})")
+            end
           end
           TDriver.logger.behaviour "PASS;sut.setup parameter methods executed"
         end
@@ -401,7 +405,11 @@ module MobyBehaviour
           methods.each do |method|
             m=method[0].to_s
             args=method[1]
-            eval ("self.#{m}(:#{args.to_sym})")
+            if args.to_s == ""
+              eval("self.#{m}")
+            else
+              eval("self.#{m}(:#{args.to_sym})")
+            end            
           end
           TDriver.logger.behaviour "PASS;sut.teardown parameter methods executed"
         end
