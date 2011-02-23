@@ -189,7 +189,7 @@ module MobyBehaviour
             if ( close_options[ :check_process ] == true ) 
 
               # the application did not close
-              raise MobyBase::VerificationError.new, "Verification of close failed. The application that was to be closed is still running." if matches.count > 0 if matches.count > 0 && (Time.now - start_time) >= timeout_time
+              raise MobyBase::VerificationError.new, "Verification of close failed. The application that was to be closed is still running." if matches.count > 0 && (Time.now - start_time) >= timeout_time
 
             elsif ( close_options[ :check_process ] == false )
 
