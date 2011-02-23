@@ -1,20 +1,20 @@
 ############################################################################
-## 
-## Copyright (C) 2010 Nokia Corporation and/or its subsidiary(-ies). 
-## All rights reserved. 
-## Contact: Nokia Corporation (testabilitydriver@nokia.com) 
-## 
-## This file is part of Testability Driver. 
-## 
-## If you have questions regarding the use of this file, please contact 
-## Nokia at testabilitydriver@nokia.com . 
-## 
-## This library is free software; you can redistribute it and/or 
-## modify it under the terms of the GNU Lesser General Public 
-## License version 2.1 as published by the Free Software Foundation 
-## and appearing in the file LICENSE.LGPL included in the packaging 
-## of this file. 
-## 
+##
+## Copyright (C) 2010 Nokia Corporation and/or its subsidiary(-ies).
+## All rights reserved.
+## Contact: Nokia Corporation (testabilitydriver@nokia.com)
+##
+## This file is part of Testability Driver.
+##
+## If you have questions regarding the use of this file, please contact
+## Nokia at testabilitydriver@nokia.com .
+##
+## This library is free software; you can redistribute it and/or
+## modify it under the terms of the GNU Lesser General Public
+## License version 2.1 as published by the Free Software Foundation
+## and appearing in the file LICENSE.LGPL included in the packaging
+## of this file.
+##
 ############################################################################
 
 module MobyBehaviour
@@ -108,7 +108,7 @@ module MobyBehaviour
     # == examples
     #  @sut.disconnect
     def received_data
-    
+
       @_sutController.received_bytes
 
     end
@@ -122,7 +122,7 @@ module MobyBehaviour
     # == examples
     #  @sut.sent_data
     def sent_data
-      
+
       @_sutController.sent_bytes
 
     end
@@ -130,7 +130,7 @@ module MobyBehaviour
     # == description
     # Function to disable taking UI dumps from target for a moment. This method might be deprecated in future release.\n
     # \n
-    # [b]NOTE:[/b] Remember to enable ui dumps again using unfreeze! 
+    # [b]NOTE:[/b] Remember to enable ui dumps again using unfreeze!
     # == returns
     # NilClass
     #  description: -
@@ -171,21 +171,21 @@ module MobyBehaviour
         warn("warning: SUT##{ __method__ } is not supported when use_find_objects optimization is enabled")
 
       else
-      
+
         @frozen = false
 
       end
 =end
 
       @frozen = false
-  
+
       nil
 
     end
 
     # == nodoc
     # == description
-    # Force to use user defined ui state (e.g. for debugging purposes). Freezes the SUT xml_data, until unfreezed or set to nil. 
+    # Force to use user defined ui state (e.g. for debugging purposes). Freezes the SUT xml_data, until unfreezed or set to nil.
     #
     # == arguments
     # xml
@@ -236,7 +236,7 @@ module MobyBehaviour
     end
 
 
-    # TODO: merge TestObject#child and SUT#child 
+    # TODO: merge TestObject#child and SUT#child
     # == description
     # Creates a child test object from this SUT. SUT object will be associated as child test objects parent.\n
     #
@@ -261,22 +261,22 @@ module MobyBehaviour
       #
       #  NOTICE: Please do not add anything unnessecery to this method, it might cause a major performance impact
       #
-            
+
       # verify attributes argument format
       attributes.check_type( Hash, "Wrong argument type $1 for attributes (expected $2)" )
-            
+
       # store original hash
       creation_hash = attributes.clone
 
       identification_directives = creation_hash.strip_dynamic_attributes!
 
-      # raise exception if wrong value type given for ;__logging 
-      identification_directives[ :__logging ].check_type( 
-      
-        [ TrueClass, FalseClass ], 
-        
+      # raise exception if wrong value type given for ;__logging
+      identification_directives[ :__logging ].check_type(
+
+        [ TrueClass, FalseClass ],
+
         "Wrong value type $1 for :__logging test object creation directive (expected $2)"
-        
+
       ) if identification_directives.has_key?( :__logging )
 
       # disable logging if requested, remove pair from creation_hash
@@ -289,10 +289,10 @@ module MobyBehaviour
 
           # current object as parent, can be either TestObject or SUT
           :parent => self,
-  
+
           # test object identification hash
           :object_attributes_hash => creation_hash,
-          
+
           :identification_directives => identification_directives
 
         )
@@ -339,20 +339,36 @@ module MobyBehaviour
     #  description: If the implementation is missing for the method
     def setup
 
-      if self.parameter[ :sut_setup, nil ]
+      if self.parameter[ :sut_setup, nil ] || self.parameter[ :setup, nil ]
 
-        require MobyUtil::FileHelper.expand_path(self.parameter[ :sut_setup ])
+        if self.parameter[ :sut_setup, nil ]
+          require MobyUtil::FileHelper.expand_path(self.parameter[ :sut_setup ])
 
-        TDriver.logger.behaviour "PASS;sut.setup method found"
+          TDriver.logger.behaviour "PASS;sut.setup method found"
 
-        self.setup
+          self.setup
 
-        TDriver.logger.behaviour "PASS;sut.setup executed"
+          TDriver.logger.behaviour "PASS;sut.setup executed"
+        end
+
+        if self.parameter[ :setup, nil ]
+          TDriver.logger.behaviour "PASS;sut.setup parameters found"
+          methods=self.parameter[ :setup ]
+          methods.each do |method|
+            m=method[0].to_s
+            args=method[1]
+            eval ("self.#{m}(:#{args.to_sym})")
+          end
+          TDriver.logger.behaviour "PASS;sut.setup parameter methods executed"
+        end
+
       else
-        TDriver.logger.behaviour "FAIL;No method found for sut.setup"
+        TDriver.logger.behaviour "FAIL;No methods or parameters found for sut.setup"
 
         Kernel::raise MobyBase::BehaviourError.new("Setup", "Failed to load sut.setup method check the :sut_setup parameter")
       end
+
+
 
     end
 
@@ -367,18 +383,31 @@ module MobyBehaviour
     #  description: If the implementation is missing for the method
     def teardown
 
-      if self.parameter[ :sut_teardown, nil ]
+      if self.parameter[ :sut_teardown, nil ] || self.parameter[ :teardown, nil ]
 
-        require MobyUtil::FileHelper.expand_path(self.parameter[ :sut_teardown ])
+        if self.parameter[ :sut_teardown, nil ]
+          require MobyUtil::FileHelper.expand_path(self.parameter[ :sut_teardown ])
 
-        TDriver.logger.behaviour "PASS;sut.teardown method found"
+          TDriver.logger.behaviour "PASS;sut.teardown method found"
 
-        self.teardown
+          self.teardown
 
-        TDriver.logger.behaviour "PASS;sut.teardown executed"
+          TDriver.logger.behaviour "PASS;sut.teardown executed"
+        end
+
+        if self.parameter[ :teardown, nil ]
+          TDriver.logger.behaviour "PASS;sut.teardown parameters found"
+          methods=self.parameter[ :teardown ]
+          methods.each do |method|
+            m=method[0].to_s
+            args=method[1]
+            eval ("self.#{m}(:#{args.to_sym})")
+          end
+          TDriver.logger.behaviour "PASS;sut.teardown parameter methods executed"
+        end
 
       else
-        TDriver.logger.behaviour "FAIL;No method found for sut.teardown"
+        TDriver.logger.behaviour "FAIL;No method or parameters found for sut.teardown"
 
         Kernel::raise MobyBase::BehaviourError.new("Teardown", "Failed to load sut.teardown method check the :sut_teardown parameter")
       end
@@ -427,7 +456,7 @@ module MobyBehaviour
     def application( attributes = {} )
 
       begin
-      
+
         attributes.check_type( Hash, "Wrong argument type $1 for attributes (expected $2)" )
 
         attributes[ :type ] = 'application'
@@ -436,16 +465,16 @@ module MobyBehaviour
 
         @current_application_id = nil if attributes[ :id ].nil?
 
-        # create test object and return it as result 
+        # create test object and return it as result
         test_object = child( attributes )
 
         # store parent application to test object
         test_object.instance_variable_set( :@parent_application, test_object )
 
         test_object
-        
+
       rescue
-      
+
         TDriver.logger.behaviour(
           "FAIL;Failed to find application.;#{ id.to_s };sut;{};application;#{ attributes.kind_of?( Hash ) ? attributes.inspect : attributes.class.to_s }"
         )
@@ -454,9 +483,9 @@ module MobyBehaviour
         Kernel::raise $!
 
       ensure
-      
+
         TDriver.logger.behaviour "PASS;Application found.;#{ id.to_s };sut;{};application;#{ attributes.inspect }" if $!.nil?
-      
+
       end
 
     end
@@ -467,7 +496,7 @@ module MobyBehaviour
     # == arguments
     # arguments
     #  Hash
-    #   description: 
+    #   description:
     #    Options to be used for screen capture. See [link="#capture_options_table"]Options table[/link] for valid keys
     #   example: ( :filename => "output.png" )
     #
@@ -480,7 +509,7 @@ module MobyBehaviour
     # == returns
     # NilClass
     #   description: -
-    #   example: -    
+    #   example: -
     #
     # == exceptions
     # TypeError
@@ -492,9 +521,9 @@ module MobyBehaviour
     # ArgumentError
     #  description: Wrong argument type %s for output filename (expected String)
     #
-    # ArgumentError 
+    # ArgumentError
     #   description: Output filename must not be empty string
-    # 
+    #
     def capture_screen( arguments )
 
       begin
@@ -520,13 +549,13 @@ module MobyBehaviour
         command.redraw = arguments[ :Redraw ] if arguments[ :Redraw ]
 
         # execute command and write binary to file
-        File.open( File.expand_path( arguments[ :filename ] ), 'wb:binary' ){ | file | 
+        File.open( File.expand_path( arguments[ :filename ] ), 'wb:binary' ){ | file |
 
-          file << execute_command( command ) 
+          file << execute_command( command )
 
         }
 
-      rescue 
+      rescue
 
         TDriver.logger.behaviour "FAIL;Failed to capture screen.;#{ id.to_s };sut;{};capture_screen;#{ arguments.kind_of?( Hash ) ? arguments.inspect : arguments.class.to_s }"
 
@@ -563,7 +592,7 @@ module MobyBehaviour
     #	|:try_attach|Boolean|If set to true, run will attempt to attach to an existing application with the given name or id. If not found the application will be launched as normal. If more than 1 are found then an exception is thrown|{:try_attach => true, :name => 'calculator'}|
     #	|:environment|String|Environment variables you want to pass to started process, passed as key value pairs separated by '=' and pairs separated by spaces |{ :environment => 'LC_ALL=en SPECIAL_VAR=value' }|
     #	|:events_to_listen|String|List of events you want to start listening to when application starts, passed as comma separated string.  You can retrieve a list of events fired by a test object by first enabling event listening and then using the get_events method. See methods enable_events, get_events and disable_events |{ :events_to_listen => 'Paint,Show' }|
-    #	|:signals_to_listen|String|List of signals you want to start listening to when application starts, passed as comma separated string. Check your application class what signals it can emit, or you can use the 'signal' fixture's 'list_signal' method to retrieve an xml string listing all the signals the object can emit.  E.g. xml = @object.fixture('signal', 'list_signals')|{ :signals_to_listen => 'applicationReady()' }|	
+    #	|:signals_to_listen|String|List of signals you want to start listening to when application starts, passed as comma separated string. Check your application class what signals it can emit, or you can use the 'signal' fixture's 'list_signal' method to retrieve an xml string listing all the signals the object can emit.  E.g. xml = @object.fixture('signal', 'list_signals')|{ :signals_to_listen => 'applicationReady()' }|
     #
     # == returns
     # TestObject
@@ -573,7 +602,7 @@ module MobyBehaviour
     # == exceptions
     # TypeError
     #  description: Wrong argument type %s for run method (expected Hash)
-    #  
+    #
     # ArgumentError
     #  description: Required key :uid or :name not found from argument hash
     #
@@ -659,7 +688,7 @@ module MobyBehaviour
           )
 
         end
-        
+
         # do not remove this, unless qttas server & plugin handles the syncronization between plugin registration & first ui state request
         # first ui dump is requested too early and target/server seems not be ready...
         #sleep 0.100
@@ -724,16 +753,16 @@ module MobyBehaviour
           #raise MobyBase::TestObjectNotFoundError if matches.count == 0
 
           # create application test object
-          foreground_app = @test_object_factory.make_test_object( 
-        
+          foreground_app = @test_object_factory.make_test_object(
+
             :parent => self,
-            
+
             :parent_application => nil,
-            
+
             :object_attributes_hash => expected_attributes,
-            
+
             :xml_object => matches.first
-        
+
           )
 
           # store application reference to test application; this will be passed to it's child test object(s)
@@ -799,7 +828,7 @@ module MobyBehaviour
     #  MobyCommand::KeySequence
     #   description: a KeySequence object of key symbols
     #   example: @sut.press_key( MobyCommand::KeySequence.new(:kDown).times!(3).append!(:kLeft) )
-    # 
+    #
     # == returns
     # NilClass
     #  description: -
@@ -821,7 +850,7 @@ module MobyBehaviour
 
         execute_command( sequence )
 
-      rescue 
+      rescue
 
         TDriver.logger.behaviour "FAIL;Failed to press key(s).;#{id.to_s};sut;{};press_key;#{ value }"
 
@@ -834,7 +863,7 @@ module MobyBehaviour
       nil
 
     end
-    
+
     # == description
     # Wrapper function to access sut specific parameters.
     # Parameters for each sut are stored in the parameters xml file under group tag with name attribute matching the SUT id
@@ -948,7 +977,7 @@ module MobyBehaviour
       Kernel::raise LogicalNameNotFoundError, "Logical name is nil" if logical_name.nil?
 
       translation_type = "localisation"
-    
+
       # Check for User Information prefix( "uif_...")
       $parameters[ :user_data_logical_string_identifier, 'uif_' ].split('|').each do |identifier|
 
@@ -959,7 +988,7 @@ module MobyBehaviour
         end
 
       end
-    
+
       # Check for Operator Data prefix( "operator_...")
       $parameters[ :operator_data_logical_string_identifier, 'operator_' ].split('|').each do |identifier|
 
@@ -970,21 +999,21 @@ module MobyBehaviour
         end
 
       end
-    
+
       case translation_type
 
       when "user_data"
 
         get_user_information( logical_name )
-    
+
       when "operator_data"
 
         get_operator_data( logical_name )
-    
+
       when "localisation"
 
         language=nil
-        
+
         if ( $parameters[ self.id ][:read_lang_from_app]=='true')
 
           #read localeName app
@@ -998,17 +1027,17 @@ module MobyBehaviour
           language=$parameters[ self.id ][ :language ]
 
         end
-        
+
         Kernel::raise LanguageNotFoundError, "Language cannot be determind to perform translation" if ( language.nil? || language.empty? )
 
-        translation = MobyUtil::Localisation.translation( 
-          logical_name, 
+        translation = MobyUtil::Localisation.translation(
+          logical_name,
           language,
-          $parameters[ self.id ][ :localisation_server_database_tablename ], 
-          file_name, 
-          plurality, 
-          lengthvariant 
-        )        
+          $parameters[ self.id ][ :localisation_server_database_tablename ],
+          file_name,
+          plurality,
+          lengthvariant
+        )
 
         if translation.kind_of? String and !numerus.nil?
 
@@ -1018,7 +1047,7 @@ module MobyBehaviour
 
           elsif numerus.kind_of? String or numerus.kind_of? Integer
 
-            translation.gsub!(/%(Ln|1)/){|s| numerus.to_s} 
+            translation.gsub!(/%(Ln|1)/){|s| numerus.to_s}
 
           end
 
@@ -1032,7 +1061,7 @@ module MobyBehaviour
 
             elsif numerus.kind_of? String or numerus.kind_of? Integer
 
-              trans.gsub!(/%(Ln|1)/){|s| numerus.to_s} 
+              trans.gsub!(/%(Ln|1)/){|s| numerus.to_s}
 
             end
 
@@ -1045,7 +1074,7 @@ module MobyBehaviour
       end
 
     end
-  
+
     # == nodoc
     # == description
     # Translates all symbol values in hash using SUT's translate method.
@@ -1081,7 +1110,7 @@ module MobyBehaviour
       end unless hash.nil?
 
     end
-    
+
     # == description
     # Wrapper function to retrieve user information for this SUT from the user information database.
     #
@@ -1115,19 +1144,19 @@ module MobyBehaviour
     def get_user_information( user_data_lname )
 
       MobyUtil::UserData.retrieve(
-      
+
         user_data_lname,
-      
+
         # language
         $parameters[ self.id ][ :language ],
-        
+
         # table name
         $parameters[ self.id ][ :user_data_server_database_tablename ]
-      
+
       )
 
     end
-  
+
     # == description
     # Wrapper function to retrieve operator data for this SUT from the operator data database.
     #
@@ -1166,7 +1195,7 @@ module MobyBehaviour
 
         # table name
         $parameters[ self.id ][ :operator_data_server_database_tablename ]
-      
+
       )
 
     end
@@ -1184,11 +1213,11 @@ module MobyBehaviour
 
       unless @childs_updated
 
-        @child_object_cache.each_object{ | test_object | 
+        @child_object_cache.each_object{ | test_object |
 
           test_object.send( :update, @xml_data )
 
-          #test_object.update( @xml_data ) 
+          #test_object.update( @xml_data )
 
         }
 
@@ -1197,10 +1226,10 @@ module MobyBehaviour
       @childs_updated = true
 
     end
-    
+
     # == nodoc
     def refresh( refresh_args = {}, creation_attributes = {} )
-            
+
       refresh_ui_dump( refresh_args, creation_attributes )
 
       # update childs only if ui state is new
@@ -1224,13 +1253,13 @@ module MobyBehaviour
     #
     # &block
     #  Proc
-    #   description: Code block to execute. 
+    #   description: Code block to execute.
     #   example: { @sut.xml_data.empty? == false }
     #
     # &block#sut
     #  MobyBase::SUT
-    #   description: 
-    #     Current SUT object is passed as block parameter. If the verify block is defined outside the scope of 
+    #   description:
+    #     Current SUT object is passed as block parameter. If the verify block is defined outside the scope of
     #     the current SUT (e.g. the SUT configuration file), this can be used to get a handle to the current SUT.
     #   example: -
     #
@@ -1238,7 +1267,7 @@ module MobyBehaviour
     # NilClass
     #  description: This method doesn't pass return value
     #  example: -
-    # 
+    #
     # == exceptions
     # MobyBase::VerificationError
     #  description: If verification failed
@@ -1266,21 +1295,21 @@ module MobyBehaviour
 
     # == nodoc
     def get_application_id
-     
+
       # retrieve application object from sut.xml_data
       matches, unused_rule = TDriver::TestObjectAdapter.get_objects( xml_data, { :type => 'application' }, true )
 
-      # retrieve id attribute if application test object found      
+      # retrieve id attribute if application test object found
       if matches.count > 0
 
         # return id attribute value
         TDriver::TestObjectAdapter.test_object_element_attribute( matches.first, 'id' )
-      
+
       else
-      
+
         # application not found
         '-1'
-      
+
       end
 
     end
@@ -1289,12 +1318,12 @@ module MobyBehaviour
 
     # TODO: document me
     def update_childs
-        
+
       # update childs only if ui state is new
       update if !@childs_updated
-    
+
     end
-  
+
     # == nodoc
     # Function asks for fresh xml ui data from the device and stores the result
     # == returns
@@ -1306,13 +1335,13 @@ module MobyBehaviour
       if !@frozen #&& ( @_previous_refresh.nil? || ( current_time - @_previous_refresh ).to_f >= @refresh_interval )
 
         use_find_objects = $parameters[ @id ][ :use_find_object, 'false' ] == 'true' and self.respond_to?( 'find_object' )
-        
+
         refresh_arguments = refresh_args.clone
 
         MobyUtil::Retryable.while(
           :tries => @refresh_tries,
           :interval => @refresh_interval,
-          :unless => [ MobyBase::ControllerNotFoundError, MobyBase::CommandNotFoundError, MobyBase::ApplicationNotAvailableError ] 
+          :unless => [ MobyBase::ControllerNotFoundError, MobyBase::CommandNotFoundError, MobyBase::ApplicationNotAvailableError ]
         ) {
 
           #use find_object if set on and the method exists
@@ -1322,44 +1351,44 @@ module MobyBehaviour
 
           else
 
-            app_command = MobyCommand::Application.new( 
-              :State, 
+            app_command = MobyCommand::Application.new(
+              :State,
               refresh_args[ :FullName ] || refresh_args[ :name ],
-              refresh_args[ :id ], 
-              self 
-            ) 
+              refresh_args[ :id ],
+              self
+            )
 
             # store in case needed
             app_command.refresh_args( refresh_args )
 
             new_xml_data, crc = execute_command( app_command )
 
-          end  
+          end
 
           @dump_count += 1
 
           @childs_updated = false
-          
+
           @xml_data = MobyUtil::XML.parse_string( new_xml_data ).root
 
           @_previous_refresh = Time.now
 
           # remove timestamp from the beginning of tasMessage, parse if not same as previous ui state
-          #if ( xml_data_no_timestamp = new_xml_data.split( ">", 2 ).last ) != @last_xml_data          
+          #if ( xml_data_no_timestamp = new_xml_data.split( ">", 2 ).last ) != @last_xml_data
           # @xml_data = MobyUtil::XML.parse_string( new_xml_data ).root
           # @last_xml_data = xml_data_no_timestamp
           #end
 
-          #if ( @xml_data_crc == 0 || crc != @xml_data_crc || crc.nil? )          
+          #if ( @xml_data_crc == 0 || crc != @xml_data_crc || crc.nil? )
           # @xml_data, @xml_data_crc, @childs_updated = MobyUtil::XML.parse_string( new_xml_data ).root, crc, false
           #end
 
-        } 
+        }
 
       end
 
       fetch_references( @xml_data )
-      
+
     end
 
     # TODO: document me
@@ -1396,7 +1425,7 @@ module MobyBehaviour
 
           # ref-ref parent does not know x coordinate, use the grandparent xys
           x_prev = x_abs.to_s unless x_abs.nil?
-          y_prev = y_abs.to_s unless y_abs.nil? 
+          y_prev = y_abs.to_s unless y_abs.nil?
 
           idx += 1
 
@@ -1405,7 +1434,7 @@ module MobyBehaviour
             begin
 
               subdata =
-                MobyUtil::XML.parse_string( 
+                MobyUtil::XML.parse_string(
                 execute_command(
                   MobyCommand::Application.new(
                     :State,
@@ -1431,7 +1460,7 @@ module MobyBehaviour
               # Remove the attribute with the pid retrieval was not successful.
               # (server returns the previous hit if not found)
               if child.attribute('id' ) != pid
-                
+
                 element.remove
 
               else
@@ -1530,10 +1559,10 @@ module MobyBehaviour
         @refresh_interval = $parameters[ @id ][ :refresh_interval, @refresh_interval ].to_f
 
       end
-    
+
       @last_xml_data = nil
-    
-      ruby_file = $parameters[ @id ][ :verify_blocks ] 
+
+      ruby_file = $parameters[ @id ][ :verify_blocks ]
 
       @verify_blocks = []
 
@@ -1566,7 +1595,7 @@ module MobyBehaviour
       child object_id
 
     end
-    
+
     # == nodoc
     #TODO: Update documentation
     #TODO: Is this function deprecated? (see SUT#refresh_ui_dump)
@@ -1577,7 +1606,7 @@ module MobyBehaviour
     # == raises
     # someException:: If Dump does not conform to the tasMessage schema error is raised
     def get_ui_dump( refresh_args = {} )
-    
+
       #$stderr.puts "warning: SUT#get_ui_dump is deprecated, please use SUT#refresh_ui_dump instead."
 
       refresh_ui_dump refresh_args, {}
@@ -1588,5 +1617,5 @@ module MobyBehaviour
     TDriver::Hooking.hook_methods( self ) if defined?( TDriver::Hooking )
 
   end # SUT
-  
+
 end # MobyBehaviour
