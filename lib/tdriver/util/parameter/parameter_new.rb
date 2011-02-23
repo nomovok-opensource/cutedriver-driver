@@ -857,6 +857,3 @@ $parameters = MobyUtil::Parameter
 
 # set global variable pointing to parameter API class
 $parameters_api = MobyUtil::ParameterUserAPI
-
-#Without this behaviour logging will not work
-$parameters.init if Gem.available?('testability-driver')
