@@ -162,7 +162,8 @@ module MobyBehaviour
         end
 
         # Disable logging
-        $logger.enabled = false if ( original_logger_state = $logger.enabled )
+        original_logger_state = $logger.enabled
+        $logger.enabled = false
 
         # verify close results
         # store start time
