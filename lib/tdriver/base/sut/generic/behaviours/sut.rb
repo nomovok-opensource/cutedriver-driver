@@ -409,7 +409,7 @@ module MobyBehaviour
               eval("self.#{m}")
             else
               eval("self.#{m}(:#{args.to_sym})")
-            end            
+            end
           end
           TDriver.logger.behaviour "PASS;sut.teardown parameter methods executed"
         end
@@ -712,6 +712,8 @@ module MobyBehaviour
         error_details = target[ :name ].nil? ? "" : "name: " << target[ :name ].to_s
         error_details << ( error_details.empty? ? "" : ", ") << "id: " << target[ :uid ].to_s if !target[ :uid ].nil?
 
+        app_name=target[ :name ].nil? ? "" : "name: " << target[ :name ].to_s
+
         if( !expected_attributes[ :FullName ].nil? )
 
           if( expected_attributes[ :FullName ].include?('/') )
@@ -735,30 +737,43 @@ module MobyBehaviour
           end
 
           expected_attributes.delete( :FullName )
+          expected_attributes.delete( :name )
 
         end
 
         begin
+          timeout_time=$parameters[ @id ][ :application_synchronization_timeout, '5' ].to_f
+          retryinterval=$parameters[ @id ][ :application_synchronization_retry_interval, '0.5' ].to_f
 
-          # verify that application is launched and application test object is found from xml
-          self.wait_child(
+          MobyUtil::Retryable.until(
+            :timeout => timeout_time,
+            :interval => retryinterval,
+            :exception => MobyBase::ApplicationNotAvailableError) {
+            # verify that application is launched and application test object is found from xml
+            expected_attributes.delete( :name )
 
-            # attributes to identify application object
-            expected_attributes,
+            self.wait_child(
 
-            # timeout to for application synchronization
-            $parameters[ @id ][ :application_synchronization_timeout, '5' ].to_f,
+              # attributes to identify application object
+              expected_attributes,
 
-            # wait retry interval and try again if application was not found
-            $parameters[ @id ][ :application_synchronization_retry_interval, '0.5' ].to_f
+              # timeout to for application synchronization
+              timeout_time,
 
-          )
+              # wait retry interval and try again if application was not found
+              retryinterval
 
-          # retrieve application object element from sut.xml_data
-          matches, unused_rule = TDriver::TestObjectAdapter.get_objects( xml_data, expected_attributes, true )
+            )
 
-          # raise exception if application element was not found; this shouldn't ever happen?
-          #raise MobyBase::TestObjectNotFoundError if matches.count == 0
+            expected_attributes[ :name ] = app_name
+            # retrieve application object element from sut.xml_data
+
+            @@matches, unused_rule = TDriver::TestObjectAdapter.get_objects( xml_data, expected_attributes, true )
+
+            # raise exception if application element was not found; this shouldn't ever happen?
+            raise MobyBase::ApplicationNotAvailableError if @@matches.count == 0
+
+          }
 
           # create application test object
           foreground_app = @test_object_factory.make_test_object(
@@ -769,7 +784,7 @@ module MobyBehaviour
 
             :object_attributes_hash => expected_attributes,
 
-            :xml_object => matches.first
+            :xml_object => @@matches.first
 
           )
 
