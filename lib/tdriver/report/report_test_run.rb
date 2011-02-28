@@ -335,7 +335,7 @@ module TDriverReportCreator
     # === raises
     def get_not_run_cases_arr()
       #@not_run_cases_arr
-      read_result_storage('not run')
+      read_result_storage('not_run')
     end
     #This method gets the passed cases name array
     #
@@ -1117,11 +1117,21 @@ module TDriverReportCreator
     # === raises
     def update_test_case_summary_page(status,rewrite=false,title="",test_case_name=nil)
       @cases_arr=Array.new
+      search_case = nil
+	  if @pass_statuses.include?(status)	
+	    search_case = "passed"
+	  elsif @fail_statuses.include?(status)
+		search_case = "failed"
+	  elsif @not_run_statuses.include?(status)
+		search_case = "not_run"
+	  else
+	    search_case = status
+	  end
       status=status.gsub(' ','_')
       if test_case_name
-        @cases_arr=read_result_storage(status,test_case_name)
+        @cases_arr=read_result_storage(search_case,test_case_name)
       else
-        @cases_arr=read_result_storage(status)
+        @cases_arr=read_result_storage(search_case)
       end
       splitted_arr=Array.new
       splitted_arr=split_array(@cases_arr,@pages.to_i)

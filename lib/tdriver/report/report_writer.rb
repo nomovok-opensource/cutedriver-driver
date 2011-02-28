@@ -905,8 +905,7 @@ display: block;
   end
   def write_test_case_summary_body(page,status,tc_arr,chronological_page=nil,report_page=nil,test_case_name=nil)
     html_body=Array.new
-    case status
-    when 'passed'
+    if @pass_statuses.include?(status) || status == "passed"
       title='<div class="page_title"><center><h1>Passed</h1></center></div>'<<
         '<div class="summary_passed">' <<
         '<form action="save_total_run_results" >'
@@ -920,7 +919,7 @@ display: block;
       html_body << '<form action="save_results_to" ><input type="submit" name="save_results_to" value="Download report" /></form>' if @report_editable=='true'
       tdriver_group=nil
       html_result=nil
-    when 'failed'
+    elsif @fail_statuses.include?(status) || status == "failed" 
       title='<div class="page_title"><center><h1>Failed</h1></center></div>'<<
         '<div class="summary_failed">' <<
         '<form action="save_total_run_results" >'
@@ -934,7 +933,7 @@ display: block;
       html_body << '<form action="save_results_to" ><input type="submit" name="save_results_to" value="Download report" /></form>' if @report_editable=='true'
       tdriver_group=nil
       html_result=nil
-    when 'not_run'
+   elsif @not_run_statuses.include?(status) || status == "not_run"
       title='<div class="page_title"><center><h1>Not run</h1></center></div>'<<
         '<div class="summary_not_run">' <<
         '<form action="save_total_run_results" >'
@@ -948,6 +947,8 @@ display: block;
       html_body << '<form action="save_results_to" ><input type="submit" name="save_results_to" value="Download report" /></form>' if @report_editable=='true'
       tdriver_group=nil
       html_result=nil
+    else
+	case status
     when 'crash'
       title='<div class="page_title"><center><h1>Crash</h1></center></div>'<<
         '<div class="summary_crash">' <<
@@ -1022,7 +1023,9 @@ display: block;
       tdriver_group=nil
       chronological_html_result=nil
       chronological_html_body=nil
-    end
+    end # case
+	end # if
+	
     html_body << '</div>'
     File.open(page, 'a') do |f2|
       f2.puts html_body
@@ -1032,15 +1035,15 @@ display: block;
   end
 
   def write_summary_body(page,start_time,end_time,run_time,total_run,total_passed,total_failed,total_not_run,total_crash_files,total_device_resets,summary_arr=nil)
-    fail_rate=0
-    pass_rate=0
-    if total_run.to_i > 0
+    fail_rate="0"
+    pass_rate="0"
+    if total_run.to_i > total_not_run.to_i
       begin
         fail_rate=(total_failed.to_f/(total_run.to_f-total_not_run.to_f))*100
         pass_rate=(total_passed.to_f/(total_run.to_f-total_not_run.to_f))*100
         fail_rate="%0.2f" % fail_rate
         pass_rate="%0.2f" % pass_rate
-      rescue
+      rescue # Note that 0.0/0.0 does result in NaN, it does not cause an exception
         fail_rate="0"
         pass_rate="0"
       end

@@ -44,7 +44,7 @@ class ReportCombine
 
       @total_passed=read_result_storage('passed').count
       @total_failed=read_result_storage('failed').count
-      @total_not_run=read_result_storage('not run').count
+      @total_not_run=read_result_storage('not_run').count
       @total_run=read_result_storage('all').count
       
       $test_case_run_index+=executed_tests.count.to_i
