@@ -111,7 +111,6 @@
   <template name="logging" inherits="error_logging">
 
     <!-- 
-
       Logging levels:
       0 = DISABLED    No logging done (default)
       1 = DEBUG  Debug level logging
@@ -120,23 +119,18 @@
       3 = WARNING     Warnings and all errors (not implemented)
       4 = ERROR       All errors (not implemented)
       5 = FATAL       Only fatal errors (not implemented)
-
     -->
-
+    
     <parameter name="logging_level" value="0" />
-
     <parameter name="logging_outputter_enabled" value="false" />
-
     <!-- default path: /logs/testability/tdriver, windows: logfiles/ under TDriver home folder -->
     <parameter name="logging_outputter_path" value="/logs/testability/tdriver" windows="logfiles/" /> 
-
     <parameter name="logging_outputter_unique_filename" value="false" />
     <parameter name="logging_outputter_append" value="false" />
-
     <parameter name="logging_include_behaviour_info" value="false" />
-
     <!-- pattern macros: %d date, %c log name, %l log level, %M text -->
-    <parameter name="logging_outputter_pattern" value="%d [%c] [%l] %M" />
+    <parameter name="logging_outputter_pattern" value="%d [%c] [%l] %M" />  
+    <parameter name="logging_stdout_outputter_enabled" value="false" />
 
   </template>
 

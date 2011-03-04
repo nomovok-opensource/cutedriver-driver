@@ -179,9 +179,6 @@ module MobyUtil
       if @logger_engine_loaded
 
         # Allow only FileOutputter instances
-        Kernel::raise ArgumentError, 'Outputter instance not valid' if ![ Log4r::FileOutputter ].include?( outputter_instance.class )
-
-        # Allow only FileOutputter instances
         Kernel::raise ArgumentError, 'Outputter pattern not valid, %M required by minimum' if !/\%M/.match( pattern ) 
 
         # create pattern for outputter
@@ -486,6 +483,17 @@ module MobyUtil
             # add outputter to logger instance
             add_outputter( @logger_instance, outputter )
 
+          end
+		  
+          # Add stdout outputter if set on configuration parameters
+          if MobyUtil::StringHelper.to_boolean( Parameter[ :logging_stdout_outputter_enabled ] )
+            stdout_outputter = create_outputter(
+              Log4r::StdoutOutputter, # outputter type
+              "TDriver_LOG_stdout",	# outputter name
+              :level => logging_level # logging level
+            ) 
+            set_outputter_pattern( stdout_outputter, Parameter[ :logging_outputter_pattern ] )
+            add_outputter( @logger_instance, stdout_outputter )
           end
 
         rescue
