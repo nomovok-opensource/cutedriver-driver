@@ -20,6 +20,24 @@
 
 module TDriverReportAPI
 
+  def tdriver_get_current_by_status( status_type )
+    Kernel::raise TypeError.new("Argument to method cannot be nil.") if status_type.nil?
+    ret = []
+    if $tdriver_reporter!=nil
+      ret = $tdriver_reporter.parse_results_for_current_test(status_type)
+    end
+    return ret
+  end
+
+  def tdriver_get_status(status_type)
+    Kernel::raise TypeError.new("Argument to method cannot be nil.") if status_type.nil?
+    ret = []
+    if $tdriver_reporter!=nil
+      ret = $tdriver_reporter.read_result_storage(status_type)
+    end
+    return ret
+  end
+  
   def tdriver_log_data(data)
     Kernel::raise TypeError.new("Argument to method cannot be nil.") if data.nil?
     if $tdriver_reporter!=nil

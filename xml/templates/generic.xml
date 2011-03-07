@@ -77,7 +77,7 @@
 
     <parameter name="verify_blocks" value="" />
 
-    <parameter name="use_find_object" value="false" />
+    <parameter name="use_find_object" value="true" />
 
   </template>
 
