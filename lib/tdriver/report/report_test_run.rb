@@ -933,6 +933,63 @@ module TDriverReportCreator
       end
     end
 
+    def parse_results_for_current_test( by_status )
+         
+      ret_xml = nil
+      while $result_storage_in_use==true
+        sleep 1
+      end
+      $result_storage_in_use=true
+      begin
+        result_storage=nil
+        result_storage=Array.new
+        storage_file='all_cases.xml'
+        
+
+        file=@report_folder+'/'+storage_file
+        if File.exist?(file)
+          io = File.open(file, 'r')
+          ret_xml = Nokogiri::XML(io){ |config| config.options = Nokogiri::XML::ParseOptions::STRICT }
+                   
+          io.close
+          
+          status_search = ""
+          
+          case by_status
+            when "all"
+              status_search = ""
+            when "passed"
+              status_search = " and (status='"
+              status_search << @pass_statuses.join("' or status='")              
+              status_search << "')"              
+            when "failed"
+              status_search = " and (status='"
+              status_search << @fail_statuses.join("' or status='")              
+              status_search << "')"              
+            when "not run"
+              status_search = " and (status='"
+              status_search << @not_run_statuses.join("' or status='")              
+              status_search << "')"              
+            else
+              status_search = " and status='" + by_status + "'"
+          end
+          
+          ret_xml = ret_xml.root.xpath("//tests/test[name='#{$new_test_case.test_case_name}' and group='#{$new_test_case.test_case_group}'#{status_search}]")
+        else
+          #puts "No file " << storage_file
+        end
+      rescue Exception => e 
+        $result_storage_in_use=false
+        raise e
+        
+      end
+      
+      $result_storage_in_use=false
+    
+      ret_xml
+      
+    end
+	
     def read_result_storage(results,case_name=nil)
       while $result_storage_in_use==true
         sleep 1
@@ -1040,9 +1097,22 @@ module TDriverReportCreator
               else
                 result_storage << current_record
               end
-
+            else
+			  if @pass_statuses.include?(status)
+			    if (( case_name and value==case_name ) or !case_name )
+				  result_storage << current_record				
+				end
+			  elsif @fail_statuses.include?(status)
+			    if (( case_name and value==case_name ) or !case_name )
+				  result_storage << current_record				
+				end
+			  elsif @not_run_statuses.include?(status)
+			    if (( case_name and value==case_name ) or !case_name )
+				  result_storage << current_record				
+				end
+			  end
             end
-          end
+		  end
           xml_data=nil
           $result_storage_in_use=false
           result_storage
