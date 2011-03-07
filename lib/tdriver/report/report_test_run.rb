@@ -488,7 +488,7 @@ module TDriverReportCreator
     def group_results_by_test_case()
       @all_cases_arr=read_result_storage('all')
       created_grouped_test_result=[]
-      tc=[]
+
       @all_cases_arr.each do |test_case|
         #name, status
         tc=[test_case[7],test_case[0]]
@@ -496,7 +496,8 @@ module TDriverReportCreator
           update_test_case_summary_page(test_case[7],false,"Test: #{test_case[0]} Result: #{test_case[7]}",test_case[0])
           created_grouped_test_result << tc
         end
-      end      
+      end
+
     end
 
     #This method updates the tdriver test run summary page
@@ -934,7 +935,7 @@ module TDriverReportCreator
     end
 
     def parse_results_for_current_test( by_status )
-         
+
       ret_xml = nil
       while $result_storage_in_use==true
         sleep 1
@@ -944,52 +945,52 @@ module TDriverReportCreator
         result_storage=nil
         result_storage=Array.new
         storage_file='all_cases.xml'
-        
+
 
         file=@report_folder+'/'+storage_file
         if File.exist?(file)
           io = File.open(file, 'r')
           ret_xml = Nokogiri::XML(io){ |config| config.options = Nokogiri::XML::ParseOptions::STRICT }
-                   
+
           io.close
-          
+
           status_search = ""
-          
+
           case by_status
-            when "all"
-              status_search = ""
-            when "passed"
-              status_search = " and (status='"
-              status_search << @pass_statuses.join("' or status='")              
-              status_search << "')"              
-            when "failed"
-              status_search = " and (status='"
-              status_search << @fail_statuses.join("' or status='")              
-              status_search << "')"              
-            when "not run"
-              status_search = " and (status='"
-              status_search << @not_run_statuses.join("' or status='")              
-              status_search << "')"              
-            else
-              status_search = " and status='" + by_status + "'"
+          when "all"
+            status_search = ""
+          when "passed"
+            status_search = " and (status='"
+            status_search << @pass_statuses.join("' or status='")
+            status_search << "')"
+          when "failed"
+            status_search = " and (status='"
+            status_search << @fail_statuses.join("' or status='")
+            status_search << "')"
+          when "not run"
+            status_search = " and (status='"
+            status_search << @not_run_statuses.join("' or status='")
+            status_search << "')"
+          else
+            status_search = " and status='" + by_status + "'"
           end
-          
+
           ret_xml = ret_xml.root.xpath("//tests/test[name='#{$new_test_case.test_case_name}' and group='#{$new_test_case.test_case_group}'#{status_search}]")
         else
           #puts "No file " << storage_file
         end
-      rescue Exception => e 
+      rescue Exception => e
         $result_storage_in_use=false
         raise e
-        
+
       end
-      
+
       $result_storage_in_use=false
-    
+
       ret_xml
-      
+
     end
-	
+
     def read_result_storage(results,case_name=nil)
       while $result_storage_in_use==true
         sleep 1
@@ -1002,10 +1003,15 @@ module TDriverReportCreator
 
         file=@report_folder+'/'+storage_file
         if File.exist?(file)
-          io = File.open(file, 'r')
+          io = File.open(file, 'rb')
           xml_data = Nokogiri::XML(io){ |config| config.options = Nokogiri::XML::ParseOptions::STRICT }
           io.close
-          xml_data.root.xpath("//tests/test").each do |node|
+          if case_name
+            nodes=xml_data.root.xpath("//tests/test[name='#{case_name}']")
+          else
+            nodes=xml_data.root.xpath("//tests/test")
+          end
+          nodes.each do |node|
             value=node.search("name").text #0
             group=node.search("group").text #1
             reboots=node.search("reboots").text #2
@@ -1098,21 +1104,21 @@ module TDriverReportCreator
                 result_storage << current_record
               end
             else
-			  if @pass_statuses.include?(status)
-			    if (( case_name and value==case_name ) or !case_name )
-				  result_storage << current_record				
-				end
-			  elsif @fail_statuses.include?(status)
-			    if (( case_name and value==case_name ) or !case_name )
-				  result_storage << current_record				
-				end
-			  elsif @not_run_statuses.include?(status)
-			    if (( case_name and value==case_name ) or !case_name )
-				  result_storage << current_record				
-				end
-			  end
+              if @pass_statuses.include?(status)
+                if (( case_name and value==case_name ) or !case_name )
+                  result_storage << current_record
+                end
+              elsif @fail_statuses.include?(status)
+                if (( case_name and value==case_name ) or !case_name )
+                  result_storage << current_record
+                end
+              elsif @not_run_statuses.include?(status)
+                if (( case_name and value==case_name ) or !case_name )
+                  result_storage << current_record
+                end
+              end
             end
-		  end
+          end
           xml_data=nil
           $result_storage_in_use=false
           result_storage
@@ -1185,18 +1191,18 @@ module TDriverReportCreator
     # === returns
     # nil
     # === raises
-    def update_test_case_summary_page(status,rewrite=false,title="",test_case_name=nil)
+    def update_test_case_summary_page(status,rewrite=false,title="",test_case_name=nil,tc_result_arr=nil)
       @cases_arr=Array.new
       search_case = nil
-	  if @pass_statuses.include?(status)	
-	    search_case = "passed"
-	  elsif @fail_statuses.include?(status)
-		search_case = "failed"
-	  elsif @not_run_statuses.include?(status)
-		search_case = "not_run"
-	  else
-	    search_case = status
-	  end
+      if @pass_statuses.include?(status)
+        search_case = "passed"
+      elsif @fail_statuses.include?(status)
+        search_case = "failed"
+      elsif @not_run_statuses.include?(status)
+        search_case = "not_run"
+      else
+        search_case = status
+      end
       status=status.gsub(' ','_')
       if test_case_name
         @cases_arr=read_result_storage(search_case,test_case_name)

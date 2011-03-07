@@ -902,7 +902,7 @@ display: block;
     end
     tdriver_group = nil
     html_body=nil
-    GC.start
+    
   end
   def write_test_case_summary_body(page,status,tc_arr,chronological_page=nil,report_page=nil,test_case_name=nil)
     html_body=Array.new
@@ -1032,7 +1032,7 @@ display: block;
       f2.puts html_body
     end
     html_body=nil
-    GC.start
+    
   end
 
   def write_summary_body(page,start_time,end_time,run_time,total_run,total_passed,total_failed,total_not_run,total_crash_files,total_device_resets,summary_arr=nil)
