@@ -438,9 +438,10 @@ display: block;
   end
 
   def format_duration(seconds)
-    if Gem.available?('chronic_duration')
+    begin
+      require 'chronic_duration'
       duration_str=ChronicDuration.output(seconds)
-    else
+    rescue LoadError
       m, s = seconds.divmod(60)
       duration_str="#{m}m#{'%.3f' % s}s"
     end
