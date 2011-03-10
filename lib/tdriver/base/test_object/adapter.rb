@@ -347,7 +347,7 @@ module TDriver
         # Kernel::raise MobyBase::MultipleAttributesFoundError.new( "Multiple attributes found with name '%s'" % name ) if nodeset.count > 1
 
         # return found attribute
-        nodeset.first.content.strip
+        nodeset.first.content
         
       end
 
