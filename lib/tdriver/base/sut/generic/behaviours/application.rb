@@ -139,6 +139,7 @@ module MobyBehaviour
               self.sut,   # sut
               nil,        # arguments
               nil,        # environment
+              nil,        # working directory
               nil,        # events_to_listen
               nil,        # signals_to_listen
               {           # flags 
@@ -154,8 +155,7 @@ module MobyBehaviour
               :Close, 
               self.name, 
               self.uid, 
-              self.sut, 
-              nil 
+              self.sut
             ) 
           )
 
@@ -359,7 +359,7 @@ module MobyBehaviour
 	#
 	def kill
 
-	  @sut.execute_command( MobyCommand::Application.new( :Kill, self.executable_name, self.uid, self.sut, nil ) )
+	  @sut.execute_command( MobyCommand::Application.new( :Kill, self.executable_name, self.uid, self.sut ) )
 
 	end
 

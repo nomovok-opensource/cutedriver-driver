@@ -689,6 +689,7 @@ module MobyBehaviour
               self,
               target[ :arguments ],
               target[ :environment ],
+              target[ :working_directory ],
               target[ :events_to_listen ],
               target[ :signals_to_listen ]
             )
