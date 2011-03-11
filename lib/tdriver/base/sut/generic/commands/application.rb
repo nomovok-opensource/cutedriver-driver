@@ -38,11 +38,13 @@ module MobyCommand
 		# app_uid::
 		# sut:: (optional) SUT, creator of the command. Can be used to access parameters when creating messages.
 		# arguments:: (optional) Arguments given to the application on start up. Comma separated list if more the one.
+		# environment:: (optional) Environment given to the application on start up. Comma separated list if more the one.
+		# working_directory:: (optional) Working directory for the application (not used on Symbian)
 		# == returns
 		# Application:: New CommandData object
 		# == raises
 		# ArgumentError:: When the supplied command_type is invalid.
-		def initialize( command_type = nil, app_name = nil, app_uid = nil, sut = nil, arguments = nil, environment = nil, events_to_listen = nil, signals_to_listen = nil, flags = nil, start_command = nil)
+		def initialize( command_type = nil, app_name = nil, app_uid = nil, sut = nil, arguments = nil, environment = nil, working_directory = nil, events_to_listen = nil, signals_to_listen = nil, flags = nil, start_command = nil)
 			# Set status value to nil (not executed)
 
 			self.command( command_type )
@@ -53,6 +55,7 @@ module MobyCommand
 			self.events_to_listen( events_to_listen )
 			self.signals_to_listen( signals_to_listen )
 			self.environment( environment )
+			self.working_directory( working_directory )
 			self.flags( flags )
 			self.start_command( start_command )
 		    self.refresh_args
@@ -136,6 +139,13 @@ module MobyCommand
 			raise ArgumentError.new( "The given application environment must be nil or a String." ) unless environment == nil || environment.kind_of?( String )   
 			@_environment = environment
 
+		end
+
+		def working_directory( working_directory )
+		
+			raise ArgumentError.new( "The given application working directory must be nil or a String." ) unless working_directory == nil || working_directory.kind_of?( String )
+			@_working_directory = working_directory
+			
 		end
 
 		def events_to_listen( events )
