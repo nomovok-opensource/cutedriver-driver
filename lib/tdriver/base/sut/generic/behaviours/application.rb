@@ -99,37 +99,51 @@ module MobyBehaviour
       begin
         
         # check if closable
-        Kernel::raise RuntimeError( "The application is of a type that cannot be closed." ) unless self.closable?
+        raise RuntimeError, 'The application is of a type that cannot be closed.' unless closable?
         
+        # default options
         default_options = { :force_kill => nil, :check_process => true }
-                
+        
+        # for backwards compatibility
         if options_hash.kind_of?( Hash )
 
+          # merge user defined options with default options 
           close_options = default_options.merge( options_hash )
 
         else
 
-          # support legacy option of defining only force_kill
+          # support legacy option of defining only force_kill as argument
           close_options = default_options
 
+          # if options defined
           if options_hash != nil
 
-            # verify options_hash value
-            options_hash.check_type( [ Hash, FalseClass, TrueClass ], "Wrong argument type $1 for options hash (expected $2)" )
+            # workaround/backwards compatibility: allow string as hash key value 
+            options_hash = options_hash.to_boolean if options_hash.kind_of?( String )
 
+            # verify options_hash value
+            options_hash.check_type( [ FalseClass, TrueClass ], "Wrong argument type $1 for options hash (expected $2)" )
+
+            # store force_kill value
             close_options[ :force_kill ] = options_hash
 
           end
 
         end
+
+        # workaround/backwards compatibility: allow string as hash key value 
+        close_options[ :force_kill ] = close_options[ :force_kill ].to_boolean if close_options[ :force_kill ].kind_of?( String )
         
-        # verify :force_kill variable type
+        # verify :force_kill value type
         close_options[ :force_kill ].check_type( [ NilClass, TrueClass, FalseClass ], "Wrong argument type $1 for :force_kill (expected $2)" )
 
-        # verify :check_process variable type
+        # workaround/backwards compatibility: allow string as hash key value 
+        close_options[ :check_process ] = close_options[ :check_process ].to_boolean if close_options[ :check_process ].kind_of?( String )
+
+        # verify :check_process value type
         close_options[ :check_process ].check_type( [ TrueClass, FalseClass ], "Wrong argument type $1 for :check_process (expected $2)" )
         
-        if close_options[ :force_kill ] != nil                
+        if close_options[ :force_kill ] != nil
 
           @sut.execute_command( 
             MobyCommand::Application.new( 
@@ -161,26 +175,33 @@ module MobyBehaviour
 
         end
 
-        # Disable logging
+        # store start time
+        start_time = Time.now
+
+        # store original logger state
         original_logger_state = $logger.enabled
+
+        # disable logging
         $logger.enabled = false
 
-        # verify close results
-        # store start time
-          start_time = Time.now
-          timeout_time = $parameters[ self.sut.id ][ :application_synchronization_timeout, '60' ].to_f
+        # retrieve application synchronization timeout value
+        timeout_time = $parameters[ self.sut.id ][ :application_synchronization_timeout, '60' ].to_f
+
+        # create application identification hash
+        application_identification_hash = { :type => 'application', :id => @id }
+
         begin
 
-          application_identification_hash = { :type => 'application', :id => @id }
-
+          # verify close results
           MobyUtil::Retryable.until(
             :timeout => timeout_time,
             :interval => $parameters[ self.sut.id ][ :application_synchronization_retry_interval, '0.25' ].to_f,
             :exception => MobyBase::VerificationError,
-            :unless => [MobyBase::TestObjectNotFoundError, MobyBase::ApplicationNotAvailableError] ) {
+            :unless => [ MobyBase::TestObjectNotFoundError, MobyBase::ApplicationNotAvailableError ] 
+          ){
 
             # raises MobyBase::ApplicationNotAvailableError if application was not found 
-            @sut.refresh( application_identification_hash, [{:className=>"application", :tasId => @id }] )
+            @sut.refresh( application_identification_hash, [ {:className => 'application', :tasId => @id } ] )
 
             # retrieve application object from sut.xml_data
             matches, unused_rule = TDriver::TestObjectAdapter.get_objects( @sut.xml_data, application_identification_hash, true )
@@ -189,7 +210,7 @@ module MobyBehaviour
             if ( close_options[ :check_process ] == true ) 
 
               # the application did not close
-              raise MobyBase::VerificationError.new, "Verification of close failed. The application that was to be closed is still running." if matches.count > 0 && (Time.now - start_time) >= timeout_time
+              raise MobyBase::VerificationError, "Verification of close failed. The application that was to be closed is still running." if matches.count > 0 && (Time.now - start_time) >= timeout_time
 
             elsif ( close_options[ :check_process ] == false )
 
@@ -214,7 +235,7 @@ module MobyBehaviour
             # The application could not be found, break
             break
 
-          }
+          } # MobyUtil::Retryable.until
           
         rescue MobyBase::TestObjectNotFoundError
 
@@ -224,14 +245,10 @@ module MobyBehaviour
 
           # everything ok: application not running anymore
 
-        rescue RuntimeError => e
+        rescue RuntimeError
         
-          unless ( e.message =~ /The application with Id \d+ is no longer available/ )
-
-            # something unexpected happened during the close, let exception through
-            raise e
-
-          end
+          # something unexpected happened during the close, let exception through
+          raise unless $!.message =~ /The application with Id \d+ is no longer available/
 
         ensure
 
@@ -240,14 +257,16 @@ module MobyBehaviour
 
         end
 
-      rescue Exception => exception
+      rescue Exception
 
-        $logger.log "behaviour", "FAIL;Failed when closing.;#{ identity };close;"
-        Kernel::raise exception
+        $logger.behaviour "FAIL;Failed when closing.;#{ identity };close;"
+
+        # let exception through
+        raise
 
       end
 
-      $logger.log "behaviour", "PASS;Closed successfully.;#{ identity };close;"
+      $logger.behaviour "PASS;Closed successfully.;#{ identity };close;"
 
       #@sut.application
             
