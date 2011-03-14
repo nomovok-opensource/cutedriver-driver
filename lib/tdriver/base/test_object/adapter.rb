@@ -98,8 +98,8 @@ module TDriver
       #p nodeset, source, options
       
       # rebuild defined regexp, used while matching element content
-      regexp_object = Regexp.new( source, options )
-      
+      regexp_object = Regexp.new( source.to_s, options.to_i )
+            
       # collect all nodes matching with regexp
       nodeset.find_all{ | node | node.content =~ regexp_object }
     
