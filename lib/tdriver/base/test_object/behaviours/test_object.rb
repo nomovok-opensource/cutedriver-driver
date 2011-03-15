@@ -571,7 +571,8 @@ module MobyBehaviour
       rescue MobyBase::TestObjectNotFoundError, MobyBase::TestObjectNotVisibleError
 
         rules_hash_clone = rules_hash.clone
-        
+
+        # remove type attribute from hash        
         rules_hash_clone.delete(:type)
 
         # string representation of used rule hash, remove curly braces
@@ -589,10 +590,19 @@ module MobyBehaviour
 
         end
 
+        # raise slightly different exception details when received object is type of application
+        if application? 
+
+          message = "The application (id: #{ @id }, name: #{ @name.inspect }) has no child object with type or behaviour method with name #{ method_id.to_s.inspect }#{ attributes_string } on #{ @sut.id.inspect }" 
+
+        else
+
+          message = "The test object (id: #{ @id }, type: #{ @type.inspect }, name: #{ @name.inspect }) has no child object with type or behaviour method with name #{ method_id.to_s.inspect }#{ attributes_string } on #{ @sut.id.inspect }" 
+
+        end
+
         # raise exception
-        Kernel::raise MobyBase::TestObjectNotFoundError.new(
-          "The test object (id: #{ @id }, type: #{ @type.inspect }, name: #{ @name.inspect }) has no child object with type or behaviour method with name #{ method_id.to_s.inspect }#{ attributes_string } on #{ @sut.id.inspect }" 
-        )
+        raise MobyBase::TestObjectNotFoundError, message
 
       end
 
