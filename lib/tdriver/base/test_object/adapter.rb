@@ -311,7 +311,7 @@ module TDriver
       # retrieve attribute(s) from xml
       nodeset = source_data.xpath(
        
-        "attributes/attribute[translate(@name,'ABCDEFGHIJKLMNOPQRSTUVWXYZ','abcdefghijklmnopqrstuvwxyz')='#{ attribute_name.downcase }']"
+        "attributes/attribute[translate(@name,'ABCDEFGHIJKLMNOPQRSTUVWXYZ','abcdefghijklmnopqrstuvwxyz')='#{ attribute_name.downcase }']/value"
         
       )
 
