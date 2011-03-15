@@ -590,7 +590,7 @@ module MobyBehaviour
 
         end
 
-        # raise slightly different exception details when received object is type of application
+        # raise slightly different exception message when receiver test object is type of application
         if application? 
 
           message = "The application (id: #{ @id }, name: #{ @name.inspect }) has no child object with type or behaviour method with name #{ method_id.to_s.inspect }#{ attributes_string } on #{ @sut.id.inspect }" 
