@@ -35,6 +35,7 @@ module TDriverReportCreator
 
     @_video_file_name = "failed_test.avi"
     @_previous_video_file_name = "previous_test.avi"
+    @_stored_details=[]
     clean_video_files
 
     if $tdriver_reporter == nil
@@ -160,8 +161,8 @@ module TDriverReportCreator
       $new_test_case.test_case_total_data_sent,
       $new_test_case.test_case_total_data_received
     )
-    
-    
+
+
     $tdriver_reporter.set_end_time(Time.now)
     $tdriver_reporter.set_total_run(1)
     $tdriver_reporter.update_summary_page('inprogress')
@@ -171,7 +172,7 @@ module TDriverReportCreator
         $run_status_thread_active=true
         Thread.new do
           begin
-            #Update test case summary pages            
+            #Update test case summary pages
             $tdriver_reporter.update_test_case_summary_pages('all')
             $tdriver_reporter.update_test_case_summary_pages('passed')
             $tdriver_reporter.update_test_case_summary_pages('failed')
@@ -249,7 +250,7 @@ module TDriverReportCreator
     $new_test_case.read_file_monitor_settings()
 
     amount_of_crash_files=$new_test_case.check_if_crash_files_exist()
-    if amount_of_crash_files.to_i > 0      
+    if amount_of_crash_files.to_i > 0
       $new_test_case.capture_crash_files()
       $new_test_case.clean_crash_files_from_sut()
       $tdriver_reporter.set_total_crash_files(amount_of_crash_files.to_i)
@@ -257,7 +258,7 @@ module TDriverReportCreator
     end
 
     amount_of_files=$new_test_case.check_if_files_exist()
-    if amount_of_files.to_i > 0      
+    if amount_of_files.to_i > 0
       $new_test_case.capture_files()
       $new_test_case.clean_files_from_sut()
       $tdriver_reporter.set_total_crash_files(amount_of_files.to_i)
@@ -311,19 +312,31 @@ module TDriverReportCreator
   # nil
   # === raises
   def update_test_case(details)
-    $new_test_case.set_test_case_execution_log(details)
-    updating_test_case_details(details) if MobyUtil::Parameter[ :custom_error_recovery_module, nil ]!=nil
-    if  MobyUtil::Parameter[ :report_monitor_memory, 'false']=='true'
-      begin
-        start_memory=$new_test_case.tc_memory_amount_start()
-        if start_memory=='-'
-          MobyBase::SUTFactory.instance.connected_suts.each do |sut_id, sut_attributes|
-            memory=$tdriver_reporter.get_sut_used_memory(sut_id,sut_attributes)
-            $new_test_case.set_tc_memory_amount_start(memory)
-          end
+    if $new_test_case==nil
+      @_stored_details<<details
+    else
+      if @_stored_details!=[]
+        @_stored_details.each do |detail|
+          $new_test_case.set_test_case_execution_log(detail)
         end
-      rescue
-        $new_test_case.set_tc_memory_amount_start(0)
+        $new_test_case.set_test_case_execution_log(details)
+        @_stored_details=[]
+      else
+        $new_test_case.set_test_case_execution_log(details)
+      end
+      updating_test_case_details(details) if MobyUtil::Parameter[ :custom_error_recovery_module, nil ]!=nil
+      if  MobyUtil::Parameter[ :report_monitor_memory, 'false']=='true'
+        begin
+          start_memory=$new_test_case.tc_memory_amount_start()
+          if start_memory=='-'
+            MobyBase::SUTFactory.instance.connected_suts.each do |sut_id, sut_attributes|
+              memory=$tdriver_reporter.get_sut_used_memory(sut_id,sut_attributes)
+              $new_test_case.set_tc_memory_amount_start(memory)
+            end
+          end
+        rescue
+          $new_test_case.set_tc_memory_amount_start(0)
+        end
       end
     end
   end
@@ -367,7 +380,7 @@ module TDriverReportCreator
     rescue Exception => e
       update_test_case("Error recovery failed Exception: #{e.message} Backtrace: #{e.backtrace}")
       end_test_case($new_test_case.test_case_name,'failed')
-      exit(1)      
+      exit(1)
     end
   end
   #This updates the test case behaviour log
@@ -479,9 +492,9 @@ module TDriverReportCreator
           status='failed' if MobyUtil::Parameter[:report_fail_test_if_files_found]=='true'
         end
       end
-      
+
       temp_rec = $new_test_case.video_recording?
-      
+
       if temp_rec
         $new_test_case.stop_video_recording
       end
@@ -497,31 +510,31 @@ module TDriverReportCreator
         end
       end
       if(status=='passed')
-  
+
         no_activity_videos = ""
-        if MobyUtil::Parameter[:report_check_device_active, 'false']=='true'          
-          if temp_rec            
-            no_activity_videos = $new_test_case.target_video_alive                                  
-          end                    
-        end        
-        
-        if no_activity_videos == "" 
+        if MobyUtil::Parameter[:report_check_device_active, 'false']=='true'
+          if temp_rec
+            no_activity_videos = $new_test_case.target_video_alive
+          end
+        end
+
+        if no_activity_videos == ""
           $new_test_case.set_test_case_status($tdriver_reporter.pass_statuses.first)
           create_test_case_folder($tdriver_reporter.pass_statuses.first)
         else
           # switch case to failed status
-          status='failed'         
+          status='failed'
           $new_test_case.copy_video_capture
           $new_test_case.update_test_case "The case failed due to video analysis (#{no_activity_videos}) indicating that the target is no longer responding."
-         
+
           $new_test_case.set_test_case_status($tdriver_reporter.fail_statuses.first)
           create_test_case_folder($tdriver_reporter.fail_statuses.first)
           if found_crash_files.to_i > 0
             $new_test_case.capture_crash_files()
           end
-          
+
         end
-        
+
       end
       if(status!='passed' && status!='failed')
         $new_test_case.set_test_case_status($tdriver_reporter.not_run_statuses.first)
@@ -598,4 +611,4 @@ end #TDriverReportCreator
 
 
 
- 
+
