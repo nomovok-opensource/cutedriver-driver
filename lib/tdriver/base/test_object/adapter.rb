@@ -31,7 +31,7 @@ module TDriver
  
         # TODO: document me
         def xpath_attributes( attributes, element_attributes, object_type )
-
+  
           # collect attributes
           attributes = attributes.collect{ | key, values |
 
@@ -41,20 +41,35 @@ module TDriver
               # concatenate string if it contains single and double quotes, otherwise return as is
               value = xpath_literal_string( value )
 
+              prefix_key = "@#{ key }"
+
               if @@partial_match_allowed.include?( [ object_type, key ] )
+                
+                # regexp support is needed also here
                 
                 prefix_value = "[contains(.,#{ value })]"
                 attribute_value = "contains(value/.,#{ value })"
               
               else
 
-                prefix_value = "=#{ value }"
-                attribute_value = "value/.=#{ value }"
+                if value.kind_of?( Regexp )
+                                
+                  prefix_value = "regexp_compare(#{ prefix_key },'#{ value.source }',#{ value.options })"
+                  attribute_value = "regexp_compare(value/.,'#{ value.source }',#{ value.options })"
+
+                  prefix_key = ""
+                
+                else
+                
+                  prefix_value = "=#{ value }"
+                  attribute_value = "value/.=#{ value }"
               
+                end
+                
               end
 
               # construct xpath
-              "(#{ element_attributes ? "@#{ key }#{ prefix_value } or " : "" }attributes/attribute[translate(@name,'ABCDEFGHIJKLMNOPQRSTUVWXYZ','abcdefghijklmnopqrstuvwxyz')='#{ key }' and #{ attribute_value }])"
+              "(#{ element_attributes ? "#{ prefix_key }#{ prefix_value } or " : "" }attributes/attribute[translate(@name,'ABCDEFGHIJKLMNOPQRSTUVWXYZ','abcdefghijklmnopqrstuvwxyz')='#{ key }' and #{ attribute_value }])"
      
             }.join( ' or ' ) # join attribute alternative values
                     
@@ -78,10 +93,27 @@ module TDriver
     end # static
 
     # TODO: document me
+    def self.regexp_compare( nodeset, source, options ) 
+      
+      #p nodeset, source, options
+      
+      # rebuild defined regexp, used while matching element content
+      regexp_object = Regexp.new( source.to_s, options.to_i )
+            
+      # collect all nodes matching with regexp
+      nodeset.find_all{ | node | node.content =~ regexp_object }
+    
+    end
+
+    # TODO: document me
     def self.xpath_to_object( rules, find_all_children )
 
       # convert hash keys to downcased string
-      rules = Hash[ rules.collect{ | key, value | [ key.to_s.downcase, value.to_s ] } ]
+      rules = Hash[ 
+        rules.collect{ | key, value | 
+          [ key.to_s.downcase, value.kind_of?( Regexp ) ? value : value.to_s ] 
+        } 
+      ]
 
       # xpath container array
       test_object_xpath_array = []
@@ -115,6 +147,8 @@ module TDriver
 
     # TODO: document me
     def self.xpath_literal_string( string )
+
+      return string if string.kind_of?( Regexp )
 
       # make sure that argument is type of string
       string = string.to_s
@@ -176,9 +210,11 @@ module TDriver
     # TODO: document me
     def self.get_objects( source_data, rules, find_all_children )
 
+      rule = xpath_to_object( rules, find_all_children )
+
       [ 
         # perform xpath to source xml data
-        source_data.xpath( rule = xpath_to_object( rules, find_all_children ) ),
+        source_data.xpath( rule, self ),
 
         # return also created xpath  
         rule 
