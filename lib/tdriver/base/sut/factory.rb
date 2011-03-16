@@ -73,13 +73,13 @@ module MobyBase
     sut = $parameters[ sut_id, nil ]
 
     # raise exception if sut was not found
-    Kernel::raise ArgumentError.new( "%s not defined in TDriver parameters XML" % [ sut_id ]) if sut.nil?
+    raise ArgumentError, "#{ sut_id.to_s } not defined in TDriver parameters XML" if sut.nil?
     
     # retrieve sut type from parameters
     sut_type = sut[ :type, nil ]
     
     # raise exception if sut type was not found
-    Kernel::raise RuntimeError.new( "SUT parameter 'type' not defined for %s in TDriver parameters/templates XML" % [ sut_id ] ) if sut_type.nil?
+    raise RuntimeError, "SUT parameter 'type' not defined for #{ sut_id.to_s } in TDriver parameters/templates XML" if sut_type.nil?
 
     sut_type_symbol = sut_type.downcase.to_sym
 
@@ -90,7 +90,7 @@ module MobyBase
     sut_env = sut[ :env, '*' ]
 
     # verify that sut plugin is defined in sut configuration
-    Kernel::raise RuntimeError.new( "SUT parameter 'sut_plugin' not defined for %s (%s)" % [ sut_id, sut_type ] ) if sut_plugin.nil?
+    raise RuntimeError, "SUT parameter 'sut_plugin' not defined for #{ sut_id.to_s } (#{ sut_type.to_s })" if sut_plugin.nil?
     
     # flag to determine that should exception be raised; allow one retry, then set flag to true if error still occures
     raise_exception = false
@@ -98,26 +98,27 @@ module MobyBase
     begin
 
       # verify that sut plugin is registered
-      if MobyUtil::PluginService.instance.plugin_registered?( sut_plugin, :sut )
+      if TDriver::PluginService.plugin_registered?( sut_plugin, :sut )
         
         # create sut object
-        created_sut = MobyUtil::PluginService.instance.call_plugin_method( sut_plugin, :make_sut, sut_id )
+        created_sut = TDriver::PluginService.call_plugin_method( sut_plugin, :make_sut, sut_id )
 
       else
 
         # raise error if sut was not registered
-        Kernel::raise NotImplementedError.new( "No plugin implementation found for SUT type: %s" % [ sut_type ] )
+        raise NotImplementedError, "No plugin implementation found for SUT type: #{ sut_type }"
 
       end
 
       rescue Exception => exception
 
       # if sut was not registered, try to load it
-      MobyUtil::PluginService.instance.load_plugin( sut_plugin ) if exception.kind_of?( NotImplementedError )
+      TDriver::PluginService.load_plugin( sut_plugin ) if exception.kind_of?( NotImplementedError )
 
       if !raise_exception
 
         raise_exception = true
+
         retry 
         
       else
@@ -161,29 +162,31 @@ module MobyBase
 
         begin
 
-        # verify that extension plugin is registered
-        unless MobyUtil::PluginService.instance.plugin_registered?( plugin_name, :extension )
+          # verify that extension plugin is registered
+          unless TDriver::PluginService.plugin_registered?( plugin_name, :extension )
 
-          # raise error if sut was not registered
-          Kernel::raise NotImplementedError.new( "Extension plugin not found %s" % [ plugin_name ] )
+            # raise error if sut was not registered
+            raise NotImplementedError, "Extension plugin not found #{ plugin_name }"
 
-        end
+          end
 
         rescue Exception => exception
 
-        # if sut was not registered, try to load it
-        MobyUtil::PluginService.instance.load_plugin( plugin_name ) if exception.kind_of?( NotImplementedError )
+          # if sut was not registered, try to load it
+          TDriver::PluginService.load_plugin( plugin_name ) if exception.kind_of?( NotImplementedError )
 
-        if !raise_exception
+          if !raise_exception
 
-          raise_exception = true
-          retry 
-        else
+            raise_exception = true
 
-          # still errors, raise original exception
-          Kernel::raise exception
+            retry
 
-        end
+          else
+
+            # still errors, raise original exception
+            Kernel::raise exception
+
+          end
 
         end
 

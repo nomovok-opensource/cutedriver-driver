@@ -29,6 +29,8 @@ module MobyBase
     @@behaviours = []
     @@behaviours_cache = {}
     @@modules_cache = {}
+
+    @@plugin_cache = []
     
     # behaviour xml files path
     @@path = File.join( MobyUtil::FileHelper.tdriver_home, '/behaviours/*.xml' )
@@ -128,58 +130,63 @@ module MobyBase
 
     rules.default = ['*']
 
-    Kernel::raise ArgumentError.new( "Target object not defined in rules hash" ) if rules[ :object ].nil?      
+    raise ArgumentError, 'Target object not defined in rules hash' if rules[ :object ].nil?      
 
     # apply behaviours to target object
-    ( get_object_behaviours( rules ) ).each{ | behaviour_index |
+    get_object_behaviours( rules ).each{ | behaviour_index |
 
       behaviour_data = @@behaviours[ behaviour_index ]
 
       # skip if required plugin is not registered or enabled
       next if behaviour_data[ :requires ].collect{ | plugin | 
 
-        #MobyUtil::PluginService.instance.plugin_registered?( plugin ) && MobyUtil::PluginService.instance.plugin_enabled?( plugin )
-
         # verify if plugin is enabled -- exception will be catched if plugin is not registered 
-        MobyUtil::PluginService.instance.plugin_enabled?( plugin ) rescue false
+        TDriver::PluginService.plugin_enabled?( plugin ) rescue false
 
       }.include?( false )
 
       begin
 
-        #behaviour_module = MobyUtil::KernelHelper.get_constant( behaviour_data[ :module ][ :name ] )
-
         # retrieve behaviour module from cache and extend target object
         rules[ :object ].extend( 
+
           @@modules_cache.fetch( behaviour_data[ :module ][ :name ] ){ | name |                  
+
             # ... or store to cache for the next time if not found 
             @@modules_cache[ name ] = MobyUtil::KernelHelper.get_constant( name )
+
           } 
+
         )
 
-      rescue NameError => exception
+      rescue NameError
 
-        Kernel::raise exception.class.new( 
-                        "Implementation for behaviour %s does not exist. (%s)" % [ behaviour_data[ :name ], behaviour_data[ :module ][ :name ] ]
-                        )
+        #Kernel::raise exception.class.new( 
+        #  "Implementation for behaviour %s does not exist. (%s)" % [ behaviour_data[ :name ], behaviour_data[ :module ][ :name ] ]
+        #)
+
+        raise NameError, "Implementation for behaviour #{ behaviour_data[ :name ] } does not exist. (#{ behaviour_data[ :module ][ :name ] })"
+
 
       rescue Exception => exception
 
-        Kernel::raise RuntimeError.new( 
-                       "Error while applying %s (%s) behaviour to target object. Reason: %s (%s)" % [
-                         behaviour_data[ :name ],
-                         behaviour_data[ :module ][ :name ],  
-                         exception.message,
-                         exception.class
-                       ]
-                       )
+        #Kernel::raise RuntimeError.new( 
+        #               "Error while applying %s (%s) behaviour to target object. Reason: %s (%s)" % [
+        #                 behaviour_data[ :name ],
+        #                 behaviour_data[ :module ][ :name ],  
+        #                 exception.message,
+        #                 exception.class
+        #               ]
+        #               )
+
+        raise RuntimeError, "Error while applying #{ behaviour_data[ :name ] } (#{ behaviour_data[ :module ][ :name ] }) behaviour to target object. Reason: #{ exception.message } (#{ exception.class })"
 
       end
 
       # add behaviour information to test object
       rules[ :object ].instance_exec{ 
 
-        @object_behaviours.push( behaviour_index ) unless @object_behaviours.include? behaviour_index 
+        @object_behaviours.push( behaviour_index ) unless @object_behaviours.include?( behaviour_index )
 
       }
 

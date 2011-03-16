@@ -17,38 +17,83 @@
 ## 
 ############################################################################
 
-module MobyUtil
+module TDriver
 
-  # Plugin service implementation
   class PluginService
 
-    include Singleton
+    # private methods and variables
+    class << self
 
-    # intialize plugin service
-    def initialize
+      private
 
-      @@registered_plugins = {}
+      # TODO: document me
+      def initialize_class
 
-    end
+        reset_plugins_list
 
-    # return all or plugins of given type
-    def registered_plugins( type = nil )
+      end
+
+      # TODO: document me
+      def reset_plugins_list
+
+        # list of registered plugins
+        @registered_plugins = {}
+
+        # list of enabled plugins
+        @enabled_plugins = []
+
+      end
+
+      # TODO: document me
+      def delete_plugin( plugin_name )
+
+        # remove from the plugins hash
+        @registered_plugins.delete( plugin_name )
+
+        # remove plugin from enabled plugins list
+        @enabled_plugins.delete( plugin_name )
+
+      end
+
+      # TODO: document me
+      def plugin_data_value( plugin_module, value_name, optional = false )
+        
+        begin
+
+          plugin_module.send( value_name.to_sym )
+
+        rescue NoMethodError
+
+          raise RuntimeError, "Plugin must have #{ value_name.to_s } value defined" if !optional
+
+        rescue Exception
+
+          raise
+
+        end
+
+      end
+
+    end # self
+
+    # TODO: document me
+    def self.registered_plugins( type = nil )
 
       # return all or plugins of given type
-      Hash[ @@registered_plugins.select{ | key, value | type.nil? || value[ :type ] == type } ]
+      Hash[ @registered_plugins.select{ | key, value | type.nil? || value[ :type ] == type } ]
 
     end
 
     # returns true if plugin is registered, plugin type can be given as optional parameter
-    def plugin_registered?( plugin_name, type = nil )
+    def self.plugin_registered?( plugin_name, type = nil )
     
       # check if given plugin is registered
-      if @@registered_plugins.has_key?( plugin_name )
+      if @registered_plugins.has_key?( plugin_name )
       
         unless type.nil?
         
           # plugin registered, compare that given plugin type matches
-          @@registered_plugins[ plugin_name ][ :type ] == type
+          @registered_plugins[ plugin_name ][ :type ] == type
                 
         else
         
@@ -59,142 +104,189 @@ module MobyUtil
       
       else
       
-        # plugin not registered, not found from @@registered_plugins hash
+        # plugin not registered, not found from registered_plugins list
         false
       
       end
 
     end
 
-    def enable_plugin( plugin_name )
-        
-      ( @@registered_plugins[ plugin_name ][ :enabled ] = true ) rescue Kernel::raise( ArgumentError.new( "No such plugin registered %s" % [ plugin_name ] ) )
+    # TODO: document me
+    def self.enabled_plugins
+
+      @enabled_plugins
+
+    end
+
+    # TODO: document me
+    def self.enable_plugin( plugin_name )
+      
+      begin
+
+        # enable plugin
+        @registered_plugins[ plugin_name ][ :enabled ] = true
+
+        # add name to enabled plugins list
+        @enabled_plugins << plugin_name unless @enabled_plugins.include?( plugin_name )
+
+      rescue 
+
+        raise ArgumentError, "No such plugin registered #{ plugin_name }"
+
+      end
+
+    end
+
+    # TODO: document me
+    def self.disable_plugin( plugin_name )
+
+      begin
+
+        # disable plugin
+        @registered_plugins[ plugin_name ][ :enabled ] = false
+
+        # remove name from enabled plugins list
+        @enabled_plugins.delete( plugin_name )
+
+      rescue 
+
+        raise ArgumentError, "No such plugin registered #{ plugin_name }"
+
+      end
       
     end
 
-    def disable_plugin( plugin_name )
+    # TODO: document me
+    def self.plugin_enabled?( plugin_name )
 
-      ( @@registered_plugins[ plugin_name ][ :enabled ] = false ) rescue Kernel::raise( ArgumentError.new( "No such plugin registered %s" % [ plugin_name ] ) )
+      @enabled_plugins.include?( plugin_name )
       
     end
 
-    def plugin_enabled?( plugin_name )
-
-      ( @@registered_plugins[ plugin_name ][ :enabled ] ) rescue false
-          
-    end
-
-    def register_plugin( plugin_module )
+    # TODO: document me
+    def self.register_plugin( plugin_module )
  
-      # retrieve plugin name
+      # retrieve plugin name 
       plugin_name = plugin_data_value( plugin_module, :plugin_name )
 
       # throw exception if plugin is already registered
-      Kernel::raise ArgumentError.new( "Plugin %s is already registered" % [ plugin_name ] ) if @@registered_plugins.has_key?( plugin_name )
+      raise ArgumentError, "Plugin #{ plugin_name } is already registered" if @registered_plugins.has_key?( plugin_name )
 
       # plugin configuration
-      @@registered_plugins[ plugin_name ] = { 
+      @registered_plugins[ plugin_name ] = {
+ 
+        # store plugin type
         :type => plugin_data_value( plugin_module, :plugin_type ), 
+
+        # store plugin implementation module name
         :plugin_module => plugin_module, 
+
+        # set plugin to enabled state
         :enabled => true 
+
       } 
 
       # register plugin
       plugin_module.register_plugin
 
-    end
-
-    def unregister_plugin( plugin_name )
-
-      # unregister plugin, raise exception if plugin is not registered
-      ( @@registered_plugins[ plugin_name ][ :plugin_module ].unregister_plugin ) rescue Kernel::raise( ArgumentError.new( "Unregister failed due to plugin %s is not registered" % [ plugin_name ] ) )
-
-      # remove from the plugins hash
-      @@registered_plugins.delete( plugin_name )
+      # add name to enabled plugins list
+      @enabled_plugins << plugin_name unless @enabled_plugins.include?( plugin_name )
 
     end
 
-    def load_plugin( plugin_name )
+    # TODO: document me
+    def self.unregister_plugin( plugin_name )
+
+      begin
+
+        # call plugin unregister mechanism
+        @registered_plugins[ plugin_name ][ :plugin_module ].unregister_plugin
+
+        # remove from the plugins hash
+        @registered_plugins.delete( plugin_name )
+
+        # remove from the plugins hash
+        @enabled_plugins.delete( plugin_name )
+
+      rescue
+
+        raise ArgumentError, "Failed to unregister plugin due to plugin #{ plugin_name.inspect } is not registered"
+
+      end
+
+    end
+
+    # TODO: document me
+    def self.load_plugin( plugin_name )
 
       begin
 
         # load plugin implementation
         require plugin_name 
 
-      rescue LoadError => exception
+      rescue LoadError
 
-        Kernel::raise RuntimeError.new( 
-
-          "Error while loading plugin %s. Please verify that the plugin is installed properly (%s: %s)" % [ plugin_name, exception.class, exception.message ]
-
-        )
+        raise RuntimeError, "Error while loading plugin #{ plugin_name.to_s }. Please verify that the plugin is installed properly (#{ $!.class }: #{ $!.message })"
 
       end
 
     end
 
-    def call_plugin_method( plugin_name, method_name, *args )
+    # TODO: document me
+    def self.call_plugin_method( plugin_name, method_name, *args )
 
       begin
 
-        plugin_module = @@registered_plugins[ plugin_name ][ :plugin_module ]
-        
-      rescue
-      
-        Kernel::raise( ArgumentError.new( "No such plugin registered %s" % [ plugin_name ] ) )
+        @registered_plugins.fetch( plugin_name ){
+
+          # in case if plugin not found from registered plugins list
+          raise ArgumentError, "No such plugin registered #{ plugin_name }"
+
+        }[ :plugin_module ].send( method_name.to_sym, *args )
+
+      rescue ArgumentError
+
+        # raise argument errors as is
+        raise      
+
+      rescue 
+
+        # raise all other exceptions as PluginError
+        raise PluginError, "Error occured during calling #{ method_name } method for #{ plugin_name } (#{ $!.class }: #{ $!.message })"
 
       end
 
-      begin
-
-        plugin_module.send( method_name.to_sym, *args )
-
-      rescue Exception => exception
-
-        raise PluginError.new( "Error occured during calling %s method for %s (%s: %s)" % [ method_name, plugin_name, exception.class, exception.message ] )
-
-      end
-
     end
 
-  private
-
-    def reset_plugins_list
-
-      @@registered_plugins = {}
-
-    end
-
-    def delete_plugin( plugin_name )
-
-      # remove from the plugins hash
-      @@registered_plugins.delete( plugin_name )
-
-    end
-
-    def plugin_data_value( plugin_module, value_name, optional = false )
-      
-      begin
-
-        result = plugin_module.send( value_name.to_sym )
-
-      rescue NoMethodError
-
-        Kernel::raise RuntimeError.new( "Plugin must have %s value defined" % [ value_name.to_s ] ) if !optional
-
-      rescue => exception
-
-        Kernel::raise exception
-
-      end
-
-      result
-
-    end
+    # initialize plugin service 
+    initialize_class
 
     # enable hooking for performance measurement & debug logging
     TDriver::Hooking.hook_methods( self ) if defined?( TDriver::Hooking )
 
   end # PluginService
 
-end # MobyUtil
+end
+
+module MobyUtil
+
+  # deprecated plugin service implementation; please use TDriver::PluginService instead of this
+  class PluginService
+
+    # deprecated
+    def self.instance
+
+      # retrieve caller information
+      file, line = caller.first.split(":")
+
+      # show warning
+      warn "#{ file }:#{ line } warning: deprecated method MobyUtil::PluginService.instance#method; please use static class TDriver::PluginService#method instead"
+
+      # redirect to new implementation
+      TDriver::PluginService
+
+    end
+
+  end
+
+end

@@ -93,7 +93,7 @@ module MobyPlugin
 			TDriver::Hooking.hook_methods( self ) if defined?( TDriver::Hooking )
 
 			# register plugin
-			MobyUtil::PluginService.instance.register_plugin( self ) # Note: self is MobyPlugin::Generic::SUT
+			TDriver::PluginService.register_plugin( self )
 
 		end # SUT
 
