@@ -128,22 +128,20 @@ module MobyBase
     # merge user-defined rules on top of default rules set
     #rules = { :sut_type => ['*'], :object_type => ['*'], :input_type => ['*'], :version => ['*'] }.merge!( rules )
 
+    raise ArgumentError, 'Target object not defined in rules hash' if rules[ :object ].nil?      
+
     rules.default = ['*']
 
-    raise ArgumentError, 'Target object not defined in rules hash' if rules[ :object ].nil?      
+    # retrieve enabled plugins from PluginService
+    enabled_plugins = TDriver::PluginService.enabled_plugins 
 
     # apply behaviours to target object
     get_object_behaviours( rules ).each{ | behaviour_index |
 
       behaviour_data = @@behaviours[ behaviour_index ]
 
-      # skip if required plugin is not registered or enabled
-      next if behaviour_data[ :requires ].collect{ | plugin | 
-
-        # verify if plugin is enabled -- exception will be catched if plugin is not registered 
-        TDriver::PluginService.plugin_enabled?( plugin ) rescue false
-
-      }.include?( false )
+      # skip if required plugin is not registered or enabled; compare requires array and enabled_plugins array
+      next unless ( behaviour_data[ :requires ] - enabled_plugins ).empty?
 
       begin
 
@@ -161,25 +159,12 @@ module MobyBase
 
       rescue NameError
 
-        #Kernel::raise exception.class.new( 
-        #  "Implementation for behaviour %s does not exist. (%s)" % [ behaviour_data[ :name ], behaviour_data[ :module ][ :name ] ]
-        #)
-
         raise NameError, "Implementation for behaviour #{ behaviour_data[ :name ] } does not exist. (#{ behaviour_data[ :module ][ :name ] })"
 
 
-      rescue Exception => exception
+      rescue
 
-        #Kernel::raise RuntimeError.new( 
-        #               "Error while applying %s (%s) behaviour to target object. Reason: %s (%s)" % [
-        #                 behaviour_data[ :name ],
-        #                 behaviour_data[ :module ][ :name ],  
-        #                 exception.message,
-        #                 exception.class
-        #               ]
-        #               )
-
-        raise RuntimeError, "Error while applying #{ behaviour_data[ :name ] } (#{ behaviour_data[ :module ][ :name ] }) behaviour to target object. Reason: #{ exception.message } (#{ exception.class })"
+        raise RuntimeError, "Error while applying #{ behaviour_data[ :name ] } (#{ behaviour_data[ :module ][ :name ] }) behaviour to target object. Reason: #{ $!.message } (#{ $!.class })"
 
       end
 
@@ -204,7 +189,7 @@ module MobyBase
 
     begin
 
-    Dir.glob( behaviour_files ).each { | behaviour | 
+    Dir.glob( behaviour_files ).each{ | behaviour | 
 
       @file_name = behaviour
 
@@ -348,47 +333,86 @@ module MobyBase
 
   end
 
+=begin
   def get_object_behaviours( rules )
 
-      # calculate hash for behaviour rules / hash value will be used to identify similar objects
-      behaviour_hash = Hash[ rules.select{ | key, value | key != :object  } ].hash
+    # calculate hash for behaviour rules / hash value will be used to identify similar objects
+    behaviour_hash = Hash[ rules.select{ | key, value | key != :object  } ].hash
 
-      if @@behaviours_cache.has_key?( behaviour_hash )
+    if @@behaviours_cache.has_key?( behaviour_hash )
 
-        # retrieve behaviour module indexes from cache
-        @@behaviours_cache[ behaviour_hash ]
+      # retrieve behaviour module indexes from cache
+      @@behaviours_cache[ behaviour_hash ]
 
-      else
+    else
 
-    rules.default = [ '*' ]
+      rules.default = [ '*' ]
 
-    extended_modules = []
+      extended_modules = []
 
-    @@behaviours.each_with_index{ | behaviour, index |
+      @@behaviours.each_with_index{ | behaviour, index |
 
-      if (   ( rules[ :name ] == behaviour[ :name ] ) || 
+        if ( ( rules[ :name ] == behaviour[ :name ] ) || 
 
-        ( rules[ :name ] == [ '*' ] && 
+          ( rules[ :name ] == [ '*' ] && 
 
-#         ( !( rules[ :sut_type ] & behaviour[ :sut_type ] ).empty? ) && 
-         ( !( rules[ :object_type ] & behaviour[ :object_type ] ).empty? ) &&
-         ( !( rules[ :input_type ] & behaviour[ :input_type ] ).empty? ) &&
-         ( !( rules[ :env ] & behaviour[ :env ] ).empty? ) &&
-         ( !( rules[ :version ] & behaviour[ :version ] ).empty? ) ) )
+          #         ( !( rules[ :sut_type ] & behaviour[ :sut_type ] ).empty? ) && 
+          ( !( rules[ :object_type ] & behaviour[ :object_type ] ).empty? ) &&
+          ( !( rules[ :input_type ] & behaviour[ :input_type ] ).empty? ) &&
+          ( !( rules[ :env ] & behaviour[ :env ] ).empty? ) &&
+          ( !( rules[ :version ] & behaviour[ :version ] ).empty? ) ) )
 
-      # retrieve list of extended modules
-      extended_modules << index
+          # retrieve list of extended modules
+          extended_modules << index
 
-      end
+        end
+
+      }
+
+      # store behaviour module indexes to cache
+      @@behaviours_cache[ behaviour_hash ] = extended_modules
+
+    end
+
+  end
+=end
+
+  def get_object_behaviours( rule )
+
+    # calculate hash for behaviour rule / hash value will be used to identify similar objects
+    @@behaviours_cache.fetch( rule.delete_keys( :object ).hash ){ | behaviour_hash |
+
+      rule.default = [ '*' ]
+
+      @@behaviours_cache[ behaviour_hash ] = @@behaviours.each_with_index.collect{ | behaviour, index |
+
+        case rule[ :name ]
+
+          when behaviour[ :name ]
+
+            index
+
+          when [ '*' ]
+
+            index if ( 
+              !( rule[ :object_type ] & behaviour[ :object_type ] ).empty? && 
+              !( rule[ :input_type ] & behaviour[ :input_type ] ).empty? &&
+              !( rule[ :env ] & behaviour[ :env ] ).empty? && 
+              !( rule[ :version ] & behaviour[ :version ] ).empty? 
+            )
+
+        else
+
+          nil
+
+        end
+
+      }.compact
 
     }
 
-        # store behaviour module indexes to cache
-        @@behaviours_cache[ behaviour_hash ] = extended_modules
-
-      end
-
   end
+
 
   def get_behaviour_from_cache( target, sut_type, object_type, sut_version, input_type )
 
