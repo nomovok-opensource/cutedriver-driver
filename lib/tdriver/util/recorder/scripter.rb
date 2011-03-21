@@ -96,7 +96,8 @@ module MobyUtil
         # If no more MouseButtonRelease or MouseButtonPress then last MoveMouse point id
         first_point_index = mouse_press_events[index].id.to_i
         next_mouse_press_index =  ( mouse_press_events[ index + 1 ].nil? ) ?  move_points.last['id'].to_i : mouse_press_events[ index + 1 ].id.to_i
-        next_mouse_release_index = release_events.select{ |event| event['id'].to_i < next_mouse_press_index }.first['id'].to_i
+        next_mouse_release = release_events.select{ |event| event['id'].to_i < next_mouse_press_index }
+        next_mouse_release_index = next_mouse_release.first['id'].to_i unless next_mouse_release.empty?
         last_point_index = ( next_mouse_release_index.nil? ) ? next_mouse_press_index : next_mouse_release_index
         
         points = move_points.select{ |point| point['id'].to_i > first_point_index and point['id'].to_i <= last_point_index }
