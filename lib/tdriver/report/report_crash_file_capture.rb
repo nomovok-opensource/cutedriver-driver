@@ -140,6 +140,7 @@ class TDriverReportCrashFileCapture
               sut_crash_files=list_sut_crash_files(sut_attributes[:sut])
               sut_crash_files.each do |crash_file|
                 download_crash_file(sut_attributes[:sut],crash_file[0],download_folder.gsub("/",'\\')+'\\',crash_file[1])
+                delete_crash_file(sut_attributes[:sut],crash_file[0])
               end
             end
           end
