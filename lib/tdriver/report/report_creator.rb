@@ -554,8 +554,7 @@ module TDriverReportCreator
       if found_files.to_i > 0
         $new_test_case.capture_files()
       end
-      $new_test_case.update_test_case_page()
-      $new_test_case.clean_crash_files_from_sut()
+      $new_test_case.update_test_case_page()      
       $new_test_case.clean_files_from_sut()
 
       update_run($new_test_case.test_case_name.to_s,status,$new_test_case.test_case_reboots,$new_test_case.test_case_crash_files,execution_log)
