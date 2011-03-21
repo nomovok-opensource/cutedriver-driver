@@ -90,7 +90,7 @@ module TDriverErrorRecovery
         current_reconnect_attempt+=1
       end
     end
-    Kernel::raise BehaviourError.new("Error Recovery", "Error recovery failed after #{attempt_reconnects} recovery attempts") if b_error_recovery_succesful==false
+    Kernel::raise MobyBase::BehaviourError.new("Error Recovery", "Error recovery failed after #{attempt_reconnects} recovery attempts") if b_error_recovery_succesful==false
   end
 
   # Reconnects the devices without ping
@@ -118,9 +118,8 @@ module TDriverErrorRecovery
   # false for failed ping
   # === raises
   def ping_device(current_sut)
-    begin
-      xml_state=current_sut.refresh()
-      if xml_state.to_s.include?("tasMessage")==false
+    begin     
+      if current_sut.refresh()==false
         MobyUtil::Logger.instance.log "behaviour" , "WARNING;Device ping failed"
         false
       else
