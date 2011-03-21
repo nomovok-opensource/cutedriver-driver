@@ -51,45 +51,109 @@ module MobyUtil
       mouse_status = 0
       previous_time = nil
       event = nil
-
-      for i in 0...event_count
-
-        event = event_list.event(:id => i.to_s)
-        type = event.name
-
-        previous_time = event.attribute('timeStamp').to_i unless previous_time
-
-        if type == 'MouseButtonPress'
-          active_target = get_target_details(event.child(:id => i.to_s))      
-          scripting = true
-          mouse_status = 1
-        end
-
-        duration = get_duration(previous_time, event.attribute('timeStamp').to_i)
-
-        point = {'x' => event.attribute('windowX'), 'y' => event.attribute('windowY'), 'interval' => duration}
-        points.push(point) if scripting 
-
-        previous_time = event.attribute('timeStamp').to_i
-
-        if type == 'MouseButtonRelease' and scripting
-
-          #mouse status based on the previous (if target changed no press)
-          mouse_status = 3 if mouse_status == 1
-          mouse_status = 2 if mouse_status == 0    
-          script << generate_command(active_target, points, mouse_status) << "\n"      
-          points.clear
-          active_target = nil
-          scripting = false
-
-        end
-      end  
-
-      if scripting and event
-
-        script << generate_command(active_target, points, mouse_status) << "\n"
-
+      
+      # puts "START mouse Down events"
+      ##mouse_events = xml_as_object.children(:type =>'event', :name=>'MouseButtonPress')
+      #mouse_events = xml_as_object.children(:type =>'event', :name=>'MouseMove')
+      # puts mouse_events.length.to_s
+      #mouse_events.each do |point|
+      #  puts " #{point.id} [ #{point.attribute('windowX')}, #{point.attribute('windowX')} ]"
+      #end
+      # puts "END mouse Down events"
+      
+      
+      # mouse_status: 
+      # 0 = no press or release
+      # 1 = press, no release     [ will only happen if recording stoped before mouse release]
+      # 2 = release, no press     [ will only happen if recording started after mouse press]
+      # 3 = press and release
+      
+      # COLLECT ALL MOUSE EVENTS
+      mouse_moves = xml_as_object.children(:type =>'event', :name=>'MouseMove')
+      mouse_press_events = xml_as_object.children(:type =>'event', :name=>'MouseButtonPress')
+      mouse_release_events = xml_as_object.children(:type =>'event', :name=>'MouseButtonRelease')
+      
+      # STORE MOVE POINTS
+      move_points = []
+      mouse_moves.each do |point|
+        timestamp = point.attribute('timeStamp').to_i
+        previous_timestamp = ( move_points[-1].nil? ) ? timestamp : move_points[-1]['timestamp'].to_i
+        interval = get_duration(previous_timestamp, timestamp)
+        move_points.push({'x' => point.attribute('windowX'), 'y' => point.attribute('windowY'), 'interval' => interval, 'timestamp' => timestamp, 'id' => point.id} )
       end
+      
+      # STORE RELEASE EVENTS
+      release_events = []
+      mouse_release_events.each do |event|
+        release_events.push({'id' => event.id})
+      end
+
+      # FOREACH MouseButtonPress
+      mouse_press_events.each_index do |index|
+        active_target = get_target_details( mouse_press_events[index].child(:id => mouse_press_events[index].id) )  
+
+        # COLLECT MouseMove points until MouseButtonRelease
+        # If no more MouseButtonRelease or MouseButtonPress then last MoveMouse point id
+        first_point_index = mouse_press_events[index].id.to_i
+        next_mouse_press_index =  ( mouse_press_events[ index + 1 ].nil? ) ?  move_points.last['id'].to_i : mouse_press_events[ index + 1 ].id.to_i
+        next_mouse_release = release_events.select{ |event| event['id'].to_i < next_mouse_press_index }
+        next_mouse_release_index = next_mouse_release.first['id'].to_i unless next_mouse_release.empty?
+        last_point_index = ( next_mouse_release_index.nil? ) ? next_mouse_press_index : next_mouse_release_index
+        
+        points = move_points.select{ |point| point['id'].to_i > first_point_index and point['id'].to_i <= last_point_index }
+        points.first['interval'] = 0.to_f unless points.empty? # set first interval to 0
+        
+        # PROCESS gesture at MouseButtonRelease
+        if ( last_point_index != move_points.last['id'].to_i )
+          script << generate_command(active_target, points, mouse_status = 3 ) << "\n"   
+          
+        # END EVENTS, MouseButtonRelease truncated or second press without release witch would not make sense
+        else
+          script << generate_command(active_target, points, mouse_status = 1 ) << "\n"  
+        end
+        
+      end
+      
+
+
+      # for i in 0...event_count
+        
+        # event = event_list.event(:id => i.to_s)
+        # type = event.name
+        
+        # previous_time = event.attribute('timeStamp').to_i unless previous_time
+
+        # if type == 'MouseButtonPress'
+          # active_target = get_target_details(event.child(:id => i.to_s))      
+          # scripting = true
+          # mouse_status = 1
+        # end
+        
+        # duration = get_duration(previous_time, event.attribute('timeStamp').to_i)
+        
+        # point = {'x' => event.attribute('windowX'), 'y' => event.attribute('windowY'), 'interval' => duration}
+        # points.push(point) if scripting 
+        
+        # previous_time = event.attribute('timeStamp').to_i
+
+        # if type == 'MouseButtonRelease' and scripting
+
+          ##mouse status based on the previous (if target changed no press)
+          # mouse_status = 3 if mouse_status == 1
+          # mouse_status = 2 if mouse_status == 0    
+          # script << generate_command(active_target, points, mouse_status) << "\n"      
+          # points.clear
+          # active_target = nil
+          # scripting = false
+
+        # end
+      # end  
+
+      # if scripting and event
+
+        # script << generate_command(active_target, points, mouse_status) << "\n"
+
+      # end
 
       script << "\n"
       script << "#################################### \n"
