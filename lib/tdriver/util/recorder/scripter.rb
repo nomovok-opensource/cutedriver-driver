@@ -52,16 +52,6 @@ module MobyUtil
       previous_time = nil
       event = nil
       
-      # puts "START mouse Down events"
-      ##mouse_events = xml_as_object.children(:type =>'event', :name=>'MouseButtonPress')
-      #mouse_events = xml_as_object.children(:type =>'event', :name=>'MouseMove')
-      # puts mouse_events.length.to_s
-      #mouse_events.each do |point|
-      #  puts " #{point.id} [ #{point.attribute('windowX')}, #{point.attribute('windowX')} ]"
-      #end
-      # puts "END mouse Down events"
-      
-      
       # mouse_status: 
       # 0 = no press or release
       # 1 = press, no release     [ will only happen if recording stoped before mouse release]
@@ -113,47 +103,6 @@ module MobyUtil
         end
         
       end
-      
-
-
-      # for i in 0...event_count
-        
-        # event = event_list.event(:id => i.to_s)
-        # type = event.name
-        
-        # previous_time = event.attribute('timeStamp').to_i unless previous_time
-
-        # if type == 'MouseButtonPress'
-          # active_target = get_target_details(event.child(:id => i.to_s))      
-          # scripting = true
-          # mouse_status = 1
-        # end
-        
-        # duration = get_duration(previous_time, event.attribute('timeStamp').to_i)
-        
-        # point = {'x' => event.attribute('windowX'), 'y' => event.attribute('windowY'), 'interval' => duration}
-        # points.push(point) if scripting 
-        
-        # previous_time = event.attribute('timeStamp').to_i
-
-        # if type == 'MouseButtonRelease' and scripting
-
-          ##mouse status based on the previous (if target changed no press)
-          # mouse_status = 3 if mouse_status == 1
-          # mouse_status = 2 if mouse_status == 0    
-          # script << generate_command(active_target, points, mouse_status) << "\n"      
-          # points.clear
-          # active_target = nil
-          # scripting = false
-
-        # end
-      # end  
-
-      # if scripting and event
-
-        # script << generate_command(active_target, points, mouse_status) << "\n"
-
-      # end
 
       script << "\n"
       script << "#################################### \n"
@@ -215,11 +164,7 @@ module MobyUtil
       target
     end
 
-    # mouse_status: 
-    # 0 = no press or release
-    # 1 = press, no release
-    # 2 = release, no press
-    # 3 = press and release
+
     def generate_command(target_details, points, mouse_status)
 
       command = "@app." 
