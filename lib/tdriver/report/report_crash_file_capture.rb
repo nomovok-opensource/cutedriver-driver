@@ -142,6 +142,7 @@ class TDriverReportCrashFileCapture
                 download_crash_file(sut_attributes[:sut],crash_file[0],download_folder.gsub("/",'\\')+'\\',crash_file[1])
                 delete_crash_file(sut_attributes[:sut],crash_file[0])
               end
+              sut_attributes[:sut].clear_crash_notes(5)
             end
           end
         end
