@@ -806,7 +806,9 @@ module TDriverReportCreator
         link='',
         total_dump=0,
         total_sent=0,
-        total_received=0 )
+        total_received=0,
+        user_data_rows=nil,
+        user_data_columns=nil)
       while $result_storage_in_use==true
         sleep 1
       end
@@ -881,6 +883,23 @@ module TDriverReportCreator
             test<<test_data
           end
 
+
+          if user_data_rows!=nil && !user_data_columns.empty?
+
+            test_data = Nokogiri::XML::Node.new("user_table_data",test)
+            #create the table rows
+            user_data_rows.each do |row_hash|
+              row_hash.sort{|a,b| a[0]<=>b[0]}.each do |value|
+                data_value=Nokogiri::XML::Node.new("column",test_data)
+                data_value.set_attribute("name",value[0].to_s)
+                data_value.content = value[1].to_s                
+                test_data << data_value
+              end
+            end
+            test<<test_data
+          end
+
+
           xml_data.root.add_child(test)
           File.open(file, 'w') {|f| f.write(xml_data.to_xml) }
           test=nil
@@ -893,6 +912,7 @@ module TDriverReportCreator
             user_data_values = user_data.values
             counter = user_data_values.size-1
           end
+
           builder = Nokogiri::XML::Builder.new do |xml|
             xml.tests {
               xml.test {
@@ -911,6 +931,7 @@ module TDriverReportCreator
                 xml.dump_count calculate_total_values_from_hash(total_dump)
                 xml.sent_bytes calculate_total_values_from_hash(total_sent)
                 xml.received_bytes calculate_total_values_from_hash(total_received)
+                
                 if user_data!=nil && !user_data.empty?
                   xml.user_display_data {
                     (0..counter).each { |i|
@@ -920,6 +941,21 @@ module TDriverReportCreator
                       }
                     }
                   }
+                end
+                
+                if user_data_rows!=nil && !user_data_columns.empty?
+
+                  xml.user_table_data{
+                    #create the table rows
+                    user_data_rows.each do |row_hash|
+                      row_hash.sort{|a,b| a[0]<=>b[0]}.each do |value|
+                        xml.column("name"=>value[0].to_s){
+                            xml.text value[1].to_s
+                        }
+                      end
+                    end
+                  }
+
                 end
               }
             }
