@@ -148,7 +148,12 @@ module TDriverReportCreator
       $tdriver_reporter.set_total_not_run(1)
     end
 
-    $tdriver_reporter.write_to_result_storage(current_status,test_case_name,group,reboots,crashes,
+    $tdriver_reporter.write_to_result_storage(
+      current_status,
+      test_case_name,
+      group,
+      reboots,
+      crashes,
       $new_test_case.test_case_start_time,
       $new_test_case.test_case_chronological_view_data,
       $new_test_case.test_case_run_time,
@@ -159,7 +164,9 @@ module TDriverReportCreator
       '',
       $new_test_case.test_case_total_dump_count,
       $new_test_case.test_case_total_data_sent,
-      $new_test_case.test_case_total_data_received
+      $new_test_case.test_case_total_data_received,
+      $new_test_case.test_case_user_data,
+      $new_test_case.test_case_user_data_columns
     )
 
 

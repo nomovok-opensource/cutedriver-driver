@@ -872,8 +872,7 @@ display: block;
     html_body=nil
     @test_case_execution_log=nil
     @test_case_behaviour_log=nil
-    @test_case_user_data=nil
-    @test_case_user_data_columns=nil
+
   end
   def tog_list_begin(name)
     html_body='<dl class="togList">'<<
