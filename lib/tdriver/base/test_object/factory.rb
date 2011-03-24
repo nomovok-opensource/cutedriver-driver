@@ -93,9 +93,6 @@ module MobyBase
         :__index => 0
                          
       )
-  
-      # DEBUG
-      retries = 0
        
       # identify objects until desired matches found or timeout exceeds
       MobyUtil::Retryable.until( 
@@ -114,13 +111,7 @@ module MobyBase
         # refresh sut
         sut.refresh( directives[ :__refresh_arguments ], search_parameters )
 
-        # DEBUG
-        if ( $parameters[ sut.id ][:retry_search_with_regexp, false] and retries > 0 and rules[ :object_attributes_hash ].has_key?(:text) )
-            text_string = rules[ :object_attributes_hash ][ :text ]
-            #elided_regex = Regexp.new( text_string[0..3] + ".*\342\200\246") # \342\200\246 unicode \u2026 the ... character
-            elided_regex = Regexp.new( text_string[0..3] )
-            rules[ :object_attributes_hash ][ :text ] = elided_regex
-        end
+
         
         # retrieve objects from xml
         matches, rule = TDriver::TestObjectAdapter.get_objects(
@@ -131,8 +122,23 @@ module MobyBase
 
         )
         
-        # DEBUG
-        retries += 1
+        # If retrying and regexp search is turned on then update the rules for text search converting it to a regex 
+        if ( 
+              matches.empty? and 
+              $parameters[ sut.id ][:regex_search, 'false'] == 'true' and 
+              rules[ :object_attributes_hash ].has_key?(:text) and
+              rules[ :object_attributes_hash ][ :text ].kind_of? String
+          )
+            puts ">>trying with regex!"
+            text_string = rules[ :object_attributes_hash ][ :text ]
+            if ( $parameters[ sut.id ][:regex_search_with_ellipsis , 'false'] == 'true' )
+              ellipsis_char = ".*\xE2\x80\xA6"  # unicode \u2026 the ... character \xE2\x80\xA6
+            else
+              ellipsis_char = ""
+            end
+            elided_regex = Regexp.new( text_string[0..3] + ellipsis_char )
+            rules[ :object_attributes_hash ][ :text ] = elided_regex
+        end
         
         # raise exception if no matching object(s) found
         raise MobyBase::TestObjectNotFoundError, "Cannot find object with rule:\n#{ rules[ :object_attributes_hash ].inspect }" if matches.empty?
