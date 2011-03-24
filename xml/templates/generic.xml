@@ -78,6 +78,8 @@
     <parameter name="verify_blocks" value="" />
 
     <parameter name="use_find_object" value="true" />
+    
+    <parameter name="retry_search_with_regexp" value="true" />
 
   </template>
 

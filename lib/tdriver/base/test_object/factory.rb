@@ -27,7 +27,7 @@ module MobyBase
 
     include Singleton
 
-    attr_reader :timeout
+    attr_reader :timeout, :my_rules # DEBUG
 
     # TODO: Document me (TestObjectFactory::initialize)
     def initialize
@@ -37,6 +37,9 @@ module MobyBase
 
       # get timeout retry interval from parameters, use default value if parameter not found
       @_retry_interval = $parameters[ :application_synchronization_retry_interval, "1" ].to_f
+      
+      # DEBUG
+      @my_rules = []
 
     end
 
@@ -93,7 +96,10 @@ module MobyBase
         :__index => 0
                          
       )
-
+  
+      # DEBUG
+      retries = 0
+       
       # identify objects until desired matches found or timeout exceeds
       MobyUtil::Retryable.until( 
 
@@ -111,6 +117,21 @@ module MobyBase
         # refresh sut
         sut.refresh( directives[ :__refresh_arguments ], search_parameters )
 
+        # DEBUG
+        puts  "My retry parameter " + $parameters[ sut.id ][:retry_search_with_regexp, nil].to_s
+        puts "Try number: #{retries} " 
+        
+        p rules
+        @my_rules << rules
+        if retries > 0 and rules[ :object_attributes_hash ].has_key?(:text)
+          text_string = rules[ :object_attributes_hash ][ :text ]
+          #elided_regex = Regexp.new( text_string[0..3] + ".*\342\200\246") # \342\200\246 unicode \u2026 the ... character
+          elided_regex = Regexp.new( text_string[0..3] )
+          rules[ :object_attributes_hash ][ :text ] = elided_regex
+          #elided_regex.match("asdfasdfBacks\342\200\246")
+          
+        end
+        
         # retrieve objects from xml
         matches, rule = TDriver::TestObjectAdapter.get_objects(
         
@@ -119,6 +140,9 @@ module MobyBase
          directives[ :__find_all_children ] 
 
         )
+        
+        # DEBUG
+        retries += 1
         
         # raise exception if no matching object(s) found
         raise MobyBase::TestObjectNotFoundError, "Cannot find object with rule:\n#{ rules[ :object_attributes_hash ].inspect }" if matches.empty?
