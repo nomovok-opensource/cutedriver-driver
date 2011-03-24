@@ -125,13 +125,12 @@ module MobyBase
         # If retrying and regexp search is turned on then update the rules for text search converting it to a regex 
         if ( 
               matches.empty? and 
-              $parameters[ sut.id ][:regex_search, 'false'] == 'true' and 
+              $parameters[ sut.id ][:elided_search, 'false'] == 'true' and 
               rules[ :object_attributes_hash ].has_key?(:text) and
               rules[ :object_attributes_hash ][ :text ].kind_of? String
           )
-            puts ">>trying with regex!"
             text_string = rules[ :object_attributes_hash ][ :text ]
-            if ( $parameters[ sut.id ][:regex_search_with_ellipsis , 'false'] == 'true' )
+            if ( $parameters[ sut.id ][:elided_search_with_ellipsis , 'false'] == 'true' )
               ellipsis_char = ".*\xE2\x80\xA6"  # unicode \u2026 the ... character \xE2\x80\xA6
             else
               ellipsis_char = ""

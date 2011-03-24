@@ -79,10 +79,10 @@
 
     <parameter name="use_find_object" value="true" />
     
-    <!-- if no objects are found by a given text, a regex search will be attempted if this is turned on -->
-    <!-- the regex will find text matching the first 4 chars and optionally ending with the ellipsis char ... (not 3 dots, but \u2026 unicode char) -->
-    <parameter name="regex_search" value="false" />
-    <parameter name="regex_search_with_ellipsis" value="false" />
+    <!-- if no objects are found by a given text, a new search will be attempted to try and find an ellided version of the text -->
+    <!-- the new search will try to match the first 4 chars of the original text and optionally a trailing ellipsis char ... (not 3 dots, but \u2026 unicode char) -->
+    <parameter name="elided_search" value="false" />
+    <parameter name="elided_search_with_ellipsis" value="false" />
 
   </template>
 
