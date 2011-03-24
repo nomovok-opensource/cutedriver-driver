@@ -1,20 +1,20 @@
 ############################################################################
-## 
-## Copyright (C) 2010 Nokia Corporation and/or its subsidiary(-ies). 
-## All rights reserved. 
-## Contact: Nokia Corporation (testabilitydriver@nokia.com) 
-## 
-## This file is part of Testability Driver. 
-## 
-## If you have questions regarding the use of this file, please contact 
-## Nokia at testabilitydriver@nokia.com . 
-## 
-## This library is free software; you can redistribute it and/or 
-## modify it under the terms of the GNU Lesser General Public 
-## License version 2.1 as published by the Free Software Foundation 
-## and appearing in the file LICENSE.LGPL included in the packaging 
-## of this file. 
-## 
+##
+## Copyright (C) 2010 Nokia Corporation and/or its subsidiary(-ies).
+## All rights reserved.
+## Contact: Nokia Corporation (testabilitydriver@nokia.com)
+##
+## This file is part of Testability Driver.
+##
+## If you have questions regarding the use of this file, please contact
+## Nokia at testabilitydriver@nokia.com .
+##
+## This library is free software; you can redistribute it and/or
+## modify it under the terms of the GNU Lesser General Public
+## License version 2.1 as published by the Free Software Foundation
+## and appearing in the file LICENSE.LGPL included in the packaging
+## of this file.
+##
 ############################################################################
 
 
@@ -37,7 +37,7 @@ module TDriverReportAPI
     end
     return ret
   end
-  
+
   def tdriver_log_data(data)
     Kernel::raise TypeError.new("Argument to method cannot be nil.") if data.nil?
     if $tdriver_reporter!=nil
@@ -45,19 +45,25 @@ module TDriverReportAPI
     end
   end
 
-  def tdriver_capture_state(capture_screen_shot=true)    
+  def tdriver_capture_state(capture_screen_shot=true)
     if $tdriver_reporter
       $new_test_case.capture_dump(capture_screen_shot) if $new_test_case
     end
   end
-  
+
+  def tdriver_capture_screen(arguments=Hash.new)
+    if $tdriver_reporter
+      $new_test_case.capture_dump(true,arguments) if $new_test_case
+    end
+  end
+
   def tdriver_log_data_in_total_run_table(column_name,value)
     Kernel::raise TypeError.new("Argument to method cannot be nil.") if column_name.nil? || value.nil?
     if $tdriver_reporter!=nil
       $tdriver_reporter.set_user_table_data(column_name,value)
     end
   end
-  
+
   def tdriver_report_log(message)
   	Kernel::raise TypeError.new("Argument message was not a String.") unless message.nil? or message.kind_of?(String)
     if $tdriver_reporter
@@ -212,8 +218,8 @@ module TDriverReportAPI
     $stderr.puts "%s:%s warning: method deprecated" % [ file, line]
     tdriver_report_combine_reports(reports)
   end
-  
-  
+
+
 end #TDriverReportAPI
 
 module MattiReportAPI
@@ -222,4 +228,4 @@ module MattiReportAPI
 
 end
 
- 
+

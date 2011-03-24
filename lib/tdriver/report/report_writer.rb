@@ -379,12 +379,35 @@ background: black; /*background of tabs for hover state, plus tab with "selected
 }
 
 
-img
-{
-	width:50%;
-	height:50%;
-}
-    .togList
+div.img
+  {
+  margin:2px;
+  border:0px;
+  height:auto;
+  width:auto;
+  text-align:left;
+  }
+div.img img
+  {
+  display:inline;
+  margin:3px;
+  border:0px;
+  }
+div.img a:hover img
+  {
+  border:1px solid #0000ff;
+  height:50%;
+  width:50%;
+  }
+div.desc
+  {
+  text-align:left;
+  font-weight:normal;
+  width:120px;
+  margin:3px;
+  }
+
+.togList
 {
 
 }
@@ -651,7 +674,7 @@ display: block;
       else
         stylesheet='<link rel="stylesheet" title="TDriverReportStyle" href="../../tdriver_report_style.css"/>'
       end
-      
+
     end
     html_start='<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">' <<
       '<html xmlns="http://www.w3.org/1999/xhtml">'<<
@@ -901,7 +924,7 @@ display: block;
     end
     tdriver_group = nil
     html_body=nil
-    
+
   end
   def write_test_case_summary_body(page,status,tc_arr,chronological_page=nil,report_page=nil,test_case_name=nil)
     html_body=Array.new
@@ -919,7 +942,7 @@ display: block;
       html_body << '<form action="save_results_to" ><input type="submit" name="save_results_to" value="Download report" /></form>' if @report_editable=='true'
       tdriver_group=nil
       html_result=nil
-    elsif @fail_statuses.include?(status) || status == "failed" 
+    elsif @fail_statuses.include?(status) || status == "failed"
       title='<div class="page_title"><center><h1>Failed</h1></center></div>'<<
         '<div class="summary_failed">' <<
         '<form action="save_total_run_results" >'
@@ -1025,13 +1048,13 @@ display: block;
       chronological_html_body=nil
     end # case
 	end # if
-	
+
     html_body << '</div>'
     File.open(page, 'a') do |f2|
       f2.puts html_body
     end
     html_body=nil
-    
+
   end
 
   def write_summary_body(page,start_time,end_time,run_time,total_run,total_passed,total_failed,total_not_run,total_crash_files,total_device_resets,summary_arr=nil)

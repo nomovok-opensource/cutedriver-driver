@@ -1,20 +1,20 @@
 ############################################################################
-## 
-## Copyright (C) 2010 Nokia Corporation and/or its subsidiary(-ies). 
-## All rights reserved. 
-## Contact: Nokia Corporation (testabilitydriver@nokia.com) 
-## 
-## This file is part of Testability Driver. 
-## 
-## If you have questions regarding the use of this file, please contact 
-## Nokia at testabilitydriver@nokia.com . 
-## 
-## This library is free software; you can redistribute it and/or 
-## modify it under the terms of the GNU Lesser General Public 
-## License version 2.1 as published by the Free Software Foundation 
-## and appearing in the file LICENSE.LGPL included in the packaging 
-## of this file. 
-## 
+##
+## Copyright (C) 2010 Nokia Corporation and/or its subsidiary(-ies).
+## All rights reserved.
+## Contact: Nokia Corporation (testabilitydriver@nokia.com)
+##
+## This file is part of Testability Driver.
+##
+## If you have questions regarding the use of this file, please contact
+## Nokia at testabilitydriver@nokia.com .
+##
+## This library is free software; you can redistribute it and/or
+## modify it under the terms of the GNU Lesser General Public
+## License version 2.1 as published by the Free Software Foundation
+## and appearing in the file LICENSE.LGPL included in the packaging
+## of this file.
+##
 ############################################################################
 
 
@@ -61,7 +61,7 @@ module TDriverReportCreator
       :tc_video_recorders,
       :tc_memory_amount_start,
       :tc_memory_amount_end,
-      :tc_memory_amount_start,      
+      :tc_memory_amount_start,
       :tc_memory_amount_total,
       :pass_statuses,
       :fail_statuses,
@@ -212,7 +212,7 @@ module TDriverReportCreator
       if stripped==nil then
         stripped=value.squeeze(" ")
       end
-      stripped1 = stripped.to_s.gsub(' ','_')      
+      stripped1 = stripped.to_s.gsub(' ','_')
       if stripped1==nil
         stripped1=stripped
       end
@@ -280,7 +280,7 @@ module TDriverReportCreator
     # === returns
     # nil
     # === raises
-    def set_test_case_execution_log(value)     
+    def set_test_case_execution_log(value)
       @test_case_execution_log=@test_case_execution_log.to_s + '<br />' + value.to_s.gsub(/\n/,'<br />')
     end
     #This method sets the test case user data
@@ -292,7 +292,7 @@ module TDriverReportCreator
     # === raises
     def set_test_case_user_data(data,columns)
       @test_case_user_data=data
-      @test_case_user_data_columns=columns    
+      @test_case_user_data_columns=columns
     end
     #This method sets the users data to display in chronological table
     #
@@ -303,7 +303,7 @@ module TDriverReportCreator
     # === raises
     def set_test_case_chronological_view_data(data)
       @test_case_chronological_view_data=data
-    end    
+    end
     #This method sets the test case behaviour log
     #
     # === params
@@ -318,17 +318,17 @@ module TDriverReportCreator
     #
     # === params
     # rec_name: String, name of video file to create
-    # previous_name: String, name of video file of previous test case	
+    # previous_name: String, name of video file of previous test case
     # === returns
     # nil
     def start_video_recording( rec_name, previous_name )
-		
+
       @tc_video_filename = rec_name
       @tc_previous_video_filename = previous_name
       tc_video_width = 640
       tc_video_height = 480
       tc_video_fps = 30
-		
+
       begin
         tc_video_width = MobyUtil::Parameter[ :report_video_width ].to_i
       rescue
@@ -344,20 +344,20 @@ module TDriverReportCreator
       rescue
         # parameter not loaded, do nothing
       end
-		
+
 
       @tc_video_recorders = []
-      	  
+
       begin
         each_video_device do | video_device, device_index |
-	  	    
+
           rec_options = { :width => tc_video_width, :height => tc_video_height, :fps => tc_video_fps }
           rec_options[ :device ] = video_device unless video_device == "true" # use default device if "true"
           video_recorder = MobyUtil::TDriverCam.new_cam( "cam_" + device_index + "_" + @tc_video_filename, rec_options )
           video_recorder.start_recording
           @tc_video_recorders << video_recorder
           @tc_video_recording = true
-		  
+
         end
       rescue Exception => e
         # make sure to stop any started cams if startup fails
@@ -365,42 +365,42 @@ module TDriverReportCreator
         raise e
 
       end
-	  
+
       nil
-		
+
     end
-	  
+
     def target_video_alive
-   
+
       ret = ""
       each_video_device do | video_device, device_index |
-     
+
         check_fps = MobyUtil::Parameter[:report_activity_fps, '3']
         check_frame_min = MobyUtil::Parameter[:report_activity_frame_treshold, '8']
         check_video_min = MobyUtil::Parameter[:report_activity_video_treshold, '29']
-        
+
         ret_n = MobyUtil.video_alive? "cam_" + device_index + "_" + @tc_video_filename, check_fps.to_f, check_frame_min.to_f, check_video_min.to_f, false
-        
+
         if !ret_n
           ret += ", " if !ret.empty?
           ret += "cam_" + device_index + "_" + @tc_video_filename
         end
-                
-      end   
-      
+
+      end
+
       return ret
-    
+
     end
-    
+
     def stop_video_recording()
-	
+
 
       @tc_video_recorders.each do | video_recorder |
         video_recorder.stop_recording
       end
 
       @tc_video_recording = false
-	  
+
     end
     #This method sets the tdriver test case memory at start
     #
@@ -432,7 +432,7 @@ module TDriverReportCreator
     def set_tc_memory_amount_total(value)
       @tc_memory_amount_total=value
     end
-        
+
     #This method updates the tdrivertest case details page
     #
     # === params
@@ -467,50 +467,50 @@ module TDriverReportCreator
           @test_case_total_data_received
         )
         write_page_end(@test_case_folder+'/index.html')
-                
+
       rescue Exception => e
         Kernel::raise e
       end
       return nil
     end
-    
+
     #This method makes a copy of the video recording of this test case
     def copy_video_capture()
-	
+
       stop_video_recording
-	  
+
       logging_enabled = MobyUtil::Logger.instance.enabled
       MobyUtil::Logger.instance.enabled=false
       begin
-	  
+
         video_folder=@test_case_folder+'/video'
         if File::directory?(video_folder)==false
           FileUtils.mkdir_p video_folder
-        end        
-		
+        end
+
 
         each_video_device do | video_device, device_index |
-                    
-          begin		
+
+          begin
             FileUtils.copy("cam_" + device_index + "_" + @tc_video_filename, video_folder)
           rescue
             # Copy failed, do nothing
           end
-          
+
           begin
             FileUtils.copy("cam_" + device_index + "_" + @tc_previous_video_filename, video_folder)
           rescue
             # Copy failed, do nothing
           end
-		
+
         end
 
-       
-		
+
+
       rescue Exception => e
         @test_case_execution_log=@test_case_execution_log.to_s + '<br />' + "Unable to store video file: " + e.message
       end
-	  
+
       MobyUtil::Logger.instance.enabled=logging_enabled
       return nil
     end
@@ -521,7 +521,7 @@ module TDriverReportCreator
     # === returns
     # nil
     # === raises
-    def capture_dump(take_screenshot=true)      
+    def capture_dump(take_screenshot=true,arguments=Hash.new)
       MobyUtil::Logger.instance.enabled=false
       image_html=Array.new
       state_html=Array.new
@@ -532,24 +532,31 @@ module TDriverReportCreator
           FileUtils.mkdir_p dump_folder
         end
         MobyBase::SUTFactory.instance.connected_suts.each do |sut_id, sut_attributes|
-          
+
           t = Time.now
           time_stamp=t.strftime( "%Y%m%d%H%M%S" )
           if take_screenshot==true
             begin
               sut_attributes[:sut].capture_screen( :Filename => dump_folder+'/'+time_stamp+'_'+sut_id.to_s+'_state.png', :Redraw => true ) if sut_attributes[:is_connected]
-              image_html='<a href="state_xml/'<<
+              if arguments[:file]
+                sut_attributes[:sut].capture_screen( :Filename => arguments[:file], :Redraw => true ) if sut_attributes[:is_connected]
+              end
+              image_html='<div class="img"><a href="state_xml/'<<
                 time_stamp+'_'+sut_id.to_s+'_state.png'<<
-                '"><img alt="" src="state_xml/'<<
+                '" target="_blank"><img alt="" src="state_xml/'<<
                 time_stamp+'_'+sut_id.to_s+'_state.png'<<
-                '" width=20% height=20% /></a>'
+                '" width="10%" height="10%" /></a>'
+                if arguments[:text]
+                  image_html << "<div class=\"desc\">#{arguments[:text]}</div>"
+                end
+                image_html << '</div>'
               self.set_test_case_execution_log(image_html.to_s)
-            rescue Exception=>e             
+            rescue Exception=>e
               @capture_screen_error="Unable to capture sceen image #{sut_id}: " + e.message
               self.set_test_case_execution_log(@capture_screen_error.to_s)
             end
           end
-        
+
           begin
             failed_xml_state=sut_attributes[:sut].xml_data() if sut_attributes[:is_connected]
             File.open(dump_folder+'/'+time_stamp+'_'+sut_id.to_s+'_state.xml', 'w') { |file| file.write(failed_xml_state) }
@@ -557,7 +564,7 @@ module TDriverReportCreator
               time_stamp+'_'+sut_id.to_s+'_state.xml'<<
               '">'+time_stamp+'_'+sut_id.to_s+'_state.xml'+'</a>'
             self.set_test_case_execution_log(state_html.to_s)
-          rescue Exception=>e           
+          rescue Exception=>e
             @failed_dump_error="Unable to capture state xml #{sut_id}: " + e.message
             self.set_test_case_execution_log(@failed_dump_error.to_s)
           end
