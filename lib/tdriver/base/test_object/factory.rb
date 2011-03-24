@@ -37,9 +37,6 @@ module MobyBase
 
       # get timeout retry interval from parameters, use default value if parameter not found
       @_retry_interval = $parameters[ :application_synchronization_retry_interval, "1" ].to_f
-      
-      # DEBUG
-      @my_rules = []
 
     end
 
@@ -118,18 +115,11 @@ module MobyBase
         sut.refresh( directives[ :__refresh_arguments ], search_parameters )
 
         # DEBUG
-        puts  "My retry parameter " + $parameters[ sut.id ][:retry_search_with_regexp, nil].to_s
-        puts "Try number: #{retries} " 
-        
-        p rules
-        @my_rules << rules
-        if retries > 0 and rules[ :object_attributes_hash ].has_key?(:text)
-          text_string = rules[ :object_attributes_hash ][ :text ]
-          #elided_regex = Regexp.new( text_string[0..3] + ".*\342\200\246") # \342\200\246 unicode \u2026 the ... character
-          elided_regex = Regexp.new( text_string[0..3] )
-          rules[ :object_attributes_hash ][ :text ] = elided_regex
-          #elided_regex.match("asdfasdfBacks\342\200\246")
-          
+        if ( $parameters[ sut.id ][:retry_search_with_regexp, false] and retries > 0 and rules[ :object_attributes_hash ].has_key?(:text) )
+            text_string = rules[ :object_attributes_hash ][ :text ]
+            #elided_regex = Regexp.new( text_string[0..3] + ".*\342\200\246") # \342\200\246 unicode \u2026 the ... character
+            elided_regex = Regexp.new( text_string[0..3] )
+            rules[ :object_attributes_hash ][ :text ] = elided_regex
         end
         
         # retrieve objects from xml
