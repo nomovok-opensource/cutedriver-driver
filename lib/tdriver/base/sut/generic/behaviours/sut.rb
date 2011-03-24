@@ -679,6 +679,7 @@ module MobyBehaviour
 
         else
 
+=begin
           # execute the application control service request
           execute_command(
 
@@ -694,6 +695,24 @@ module MobyBehaviour
               target[ :signals_to_listen ]
             )
 
+          )
+=end
+
+          # execute the application control service request
+          execute_command(
+            MobyCommand::Application.new(
+              :Run,
+              { 
+                :application_name => target[ :name ],
+                :application_uid => target[ :uid ],
+                :sut => self,
+                :arguments => target[ :arguments ],
+                :environment => target[ :environment ],
+                :working_directory => target[ :working_directory ],
+                :events_to_listen => target[ :events_to_listen ],
+                :signals_to_listen => target[ :signals_to_listen ]
+              }
+            )
           )
 
         end
@@ -1375,11 +1394,22 @@ module MobyBehaviour
 
           else
 
+=begin
             app_command = MobyCommand::Application.new(
               :State,
               refresh_args[ :FullName ] || refresh_args[ :name ],
               refresh_args[ :id ],
               self
+            )
+=end
+
+            app_command = MobyCommand::Application.new(
+              :State,
+              {
+                :application_name => refresh_args[ :FullName ] || refresh_args[ :name ],
+                :application_uid => refresh_args[ :id ],
+                :sut => self
+              }
             )
 
             # store in case needed
@@ -1457,6 +1487,7 @@ module MobyBehaviour
 
             begin
 
+=begin
               subdata =
                 MobyUtil::XML.parse_string(
                 execute_command(
@@ -1469,11 +1500,32 @@ module MobyBehaviour
                     nil,
                     nil,
                     nil,
+                    nil,
                     {
                       'x_parent_absolute' => x_prev,
                       'y_parent_absolute' => y_prev,
                       'embedded' => 'true',
                       'parent_size' => winSize
+                    }
+                  )
+                )[ 0 ]
+              )
+=end
+
+              subdata =
+                MobyUtil::XML.parse_string(
+                execute_command(
+                  MobyCommand::Application.new(
+                    :State,
+                    {
+                      :application_uid => pid,
+                      :sut => self,
+                      :flags => {
+                        'x_parent_absolute' => x_prev,
+                        'y_parent_absolute' => y_prev,
+                        'embedded' => 'true',
+                        'parent_size' => winSize
+                      }
                     }
                   )
                 )[ 0 ]

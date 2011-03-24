@@ -145,6 +145,7 @@ module MobyBehaviour
         
         if close_options[ :force_kill ] != nil
 
+=begin
           @sut.execute_command( 
             MobyCommand::Application.new( 
               :Close,     # command_type
@@ -161,15 +162,41 @@ module MobyBehaviour
               } 
             )
           )
+=end
+
+          @sut.execute_command( 
+            MobyCommand::Application.new( 
+              :Close,     # command_type
+              {
+                :application_name => self.name,
+                :application_uid => self.uid,  
+                :sut => self.sut,              
+                :flags => { :force_kill => close_options[ :force_kill ] }
+              } 
+            )
+          )
 
         else   
 
+=begin
           @sut.execute_command( 
             MobyCommand::Application.new( 
               :Close, 
               self.name, 
               self.uid, 
               self.sut
+            ) 
+          )
+=end
+
+          @sut.execute_command( 
+            MobyCommand::Application.new( 
+              :Close, 
+              { 
+                :application_name => self.name, 
+                :application_uid => self.uid, 
+                :sut => self.sut
+              }
             ) 
           )
 
@@ -364,9 +391,20 @@ module MobyBehaviour
 	#
 	#
 	def bring_to_foreground
-	  @sut.execute_command(MobyCommand::Application.new(:BringToForeground, nil, self.uid, self.sut))
-	end
 
+	  #@sut.execute_command(MobyCommand::Application.new(:BringToForeground, nil, self.uid, self.sut))
+
+	  @sut.execute_command(
+	    MobyCommand::Application.new(
+	      :BringToForeground, 
+	      { 
+	        :application_uid => self.uid, 
+	        :sut => self.sut
+        }
+      )
+    )
+
+	end
 
 	# == description
 	# Kills the application process
@@ -378,7 +416,19 @@ module MobyBehaviour
 	#
 	def kill
 
-	  @sut.execute_command( MobyCommand::Application.new( :Kill, self.executable_name, self.uid, self.sut ) )
+	  #@sut.execute_command( MobyCommand::Application.new( :Kill, self.executable_name, self.uid, self.sut ) )
+
+	  @sut.execute_command( 
+	    MobyCommand::Application.new( 
+	      :Kill, 
+	      {
+	        :application_name => self.executable_name, 
+	        :application_uid => self.uid, 
+	        :sut => self.sut 
+        }
+      ) 
+    )
+
 
 	end
 
