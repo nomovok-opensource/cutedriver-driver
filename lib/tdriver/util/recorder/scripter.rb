@@ -59,9 +59,24 @@ module MobyUtil
       # 3 = press and release
       
       # COLLECT ALL MOUSE EVENTS
-      mouse_moves = xml_as_object.children(:type =>'event', :name=>'MouseMove')
-      mouse_press_events = xml_as_object.children(:type =>'event', :name=>'MouseButtonPress')
-      mouse_release_events = xml_as_object.children(:type =>'event', :name=>'MouseButtonRelease')
+      mouse_moves = []
+      mouse_press_events = []
+      mouse_release_events = []
+      
+      begin
+        mouse_moves = xml_as_object.children(:type =>'event', :name=>'MouseMove')
+      rescue MobyBase::TestObjectNotFoundError
+      end
+      
+      begin
+        mouse_press_events = xml_as_object.children(:type =>'event', :name=>'MouseButtonPress')
+      rescue MobyBase::TestObjectNotFoundError
+      end
+      
+      begin 
+        mouse_release_events = xml_as_object.children(:type =>'event', :name=>'MouseButtonRelease')
+      rescue MobyBase::TestObjectNotFoundError
+      end
       
       # STORE MOVE POINTS
       move_points = []
@@ -85,16 +100,28 @@ module MobyUtil
         # COLLECT MouseMove points until MouseButtonRelease
         # If no more MouseButtonRelease or MouseButtonPress then last MoveMouse point id
         first_point_index = mouse_press_events[index].id.to_i
-        next_mouse_press_index =  ( mouse_press_events[ index + 1 ].nil? ) ?  move_points.last['id'].to_i : mouse_press_events[ index + 1 ].id.to_i
-        next_mouse_release = release_events.select{ |event| event['id'].to_i < next_mouse_press_index }
-        next_mouse_release_index = next_mouse_release.first['id'].to_i unless next_mouse_release.empty?
-        last_point_index = ( next_mouse_release_index.nil? ) ? next_mouse_press_index : next_mouse_release_index
+        if ( !move_points.empty? )
+          next_mouse_press_index =  ( mouse_press_events[ index + 1 ].nil? ) ?  move_points.last['id'].to_i : mouse_press_events[ index + 1 ].id.to_i
+          next_mouse_release = release_events.select{ |event| event['id'].to_i < next_mouse_press_index }
+          next_mouse_release_index = next_mouse_release.first['id'].to_i unless next_mouse_release.empty?
+          last_point_index = ( next_mouse_release_index.nil? ) ? next_mouse_press_index : next_mouse_release_index
+        else
+          if ( !release_events.empty? )
+            next_mouse_press_index =  ( mouse_press_events[ index + 1 ].nil? ) ?  0 : mouse_press_events[ index + 1 ].id.to_i
+            next_mouse_release = ( next_mouse_press_index == 0 ) ? [ release_events.last ] : release_events.select{ |event| event['id'].to_i < next_mouse_press_index }
+            last_point_index =  next_mouse_release.first['id'].to_i unless ( next_mouse_release.nil? or next_mouse_release.empty? )
+          else
+            last_point_index = 0
+          end
+        end
+        
         
         points = move_points.select{ |point| point['id'].to_i > first_point_index and point['id'].to_i <= last_point_index }
         points.first['interval'] = 0.to_f unless points.empty? # set first interval to 0
         
-        # PROCESS gesture at MouseButtonRelease
-        if ( last_point_index != move_points.last['id'].to_i )
+        # PROCESS gesture at MouseButtonRelease unless we hit last point and there is no release
+        last_processed_event_id = ( move_points.empty? ) ? 0 : move_points.last['id'].to_i
+        if ( last_point_index != last_processed_event_id )
           script << generate_command(active_target, points, mouse_status = 3 ) << "\n"   
           
         # END EVENTS, MouseButtonRelease truncated or second press without release witch would not make sense
