@@ -396,8 +396,8 @@ div.img img
 div.img a:hover img
   {
   border:1px solid #0000ff;
-  height:10%;
-  width:10%;
+  height:20%;
+  width:20%;
   }
 div.desc
   {

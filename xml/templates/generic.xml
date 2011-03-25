@@ -153,10 +153,12 @@
 
     <!-- Parameters for report crash file monitoring -->
     <parameter name="report_crash_file_monitor" value="false" />
+    <parameter name="report_crash_file_monitor_crash_file_cleanup" value="false" />
     <parameter name="report_crash_file_monitored_sut_ids" value="s60,qt_sut" />
     <parameter name="report_crash_file_locations" value="C:,c:\data,E:,F:" /> <!-- posix="..." -->
     <parameter name="report_crash_file_names" value="MobileCrash" />
     <parameter name="report_disconnect_connected_devices" value="false" />
+
 
     <!-- Parameters for report details -->
     <parameter name="report_outputter_path" value="tdriver_reports/" />

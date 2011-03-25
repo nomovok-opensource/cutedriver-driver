@@ -254,9 +254,13 @@ module TDriverReportCreator
       exit(1)
     end
     $new_test_case.read_crash_monitor_settings()
+
     $new_test_case.read_file_monitor_settings()
+    
+    $new_test_case.clean_crash_files_from_sut() if $test_case_run_index==1 && MobyUtil::Parameter[ :report_crash_file_monitor_crash_file_cleanup, false ]=='true'
 
     amount_of_crash_files=$new_test_case.check_if_crash_files_exist()
+    
     if amount_of_crash_files.to_i > 0
       $new_test_case.capture_crash_files()
       $new_test_case.clean_crash_files_from_sut()
