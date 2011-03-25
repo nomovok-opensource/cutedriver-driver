@@ -17,6 +17,7 @@
 ##
 ############################################################################
 
+
 require 'fileutils'
 require 'date'
 require File.expand_path( File.join( File.dirname( __FILE__ ), 'error_recovery/tdriver_error_recovery_settings' ) )
@@ -56,6 +57,8 @@ if MobyUtil::Parameter[ :custom_error_recovery_module, nil ]!=nil
   require MobyUtil::Parameter[ :custom_error_recovery_module ]
 
 end
+include TDriverReportAPI
+
 
 
  

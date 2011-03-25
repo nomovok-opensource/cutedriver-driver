@@ -147,5 +147,8 @@ $parameters.init
 # enable logging engine
 $logger.enable_logging
 
+# reporting modules
+require File.expand_path( File.join( File.dirname( __FILE__ ), 'report/report.rb' ) ) if MobyUtil::Parameter[ :enable_reporter, 'true' ]=='true'
+
 # initialization done, everything is ready
 $TDRIVER_INITIALIZED = true
