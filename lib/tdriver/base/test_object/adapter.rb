@@ -26,9 +26,6 @@ module TDriver
     
       private
 
-    		# special cases: allow partial match when value of type and attribute name matches
-        @@partial_match_allowed = [ 'list_item', 'text' ], [ 'application', 'fullname' ]
- 
         # TODO: document me
         def xpath_attributes( attributes, element_attributes, object_type )
   
@@ -43,7 +40,7 @@ module TDriver
 
               prefix_key = "@#{ key }"
 
-              if @@partial_match_allowed.include?( [ object_type, key ] )
+              if @partial_match_allowed.include?( [ object_type, key ] )
                 
                 # regexp support is needed also here
                 
@@ -89,13 +86,19 @@ module TDriver
           end
           
         end # xpath_attributes
+ 
+        # TODO: document me
+        def initialize_class
+
+      		# special cases: allow partial match when value of type and attribute name matches
+          @partial_match_allowed = [ 'list_item', 'text' ], [ 'application', 'fullname' ]
+
+        end
       
     end # static
 
     # TODO: document me
     def self.regexp_compare( nodeset, source, options ) 
-      
-      #p nodeset, source, options
       
       # rebuild defined regexp, used while matching element content
       regexp_object = Regexp.new( source.to_s, options.to_i )
@@ -456,12 +459,21 @@ module TDriver
         # skip if child accessor is already created 
         next if test_object.respond_to?( object_type ) 
 
-        # create child accessor method to test object unless already exists
-        test_object.instance_eval(
+        begin
 
-          "def #{ object_type }( rules = {} ); raise TypeError,'parameter <rules> should be hash' unless rules.kind_of?( Hash ); rules[ :type ]=:#{ object_type }; child( rules ); end;"
+          # create child accessor method to test object unless already exists
+          test_object.instance_eval(
 
-        ) unless object_type.empty?
+            "def #{ object_type }( rules = {} ); raise TypeError,'parameter <rules> should be hash' unless rules.kind_of?( Hash ); rules[ :type ]=:#{ object_type }; child( rules ); end;"
+
+          ) unless object_type.empty?
+
+        # in case if object type has some invalid characters, e.g. type is "ns:object"
+        rescue SyntaxError
+  
+          warn "warning: unable to create accessor to child test object whose type is #{ object_type.inspect }"
+
+        end
 
       }
 
@@ -640,6 +652,9 @@ module TDriver
 
     # enable hooking for performance measurement & debug logging
     TDriver::Hooking.hook_methods( self ) if defined?( TDriver::Hooking )
+
+    # initialize TDriver::TestObjectAdapter
+    initialize_class
 
   end # TestObjectAdapter
 
