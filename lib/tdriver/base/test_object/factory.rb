@@ -27,7 +27,7 @@ module MobyBase
 
     include Singleton
 
-    attr_reader :timeout, :my_rules # DEBUG
+    attr_reader :timeout
 
     # TODO: Document me (TestObjectFactory::initialize)
     def initialize
