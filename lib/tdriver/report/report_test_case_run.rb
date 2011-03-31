@@ -112,6 +112,7 @@ module TDriverReportCreator
       @not_run_statuses=MobyUtil::Parameter[ :report_not_run_statuses, "not run" ].split('|')
       @test_case_logging_level = MobyUtil::Parameter[ :logging_level, nil ]
       @trace_directory=MobyUtil::Parameter[ :report_trace_folder, nil]
+      @report_short_folders=MobyUtil::Parameter[ :report_short_folders, 'false']
       $tdriver_report_log_output = StringIO.new ""
       begin
         if MobyUtil::Parameter[:behaviour_logging] == 'true'
@@ -612,7 +613,12 @@ module TDriverReportCreator
     def  create_test_case_folder(status)
       begin
         #check if report directory exists
-        @test_case_folder=@test_cases_folder+'/'+status+'_'+@test_case_index.to_s+'_'+@test_case_name
+        if @report_short_folders == 'true'
+          @test_case_folder=@test_cases_folder+'/'+status+'_'+@test_case_index.to_s
+        else
+          @test_case_folder=@test_cases_folder+'/'+status+'_'+@test_case_index.to_s+'_'+@test_case_name
+        end
+        
         if File::directory?(@test_case_folder)==false
           FileUtils.mkdir_p @test_case_folder
         end
@@ -633,7 +639,12 @@ module TDriverReportCreator
       begin
         #check if report directory exists
         old_test_case_folder=@test_case_folder
-        new_test_case_folder=@test_case_folder.sub('result'+'_'+@test_case_index.to_s+'_'+@test_case_name,status+'_'+@test_case_index.to_s+'_'+@test_case_name)
+        if @report_short_folders == 'true'
+          new_test_case_folder=@test_case_folder.sub('result'+'_'+@test_case_index.to_s,status+'_'+@test_case_index.to_s)
+        else
+          new_test_case_folder=@test_case_folder.sub('result'+'_'+@test_case_index.to_s+'_'+@test_case_name,status+'_'+@test_case_index.to_s+'_'+@test_case_name)
+        end
+        
         if File::directory?(new_test_case_folder)==false
           FileUtils.mv old_test_case_folder, new_test_case_folder , :force => true  # no error
           @test_case_folder=new_test_case_folder

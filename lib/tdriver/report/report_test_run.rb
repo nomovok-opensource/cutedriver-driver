@@ -94,6 +94,7 @@ module TDriverReportCreator
       @fail_statuses=MobyUtil::Parameter[ :report_failed_statuses, "failed" ].split('|')
       @not_run_statuses=MobyUtil::Parameter[ :report_not_run_statuses, "not run" ].split('|')
       @report_editable=MobyUtil::Parameter[ :report_editable, "false" ]
+      @report_short_folders=MobyUtil::Parameter[ :report_short_folders, 'false']
     end
     #This method sets the test case user defined status
     #
@@ -815,7 +816,14 @@ module TDriverReportCreator
       $result_storage_in_use=true
       begin
         storage_file=nil
-        html_link=status+'_'+index.to_s+'_'+testcase+'/index.html' if link==''
+
+        if @report_short_folders=='true'
+          html_link=status+'_'+index.to_s+'/index.html' if link==''
+        else
+          html_link=status+'_'+index.to_s+'_'+testcase+'/index.html' if link==''
+        end
+
+
         storage_file='all_cases.xml'
 
         file=@report_folder+'/'+storage_file
