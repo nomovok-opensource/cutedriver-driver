@@ -39,9 +39,7 @@ require File.expand_path( File.join( File.dirname( __FILE__ ), 'util/loader.rb' 
 # base modules
 require File.expand_path( File.join( File.dirname( __FILE__ ), 'base/loader.rb' ) )
 
-# reporting modules
-require File.expand_path( File.join( File.dirname( __FILE__ ), 'report/report.rb' ) )
-
 # verify module
 require File.expand_path( File.join( File.dirname( __FILE__ ), 'verify/verify.rb' ) )
+
 
