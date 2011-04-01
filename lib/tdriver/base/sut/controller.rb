@@ -84,30 +84,39 @@ module MobyBase
 		# TypeError:: Wrong argument type $1 for command_data (expected $2)
 		# MobyBase::CommandNotFoundError:: if no implementation is found for the CommandData object
 		def execute_command( command_data )
+        command_data.check_type( MobyCommand::CommandData, "Wrong argument type $1 for command_data (expected $2)" )
+        
+        @execution_order.each{ | controller |
+          
+          begin 
+            
+            # extend command_data with combinination of command data object name and module name to be extended  
+            eval 'command_data.extend %s::%s' % [ @sut_controllers[ controller ].first.first, command_data.class.name.scan( /::(.+)/ ).first.first ]
 
-      command_data.check_type( MobyCommand::CommandData, "Wrong argument type $1 for command_data (expected $2)" )
+            # break if controller associated succesfully 
+            break
 
-			@execution_order.each{ | controller |
+          rescue NameError
 
-				begin 
+            # raise exception only if none controller found
+            Kernel::raise MobyBase::ControllerNotFoundError.new( 'No controller found for CommandData object %s' % command_data.inspect ) unless controller.object_id != @execution_order.last.object_id
+          end
 
-					# extend command_data with combinination of command data object name and module name to be extended  
-					eval 'command_data.extend %s::%s' % [ @sut_controllers[ controller ].first.first, command_data.class.name.scan( /::(.+)/ ).first.first ]
-
-					# break if controller associated succesfully 
-					break
-
-				rescue NameError
-
-					# raise exception only if none controller found
-					Kernel::raise MobyBase::ControllerNotFoundError.new( 'No controller found for CommandData object %s' % command_data.inspect ) unless controller.object_id != @execution_order.last.object_id
-				end
-
-			}
-			
-			command_data.set_adapter( @sut_adapter )      
-			command_data.execute
-
+        }
+        
+        command_data.set_adapter( @sut_adapter )      
+      retries = 0
+      begin 
+        command_data.execute
+      rescue Errno::EPIPE, IOError => e
+         raise if retries == 1
+         retries += 1
+         if MobyBase::SUTFactory.instance.connected_suts.include?(@sut_adapter.sut_id.to_sym)
+           @sut_adapter.disconnect
+           @sut_adapter.connect(@sut_adapter.sut_id)
+         end
+        retry
+      end
 		end
 
 		# enable hooking for performance measurement & debug logging
