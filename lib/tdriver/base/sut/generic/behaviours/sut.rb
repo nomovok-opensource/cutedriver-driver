@@ -1441,11 +1441,12 @@ module MobyBehaviour
 
       end
 
-      fetch_references( @xml_data )
-
+#      fetch_references( @xml_data )
+      @xml_data
     end
 
     # TODO: document me
+    # Usage disable for now.
     def fetch_references( xml )
 
       pids = []
