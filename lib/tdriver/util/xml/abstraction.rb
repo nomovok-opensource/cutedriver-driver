@@ -33,6 +33,14 @@ module MobyUtil
       end
 
       # TODO: document me
+      def clone
+
+        # create a clone of self object, also xml reference object is cloned
+        self.class.new( @xml.clone )
+
+      end
+
+      # TODO: document me
       def comment?
 
         self.kind_of?( MobyUtil::XML::Comment )
