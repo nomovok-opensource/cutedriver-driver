@@ -236,12 +236,26 @@ module TDriver
     # Sort XML nodeset of test objects with layout direction
     def self.sort_elements( nodeset, layout_direction = 'LeftToRight' )
 
-      attribute_pattern = './attributes/attribute[@name="%s"]/value/text()'
+      # cache for x_absolute and y_absolute values; reduces dramatically number of xpath calls
+      cache = {}
+
+      # xpath pattern to be used for x_absolute attribute value
+      x_absolute_pattern = './attributes/attribute[@name="x_absolute"]/value/text()'
+
+      # xpath pattern to be used for x_absolute attribute value
+      y_absolute_pattern = './attributes/attribute[@name="y_absolute"]/value/text()'
 
       # collect only nodes that has x_absolute and y_absolute attributes
       nodeset.collect!{ | node |
 
-        if node.at_xpath( attribute_pattern % 'x_absolute' ).nil? || node.at_xpath( attribute_pattern % 'y_absolute' ).nil?
+        # retrieve x_absolute attribute
+        x_absolute = node.at_xpath( x_absolute_pattern )
+
+        # retrieve y_absolute attribute
+        y_absolute = node.at_xpath( y_absolute_pattern )
+
+        # return unmodified nodeset if both attributes was not found 
+        if x_absolute.nil? || y_absolute.nil?
 
           #warn("Warning: Unable to sort object set due to object type of #{ node.attribute( 'type' ).inspect } does not have \"x_absolute\" or \"y_absolute\" attribute")
 
@@ -249,6 +263,10 @@ module TDriver
 
         else
 
+          # store attributes to cache for further processing
+          cache[ node ] = [ x_absolute.content.to_i, y_absolute.content.to_i ]
+
+          # return node as result
           node
 
         end
@@ -256,12 +274,10 @@ module TDriver
       }.compact!.sort!{ | element_a, element_b |
 
         # retrieve element a's attributes x and y
-        element_a_x = element_a.at_xpath( attribute_pattern % 'x_absolute' ).content.to_i
-        element_a_y = element_a.at_xpath( attribute_pattern % 'y_absolute' ).content.to_i
+        element_a_x, element_a_y = cache[ element_a ]
 
         # retrieve element b's attributes x and y
-        element_b_x = element_b.at_xpath( attribute_pattern % 'x_absolute' ).content.to_i
-        element_b_y = element_b.at_xpath( attribute_pattern % 'y_absolute' ).content.to_i
+        element_b_x, element_b_y = cache[ element_b ]
 
         case layout_direction
         
