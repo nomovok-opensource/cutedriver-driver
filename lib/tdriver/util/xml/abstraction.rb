@@ -33,9 +33,9 @@ module MobyUtil
       end
 
       # TODO: document me
-      def clone
+      def clone!
 
-        # create a clone of self object, also xml reference object is cloned
+        # create a clone of self object, also xml object is cloned; note that all references (e.g. parent) will be disconnected
         self.class.new( @xml.clone )
 
       end
