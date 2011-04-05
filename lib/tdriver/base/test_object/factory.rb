@@ -312,7 +312,9 @@ module MobyBase
           :xml_object => test_object_xml,
 
           # object identification attributes
-          :object_attributes_hash => object_attributes_hash
+          :object_attributes_hash => object_attributes_hash,
+
+          :identification_directives => identification_directives
 
         )
                  
@@ -325,7 +327,7 @@ module MobyBase
 
     # TODO: document me
     def make_test_object( rules )
-                  
+
       # get parent object from hash
       parent = rules[ :parent ]
 
@@ -334,6 +336,9 @@ module MobyBase
       
       # xml object element      
       xml_object = rules[ :xml_object ]
+
+      # additional rules, e.g. :__no_caching
+      identification_directives = rules[ :identification_directives ] || {}
 
       # retrieve attributes
       #TDriver::TestObjectAdapter.fetch_attributes( xml_object, [ 'id', 'name', 'type', 'env' ], false )
@@ -409,8 +414,8 @@ module MobyBase
         # set given application test object in rules hash as parent application for new child test object
         test_object.instance_variable_set( :@parent_application, rules[ :parent_application ] )
 
-        # add created test object to parents child objects cache
-        parent_cache.add_object( test_object ) 
+        # add created test object to parents child objects cache, unless explicitly disabled
+        parent_cache.add_object( test_object ) #unless identification_directives[ :__no_caching ] == true
 
       end
 
