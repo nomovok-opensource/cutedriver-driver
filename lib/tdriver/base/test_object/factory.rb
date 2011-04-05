@@ -415,7 +415,7 @@ module MobyBase
         test_object.instance_variable_set( :@parent_application, rules[ :parent_application ] )
 
         # add created test object to parents child objects cache, unless explicitly disabled
-        parent_cache.add_object( test_object ) #unless identification_directives[ :__no_caching ] == true
+        parent_cache.add_object( test_object ) unless identification_directives[ :__no_caching ] == true
 
       end
 
