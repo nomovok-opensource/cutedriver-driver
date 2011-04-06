@@ -122,6 +122,11 @@ module MobyBase
 
         )
         
+        # Temporary prevent users misleading :Text with :text (as they are different)
+        if ( rules[ :object_attributes_hash ].has_key?(:Text) )
+          rules[ :object_attributes_hash ][:text] = rules[ :object_attributes_hash ][:Text]
+        end
+        
         # If retrying and regexp search is turned on then update the rules for text search converting it to a regex 
         if ( 
               matches.empty? and 
