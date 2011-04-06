@@ -1377,8 +1377,10 @@ module MobyBehaviour
 
       if !@frozen #&& ( @_previous_refresh.nil? || ( current_time - @_previous_refresh ).to_f >= @refresh_interval )
 
-        use_find_objects = $parameters[ @id ][ :use_find_object, 'false' ] == 'true' and self.respond_to?( 'find_object' )
+        # determine should FindObjects service be used
+        use_find_objects =  $parameters[ @id ][ :use_find_object, 'false' ] == 'true' and self.respond_to?( 'find_object' ) == true
 
+        # duplicate refresh arguments hash
         refresh_arguments = refresh_args.clone
 
         MobyUtil::Retryable.while(
@@ -1390,62 +1392,59 @@ module MobyBehaviour
           #use find_object if set on and the method exists
           if use_find_objects
 
+            # retrieve new ui dump xml and crc
             new_xml_data, crc = find_object( refresh_arguments, creation_attributes )
 
           else
 
-=begin
-            app_command = MobyCommand::Application.new(
-              :State,
-              refresh_args[ :FullName ] || refresh_args[ :name ],
-              refresh_args[ :id ],
-              self
+            # retrieve new ui dump xml and crc
+            new_xml_data, crc = execute_command(  
+            
+              MobyCommand::Application.new(
+                :State,
+                {
+                  :application_name => refresh_args[ :FullName ] || refresh_args[ :name ],
+                  :application_uid => refresh_args[ :id ],
+                  :sut => self,
+                  :refresh_arguments => refresh_args
+                }
+              )
+            
             )
-=end
-
-            app_command = MobyCommand::Application.new(
-              :State,
-              {
-                :application_name => refresh_args[ :FullName ] || refresh_args[ :name ],
-                :application_uid => refresh_args[ :id ],
-                :sut => self
-              }
-            )
-
-            # store in case needed
-            app_command.refresh_args( refresh_args )
-
-            new_xml_data, crc = execute_command( app_command )
 
           end
 
+          # parse the xml if crc does not match with previously retrieved crc
+          if ( @xml_data_crc == 0 || crc != @xml_data_crc || crc.nil? )
+
+            # parse new xml data
+            @xml_data = MobyUtil::XML.parse_string( new_xml_data ).root
+
+            # store xml crc to be compared while next ui dump request; do not reparse xml if crc values are equal
+            @xml_data_crc = crc
+
+            # mark that child objects needs to be updated 
+            @childs_updated = false
+
+          end
+
+          # increase number of sent ui dump requests by one
           @dump_count += 1
 
-          @childs_updated = false
-
-          @xml_data = MobyUtil::XML.parse_string( new_xml_data ).root
-
+          # store timestamp of last performed ui dump request 
           @_previous_refresh = Time.now
-
-          # remove timestamp from the beginning of tasMessage, parse if not same as previous ui state
-          #if ( xml_data_no_timestamp = new_xml_data.split( ">", 2 ).last ) != @last_xml_data
-          # @xml_data = MobyUtil::XML.parse_string( new_xml_data ).root
-          # @last_xml_data = xml_data_no_timestamp
-          #end
-
-          #if ( @xml_data_crc == 0 || crc != @xml_data_crc || crc.nil? )
-          # @xml_data, @xml_data_crc, @childs_updated = MobyUtil::XML.parse_string( new_xml_data ).root, crc, false
-          #end
 
         }
 
       end
 
-      fetch_references( @xml_data )
-
+      #fetch_references( @xml_data )
+      @xml_data
+      
     end
 
     # TODO: document me
+    # Usage disable for now.
     def fetch_references( xml )
 
       pids = []

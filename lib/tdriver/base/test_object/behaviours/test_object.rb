@@ -433,7 +433,7 @@ module MobyBehaviour
       attributes[ :type ] = '*' if attributes.select{ | key, value | key.to_s !~ /^__/ ? true : false }.empty?
 
       # children method specific settings
-      attributes.merge!( :__multiple_objects => true, :__find_all_children => find_all_children )
+      attributes.merge!( :__multiple_objects => true, :__find_all_children => find_all_children, :__no_caching => true )
 
       # disable optimizer state if enabled
       disable_optimizer
