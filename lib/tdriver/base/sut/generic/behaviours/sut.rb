@@ -985,7 +985,7 @@ module MobyBehaviour
     #   example: "1"
     #   default: nil
     #  Integer
-    #   description: Optional numeral replacement of an '%Ln | %1' tag on the translated string
+    #   description: Optional numeral replacement of an '%Ln | %1 | %D | %U | %N' tag on the translated string
     #   example: 1
     #  Array
     #   description: Optional numeral replacements for multiple '%L1 | %1, %L2 | %2, ...' tags on the translated string
@@ -1090,7 +1090,7 @@ module MobyBehaviour
 
           elsif numerus.kind_of? String or numerus.kind_of? Integer
 
-            translation.gsub!(/%(Ln|1)/){|s| numerus.to_s}
+            translation.gsub!(/%(Ln|1|U|D|N)/){|s| numerus.to_s}
 
           end
 
@@ -1104,7 +1104,7 @@ module MobyBehaviour
 
             elsif numerus.kind_of? String or numerus.kind_of? Integer
 
-              trans.gsub!(/%(Ln|1)/){|s| numerus.to_s}
+              trans.gsub!(/%(Ln|1|U|D|N)/){|s| numerus.to_s}
 
             end
 
