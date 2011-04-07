@@ -28,16 +28,25 @@ module MobyUtil
         include Node
 
         # TODO: document me
-        def parse( xml_string )
-
-          ::Nokogiri::XML.parse( xml_string, nil, 'UTF-8', ::Nokogiri::XML::ParseOptions::STRICT )
-
+        def initialize( xml )
+          
+          @xml = parse( xml )
+        
         end
 
         # TODO: document me
         def root
 
           node_object( @xml.root )
+
+        end
+
+      private
+      
+        # TODO: document me
+        def parse( xml_string )
+
+          ::Nokogiri::XML.parse( xml_string, nil, 'UTF-8', ::Nokogiri::XML::ParseOptions::STRICT )
 
         end
 

@@ -21,6 +21,19 @@ module MobyUtil
 
   module XML    
 
+    class << self
+    
+      private
+    
+      def initialize_class
+      
+        # set used parser module
+        self.current_parser = MobyUtil::XML::Nokogiri        
+      
+      end
+    
+    end
+
     # Get current XML parser
     # == params
     # == return
@@ -48,20 +61,31 @@ module MobyUtil
 
       # apply parser implementation to abstraction modules
       [ 
-        MobyUtil::XML::Document, 
-        MobyUtil::XML::Element, 
-        MobyUtil::XML::Nodeset, 
-        MobyUtil::XML::Attribute, 
-        MobyUtil::XML::Text, 
-        MobyUtil::XML::Builder,
-        MobyUtil::XML::Comment ].each do | _module |
-          
-          _module.module_exec{ 
+        :Document, 
+        :Element, 
+        :Nodeset, 
+        :Attribute, 
+        :Text, 
+        :Builder,
+        :Comment 
+        
+      ].each do | _module |
 
-            # include parser implementation to abstraction modules 
-            include MobyUtil::KernelHelper.get_constant( "#{ @@parser }::#{ _module.name.split('::').last }") 
+        const_get( _module ).module_exec{
 
-          }
+          begin      
+
+            # include parser behaviour
+            include @@parser.const_get( _module ) 
+
+          rescue NameError
+
+            # raise proper exception if behaviour module not found
+            raise NotImplementedError, "Required behaviour module #{ @@parser.name }::#{ _module } not found"
+            
+          end
+        
+        }
         
       end
 
@@ -84,14 +108,10 @@ module MobyUtil
 
       begin
 
-        MobyUtil::XML::Document.new( nil ).tap{ | document | 
+        # create new document object with given xml string
+        Document.new( xml_string )
 
-          # parse given string
-          document.xml = document.parse( xml_string ) 
-
-        }
-
-      rescue Exception => exception
+      rescue
 
         if $TDRIVER_INITIALIZED == true
         
@@ -133,14 +153,12 @@ module MobyUtil
           end
 
           # raise exception
-          #Kernel::raise MobyUtil::XML::ParseError.new( "%s (%s)%s" % [ exception.message.gsub("\n", ''), exception.class, dump_location ] )
-          Kernel::raise MobyUtil::XML::ParseError, "#{ exception.message.gsub("\n", '') } (#{ exception.class }). #{ dump_location }"
+          Kernel::raise MobyUtil::XML::ParseError, "#{ $!.message.gsub("\n", '') } (#{ $!.class }). #{ dump_location }"
 
         else
         
           # raise exception
-          #Kernel::raise MobyUtil::XML::ParseError.new( "%s (%s)" % [ exception.message.gsub("\n", ''), exception.class ] )
-          Kernel::raise MobyUtil::XML::ParseError, "#{ exception.message.gsub("\n", '') } (#{ exception.class })"
+          Kernel::raise MobyUtil::XML::ParseError, "#{ $!.message.gsub("\n", '') } (#{ $!.class })"
         
         end
 
@@ -160,11 +178,16 @@ module MobyUtil
     # == raises
     # IOError:: File '%s' not found    
     def self.parse_file( filename )    
-
+  
       # raise exception if file not found
       Kernel::raise IOError, "File #{ filename.inspect } not found" unless File.exist?( filename )
 
-      self.parse_string( IO.read( filename ) )
+      # parse file content
+      parse_string( 
+      
+        IO.read( filename ) 
+        
+      )
 
     end
 
@@ -190,15 +213,15 @@ module MobyUtil
 
       begin
 
-        MobyUtil::XML::Builder.new.tap{ | builder | 
+        Builder.new.tap{ | builder | 
 
           builder.build( &block )
 
         }
 
-      rescue Exception => exception
+      rescue
 
-        Kernel::raise MobyUtil::XML::BuilderError, "#{ exception.message } (#{ exception.class })"
+        Kernel::raise MobyUtil::XML::BuilderError, "#{ $!.message } (#{ $!.class })"
 
       end
       
@@ -207,9 +230,9 @@ module MobyUtil
     # enable hooking for performance measurement & debug logging
     TDriver::Hooking.hook_methods( self ) if defined?( TDriver::Hooking )
 
+    # initialize class
+    initialize_class
+
   end # XML
 
 end # MobyUtil
-
-# set used parser module
-MobyUtil::XML.current_parser = MobyUtil::XML::Nokogiri
