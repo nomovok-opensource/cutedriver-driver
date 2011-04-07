@@ -436,13 +436,13 @@ module MobyBehaviour
       attributes.merge!( :__multiple_objects => true, :__find_all_children => find_all_children, :__no_caching => true )
 
       # disable optimizer state if enabled
-      disable_optimizer
+      #disable_optimizer -> leave it on, tuukka if breaks take it back...
 
       # retrieve child objects
       result = get_child_objects( attributes )
 
       # restore optimizer state if it was enabled
-      enable_optimizer
+      #enable_optimizer
 
       # return results
       result
