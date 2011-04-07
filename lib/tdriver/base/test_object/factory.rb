@@ -90,8 +90,10 @@ module MobyBase
         :__xy_sorting => directives.has_key?( :__index ),
 
         # determine index of test object to be retrieved
-        :__index => 0
-                         
+        :__index => 0,
+        
+        :__retriable_allowed_exceptions => [ MobyBase::TestObjectNotFoundError, MobyBase::MultipleTestObjectsIdentifiedError ]
+                 
       )
        
       # identify objects until desired matches found or timeout exceeds
@@ -104,15 +106,13 @@ module MobyBase
         :interval => directives[ :__retry_interval ],
 
         # following exceptions are allowed; Retry until timeout exceeds or other exception type is raised
-        :exception => [ MobyBase::TestObjectNotFoundError, MobyBase::MultipleTestObjectsIdentifiedError ]
-
+        :exception => directives[ :__retriable_allowed_exceptions ]
+        
       ){
 
         # refresh sut
         sut.refresh( directives[ :__refresh_arguments ], search_parameters )
 
-
-        
         # retrieve objects from xml
         matches, rule = TDriver::TestObjectAdapter.get_objects(
         
