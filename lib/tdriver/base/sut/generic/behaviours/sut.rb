@@ -699,7 +699,9 @@ module MobyBehaviour
 =end
 
           # execute the application control service request
-          execute_command(
+          # the run request will return the pid if all goes well
+          app_pid = nil
+          app_pid = execute_command(
             MobyCommand::Application.new(
               :Run,
               { 
@@ -719,37 +721,32 @@ module MobyBehaviour
 
         # do not remove this, unless qttas server & plugin handles the syncronization between plugin registration & first ui state request
         # first ui dump is requested too early and target/server seems not be ready...
-        #sleep 0.100
-
         sleep sleep_time if sleep_time > 0
 
-        expected_attributes = { :type => 'application' }
-
-        expected_attributes[ :id ] = target[ :uid ] unless target[ :uid ].nil?
-
+     
+        # Now the application id is its PID that we get from the execute_command response
+        expected_attributes[ :type ] = 'application'
+        expected_attributes[ :id ] = app_pid unless app_pid.nil?
         expected_attributes[ :FullName ] = target[ :name ] unless target[ :name ].nil?
 
+        # For error reporting
         error_details = target[ :name ].nil? ? "" : "name: " << target[ :name ].to_s
         error_details << ( error_details.empty? ? "" : ", ") << "id: " << target[ :uid ].to_s if !target[ :uid ].nil?
 
-        app_name=target[ :name ].nil? ? "" : "name: " << target[ :name ].to_s
-
+        # Calculate the application name from :FullName ( used later )
+        app_name = target[ :name ].nil? ? "" : "name: " << target[ :name ].to_s
         if( !expected_attributes[ :FullName ].nil? )
-
           if( expected_attributes[ :FullName ].include?('/') )
-
             app_name = expected_attributes[ :FullName ].split('/')[ expected_attributes[ :FullName ].split( '/' ).size-1 ]
             app_name.slice!( ".exe" )
             expected_attributes[ :name ] = app_name
 
           elsif( expected_attributes[ :FullName ].include?("\\") )
-
             app_name = expected_attributes[ :FullName ].split("\\")[ expected_attributes[ :FullName ].split( "\\" ).size-1 ]
             app_name.slice!( ".exe" )
             expected_attributes[:name] = app_name
 
           else
-
             app_name = expected_attributes[ :FullName ]
             app_name.slice!( ".exe" )
             expected_attributes[ :name ] = app_name
@@ -758,9 +755,9 @@ module MobyBehaviour
 
           expected_attributes.delete( :FullName )
           expected_attributes.delete( :name )
-
         end
 
+        # Wait for application to register and then create the application test object
         begin
           timeout_time=$parameters[ @id ][ :application_synchronization_timeout, '5' ].to_f
           retryinterval=$parameters[ @id ][ :application_synchronization_retry_interval, '0.5' ].to_f
