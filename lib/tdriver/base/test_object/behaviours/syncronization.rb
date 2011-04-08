@@ -120,7 +120,11 @@ module MobyBehaviour
 
 				# the child object was not found in the specified timeout
 				raise MobyBase::SyncTimeoutError, "Synchronization timed out (#{ timeout_secs }) before the defined child object could be found."
-
+      
+      rescue MobyBase::ApplicationNotAvailableError
+        
+        raise
+      
       rescue # unexpected errors
 
 				raise RuntimeError, "Synchronization failed due to #{ $!.message } (#{ $!.class })"
