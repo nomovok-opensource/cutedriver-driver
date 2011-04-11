@@ -725,7 +725,7 @@ module MobyBehaviour
 
      
         # Now the application id is its PID that we get from the execute_command response
-        expected_attributes[ :type ] = 'application'
+        expected_attributes = { :type => 'application' }
         expected_attributes[ :id ] = app_pid unless app_pid.nil?
         expected_attributes[ :FullName ] = target[ :name ] unless target[ :name ].nil?
 
