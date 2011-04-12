@@ -416,14 +416,18 @@ module MobyBase
 
         #test_object.instance_variable_set( :@object_behaviours, [] )
 
+        obj_type = object_type.clone
+
         # apply all test object related behaviours unless object type is 'application'
-        object_type << ';*' unless object_type == 'application'
+        #object_type << ';*' unless object_type == 'application'
+        obj_type << ';*' unless obj_type == 'application'
 
         # apply behaviours to test object
         MobyBase::BehaviourFactory.instance.apply_behaviour!(
 
           :object => test_object,
-          :object_type => [ *object_type.split(';') ], 
+          #:object_type => [ *object_type.split(';') ], 
+          :object_type => [ *obj_type.split(';') ], 
           :input_type => [ '*', sut.input.to_s ],
           :env => [ '*', *env.to_s.split(";") ],
           :version => [ '*', sut.ui_version.to_s ]
