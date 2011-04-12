@@ -188,6 +188,13 @@ class Hash
   end # strip_dynamic_attributes!
 
   # TODO: document me
+  def to_attributes
+  
+    self.collect{ | key, value | "#{ key.to_s }=\"#{ value.to_s }\"" }.join(" ")
+  
+  end
+
+  # TODO: document me
   def recursive_merge( other )
   
     self.merge( other ){ | key, old_value, new_value |
