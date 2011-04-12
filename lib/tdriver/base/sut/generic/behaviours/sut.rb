@@ -1414,14 +1414,17 @@ module MobyBehaviour
           # parse the xml if crc does not match with previously retrieved crc
           if ( @xml_data_crc == 0 || crc != @xml_data_crc || crc.nil? )
 
-            # parse new xml data
-            @xml_data = MobyUtil::XML.parse_string( new_xml_data ).root
+              # parse new xml string, return cached object if one is found; crc is used for caching and identifying the duplicate xml strings
+              xml_data, from_cache = MobyUtil::XML.parse_string( new_xml_data, crc )
 
-            # store xml crc to be compared while next ui dump request; do not reparse xml if crc values are equal
-            @xml_data_crc = crc
+              # store new xml data object
+              @xml_data = xml_data.root
 
-            # mark that child objects needs to be updated 
-            @childs_updated = false
+              # store xml crc to be compared while next ui dump request; do not reparse xml if crc values are equal
+              @xml_data_crc = crc
+
+              # mark that child objects needs to be updated 
+              @childs_updated = false unless from_cache
 
           end
 
@@ -1435,7 +1438,6 @@ module MobyBehaviour
 
       end
 
-      #fetch_references( @xml_data )
       @xml_data
       
     end

@@ -24,6 +24,9 @@
     
     <!-- synchronization timeout for verify when used as a global method -->
     <parameter name="synchronization_timeout" value="10" />
+
+    <!-- xml cache settings -->
+    <parameter name="xml_cache_buffer_size" value="10" />
     
   </template>
 
