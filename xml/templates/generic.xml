@@ -61,6 +61,7 @@
     <parameter name="application_start_arguments" value="" /> <!-- start, e.g. value="-style, testability" -->
     <parameter name="application_close_kill" value="true" /> <!-- stop -->
     <parameter name="application_close_wait" value="10" /> <!-- time in seconds -->
+    <parameter name="application_check_pid" value="true" /> <!-- use pid for application object identification -->
 
     <parameter name="application_synchronization_timeout" value="20" />
     <parameter name="application_synchronization_retry_interval" value="0.25" />

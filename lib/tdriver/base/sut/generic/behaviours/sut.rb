@@ -595,12 +595,13 @@ module MobyBehaviour
     #  |:uid|String or Integer|Unique ID of the application|{ :uid => 268458181 }|
     #  |:name|String|Executable name of the application|{ :name => 'calculator' }|
     #  |:arguments|String|Comma separated list of arguments passed to the application when it is started|{ :arguments => '--nogui,-v' }|
-    #	|:sleep_time|Integer|Number of seconds to sleep immediately after launching the process|{ :sleep_time => 10 }|
-    #	|:start_command|String|When set, the run method will execute this command and expect the application provided by the :name key to be launched. Note that applications launched this way can't be sent a Kill message and its start up events and signals may not be recorded.|{ :start_command => 'start_app_batch',:name => 'calculator' }|
-    #	|:try_attach|Boolean|If set to true, run will attempt to attach to an existing application with the given name or id. If not found the application will be launched as normal. If more than 1 are found then an exception is thrown|{:try_attach => true, :name => 'calculator'}|
-    #	|:environment|String|Environment variables you want to pass to started process, passed as key value pairs separated by '=' and pairs separated by spaces |{ :environment => 'LC_ALL=en SPECIAL_VAR=value' }|
-    #	|:events_to_listen|String|List of events you want to start listening to when application starts, passed as comma separated string.  You can retrieve a list of events fired by a test object by first enabling event listening and then using the get_events method. See methods enable_events, get_events and disable_events |{ :events_to_listen => 'Paint,Show' }|
-    #	|:signals_to_listen|String|List of signals you want to start listening to when application starts, passed as comma separated string. Check your application class what signals it can emit, or you can use the 'signal' fixture's 'list_signal' method to retrieve an xml string listing all the signals the object can emit.  E.g. xml = @object.fixture('signal', 'list_signals')|{ :signals_to_listen => 'applicationReady()' }|
+    #  |:check_pid|Boolean|Overrides default value of SUT parameter :application_check_pid; When set to true, process id is used to test object identification|false|
+    #	 |:sleep_time|Integer|Number of seconds to sleep immediately after launching the process|{ :sleep_time => 10 }|
+    #	 |:start_command|String|When set, the run method will execute this command and expect the application provided by the :name key to be launched. Note that applications launched this way can't be sent a Kill message and its start up events and signals may not be recorded.|{ :start_command => 'start_app_batch',:name => 'calculator' }|
+    #	 |:try_attach|Boolean|If set to true, run will attempt to attach to an existing application with the given name or id. If not found the application will be launched as normal. If more than 1 are found then an exception is thrown|{:try_attach => true, :name => 'calculator'}|
+    #	 |:environment|String|Environment variables you want to pass to started process, passed as key value pairs separated by '=' and pairs separated by spaces |{ :environment => 'LC_ALL=en SPECIAL_VAR=value' }|
+    #	 |:events_to_listen|String|List of events you want to start listening to when application starts, passed as comma separated string.  You can retrieve a list of events fired by a test object by first enabling event listening and then using the get_events method. See methods enable_events, get_events and disable_events |{ :events_to_listen => 'Paint,Show' }|
+    #	 |:signals_to_listen|String|List of signals you want to start listening to when application starts, passed as comma separated string. Check your application class what signals it can emit, or you can use the 'signal' fixture's 'list_signal' method to retrieve an xml string listing all the signals the object can emit.  E.g. xml = @object.fixture('signal', 'list_signals')|{ :signals_to_listen => 'applicationReady()' }|
     #
     # == returns
     # TestObject
@@ -637,12 +638,25 @@ module MobyBehaviour
         # due to bug #1488
         sleep_time = ( target[ :sleep_after_launch ] || target[ :sleep_time ] ).to_i
 
+        if target.has_key?( :check_pid )
+
+          check_pid = target[ :check_pid ]
+          
+          check_pid.check_type [ TrueClass, FalseClass ], 'wrong argument type $1 for SUT#run :check_pid (expected $2)' 
+        
+        else
+                    
+          # due to bug #1710; pid checking must be configurable
+          check_pid = $parameters[ @id ][ :application_check_pid, false ].to_s.to_boolean( false )
+
+        end
+
         Kernel::raise ArgumentError, "Sleep time need to be >= 0" unless sleep_time >= 0
 
         # try to find an existing app with the current arguments
         if target[ :try_attach ]
 
-          app_list = MobyBase::StateObject.new( self.list_apps() )
+          app_list = MobyBase::StateObject.new( self.list_apps )
 
           # either ID or NAME have been passed to identify the application
           # raise exception if more than one app has been found for this id/name
@@ -722,11 +736,19 @@ module MobyBehaviour
         # do not remove this, unless qttas server & plugin handles the syncronization between plugin registration & first ui state request
         # first ui dump is requested too early and target/server seems not be ready...
         sleep sleep_time if sleep_time > 0
-
      
         # Now the application id is its PID that we get from the execute_command response
         expected_attributes = { :type => 'application' }
-        expected_attributes[ :id ] = app_pid unless app_pid.nil?
+
+        # fix to bug #1710; pid checking must be configurable
+        if check_pid == true
+        
+          expected_attributes[ :id ] = app_pid unless app_pid.nil?
+
+        end        
+        
+        p expected_attributes
+        
         expected_attributes[ :FullName ] = target[ :name ] unless target[ :name ].nil?
 
         # For error reporting
@@ -759,13 +781,16 @@ module MobyBehaviour
 
         # Wait for application to register and then create the application test object
         begin
-          timeout_time=$parameters[ @id ][ :application_synchronization_timeout, '5' ].to_f
-          retryinterval=$parameters[ @id ][ :application_synchronization_retry_interval, '0.5' ].to_f
+
+          timeout_time = $parameters[ @id ][ :application_synchronization_timeout, '5' ].to_f
+
+          retry_interval = $parameters[ @id ][ :application_synchronization_retry_interval, '0.5' ].to_f
 
           MobyUtil::Retryable.until(
             :timeout => timeout_time,
-            :interval => retryinterval,
+            :interval => retry_interval,
             :exception => MobyBase::ApplicationNotAvailableError) {
+
             # verify that application is launched and application test object is found from xml
             expected_attributes.delete( :name )
 
@@ -778,7 +803,7 @@ module MobyBehaviour
               timeout_time,
 
               # wait retry interval and try again if application was not found
-              retryinterval
+              retry_interval
 
             )
 
