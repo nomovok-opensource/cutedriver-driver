@@ -752,6 +752,20 @@ module MobyUtil
     end
 
     # TODO: document me
+    def self.has_key?( key )
+    
+      @parameters.has_key?( key )
+    
+    end
+
+    # TODO: document me
+    def self.has_value?( key )
+    
+      @parameters.has_value?( key )
+    
+    end
+
+    # TODO: document me
     def self.keys
     
       @parameters.keys
