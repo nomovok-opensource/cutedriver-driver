@@ -23,11 +23,11 @@ module MobyBase
 
     attr_reader(
       :sut,     # SUT associated to test object
-      :type,     # test object type (from xml)
-      :id,     # test object id (from xml)
+      :type,    # test object type (from xml)
+      :id,      # test object id (from xml)
       :parent,  # parent test object
-      :name,     # test object name (from xml)
-      :x_path    # xpath for test object, used when updating self with fresh ui dump
+      :name,    # test object name (from xml)
+      :x_path   # xpath for test object, used when updating self with fresh ui dump
     )
 
     # Creation of a new TestObject requires options hash to be given to constructor.
@@ -113,7 +113,7 @@ module MobyBase
       # optimized version
       #( ( ( 17 * 37 + @id.to_i ) * 37 + @type.hash ) * 37 + @name.hash )
 
-      TDriver::TestObjectAdapter.test_object_hash( @id.to_i, @type, @name )
+      @test_object_adapter.test_object_hash( @id.to_i, @type, @name )
 
     end
 
@@ -147,7 +147,7 @@ module MobyBase
     # Function to be renamed, possibly refactored
     def xml_data=( xml_object )
 
-      @x_path, @name, @type, @id, @env = TDriver::TestObjectAdapter.get_test_object_identifiers( xml_object, self )
+      @x_path, @name, @type, @id, @env = @test_object_adapter.get_test_object_identifiers( xml_object, self )
 
     end
 
@@ -161,7 +161,7 @@ module MobyBase
 
       begin
       
-        TDriver::TestObjectAdapter.get_xml_element_for_test_object( self )
+        @test_object_adapter.get_xml_element_for_test_object( self )
 
       rescue MobyBase::TestObjectNotFoundError
       

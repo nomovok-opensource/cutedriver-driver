@@ -231,7 +231,7 @@ module MobyBehaviour
             @sut.refresh( application_identification_hash, [ {:className => 'application', :tasId => @id } ] )
 
             # retrieve application object from sut.xml_data
-            matches, unused_rule = TDriver::TestObjectAdapter.get_objects( @sut.xml_data, application_identification_hash, true )
+            matches, unused_rule = @test_object_adapter.get_objects( @sut.xml_data, application_identification_hash, true )
 
             # check if the application is still found or not
             if ( close_options[ :check_process ] == true ) 
@@ -243,7 +243,7 @@ module MobyBehaviour
 
               if matches.count > 0 
               
-                if TDriver::TestObjectAdapter.test_object_element_attribute( matches.first, 'id' ) == @id 
+                if @test_object_adapter.test_object_element_attribute( matches.first, 'id' ) == @id 
 
                   # the application was still in the foreground
                   raise MobyBase::VerificationError, "Verification of close failed. The application that was to be closed was still in the foreground."
