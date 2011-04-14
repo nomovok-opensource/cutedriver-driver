@@ -746,9 +746,7 @@ module MobyBehaviour
           expected_attributes[ :id ] = app_pid unless app_pid.nil?
 
         end        
-        
-        p expected_attributes
-        
+                
         expected_attributes[ :FullName ] = target[ :name ] unless target[ :name ].nil?
 
         # For error reporting
