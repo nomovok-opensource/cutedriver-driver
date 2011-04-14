@@ -138,7 +138,7 @@ module MobyBehaviour
     def freeze
 
 =begin
-      if $parameters[ @id ][ :use_find_object, 'false' ] == 'true' && self.respond_to?( 'find_object' )
+      if @sut_parameters[ :use_find_object, 'false' ] == 'true' && self.respond_to?( 'find_object' )
 
         warn("warning: SUT##{ __method__ } is not supported when use_find_objects optimization is enabled")
 
@@ -166,7 +166,7 @@ module MobyBehaviour
     def unfreeze
 
 =begin
-      if $parameters[ @id ][ :use_find_object, 'false' ] == 'true' && self.respond_to?( 'find_object' )
+      if @sut_parameters[ :use_find_object, 'false' ] == 'true' && self.respond_to?( 'find_object' )
 
         warn("warning: SUT##{ __method__ } is not supported when use_find_objects optimization is enabled")
 
@@ -280,7 +280,7 @@ module MobyBehaviour
       ) if identification_directives.has_key?( :__logging )
 
       # disable logging if requested, remove pair from creation_hash
-      $logger.push_enabled( identification_directives[ :__logging ] || TDriver.logger.enabled )
+      $logger.push_enabled( identification_directives[ :__logging ] || $logger.enabled )
 
       begin
 
@@ -299,19 +299,19 @@ module MobyBehaviour
 
       rescue MobyBase::MultipleTestObjectsIdentifiedError => exception
 
-        TDriver.logger.behaviour "FAIL;Multiple child objects matched criteria.;#{ id };sut;{};child;#{ attributes.inspect }"
+        $logger.behaviour "FAIL;Multiple child objects matched criteria.;#{ id };sut;{};child;#{ attributes.inspect }"
 
         Kernel::raise exception
 
       rescue MobyBase::TestObjectNotFoundError => exception
 
-        TDriver.logger.behaviour "FAIL;The child object could not be found.;#{ id };sut;{};child;#{ attributes.inspect }"
+        $logger.behaviour "FAIL;The child object could not be found.;#{ id };sut;{};child;#{ attributes.inspect }"
 
         Kernel::raise exception
 
       rescue Exception => exception
 
-        TDriver.logger.behaviour "FAIL;Failed when trying to find child object.;#{ id };sut;{};child;#{ attributes.inspect }"
+        $logger.behaviour "FAIL;Failed when trying to find child object.;#{ id };sut;{};child;#{ attributes.inspect }"
 
         Kernel::raise exception
 
@@ -344,15 +344,15 @@ module MobyBehaviour
         if self.parameter[ :sut_setup, nil ]
           require MobyUtil::FileHelper.expand_path(self.parameter[ :sut_setup ])
 
-          TDriver.logger.behaviour "PASS;sut.setup method found"
+          $logger.behaviour "PASS;sut.setup method found"
 
           self.setup
 
-          TDriver.logger.behaviour "PASS;sut.setup executed"
+          $logger.behaviour "PASS;sut.setup executed"
         end
 
         if self.parameter[ :setup, nil ]
-          TDriver.logger.behaviour "PASS;sut.setup parameters found"
+          $logger.behaviour "PASS;sut.setup parameters found"
           methods=self.parameter[ :setup ]
           methods.each do |method|
             m=method[0].to_s
@@ -363,11 +363,11 @@ module MobyBehaviour
               eval("self.#{m}(:#{args.to_sym})")
             end
           end
-          TDriver.logger.behaviour "PASS;sut.setup parameter methods executed"
+          $logger.behaviour "PASS;sut.setup parameter methods executed"
         end
 
       else
-        TDriver.logger.behaviour "FAIL;No methods or parameters found for sut.setup"
+        $logger.behaviour "FAIL;No methods or parameters found for sut.setup"
 
         Kernel::raise MobyBase::BehaviourError.new("Setup", "Failed to load sut.setup method check the :sut_setup parameter")
       end
@@ -392,15 +392,15 @@ module MobyBehaviour
         if self.parameter[ :sut_teardown, nil ]
           require MobyUtil::FileHelper.expand_path(self.parameter[ :sut_teardown ])
 
-          TDriver.logger.behaviour "PASS;sut.teardown method found"
+          $logger.behaviour "PASS;sut.teardown method found"
 
           self.teardown
 
-          TDriver.logger.behaviour "PASS;sut.teardown executed"
+          $logger.behaviour "PASS;sut.teardown executed"
         end
 
         if self.parameter[ :teardown, nil ]
-          TDriver.logger.behaviour "PASS;sut.teardown parameters found"
+          $logger.behaviour "PASS;sut.teardown parameters found"
           methods=self.parameter[ :teardown ]
           methods.each do |method|
             m=method[0].to_s
@@ -411,11 +411,11 @@ module MobyBehaviour
               eval("self.#{m}(:#{args.to_sym})")
             end
           end
-          TDriver.logger.behaviour "PASS;sut.teardown parameter methods executed"
+          $logger.behaviour "PASS;sut.teardown parameter methods executed"
         end
 
       else
-        TDriver.logger.behaviour "FAIL;No method or parameters found for sut.teardown"
+        $logger.behaviour "FAIL;No method or parameters found for sut.teardown"
 
         Kernel::raise MobyBase::BehaviourError.new("Teardown", "Failed to load sut.teardown method check the :sut_teardown parameter")
       end
@@ -465,7 +465,7 @@ module MobyBehaviour
 
       begin
 
-        attributes.check_type( Hash, "Wrong argument type $1 for attributes (expected $2)" )
+        attributes.check_type( Hash, 'Wrong argument type $1 for attributes (expected $2)' )
 
         attributes[ :type ] = 'application'
 
@@ -483,7 +483,7 @@ module MobyBehaviour
 
       rescue
 
-        TDriver.logger.behaviour(
+        $logger.behaviour(
           "FAIL;Failed to find application.;#{ id.to_s };sut;{};application;#{ attributes.kind_of?( Hash ) ? attributes.inspect : attributes.class.to_s }"
         )
 
@@ -492,7 +492,7 @@ module MobyBehaviour
 
       ensure
 
-        TDriver.logger.behaviour "PASS;Application found.;#{ id.to_s };sut;{};application;#{ attributes.inspect }" if $!.nil?
+        $logger.behaviour "PASS;Application found.;#{ id.to_s };sut;{};application;#{ attributes.inspect }" if $!.nil?
 
       end
 
@@ -565,13 +565,13 @@ module MobyBehaviour
 
       rescue
 
-        TDriver.logger.behaviour "FAIL;Failed to capture screen.;#{ id.to_s };sut;{};capture_screen;#{ arguments.kind_of?( Hash ) ? arguments.inspect : arguments.class.to_s }"
+        $logger.behaviour "FAIL;Failed to capture screen.;#{ id.to_s };sut;{};capture_screen;#{ arguments.kind_of?( Hash ) ? arguments.inspect : arguments.class.to_s }"
 
         Kernel::raise $!
 
       end
 
-      TDriver.logger.behaviour "PASS;Screen was captured successfully.;#{ id.to_s };sut;{};capture_screen;#{ arguments.inspect }"
+      $logger.behaviour "PASS;Screen was captured successfully.;#{ id.to_s };sut;{};capture_screen;#{ arguments.inspect }"
 
       nil
 
@@ -623,8 +623,8 @@ module MobyBehaviour
       begin
 
         # set the refresh interval to zero while the application is launched
-        #orig_interval = $parameters[ @id ][ :refresh_interval ]
-        #$parameters[ @id ][ :refresh_interval ] = '0'
+        #orig_interval = @sut_parameters[ :refresh_interval ]
+        #@sut_parameters[ :refresh_interval ] = '0'
 
         # raise exception if argument type other than hash
         target.check_type( Hash, "Wrong argument type $1 for run method (expected $2)" )
@@ -638,16 +638,18 @@ module MobyBehaviour
         # due to bug #1488
         sleep_time = ( target[ :sleep_after_launch ] || target[ :sleep_time ] ).to_i
 
+        timeout_time = @sut_parameters[ :application_synchronization_timeout, '5' ].to_f
+
+        retry_interval = @sut_parameters[ :application_synchronization_retry_interval, '0.5' ].to_f
+
         if target.has_key?( :check_pid )
 
-          check_pid = target[ :check_pid ]
-          
-          check_pid.check_type [ TrueClass, FalseClass ], 'wrong argument type $1 for SUT#run :check_pid (expected $2)' 
+          check_pid = target[ :check_pid ].check_type [ TrueClass, FalseClass ], 'wrong argument type $1 for SUT#run :check_pid (expected $2)' 
         
         else
                     
           # due to bug #1710; pid checking must be configurable
-          check_pid = $parameters[ @id ][ :application_check_pid, false ].to_s.to_boolean( false )
+          check_pid = @sut_parameters[ :application_check_pid, false ].to_s.to_boolean( false )
 
         end
 
@@ -675,7 +677,7 @@ module MobyBehaviour
 
             rescue Exception => e
 
-              TDriver.logger.warning "Could not bring app to foreground"
+              $logger.warning "Could not bring app to foreground"
 
             end
 
@@ -693,28 +695,10 @@ module MobyBehaviour
 
         else
 
-=begin
-          # execute the application control service request
-          execute_command(
-
-            MobyCommand::Application.new(
-              :Run,
-              target[ :name ],
-              target[ :uid ],
-              self,
-              target[ :arguments ],
-              target[ :environment ],
-              target[ :working_directory ],
-              target[ :events_to_listen ],
-              target[ :signals_to_listen ]
-            )
-
-          )
-=end
-
           # execute the application control service request
           # the run request will return the pid if all goes well
           app_pid = nil
+
           app_pid = execute_command(
             MobyCommand::Application.new(
               :Run,
@@ -755,6 +739,7 @@ module MobyBehaviour
 
         # Calculate the application name from :FullName ( used later )
         app_name = target[ :name ].nil? ? "" : "name: " << target[ :name ].to_s
+
         if( !expected_attributes[ :FullName ].nil? )
           if( expected_attributes[ :FullName ].include?('/') )
             app_name = expected_attributes[ :FullName ].split('/')[ expected_attributes[ :FullName ].split( '/' ).size-1 ]
@@ -780,10 +765,6 @@ module MobyBehaviour
         # Wait for application to register and then create the application test object
         begin
 
-          timeout_time = $parameters[ @id ][ :application_synchronization_timeout, '5' ].to_f
-
-          retry_interval = $parameters[ @id ][ :application_synchronization_retry_interval, '0.5' ].to_f
-
           MobyUtil::Retryable.until(
             :timeout => timeout_time,
             :interval => retry_interval,
@@ -808,10 +789,10 @@ module MobyBehaviour
             expected_attributes[ :name ] = app_name
             # retrieve application object element from sut.xml_data
 
-            @@matches, unused_rule = TDriver::TestObjectAdapter.get_objects( xml_data, expected_attributes, true )
+            @matches, unused_rule = TDriver::TestObjectAdapter.get_objects( xml_data, expected_attributes, true )
 
             # raise exception if application element was not found; this shouldn't ever happen?
-            raise MobyBase::ApplicationNotAvailableError if @@matches.count == 0
+            raise MobyBase::ApplicationNotAvailableError if @matches.count == 0
 
           }
 
@@ -824,7 +805,7 @@ module MobyBehaviour
 
             :object_attributes_hash => expected_attributes,
 
-            :xml_object => @@matches.first
+            :xml_object => @matches.first
 
           )
 
@@ -844,16 +825,16 @@ module MobyBehaviour
 
         end
 
-        # raise behaviour error if any exception is raised
-      rescue # Exception => e
+      # raise behaviour error if any exception is raised
+      rescue
 
-        TDriver.logger.behaviour "FAIL;Failed to launch application.;#{ id.to_s };sut;{};run;#{ target.kind_of?( Hash ) ? target.inspect : target.class.to_s }"
+        $logger.behaviour "FAIL;Failed to launch application.;#{ id.to_s };sut;{};run;#{ target.kind_of?( Hash ) ? target.inspect : target.class.to_s }"
 
         Kernel::raise MobyBase::BehaviourError.new("Run", "Failed to launch application")
 
       end
 
-      TDriver.logger.behaviour "PASS;The application was launched successfully.;#{ id.to_s };sut;{};run;#{ target.inspect }"
+      $logger.behaviour "PASS;The application was launched successfully.;#{ id.to_s };sut;{};run;#{ target.inspect }"
 
       foreground_app
 
@@ -907,7 +888,15 @@ module MobyBehaviour
 
         value.check_type( [ Symbol, MobyCommand::KeySequence ], "Wrong argument type $1 for press_key (expected $2)" )
 
-        sequence = value.kind_of?( Symbol ) ? MobyCommand::KeySequence.new( value ) : value
+        if value.kind_of?( Symbol )
+
+          sequence = MobyCommand::KeySequence.new( value )
+        
+        else
+
+          sequence = value
+        
+        end
 
         sequence.set_sut( self )
 
@@ -915,13 +904,13 @@ module MobyBehaviour
 
       rescue
 
-        TDriver.logger.behaviour "FAIL;Failed to press key(s).;#{id.to_s};sut;{};press_key;#{ value }"
+        $logger.behaviour "FAIL;Failed to press key(s).;#{id.to_s};sut;{};press_key;#{ value }"
 
         Kernel::raise $!
 
       end
 
-      TDriver.logger.behaviour "PASS;Successfully pressed key(s).;#{ id.to_s };sut;{};press_key;#{ value }"
+      $logger.behaviour "PASS;Successfully pressed key(s).;#{ id.to_s };sut;{};press_key;#{ value }"
 
       nil
 
@@ -1075,9 +1064,9 @@ module MobyBehaviour
 
       when "localisation"
 
-        language=nil
+        language = nil
 
-        if ( $parameters[ self.id ][:read_lang_from_app]=='true')
+        if ( @sut_parameters[ :read_lang_from_app ]=='true')
 
           #read localeName app
           language=self.application.attribute("localeName")
@@ -1087,7 +1076,7 @@ module MobyBehaviour
 
         else
 
-          language=$parameters[ self.id ][ :language ]
+          language = @sut_parameters[ :language ]
 
         end
 
@@ -1096,7 +1085,7 @@ module MobyBehaviour
         translation = MobyUtil::Localisation.translation(
           logical_name,
           language,
-          $parameters[ self.id ][ :localisation_server_database_tablename ],
+          @sut_parameters[ :localisation_server_database_tablename ],
           file_name,
           plurality,
           lengthvariant
@@ -1211,10 +1200,10 @@ module MobyBehaviour
         user_data_lname,
 
         # language
-        $parameters[ self.id ][ :language ],
+        @sut_parameters[ :language ],
 
         # table name
-        $parameters[ self.id ][ :user_data_server_database_tablename ]
+        @sut_parameters[ :user_data_server_database_tablename ]
 
       )
 
@@ -1254,10 +1243,10 @@ module MobyBehaviour
         operator_data_lname,
 
         # operator
-        $parameters[ self.id ][ :operator_selected ],
+        @sut_parameters[ :operator_selected ],
 
         # table name
-        $parameters[ self.id ][ :operator_data_server_database_tablename ]
+        @sut_parameters[ :operator_data_server_database_tablename ]
 
       )
 
@@ -1272,9 +1261,7 @@ module MobyBehaviour
     # === raises
     def update
 
-      #@_child_objects.each{ | test_object | test_object.update( @xml_data ) } if !@childs_updated
-
-      unless @childs_updated
+      if @update_childs
 
         @child_object_cache.each_object{ | test_object |
 
@@ -1286,7 +1273,7 @@ module MobyBehaviour
 
       end
 
-      @childs_updated = true
+      @update_childs = false
 
     end
 
@@ -1377,13 +1364,13 @@ module MobyBehaviour
 
     end
 
-    private
+  private
 
     # TODO: document me
     def update_childs
 
       # update childs only if ui state is new
-      update if !@childs_updated
+      update if @update_childs
 
     end
 
@@ -1398,7 +1385,7 @@ module MobyBehaviour
       if !@frozen #&& ( @_previous_refresh.nil? || ( current_time - @_previous_refresh ).to_f >= @refresh_interval )
 
         # determine should FindObjects service be used
-        use_find_objects =  $parameters[ @id ][ :use_find_object, 'false' ] == 'true' and self.respond_to?( 'find_object' ) == true
+        use_find_objects =  @sut_parameters[ :use_find_object, 'false' ] == 'true' and self.respond_to?( 'find_object' ) == true
 
         # duplicate refresh arguments hash
         refresh_arguments = refresh_args.clone
@@ -1447,7 +1434,7 @@ module MobyBehaviour
               @xml_data_crc = crc
 
               # mark that child objects needs to be updated 
-              @childs_updated = false unless from_cache
+              @update_childs = true unless from_cache
 
           end
 
@@ -1624,58 +1611,68 @@ module MobyBehaviour
 
     end
 
+    def load_verify_blocks( filename )
+
+      # load verify blocks if filename not empty
+      unless filename.blank?
+
+        # verify that file exists
+        if File.exists?( filename )
+
+          # load verify blocks configuration file
+          load filename
+
+          # return collection of verify blocks; reference directly to VERIFY_BLOCKS must not be used, due to it may get cleared by user
+          SutParameters::VERIFY_BLOCKS.collect{ | block | block }
+
+        else
+        
+          # return empty array due to file didn't exist
+          []
+        
+        end
+
+      else
+      
+        # return empty array due to no filename was given
+        []
+      
+      end
+
+    end
+
+    # TODO: document me
     def initialize_settings
 
-      @xml_data = ""
-
+      # default values
       @x_path = '.'
+      @xml_data = ""
+      @dump_count = 0
 
+      # determines that should child test objects be updated
+      @update_childs = true
+      
+      @last_xml_data = nil
       @frozen = false
 
+      # initialize cache for sut children
       @child_object_cache = TDriver::TestObjectCache.new
 
       @current_application_id = nil
 
-      @dump_count = 0
+      # create empty hash for sut parameters if sut id not found from parameters
+      $parameters[ @id ] = {} unless $parameters.has_key?( @id )
 
-      # default values
-      @input = :key
+      # accessor for sut parameters
+      @sut_parameters   = $parameters[ @id ]
 
-      @refresh_tries = 5
-      @refresh_interval = 0.5
+      @input            = @sut_parameters[ :input_type,             'key' ].to_sym
+      @refresh_tries    = @sut_parameters[ :ui_state_refresh_tries, '5'   ].to_f
+      @refresh_interval = @sut_parameters[ :refresh_interval,       '0.5' ].to_f
 
-      @childs_updated = false
-
-      # id not found from parameters
-      if $parameters[ @id, nil ] != nil
-
-        @input = $parameters[ @id ][ :input_type, "key" ].to_sym
-
-        @refresh_tries = $parameters[ @id ][ :ui_state_refresh_tries, @refresh_tries ].to_f
-
-        @refresh_interval = $parameters[ @id ][ :refresh_interval, @refresh_interval ].to_f
-
-      end
-
-      @last_xml_data = nil
-
-      ruby_file = $parameters[ @id ][ :verify_blocks ]
-
-      @verify_blocks = []
-
-      if File.exists?( ruby_file )
-
-        load ruby_file
-
-        SutParameters::VERIFY_BLOCKS.each { | block |
-
-          @verify_blocks << block
-
-        }
-
-
-      end
-
+      # load verify blocks from defined sut configuration file 
+      @verify_blocks    = load_verify_blocks( @sut_parameters[ :verify_blocks, nil ] )
+      
     end
 
     public # deprecated
@@ -1689,7 +1686,7 @@ module MobyBehaviour
 
       warn "warning: deprecated method SUT#get_object; please use SUT#child instead"
 
-      child object_id
+      child( object_id )
 
     end
 
@@ -1706,7 +1703,7 @@ module MobyBehaviour
 
       #$stderr.puts "warning: SUT#get_ui_dump is deprecated, please use SUT#refresh_ui_dump instead."
 
-      refresh_ui_dump refresh_args, {}
+      refresh_ui_dump( refresh_args, {} )
 
     end
 

@@ -53,7 +53,7 @@ module MobyBehaviour
 		#   description: Hash defining the set of attributes that the child test object must possess.
 		#   example: {:text=>'1'}
 		#
-		# timeout_secs
+		# timeout
 		#  Fixnum
 		#   description: Overriding the default synchronization timeout
 		#   example: 30
@@ -84,7 +84,7 @@ module MobyBehaviour
 		# MobyBase::SyncTimeoutError
 		#  description: Synchronization timed out (%i) before the defined child object could be found
 		#
-		def wait_child( attributes = {}, timeout_secs = 10, retry_interval = 0.5 )
+		def wait_child( attributes = {}, timeout = 10, retry_interval = 0.5 )
 
       # verify that attributes is type of Hash
       attributes.check_type( Hash, "Wrong argument type $1 for attributes (expected $2)" )
@@ -96,7 +96,7 @@ module MobyBehaviour
       attributes[ :type ].not_empty( "Attribute :type must not be empty" )
 
       # verify timeout type is numeric
-      timeout_secs.check_type( [ Integer, Fixnum, Float ], "Wrong argument type $1 for timeout (expected $2)" )
+      timeout.check_type( [ Integer, Fixnum, Float ], "Wrong argument type $1 for timeout (expected $2)" )
 
       # verify timeout type is numeric
       retry_interval.check_type( [ Integer, Fixnum, Float ], "Wrong argument type $1 for retry interval (expected $2)" )
@@ -109,7 +109,7 @@ module MobyBehaviour
         @test_object_factory.identify_object(
           :object_attributes_hash => attributes,
           :identification_directives => dynamic_attributes.default_values(
-            :__timeout => timeout_secs,
+            :__timeout => timeout,
             :__retry_interval => retry_interval,
             :__refresh_arguments => self.kind_of?( MobyBase::SUT ) ? attributes : { :id => self.get_application_id }
           ),
@@ -119,7 +119,7 @@ module MobyBehaviour
 			rescue MobyBase::TestObjectNotFoundError
 
 				# the child object was not found in the specified timeout
-				raise MobyBase::SyncTimeoutError, "Synchronization timed out (#{ timeout_secs }) before the defined child object could be found."
+				raise MobyBase::SyncTimeoutError, "Synchronization timed out (#{ timeout }) before the defined child object could be found."
       
       rescue MobyBase::ApplicationNotAvailableError
         
