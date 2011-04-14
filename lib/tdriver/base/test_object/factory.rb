@@ -27,16 +27,18 @@ module MobyBase
 
     include Singleton
 
-    attr_reader :timeout
+    attr_reader :timeout, :test_object_adapter
 
     # TODO: Document me (TestObjectFactory::initialize)
-    def initialize
+    def initialize( options = {} )
 
       # get timeout from parameters, use default value if parameter not found
       @timeout = $parameters[ :application_synchronization_timeout, "20" ].to_f
 
       # get timeout retry interval from parameters, use default value if parameter not found
       @_retry_interval = $parameters[ :application_synchronization_retry_interval, "1" ].to_f
+
+      @test_object_adapter = TDriver::TestObjectAdapter
 
     end
 
@@ -412,9 +414,15 @@ module MobyBase
       else
         
         # create test object
-        test_object = MobyBase::TestObject.new( self, sut, parent, xml_object )
+        test_object = MobyBase::TestObject.new( 
+        
+          :test_object_factory => self,
+          :test_object_adapter => @test_object_adapter,
+          :xml_object => xml_object,
+          :sut => sut, 
+          :parent => parent
 
-        #test_object.instance_variable_set( :@object_behaviours, [] )
+        )
 
         obj_type = object_type.clone
 

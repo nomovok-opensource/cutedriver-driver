@@ -30,26 +30,29 @@ module MobyBase
       :x_path    # xpath for test object, used when updating self with fresh ui dump
     )
 
-    # Creation of a new TestObject requires a data object to be given to constructor
+    # Creation of a new TestObject requires options hash to be given to constructor.
     # === params
-    # factory:: TestObjectFactory used for creating test object for the sut this object is associated with
-    # sut:: SUT object that this test object is associated with
-    # xml_object:: REXML::Document object describing this test object
+    # options:: Hash containing xml object describing the object and all other required configuration values e.g. test object factory, -adapter etc.
     # === returns
     # TestObject:: new TestObject instance
     # === raises
-    def initialize( test_object_factory, sut, parent = nil, xml_object = nil )
+    def initialize( options )
 
-      # Initializes a test object by assigning it a test object factory and a sut and storing xml data 
-      # describing the object.
-      @test_object_factory = test_object_factory
-      @parent = parent
-      @sut = sut
+      # verify that given argument is type of hash    
+      options.check_type Hash, 'wrong argument type $1 for TestObject#new (expected $2)'
+
+      # verify that required keys is found from options hash and initialize the test object with these values.
+      @test_object_factory = options.require_key( :test_object_factory )
+      @test_object_adapter = options.require_key( :test_object_adapter )
+      @parent = options.require_key( :parent )
+      @sut = options.require_key( :sut )
+
+      # apply xml object if given; test object type, id and name are retrieved from the xml 
+      self.xml_data = options[ :xml_object ] if options.has_key?( :xml_object )
+
+      # empty test object behaviours list
       @object_behaviours = []
-
-      #self.xml_data = xml_object if xml_object
-      method( :xml_data= ).call( xml_object ) if xml_object
-      
+ 
     end
 
     # Function to verify is DATA of two TestObjects are the same, 
