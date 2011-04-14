@@ -632,7 +632,7 @@ module MobyBehaviour
         target.default = nil
 
         # raise exception if :uid or :name not found from hash
-        target.require_key( [ :uid, :name ], "Required key :uid or :name not found from argument hash" )
+        target.require_one( [ :uid, :name ], "Required key :uid or :name not found from argument hash" )
 
         # due to bug #1488
         sleep_time = ( target[ :sleep_after_launch ] || target[ :sleep_time ] ).to_i

@@ -28,8 +28,8 @@ class Hash
 
   end
 
-  # Verify that received object contains one of given keys. Raises exception is key not found.
-  def require_key( keys, message = "None of key(s) $1 found from hash" )
+  # verify that receiver object contains one of given keys. Raises exception is key not found.
+  def require_one( keys, message = "None of key(s) $1 found from hash" )
 
     # create array of types
     keys_array = Array( keys )
@@ -63,7 +63,18 @@ class Hash
 
   end
 
-  # Verify that received object contains all of given keys. Raises exception is key not found.
+  # verify that receiver object contains all of given keys. Raises exception is key not found.
+  def require_key( key, message = 'required key $1 not found from hash' )
+  
+    fetch( key ){
+    
+      raise ArgumentError, message
+    
+    }
+  
+  end
+
+  # verify that receiver object contains all of given keys. Raises exception is key not found.
   def require_keys( keys, message = "Required key(s) $1 not found from hash" )
 
     # create array of types
