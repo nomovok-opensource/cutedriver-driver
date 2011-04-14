@@ -244,4 +244,38 @@ class Hash
   
   end # recursive_merge!
 
-end
+  # TODO: document me
+  def fetch!( key )
+  
+    if has_key?( key )
+    
+      yield( key, self[ key ] )
+    
+    end
+  
+  end # fetch!
+
+  # TODO: document me
+  def rename_key!( key, new )
+
+    if has_key?( key )
+    
+      self[ new ] = delete( key )
+    
+    else
+    
+      if block_given?
+      
+        yield( key, new )
+        
+      else
+        
+        raise IndexError, "key #{ key.inspect } not found"
+      
+      end
+          
+    end # has_key?
+  
+  end # rename_key!
+
+end # Hash
