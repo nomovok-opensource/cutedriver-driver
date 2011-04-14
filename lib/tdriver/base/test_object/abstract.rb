@@ -47,6 +47,9 @@ module MobyBase
       @parent = options.require_key( :parent )
       @sut = options.require_key( :sut )
 
+      # retrieve reference to sut parameters hash
+      @sut_parameters = @sut.instance_variable_get( :@sut_parameters )
+
       # apply xml object if given; test object type, id and name are retrieved from the xml 
       self.xml_data = options[ :xml_object ] if options.has_key?( :xml_object )
 
