@@ -439,7 +439,7 @@ module MobyBehaviour
 
       Kernel::raise RuntimeError, "Can not create state object of SUT with id #{ @id.inspect }, no XML content or SUT not initialized properly." if @xml_data.empty?
 
-      MobyBase::StateObject.new( TDriver::TestObjectAdapter.state_object_xml( @xml_data, @id ), self )
+      MobyBase::StateObject.new( @test_object_adapter.state_object_xml( @xml_data, @id ), self )
 
     end
 
@@ -789,7 +789,7 @@ module MobyBehaviour
             expected_attributes[ :name ] = app_name
             # retrieve application object element from sut.xml_data
 
-            @matches, unused_rule = TDriver::TestObjectAdapter.get_objects( xml_data, expected_attributes, true )
+            @matches, unused_rule = @test_object_adapter.get_objects( xml_data, expected_attributes, true )
 
             # raise exception if application element was not found; this shouldn't ever happen?
             raise MobyBase::ApplicationNotAvailableError if @matches.count == 0
@@ -1347,13 +1347,13 @@ module MobyBehaviour
     def get_application_id
 
       # retrieve application object from sut.xml_data
-      matches, unused_rule = TDriver::TestObjectAdapter.get_objects( xml_data, { :type => 'application' }, true )
+      matches, unused_rule = @test_object_adapter.get_objects( xml_data, { :type => 'application' }, true )
 
       # retrieve id attribute if application test object found
       if matches.count > 0
 
         # return id attribute value
-        TDriver::TestObjectAdapter.test_object_element_attribute( matches.first, 'id' )
+        @test_object_adapter.test_object_element_attribute( matches.first, 'id' )
 
       else
 

@@ -39,7 +39,9 @@ module MobyBase
 
       @_sutController = sut_controller
       
-      @test_object_factory = test_object_factory || TDriver::TestObjectFactory.new( :test_object_adapter => TDriver::TestObjectAdapter )
+      @test_object_factory = test_object_factory #|| TDriver::TestObjectFactory.new( :test_object_adapter => TDriver::TestObjectAdapter )
+      
+      @test_object_adapter = TDriver::TestObjectAdapter
       
       @id = sut_id
 
