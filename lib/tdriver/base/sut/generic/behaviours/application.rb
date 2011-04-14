@@ -135,42 +135,23 @@ module MobyBehaviour
         close_options[ :force_kill ] = close_options[ :force_kill ].to_boolean if close_options[ :force_kill ].kind_of?( String )
         
         # verify :force_kill value type
-        close_options[ :force_kill ].check_type( [ NilClass, TrueClass, FalseClass ], "Wrong argument type $1 for :force_kill (expected $2)" )
+        close_options[ :force_kill ].check_type( [ NilClass, TrueClass, FalseClass ], 'Wrong argument type $1 for :force_kill (expected $2)' )
 
         # workaround/backwards compatibility: allow string as hash key value 
         close_options[ :check_process ] = close_options[ :check_process ].to_boolean if close_options[ :check_process ].kind_of?( String )
 
         # verify :check_process value type
-        close_options[ :check_process ].check_type( [ TrueClass, FalseClass ], "Wrong argument type $1 for :check_process (expected $2)" )
+        close_options[ :check_process ].check_type( [ TrueClass, FalseClass ], 'Wrong argument type $1 for :check_process (expected $2)' )
         
         if close_options[ :force_kill ] != nil
 
-=begin
           @sut.execute_command( 
             MobyCommand::Application.new( 
-              :Close,     # command_type
-              self.name,  # app_name
-              self.uid,   # app_uid
-              self.sut,   # sut
-              nil,        # arguments
-              nil,        # environment
-              nil,        # working directory
-              nil,        # events_to_listen
-              nil,        # signals_to_listen
-              {           # flags 
-                :force_kill => close_options[ :force_kill ] 
-              } 
-            )
-          )
-=end
-
-          @sut.execute_command( 
-            MobyCommand::Application.new( 
-              :Close,     # command_type
+              :Close,     
               {
-                :application_name => self.name,
-                :application_uid => self.uid,  
-                :sut => self.sut,              
+                :application_name => @name,
+                :application_uid => @id,  
+                :sut => @sut,              
                 :flags => { :force_kill => close_options[ :force_kill ] }
               } 
             )
@@ -178,24 +159,13 @@ module MobyBehaviour
 
         else   
 
-=begin
-          @sut.execute_command( 
-            MobyCommand::Application.new( 
-              :Close, 
-              self.name, 
-              self.uid, 
-              self.sut
-            ) 
-          )
-=end
-
           @sut.execute_command( 
             MobyCommand::Application.new( 
               :Close, 
               { 
-                :application_name => self.name, 
-                :application_uid => self.uid, 
-                :sut => self.sut
+                :application_name => @name, 
+                :application_uid => @id, 
+                :sut => @sut
               }
             ) 
           )
@@ -212,7 +182,10 @@ module MobyBehaviour
         $logger.enabled = false
 
         # retrieve application synchronization timeout value
-        timeout_time = $parameters[ self.sut.id ][ :application_synchronization_timeout, '60' ].to_f
+        timeout_time = @sut_parameters[ :application_synchronization_timeout, '60' ].to_f
+
+        # retrieve application synchronization timeout retry interval value
+        refresh_interval = @sut_parameters[ :application_synchronization_retry_interval, '0.25' ].to_f
 
         # create application identification hash
         application_identification_hash = { :type => 'application', :id => @id }
@@ -222,7 +195,7 @@ module MobyBehaviour
           # verify close results
           MobyUtil::Retryable.until(
             :timeout => timeout_time,
-            :interval => $parameters[ self.sut.id ][ :application_synchronization_retry_interval, '0.25' ].to_f,
+            :interval => refresh_interval,
             :exception => MobyBase::VerificationError,
             :unless => [ MobyBase::TestObjectNotFoundError, MobyBase::ApplicationNotAvailableError ] 
           ){
@@ -316,25 +289,25 @@ module MobyBehaviour
 
       begin
 
-        exe_name = self.attribute( 'FullName' ).to_s
+        name = attribute('FullName')
 
       rescue MobyBase::AttributeNotFoundError
 
         begin
 
-          exe_name = self.attribute( 'exepath' ).to_s
+          name = attribute('exepath')
 
         rescue MobyBase::AttributeNotFoundError
 
-          exe_name = ""
+          name = ''
 
         end
 
       end
 
-      Kernel::raise RuntimeError.new( "Application does not have 'FullName' or 'exepath' attribute defined" ) if exe_name.empty?
+      name.not_empty 'Application does not have "FullName" or "exepath" attribute', RuntimeError
 
-      File.basename( exe_name.gsub( /\\/, '/' ) )
+      File.basename( name.gsub( /\\/, '/' ) )
 
     end
 
@@ -348,7 +321,7 @@ module MobyBehaviour
     #  puts @sut.application.uid #prints foreground executable uid to console
     def uid
 
-      id
+      @id
 
     end
 
@@ -377,79 +350,77 @@ module MobyBehaviour
       true
 
     end
+	      
+	  # == description
+	  # Bring the application to foreground.\n
+	  # \n
+	  # [b]NOTE:[/b] Currently this works only for Symbian OS target!
+	  # 
+	  # == returns
+	  # NilClass
+	  #   description: -
+	  #   example: -
+	  #
+	  #
+	  def bring_to_foreground
 
-	    
-	# == description
-	# Bring the application to foreground.\n
-	# \n
-	# [b]NOTE:[/b] Currently this works only for Symbian OS target!
-	# 
-	# == returns
-	# NilClass
-	#   description: -
-	#   example: -
-	#
-	#
-	def bring_to_foreground
-
-	  #@sut.execute_command(MobyCommand::Application.new(:BringToForeground, nil, self.uid, self.sut))
-
-	  @sut.execute_command(
-	    MobyCommand::Application.new(
-	      :BringToForeground, 
-	      { 
-	        :application_uid => self.uid, 
-	        :sut => self.sut
-        }
+	    @sut.execute_command(
+	      MobyCommand::Application.new(
+	        :BringToForeground, 
+	        { 
+	          :application_uid => @id, 
+	          :sut => @sut
+          }
+        )
       )
-    )
 
-	end
-
-	# == description
-	# Kills the application process
-	# 
-	# == returns
-	# NilClass
-	#   description: -
-	#   example: -
-	#
-	def kill
-
-	  #@sut.execute_command( MobyCommand::Application.new( :Kill, self.executable_name, self.uid, self.sut ) )
-
-	  @sut.execute_command( 
-	    MobyCommand::Application.new( 
-	      :Kill, 
-	      {
-	        :application_name => self.executable_name, 
-	        :application_uid => self.uid, 
-	        :sut => self.sut 
-        }
-      ) 
-    )
-
-
-	end
-
-	# == description
-	# Returns the mem usage of the application if the information is available.
-	# Will return -1 if the information is not available.
-	# 
-	# == returns
-	# Integer
-	#   description: Current memory usage
-	#   example: 124354
-	#
-	def mem_usage
-	  mem = -1
-	  begin
-		mem = self.attribute('memUsage')
-	  rescue
 	  end
-	  mem
-	end
 
+	  # == description
+	  # Kills the application process
+	  # 
+	  # == returns
+	  # NilClass
+	  #   description: -
+	  #   example: -
+	  #
+	  def kill
+
+	    @sut.execute_command( 
+	      MobyCommand::Application.new( 
+	        :Kill, 
+	        {
+	          :application_name => executable_name, 
+	          :application_uid => @id, 
+	          :sut => @sut 
+          }
+        ) 
+      )
+
+	  end
+
+	  # == description
+	  # Returns the mem usage of the application if the information is available.
+	  # Will return -1 if the information is not available.
+	  # 
+	  # == returns
+	  # Integer
+	  #   description: Current memory usage
+	  #   example: 124354
+	  #
+	  def mem_usage
+
+	    begin
+
+  		  attribute('memUsage').to_i
+
+	    rescue
+
+        -1
+        
+	    end
+
+	  end
 
     # enable hooking for performance measurement & debug logging
     TDriver::Hooking.hook_methods( self ) if defined?( TDriver::Hooking )

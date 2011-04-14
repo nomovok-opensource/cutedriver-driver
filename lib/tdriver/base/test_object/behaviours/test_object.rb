@@ -99,14 +99,11 @@ module MobyBehaviour
     # attributes_hash = @test_app.Triangle( :name => 'Triangle1' ).attributes # retrieve all attribute for triangle object
     def attributes
 
-      # retrieve sut parameters
-      sut_parameters = $parameters[ @sut.id ]
-
       # retrieve sut attribute filter type
-      filter_type = sut_parameters[ :filter_type, 'none' ] 
+      filter_type = @sut_parameters[ :filter_type, 'none' ] 
 
       # temporarly disable attribute filter to retrieve all test object attributes
-      sut_parameters[ :filter_type ] = 'none'
+      @sut_parameters[ :filter_type ] = 'none'
 
       begin
 
@@ -140,7 +137,7 @@ module MobyBehaviour
       ensure
 
         # restore attributes filter type
-        sut_parameters[ :filter_type ] = filter_type
+        @sut_parameters[ :filter_type ] = filter_type
 
       end
 
@@ -524,14 +521,12 @@ module MobyBehaviour
     # TODO: document me
     def disable_optimizer
 
-      sut_parameters = $parameters[ @sut.id ]
-
       # disable optimizer for this call since it will not work
       @_enable_optimizer = false
 
-      if sut_parameters[ :use_find_object, 'false' ] == 'true' and @sut.respond_to?( 'find_object' )
+      if @sut_parameters[ :use_find_object, 'false' ] == 'true' and @sut.respond_to?( 'find_object' )
 
-        sut_parameters[ :use_find_object ] = 'false'
+        @sut_parameters[ :use_find_object ] = 'false'
 
         @_enable_optimizer = true
 
@@ -544,7 +539,7 @@ module MobyBehaviour
     # TODO: document me
     def enable_optimizer
 
-      $parameters[ @sut.id ][ :use_find_object ] = 'true' if @_enable_optimizer
+      @sut_parameters[ :use_find_object ] = 'true' if @_enable_optimizer
 
       @_enable_optimizer = false
 
