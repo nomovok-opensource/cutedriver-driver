@@ -646,7 +646,19 @@ display: block;
       '-'
     end
   end
+
+  def repalce_chars_to_html_format(log)
+    formatted_log=Array.new
+    log.each do |line|
+      formatted_line=line.gsub('<','&#60;')
+      formatted_line=formatted_line.gsub('>','&#62;')
+      formatted_log << formatted_line
+    end
+    formatted_log
+  end
+  
   def format_execution_log(log,folder=nil)
+    log=repalce_chars_to_html_format(log)
     begin
       formatted_log=Array.new
       log.each do |line|

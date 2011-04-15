@@ -91,7 +91,15 @@ class TDriverErrorRecoverySettings
   end
   def get_monitored_sut
     str_parameter=MobyUtil::Parameter[ :error_recovery_monitored_sut_ids ]
-    @monitored_suts=str_parameter.split('|')
+
+    if str_parameter.include?('|')
+      @monitored_suts=str_parameter.split('|')
+    elsif str_parameter.include?(',')
+      @monitored_suts=str_parameter.split(',')
+    else
+      @monitored_suts=str_parameter
+    end
+    
     @monitored_suts
   end
 
