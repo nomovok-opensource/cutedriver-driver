@@ -330,10 +330,10 @@ module TDriverReportCreator
         @_stored_details.each do |detail|
           $new_test_case.set_test_case_execution_log(detail)
         end
-        $new_test_case.set_test_case_execution_log(details)
+        $new_test_case.set_test_case_execution_log(details,true)
         @_stored_details=[]
       else
-        $new_test_case.set_test_case_execution_log(details)
+        $new_test_case.set_test_case_execution_log(details,true)
       end
       updating_test_case_details(details) if MobyUtil::Parameter[ :custom_error_recovery_module, nil ]!=nil
       if  MobyUtil::Parameter[ :report_monitor_memory, 'false']=='true'

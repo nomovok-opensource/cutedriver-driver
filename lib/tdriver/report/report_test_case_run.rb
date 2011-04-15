@@ -289,8 +289,8 @@ module TDriverReportCreator
       formatted_line
     end
 
-    def set_test_case_execution_log(value)
-      value=repalce_chars_to_html_format(value)
+    def set_test_case_execution_log(value,format=false)
+      value=repalce_chars_to_html_format(value) if format==true
       @test_case_execution_log=@test_case_execution_log.to_s + '<br />' + value.to_s.gsub(/\n/,'<br />')
     end
     #This method sets the test case user data
