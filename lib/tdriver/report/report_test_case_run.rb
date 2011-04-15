@@ -282,7 +282,8 @@ module TDriverReportCreator
     # nil
     # === raises
     def repalce_chars_to_html_format(value)
-      formatted_line=value.gsub('<','&#60;')
+      
+      formatted_line=value.to_s.gsub('<','&#60;')
       formatted_line=formatted_line.gsub('>','&#62;')
 
       formatted_line
