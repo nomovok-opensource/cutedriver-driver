@@ -201,7 +201,11 @@ class Hash
   # TODO: document me
   def to_attributes
   
-    self.collect{ | key, value | "#{ key.to_s }=\"#{ value.to_s }\"" }.join(" ")
+    self.collect{ | key, value |
+
+      "#{ key.to_s }=\"#{ value.to_s.encode_to_xml }\"" 
+  
+    }.join(" ")
   
   end
 

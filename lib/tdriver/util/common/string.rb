@@ -28,6 +28,13 @@ class String
 
   end
 
+  # TODO: document me
+  def encode_to_xml
+
+    gsub('&', '&amp;').gsub('<', '&lt;').gsub('>', '&gt;').gsub( '"', '&quot;' ).gsub( '\'', '&apos;' )
+
+  end
+
   # Function determines if string is "true" or "false"
   # == params
   # string:: String
