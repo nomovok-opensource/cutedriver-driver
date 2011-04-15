@@ -28,6 +28,8 @@ module MobyUtil
       # TODO: document me
       def initialize( xml = nil )
 
+        @cache = Hash.new{ | hash, key | hash[ key ] = {} }
+
         @xml = xml
 
       end

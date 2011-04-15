@@ -27,16 +27,18 @@ module MobyBase
 
     include Singleton
 
-    attr_reader :timeout
+    attr_reader :timeout, :test_object_adapter
 
     # TODO: Document me (TestObjectFactory::initialize)
-    def initialize
+    def initialize( options = {} )
 
       # get timeout from parameters, use default value if parameter not found
       @timeout = $parameters[ :application_synchronization_timeout, "20" ].to_f
 
       # get timeout retry interval from parameters, use default value if parameter not found
       @_retry_interval = $parameters[ :application_synchronization_retry_interval, "1" ].to_f
+
+      @test_object_adapter = TDriver::TestObjectAdapter
 
     end
 
@@ -114,7 +116,7 @@ module MobyBase
         sut.refresh( directives[ :__refresh_arguments ], search_parameters )
 
         # retrieve objects from xml
-        matches, rule = TDriver::TestObjectAdapter.get_objects(
+        matches, rule = @test_object_adapter.get_objects(
         
          rules[ :parent ].xml_data, 
          rules[ :object_attributes_hash ], 
@@ -159,9 +161,9 @@ module MobyBase
         if directives[ :__xy_sorting ] == true
                   
           # sort elements
-          TDriver::TestObjectAdapter.sort_elements( 
+          @test_object_adapter.sort_elements( 
             matches, 
-            TDriver::TestObjectAdapter.application_layout_direction( sut )
+            @test_object_adapter.application_layout_direction( sut )
           )
 
         end
@@ -272,7 +274,7 @@ module MobyBase
         unless identification_directives.has_key?( :__parent_application ) || rules.has_key?( :parent_application )
               
           # retrieve application test object xml element
-          application_test_object_xml = TDriver::TestObjectAdapter.retrieve_parent_application( test_object_xml )
+          application_test_object_xml = @test_object_adapter.retrieve_parent_application( test_object_xml )
 
           unless application_test_object_xml.nil?
 
@@ -280,16 +282,16 @@ module MobyBase
             sut = rules[ :parent ].instance_variable_get( :@sut )
 
             # retrieve test object id from xml
-            object_id = TDriver::TestObjectAdapter.test_object_element_attribute( application_test_object_xml, 'id' ){ nil }.to_i
+            object_id = @test_object_adapter.test_object_element_attribute( application_test_object_xml, 'id', nil ).to_i
 
             # retrieve test object name from xml
-            object_name = TDriver::TestObjectAdapter.test_object_element_attribute( application_test_object_xml, 'name' ){ nil }.to_s
+            object_name = @test_object_adapter.test_object_element_attribute( application_test_object_xml, 'name', nil ).to_s
 
             # retrieve test object type from xml
-            object_type = TDriver::TestObjectAdapter.test_object_element_attribute( application_test_object_xml, 'type' ){ nil }.to_s 
+            object_type = @test_object_adapter.test_object_element_attribute( application_test_object_xml, 'type', nil ).to_s 
               
             # calculate object cache hash key
-            hash_key = TDriver::TestObjectAdapter.test_object_hash( object_id, object_type, object_name )
+            hash_key = @test_object_adapter.test_object_hash( object_id, object_type, object_name )
               
             parent_cache = sut.instance_variable_get( :@child_object_cache )                       
             
@@ -365,21 +367,21 @@ module MobyBase
       identification_directives = rules[ :identification_directives ] || {}
 
       # retrieve attributes
-      #TDriver::TestObjectAdapter.fetch_attributes( xml_object, [ 'id', 'name', 'type', 'env' ], false )
+      #@test_object_adapter.fetch_attributes( xml_object, [ 'id', 'name', 'type', 'env' ], false )
 
       if xml_object.kind_of?( MobyUtil::XML::Element )
 
         # retrieve test object id from xml
-        object_id = TDriver::TestObjectAdapter.test_object_element_attribute( xml_object, 'id' ){ nil }.to_i
+        object_id = @test_object_adapter.test_object_element_attribute( xml_object, 'id', nil ).to_i
 
         # retrieve test object name from xml
-        object_name = TDriver::TestObjectAdapter.test_object_element_attribute( xml_object, 'name' ){ nil }.to_s
+        object_name = @test_object_adapter.test_object_element_attribute( xml_object, 'name', nil ).to_s
 
         # retrieve test object type from xml
-        object_type = TDriver::TestObjectAdapter.test_object_element_attribute( xml_object, 'type' ){ nil }.to_s 
+        object_type = @test_object_adapter.test_object_element_attribute( xml_object, 'type', nil ).to_s 
 
         # retrieve test object type from xml
-        env = TDriver::TestObjectAdapter.test_object_element_attribute( xml_object, 'env' ){ $parameters[ sut.id ][ :env ] }.to_s
+        env = @test_object_adapter.test_object_element_attribute( xml_object, 'env' ){ $parameters[ sut.id ][ :env ] }.to_s
         
       else
       
@@ -395,7 +397,7 @@ module MobyBase
       end
       
       # calculate object cache hash key
-      hash_key = TDriver::TestObjectAdapter.test_object_hash( object_id, object_type, object_name )
+      hash_key = @test_object_adapter.test_object_hash( object_id, object_type, object_name )
       
       # get reference to parent objects child objects cache
       parent_cache = rules[ :parent ].instance_variable_get( :@child_object_cache )
@@ -412,25 +414,35 @@ module MobyBase
       else
         
         # create test object
-        test_object = MobyBase::TestObject.new( self, sut, parent, xml_object )
+        test_object = MobyBase::TestObject.new( 
+        
+          :test_object_factory => self,
+          :test_object_adapter => @test_object_adapter,
+          :xml_object => xml_object,
+          :sut => sut, 
+          :parent => parent
 
-        #test_object.instance_variable_set( :@object_behaviours, [] )
+        )
+
+        obj_type = object_type.clone
 
         # apply all test object related behaviours unless object type is 'application'
-        object_type << ';*' unless object_type == 'application'
+        #object_type << ';*' unless object_type == 'application'
+        obj_type << ';*' unless obj_type == 'application'
 
         # apply behaviours to test object
         MobyBase::BehaviourFactory.instance.apply_behaviour!(
 
           :object => test_object,
-          :object_type => [ *object_type.split(';') ], 
+          #:object_type => [ *object_type.split(';') ], 
+          :object_type => [ *obj_type.split(';') ], 
           :input_type => [ '*', sut.input.to_s ],
           :env => [ '*', *env.to_s.split(";") ],
           :version => [ '*', sut.ui_version.to_s ]
 
         )
         # create child accessors
-        TDriver::TestObjectAdapter.create_child_accessors!( xml_object, test_object )
+        @test_object_adapter.create_child_accessors!( xml_object, test_object )
 
         # set given parent in rules hash as parent object for new child test object    
         test_object.instance_variable_set( :@parent, parent )
@@ -482,8 +494,12 @@ module MobyBase
         
         object_search_params = creation_attributes.clone
 
-        object_search_params[ :className  ] = object_search_params.delete( :type ) if creation_attributes.has_key?( :type )
-        object_search_params[ :objectName ] = object_search_params.delete( :name ) if creation_attributes.has_key?( :name )
+        # see below lines how to do following easier
+        #object_search_params[ :className  ] = object_search_params.delete( :type ) if creation_attributes.has_key?( :type )
+        #object_search_params[ :objectName ] = object_search_params.delete( :name ) if creation_attributes.has_key?( :name )
+
+        object_search_params.rename_key!( :type, :className ){} 
+        object_search_params.rename_key!( :name, :objectName ){}
 
         object_search_params
 

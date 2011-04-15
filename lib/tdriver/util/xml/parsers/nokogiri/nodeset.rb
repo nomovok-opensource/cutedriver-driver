@@ -25,23 +25,23 @@ module MobyUtil
 
       module Nodeset # behaviour
 
-        include Abstraction 
+        include Abstraction
 
         def []( node )
 
-          node_object( @xml[ node ] )
+          cache( :at_index, node ){ node_object( @xml[ node ] ) }
 
         end
 
         def first
 
-          node_object( @xml.first )
+          cache( :first, :vaue ){ node_object( @xml.first ) }
 
         end
 
         def last
 
-          node_object( @xml.last )
+          cache( :last, :value ){ node_object( @xml.last ) }
 
         end
 
@@ -49,7 +49,7 @@ module MobyUtil
 
           @xml.each{ | node | 
 
-            yield( node_object( node ) ) 
+            yield( cache( :each, node ){ node_object( node ) } ) 
 
           }
 
@@ -61,7 +61,7 @@ module MobyUtil
 
           @xml.each_with_index{ | node, index | 
 
-            yield( node_object( node ), index ) 
+            yield( cache( :each, node ){ node_object( node ) }, index )
 
           }
 
@@ -72,11 +72,12 @@ module MobyUtil
         def collect( &block )
 
           _collect( &block )
-          #nodeset_object( _collect( &block ) )
 
         end
 
         def collect!( &block )
+
+          clear_cache
 
           @xml = _collect( &block )
 
@@ -86,13 +87,13 @@ module MobyUtil
 
         def compact
 
-          nodeset_object( @xml.compact )
+          cache( :compact, :value ){ nodeset_object( @xml.compact ) }
 
         end
 
         def compact!
 
-          @xml = @xml.compact
+          @xml = cache( :compact_, :value ){ @xml.compact }
 
           self
 
@@ -106,6 +107,8 @@ module MobyUtil
 
         def sort!( &block )
 
+          clear_cache
+
           @xml = _sort( &block )
 
           self
@@ -114,28 +117,26 @@ module MobyUtil
 
         def empty?
 
-          @xml.empty?
+          cache( :is_empty, :value ){ @xml.empty? }
 
         end
         
         def length
 
-          @xml.length
+          cache( :length, :value ){ @xml.length }
 
         end
     
     
         def to_a
 
-          @xml.collect{ | node | 
-
-            node_object( node ) 
-
-          }
+          cache( :to_a, :value ){ @xml.collect{ | node | node_object( node ) } }
           
         end
         
         def delete( node )
+
+          clear_cache
 
           @xml.each do | nodeset_node |
 
@@ -160,11 +161,7 @@ module MobyUtil
 
         def _collect( &block )
 
-          @xml.collect{ | node | 
-
-            yield( node_object( node ) ) 
-
-          } 
+          @xml.collect{ | node | yield( cache( :each, node ){ node_object( node ) } ) }
 
         end
 
@@ -174,7 +171,7 @@ module MobyUtil
         
             if block_given?
 
-              yield( node_object( node_a ), node_object( node_b ) ) 
+              yield( cache( :each, node_a ){ node_object( node_a ) }, cache( :each, node_b ){ node_object( node_b ) } )
 
             else
 

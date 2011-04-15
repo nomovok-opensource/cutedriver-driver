@@ -23,40 +23,80 @@ module MobyUtil
 
     module Nokogiri
 
+      module Cache
+      
+        private
+      
+        # TODO: document me
+        def initialize_cache
+
+          @cache = Hash.new{ | hash, key | hash[ key ] = {} }
+
+        end
+      
+        # TODO: document me
+        def clear_cache
+        
+          @cache.clear
+        
+        end
+      
+        # TODO: document me
+        def cache( key, value )
+        
+          @cache[ key ].fetch( value ){
+
+            @cache[ key ][ value ] = yield
+
+          }
+        
+        end
+      
+        # TODO: document me
+        def no_cache( *args )
+        
+          yield
+        
+        end
+      
+      end
+  
       module Abstraction
+
+        include Cache
 
         # TODO: Documentation
         def empty?
 
-          @xml.nil?
+          cache( :is_nil, :value ){ @xml.nil? }
 
         end
 
         # TODO: Documentation
         def name
 
-          @xml.name
+          cache( :name, :value ){ @xml.name }
 
         end
 
         # TODO: Documentation
         def nil?
 
-          @xml.nil?
+          cache( :is_nil, :value ){ @xml.nil? }
 
         end
 
         # TODO: Documentation
         def size
 
-          @xml.size
+          cache( :size, :value ){ @xml.size }
 
         end
 
         # TODO: Documentation
         def to_s
 
-          @xml.to_s
+          cache( :to_s, :value ){ @xml.to_s }
 
         end
 

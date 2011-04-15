@@ -28,8 +28,8 @@ class Hash
 
   end
 
-  # Verify that received object contains one of given keys. Raises exception is key not found.
-  def require_key( keys, message = "None of key(s) $1 found from hash" )
+  # verify that receiver object contains one of given keys. Raises exception is key not found.
+  def require_one( keys, message = "None of key(s) $1 found from hash" )
 
     # create array of types
     keys_array = Array( keys )
@@ -63,7 +63,18 @@ class Hash
 
   end
 
-  # Verify that received object contains all of given keys. Raises exception is key not found.
+  # verify that receiver object contains all of given keys. Raises exception is key not found.
+  def require_key( key, message = 'required key $1 not found from hash' )
+  
+    fetch( key ){
+    
+      raise ArgumentError, message
+    
+    }
+  
+  end
+
+  # verify that receiver object contains all of given keys. Raises exception is key not found.
   def require_keys( keys, message = "Required key(s) $1 not found from hash" )
 
     # create array of types
@@ -188,6 +199,13 @@ class Hash
   end # strip_dynamic_attributes!
 
   # TODO: document me
+  def to_attributes
+  
+    self.collect{ | key, value | "#{ key.to_s }=\"#{ value.to_s }\"" }.join(" ")
+  
+  end
+
+  # TODO: document me
   def recursive_merge( other )
   
     self.merge( other ){ | key, old_value, new_value |
@@ -226,4 +244,38 @@ class Hash
   
   end # recursive_merge!
 
-end
+  # TODO: document me
+  def fetch!( key )
+  
+    if has_key?( key )
+    
+      yield( key, self[ key ] )
+    
+    end
+  
+  end # fetch!
+
+  # TODO: document me
+  def rename_key!( key, new )
+
+    if has_key?( key )
+    
+      self[ new ] = delete( key )
+    
+    else
+    
+      if block_given?
+      
+        yield( key, new )
+        
+      else
+        
+        raise IndexError, "key #{ key.inspect } not found"
+      
+      end
+          
+    end # has_key?
+  
+  end # rename_key!
+
+end # Hash

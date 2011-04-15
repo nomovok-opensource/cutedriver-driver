@@ -30,12 +30,14 @@ module MobyUtil
         # TODO: document me
         def []( value )
 
-          @xml[ value ]
+          cache( __method__, value ){ @xml[ value ] }
 
         end
 
         # TODO: document me
         def []=( name, value )
+
+          clear_cache
 
           @xml[ name ] = value
 
@@ -44,8 +46,8 @@ module MobyUtil
         # TODO: document me
         def ==( object )
 
-          @xml.content == object.xml.content
-
+          cache( __method__, object.object_id ){ @xml.content == object.xml.content }
+          
         end
 
         # aliases for ==
@@ -54,12 +56,14 @@ module MobyUtil
         # TODO: document me
         def <=>( object )
 
-          @xml <=> object.xml
+          cache( __method__, object.object_id ){ @xml <=> object.xml }
 
         end
 
         # TODO: document me
         def add_previous_sibling( other )
+
+          clear_cache
 
           @xml.add_previous_sibling( other.xml )
 
@@ -68,44 +72,40 @@ module MobyUtil
         # TODO: document me
         def attribute( attr_name )
 
-          unless ( value = @xml.attribute( attr_name ) ).nil?
-
-            value.to_s
-
-          end
+          cache( :attribute, attr_name ){ _attribute( @xml.attribute( attr_name ) ) }
 
         end
 
         # TODO: document me
         def attributes
 
-          # return hash of attributes
-          Hash[ @xml.attribute_nodes.collect{ | node | 
-
-            [ node.node_name, node.value.to_s ] }
-
-          ]
+          cache( :attributes, :value ){
+            # return hash of attributes
+            Hash[ @xml.attribute_nodes.collect{ | node | 
+              [ node.node_name, node.value.to_s ] }
+            ]
+          }
 
         end
 
         # TODO: document me
         def blank?
 
-          @xml.blank?
+          cache( :is_blank, :value ){ @xml.blank? }
 
         end
 
         # TODO: document me
         def children
 
-          node_object( @xml.children )
+          cache( :children, :value ){ node_object( @xml.children ) }
 
         end
 
         # TODO: document me
         def content
 
-          @xml.content
+          cache( :content, :value ){ @xml.content }
 
         end
 
@@ -119,7 +119,7 @@ module MobyUtil
           # iterate each attribute
           @xml.each{ | element | 
 
-            yield( node_object( element ) ) 
+            yield( cache( :each, element ){ node_object( element ) } )
 
           }
 
@@ -130,7 +130,7 @@ module MobyUtil
         # TODO: document me
         def inner_html
 
-          @xml.inner_html
+          cache( :inner_html, :value ){ @xml.inner_html }
 
         end
 
@@ -139,20 +139,22 @@ module MobyUtil
 
         # TODO: document me
         def to_s
-  
-          @xml.to_s
+
+          cache( :to_s, :value ){ @xml.to_s }
 
         end
 
         # TODO: document me
         def parent
         
-          node_object( @xml.parent )
+          cache( :parent, :value ){ node_object( @xml.parent ) }
         
         end
 
         # TODO: document me
         def remove
+
+          clear_cache
 
           @xml.remove
 
@@ -163,6 +165,8 @@ module MobyUtil
         # TODO: document me
         def replace( other )
 
+          clear_cache
+
           @xml.replace( other.xml )
 
           self
@@ -172,23 +176,23 @@ module MobyUtil
         # TODO: document me
         def xpath( xpath_query, *args, &block )
 
-          node_object( 
-
-            @xml.xpath( xpath_query, *args, &block ) 
-
-          )
+          cache( :xpath, xpath_query ){ node_object( @xml.xpath( xpath_query, *args, &block ) ) }
 
         end
 
         # TODO: document me
         def at_xpath( xpath_query, *args, &block )
 
-          node_object( 
+          cache( :at_xpath, xpath_query ){ node_object( @xml.at_xpath( xpath_query, *args, &block ) ) }
 
-            @xml.at_xpath( xpath_query, *args, &block ) 
+        end
 
-          )
-
+      private
+      
+        def _attribute( value )
+        
+          value.to_s unless value.nil?
+        
         end
 
         # enable hooking for performance measurement & debug logging

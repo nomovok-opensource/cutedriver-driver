@@ -19,6 +19,7 @@
 # Generic configuration file for sut data.
 # Can be used to provide ruby code for sut configurations.
 module SutParameters
+
   # Verify blocks define the verify_always blocks that are automatically added to given sut.  
   # Takes an array of VerifyBlock objects
   # VerifyBlock parameters:
@@ -27,13 +28,25 @@ module SutParameters
   # - Error message
   # Configured verify_always blocks will not return the failed error block code in the error message.
   VERIFY_BLOCKS = [
-                   # Example block
-                   MobyUtil::VerifyBlock.new(
-                                             Proc.new { |sut|
-                                               # Verifies that some application is always running
-                                               sut.application.name != "qttasserver"
-                                             }, 
-                                             true, "Top most application is qttas, no application is running")                                           
-                  ]
+  
+    # Example block
+    MobyUtil::VerifyBlock.new(
+
+      # proc block to execute
+      Proc.new{ |sut|
+        # Verifies that some application is always running
+        sut.application.name != "qttasserver"
+      }, 
+
+      # expected return value
+      true, 
+
+      # error message
+      "Top most application is qttas, no application is running"
+
+    )
+    
+  ]
+  
 end
   

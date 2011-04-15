@@ -29,6 +29,8 @@ module MobyUtil
 
         # TODO: document me
         def initialize( xml )
+
+          initialize_cache
           
           @xml = parse( xml )
         
@@ -36,9 +38,9 @@ module MobyUtil
 
         # TODO: document me
         def root
-
-          node_object( @xml.root )
-
+  
+          cache( :root, :value ){ node_object( @xml.root ) }
+        
         end
 
       private

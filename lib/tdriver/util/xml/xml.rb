@@ -23,10 +23,16 @@ module MobyUtil
 
     class << self
     
-      private
+    private
     
       def initialize_class
       
+        # empty xml cache hash
+        @document_cache = { :cache => [], :objects => {} }
+
+        # default xml cache buffer size
+        @document_cache_buffer_size = 10
+
         # set used parser module
         self.current_parser = MobyUtil::XML::Nokogiri        
       
@@ -43,6 +49,31 @@ module MobyUtil
 
       @@parser
 
+    end
+
+    # Set XML document cache buffering size, set 0 to disable
+    # == params
+    # == return
+    # Integer:: 
+    # == raises
+    # TypeError::
+    def self.buffer_size=( value )
+    
+      value.check_type Integer, 'wrong argument type $1 for XML cache buffer size (expected $2)' 
+    
+      @document_cache_buffer_size = value
+    
+    end
+    
+    # Get current XML document cache buffering size
+    # == params
+    # == return
+    # Integer:: 
+    # == raises
+    def self.buffer_size
+      
+      @document_cache_buffer_size
+    
     end
 
     # Set XML parser to be used
@@ -101,15 +132,62 @@ module MobyUtil
     #
     # == params
     # xml_string:: String containing XML  
+    # crc:: Optional CRC16 checksum - used for cache/buffering if given
     # == return
     # Document:: XML document object
+    # Array:: Array containing XML document object and status was it already found from cache
     # == raises
-    def self.parse_string( xml_string )
+    def self.parse_string( xml_string, crc = nil )
 
       begin
 
-        # create new document object with given xml string
-        Document.new( xml_string )
+        unless crc.nil?
+
+          if @document_cache[ :cache ].include?( crc )
+
+            # return cached object and status that object was found from cache
+            [ @document_cache[ :objects ][ crc ], true ]
+
+          else
+
+            # create new document object with given xml string
+            document = Document.new( xml_string )
+
+            # verify that xml caching is enabled
+            if @document_cache_buffer_size > 0
+
+              # drop olders cached xml object
+              if @document_cache[ :cache ].count == @document_cache_buffer_size
+
+                # remove data object from cache
+                @document_cache[ :objects ].delete( 
+
+                  # take (oldest) first from cache buffer
+                  @document_cache[ :cache ].shift
+
+                )
+
+              end
+
+              # add new xml data object to cache
+              @document_cache[ :cache ] << crc
+
+              # add new xml data object to cache
+              @document_cache[ :objects ][ crc ] = document 
+
+            end
+
+            # return document object and status that object was not found from cache
+            [ document, false ]
+            
+          end
+
+        else
+
+          # create new document object with given xml string - no caching used
+          Document.new( xml_string )
+
+        end
 
       rescue
 

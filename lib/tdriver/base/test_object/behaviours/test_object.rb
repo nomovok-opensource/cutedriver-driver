@@ -99,14 +99,11 @@ module MobyBehaviour
     # attributes_hash = @test_app.Triangle( :name => 'Triangle1' ).attributes # retrieve all attribute for triangle object
     def attributes
 
-      # retrieve sut parameters
-      sut_parameters = $parameters[ @sut.id ]
-
       # retrieve sut attribute filter type
-      filter_type = sut_parameters[ :filter_type, 'none' ] 
+      filter_type = @sut_parameters[ :filter_type, 'none' ] 
 
       # temporarly disable attribute filter to retrieve all test object attributes
-      sut_parameters[ :filter_type ] = 'none'
+      @sut_parameters[ :filter_type ] = 'none'
 
       begin
 
@@ -140,12 +137,12 @@ module MobyBehaviour
       ensure
 
         # restore attributes filter type
-        sut_parameters[ :filter_type ] = filter_type
+        @sut_parameters[ :filter_type ] = filter_type
 
       end
 
       # return hash of test object attributes
-      TDriver::TestObjectAdapter.test_object_attributes( _xml_data )
+      @test_object_adapter.test_object_attributes( _xml_data )
 
     end
 
@@ -206,10 +203,10 @@ module MobyBehaviour
       @sut.refresh if disable_optimizer
 
       # retrieve parent of current xml element; objects/object/objects/object/../..
-      parent_element = TDriver::TestObjectAdapter.parent_test_object_element( self )
+      parent_element = @test_object_adapter.parent_test_object_element( self )
 
       # retrieve parent element attributes
-      parent_attributes = TDriver::TestObjectAdapter.test_object_element_attributes( parent_element )
+      parent_attributes = @test_object_adapter.test_object_element_attributes( parent_element )
 
       if self.get_application_id && parent_attributes[ 'type' ] != 'application'
 
@@ -466,7 +463,7 @@ module MobyBehaviour
       begin
 
         # find object from new xml data
-        _xml_data, unused_rule = TDriver::TestObjectAdapter.get_objects( xml_document, { :type => @type, :id => @id, :name => @name }, true )
+        _xml_data, unused_rule = @test_object_adapter.get_objects( xml_document, { :type => @type, :id => @id, :name => @name }, true )
                         
         # deactivate if test object not found or multiple matches found
         raise unless _xml_data.count == 1 
@@ -524,14 +521,12 @@ module MobyBehaviour
     # TODO: document me
     def disable_optimizer
 
-      sut_parameters = $parameters[ @sut.id ]
-
       # disable optimizer for this call since it will not work
       @_enable_optimizer = false
 
-      if sut_parameters[ :use_find_object, 'false' ] == 'true' and @sut.respond_to?( 'find_object' )
+      if @sut_parameters[ :use_find_object, 'false' ] == 'true' and @sut.respond_to?( 'find_object' )
 
-        sut_parameters[ :use_find_object ] = 'false'
+        @sut_parameters[ :use_find_object ] = 'false'
 
         @_enable_optimizer = true
 
@@ -544,7 +539,7 @@ module MobyBehaviour
     # TODO: document me
     def enable_optimizer
 
-      $parameters[ @sut.id ][ :use_find_object ] = 'true' if @_enable_optimizer
+      @sut_parameters[ :use_find_object ] = 'true' if @_enable_optimizer
 
       @_enable_optimizer = false
 
@@ -823,7 +818,7 @@ module MobyBehaviour
           begin
           
             # retrieve attribute(s) from test object; never access ui state xml data directly from behaviour implementation
-            TDriver::TestObjectAdapter.test_object_attribute( _xml_data, name )
+            @test_object_adapter.test_object_attribute( _xml_data, name )
 
           rescue MobyBase::AttributeNotFoundError
           

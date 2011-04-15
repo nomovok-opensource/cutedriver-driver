@@ -30,12 +30,18 @@ module MobyUtil
         # TODO: document me
         def value
 
-          @xml.value
-
+          cache( :value, :value ){ 
+          
+            @xml.value
+          
+          }
+          
         end
 
         # TODO: document me
         def value=( content )
+
+          clear_cache
 
           @xml.value = content
 
