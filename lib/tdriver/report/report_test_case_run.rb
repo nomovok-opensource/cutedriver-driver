@@ -281,7 +281,15 @@ module TDriverReportCreator
     # === returns
     # nil
     # === raises
+    def repalce_chars_to_html_format(value)
+      formatted_line=log.gsub('<','&#60;')
+      formatted_line=formatted_line.gsub('>','&#62;')
+
+      formatted_line
+    end
+
     def set_test_case_execution_log(value)
+      value=repalce_chars_to_html_format(value)
       @test_case_execution_log=@test_case_execution_log.to_s + '<br />' + value.to_s.gsub(/\n/,'<br />')
     end
     #This method sets the test case user data
@@ -547,10 +555,10 @@ module TDriverReportCreator
                 '" target="_blank"><img alt="" src="state_xml/'<<
                 time_stamp+'_'+sut_id.to_s+'_state.png'<<
                 '" width="10%" height="10%" /></a>'
-                if arguments[:text]
-                  image_html << "<div class=\"desc\">#{arguments[:text]}</div>"
-                end
-                image_html << '</div>'
+              if arguments[:text]
+                image_html << "<div class=\"desc\">#{arguments[:text]}</div>"
+              end
+              image_html << '</div>'
               self.set_test_case_execution_log(image_html.to_s)
             rescue Exception=>e
               @capture_screen_error="Unable to capture sceen image #{sut_id}: " + e.message

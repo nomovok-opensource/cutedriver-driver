@@ -646,19 +646,8 @@ display: block;
       '-'
     end
   end
-
-  def repalce_chars_to_html_format(log)
-    formatted_log=Array.new
-    log.each do |line|
-      formatted_line=line.gsub('<','&#60;')
-      formatted_line=formatted_line.gsub('>','&#62;')
-      formatted_log << formatted_line
-    end
-    formatted_log
-  end
   
-  def format_execution_log(log,folder=nil)
-    log=repalce_chars_to_html_format(log)
+  def format_execution_log(log,folder=nil)   
     begin
       formatted_log=Array.new
       log.each do |line|
@@ -674,6 +663,7 @@ display: block;
       '-'
     end
   end
+  
   def write_page_start(page, title,report_page=nil,report_pages=nil)
     case title
     when "TDriver test results"
