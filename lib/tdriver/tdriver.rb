@@ -136,19 +136,29 @@ module TDriver
     
 	end
 
+  def self.init
+  
+    # initialize parameters
+    $parameters.init
+
+    # enable logging engine
+    $logger.enable_logging
+
+    # set xml cache buffer size 
+    MobyUtil::XML.buffer_size = $parameters[ :xml_cache_buffer_size, 10 ].to_i
+
+    # reporting modules
+    require File.expand_path( File.join( File.dirname( __FILE__ ), 'report/report.rb' ) ) if MobyUtil::Parameter[ :enable_reporter, 'true' ]=='true'
+
+    # initialization done, everything is ready
+    $TDRIVER_INITIALIZED = true
+
+  end
+
 	# enable hooking for performance measurement & debug logging
 	TDriver::Hooking.hook_methods( self ) if defined?( TDriver::Hooking )
 
 end # TDriver
 
-# initialize parameters
-$parameters.init
-
-# enable logging engine
-$logger.enable_logging
-
-# reporting modules
-require File.expand_path( File.join( File.dirname( __FILE__ ), 'report/report.rb' ) ) if MobyUtil::Parameter[ :enable_reporter, 'true' ]=='true'
-
-# initialization done, everything is ready
-$TDRIVER_INITIALIZED = true
+# initialize TDriver
+TDriver.init
