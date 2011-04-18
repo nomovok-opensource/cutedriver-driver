@@ -182,10 +182,10 @@ module MobyBehaviour
         $logger.enabled = false
 
         # retrieve application synchronization timeout value
-        timeout_time = @sut_parameters[ :application_synchronization_timeout, '60' ].to_f
+        timeout_time = sut_parameters[ :application_synchronization_timeout, '60' ].to_f
 
         # retrieve application synchronization timeout retry interval value
-        refresh_interval = @sut_parameters[ :application_synchronization_retry_interval, '0.25' ].to_f
+        refresh_interval = sut_parameters[ :application_synchronization_retry_interval, '0.25' ].to_f
 
         # create application identification hash
         application_identification_hash = { :type => 'application', :id => @id }

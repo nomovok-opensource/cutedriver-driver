@@ -138,7 +138,7 @@ module MobyBehaviour
     def freeze
 
 =begin
-      if @sut_parameters[ :use_find_object, 'false' ] == 'true' && self.respond_to?( 'find_object' )
+      if sut_parameters[ :use_find_object, 'false' ] == 'true' && self.respond_to?( 'find_object' )
 
         warn("warning: SUT##{ __method__ } is not supported when use_find_objects optimization is enabled")
 
@@ -166,7 +166,7 @@ module MobyBehaviour
     def unfreeze
 
 =begin
-      if @sut_parameters[ :use_find_object, 'false' ] == 'true' && self.respond_to?( 'find_object' )
+      if sut_parameters[ :use_find_object, 'false' ] == 'true' && self.respond_to?( 'find_object' )
 
         warn("warning: SUT##{ __method__ } is not supported when use_find_objects optimization is enabled")
 
@@ -623,8 +623,8 @@ module MobyBehaviour
       begin
 
         # set the refresh interval to zero while the application is launched
-        #orig_interval = @sut_parameters[ :refresh_interval ]
-        #@sut_parameters[ :refresh_interval ] = '0'
+        #orig_interval = sut_parameters[ :refresh_interval ]
+        #sut_parameters[ :refresh_interval ] = '0'
 
         # raise exception if argument type other than hash
         target.check_type( Hash, "Wrong argument type $1 for run method (expected $2)" )
@@ -638,9 +638,9 @@ module MobyBehaviour
         # due to bug #1488
         sleep_time = ( target[ :sleep_after_launch ] || target[ :sleep_time ] ).to_i
 
-        timeout_time = @sut_parameters[ :application_synchronization_timeout, '5' ].to_f
+        timeout_time = sut_parameters[ :application_synchronization_timeout, '5' ].to_f
 
-        retry_interval = @sut_parameters[ :application_synchronization_retry_interval, '0.5' ].to_f
+        retry_interval = sut_parameters[ :application_synchronization_retry_interval, '0.5' ].to_f
 
         if target.has_key?( :check_pid )
 
@@ -649,7 +649,7 @@ module MobyBehaviour
         else
                     
           # due to bug #1710; pid checking must be configurable
-          check_pid = @sut_parameters[ :application_check_pid, false ].to_s.to_boolean( false )
+          check_pid = sut_parameters[ :application_check_pid, false ].to_s.to_boolean( false )
 
         end
 
@@ -1066,7 +1066,7 @@ module MobyBehaviour
 
         language = nil
 
-        if ( @sut_parameters[ :read_lang_from_app ]=='true')
+        if ( sut_parameters[ :read_lang_from_app ]=='true')
 
           #read localeName app
           language=self.application.attribute("localeName")
@@ -1076,7 +1076,7 @@ module MobyBehaviour
 
         else
 
-          language = @sut_parameters[ :language ]
+          language = sut_parameters[ :language ]
 
         end
 
@@ -1085,7 +1085,7 @@ module MobyBehaviour
         translation = MobyUtil::Localisation.translation(
           logical_name,
           language,
-          @sut_parameters[ :localisation_server_database_tablename ],
+          sut_parameters[ :localisation_server_database_tablename ],
           file_name,
           plurality,
           lengthvariant
@@ -1200,10 +1200,10 @@ module MobyBehaviour
         user_data_lname,
 
         # language
-        @sut_parameters[ :language ],
+        sut_parameters[ :language ],
 
         # table name
-        @sut_parameters[ :user_data_server_database_tablename ]
+        sut_parameters[ :user_data_server_database_tablename ]
 
       )
 
@@ -1243,10 +1243,10 @@ module MobyBehaviour
         operator_data_lname,
 
         # operator
-        @sut_parameters[ :operator_selected ],
+        sut_parameters[ :operator_selected ],
 
         # table name
-        @sut_parameters[ :operator_data_server_database_tablename ]
+        sut_parameters[ :operator_data_server_database_tablename ]
 
       )
 
@@ -1385,7 +1385,7 @@ module MobyBehaviour
       if !@frozen #&& ( @_previous_refresh.nil? || ( current_time - @_previous_refresh ).to_f >= @refresh_interval )
 
         # determine should FindObjects service be used
-        use_find_objects =  @sut_parameters[ :use_find_object, 'false' ] == 'true' and self.respond_to?( 'find_object' ) == true
+        use_find_objects =  sut_parameters[ :use_find_object, 'false' ] == 'true' and self.respond_to?( 'find_object' ) == true
 
         # duplicate refresh arguments hash
         refresh_arguments = refresh_args.clone
@@ -1663,16 +1663,20 @@ module MobyBehaviour
       # create empty hash for sut parameters if sut id not found from parameters
       $parameters[ @id ] = {} unless $parameters.has_key?( @id )
 
-      # accessor for sut parameters
-      @sut_parameters   = $parameters[ @id ]
-
-      @input            = @sut_parameters[ :input_type,             'key' ].to_sym
-      @refresh_tries    = @sut_parameters[ :ui_state_refresh_tries, '5'   ].to_f
-      @refresh_interval = @sut_parameters[ :refresh_interval,       '0.5' ].to_f
+      @input            = sut_parameters[ :input_type,             'key' ].to_sym
+      @refresh_tries    = sut_parameters[ :ui_state_refresh_tries, '5'   ].to_f
+      @refresh_interval = sut_parameters[ :refresh_interval,       '0.5' ].to_f
 
       # load verify blocks from defined sut configuration file 
-      @verify_blocks    = load_verify_blocks( @sut_parameters[ :verify_blocks, nil ] )
+      @verify_blocks    = load_verify_blocks( sut_parameters[ :verify_blocks, nil ] )
       
+    end
+
+    # accessor for sut parameters
+    def sut_parameters
+    
+      $parameters[ @id ]
+    
     end
 
     public # deprecated
