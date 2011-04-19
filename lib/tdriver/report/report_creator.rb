@@ -574,6 +574,7 @@ module TDriverReportCreator
       $new_test_case.clean_files_from_sut()
 
       update_run($new_test_case.test_case_name.to_s,status,$new_test_case.test_case_reboots,$new_test_case.test_case_crash_files,execution_log)
+      
       $new_junit_xml_results.add_test_result(status, $new_test_case.test_case_start_time, $new_test_case.test_case_end_time)
 
       $new_test_case=nil

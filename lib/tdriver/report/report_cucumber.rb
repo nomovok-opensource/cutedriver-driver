@@ -107,7 +107,7 @@ module TDriverReport
     # === params
     # === returns
     # === raises
-    def visit_feature_element_name(keyword, name, file_colon_line, source_indent)      
+    def visit_feature_element_name(keyword, name, file_colon_line, source_indent)    
       line = %Q("#{name}")      
       @current_feature_element=line if @current_feature_element.nil?
       unless line == @current_feature_element       

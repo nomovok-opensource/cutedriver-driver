@@ -450,8 +450,7 @@ module TDriverReportCreator
         if File::directory?(@report_folder)==false
           FileUtils.mkdir_p @report_folder+'/environment'
           FileUtils.mkdir_p @report_folder+'/cases'
-          FileUtils.mkdir_p @report_folder+'/junit_xml'
-
+          FileUtils.mkdir_p @report_folder+'/junit_xml'          
         else
           if b_fixed_report_folder==true
             FileUtils::remove_entry_secure(@report_folder, :force => true)
