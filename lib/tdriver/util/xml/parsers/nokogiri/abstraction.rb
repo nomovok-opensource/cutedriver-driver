@@ -29,7 +29,7 @@ module MobyUtil
       
         # TODO: document me
         def initialize_cache
-
+                
           @cache = Hash.new{ | hash, key | hash[ key ] = {} }
 
         end
@@ -43,17 +43,28 @@ module MobyUtil
       
         # TODO: document me
         def cache( key, value )
-        
-          @cache[ key ].fetch( value ){
 
-            @cache[ key ][ value ] = yield
+          if @options[ :cache_enabled ] == true
+          
+            @cache[ key ].fetch( value ){
 
-          }
+              @cache[ key ][ value ] = yield
+
+            }
+
+          else
+
+            yield
+              
+          end
+              
         
         end
       
         # TODO: document me
         def no_cache( *args )
+        
+          p __method__
         
           yield
         
@@ -109,23 +120,23 @@ module MobyUtil
 
             when ::Nokogiri::XML::Element
 
-              XML::Element.new( object )
+              XML::Element.new( object, @options )
 
             when ::Nokogiri::XML::NodeSet
 
-              XML::Nodeset.new( object )
+              XML::Nodeset.new( object, @options )
 
             when ::Nokogiri::XML::Text
 
-              XML::Text.new( object )
+              XML::Text.new( object, @options )
 
             when ::Nokogiri::XML::Attr
 
-              XML::Attribute.new( object )
+              XML::Attribute.new( object, @options )
 
             when ::Nokogiri::XML::Comment
 
-              XML::Comment.new( object )
+              XML::Comment.new( object, @options )
 
             when ::NilClass
 

@@ -64,7 +64,7 @@ module MobyUtil
       @document_cache_buffer_size = value
     
     end
-    
+
     # Get current XML document cache buffering size
     # == params
     # == return
@@ -149,12 +149,14 @@ module MobyUtil
             [ @document_cache[ :objects ][ crc ], true ]
 
           else
+  
+            cache_enabled = ( @document_cache_buffer_size > 0 )
 
             # create new document object with given xml string
-            document = Document.new( xml_string )
+            document = Document.new( xml_string, { :cache_enabled => cache_enabled } )
 
             # verify that xml caching is enabled
-            if @document_cache_buffer_size > 0
+            if cache_enabled
 
               # drop olders cached xml object
               if @document_cache[ :cache ].count == @document_cache_buffer_size

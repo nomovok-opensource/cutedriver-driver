@@ -26,7 +26,9 @@ module MobyUtil
       attr_accessor :xml
 
       # TODO: document me
-      def initialize( xml = nil )
+      def initialize( xml = nil, options = {} )
+
+        @options = options
 
         @cache = Hash.new{ | hash, key | hash[ key ] = {} }
 

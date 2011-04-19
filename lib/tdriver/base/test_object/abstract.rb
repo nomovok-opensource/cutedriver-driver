@@ -47,8 +47,10 @@ module MobyBase
       @parent = options.require_key( :parent )
       @sut = options.require_key( :sut )
 
+      @sut_id = @sut.instance_variable_get( :@id )
+
       # retrieve reference to sut parameters hash
-      @sut_parameters = @sut.instance_variable_get( :@sut_parameters )
+      #@sut_parameters = @sut.instance_variable_get( :@sut_parameters )
 
       # apply xml object if given; test object type, id and name are retrieved from the xml 
       self.xml_data = options[ :xml_object ] if options.has_key?( :xml_object )
@@ -183,6 +185,14 @@ module MobyBase
 
       "#<#{ self.class }:0x#{ ( "%x" % ( self.object_id.to_i << 1 ) )[ 3 .. -1 ] } @id=\"#{ @id }\" @name=\"#{ @name }\" @parent=#{ @parent.inspect } @sut=#{ @sut.inspect } @type=\"#{ @type }\" @x_path=\"#{ @x_path }\">"
 
+    end
+    
+    private
+    
+    def sut_parameters
+      
+      $parameters[ @sut_id ]
+    
     end
     
     # enable hooking for performance measurement & debug logging

@@ -28,7 +28,9 @@ module MobyUtil
         include Node
 
         # TODO: document me
-        def initialize( xml )
+        def initialize( xml, options = {} )
+
+          @options = options
 
           initialize_cache
           
