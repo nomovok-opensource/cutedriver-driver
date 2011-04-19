@@ -853,20 +853,19 @@ module MobyBehaviour
 
     end
 
-    # this method will be automatically invoked after module is extended to sut object  
+    # this method will be automatically invoked after module is extended to target object
     def self.extended( target_object )
 
       target_object.instance_exec{ 
       
-        # initialize cache object 
-        @child_object_cache = TDriver::TestObjectCache.new
-      
-        @parent_application = nil
-      
         # defaults
-        @_application_id = nil
-        @creation_attributes = nil
-        @_active = true
+        @_application_id ||= nil
+
+        @creation_attributes ||= nil
+
+        @_active ||= true
+
+        @parent_application ||= nil
         
       }
 
