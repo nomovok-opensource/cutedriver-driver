@@ -485,11 +485,14 @@ module MobyBehaviour
             # remove cached behaviour module 
             MobyBase::BehaviourFactory.instance.reset_modules_cache
 
+            # apply only application behaviours if test object is type of 'application'
+            object_type = ( @type == "application" ? [ @type ] : [ '*', @type ] )
+
             # reapply behaviours to test object if environment value has changed
             MobyBase::BehaviourFactory.instance.apply_behaviour!(
 
               :object => self,
-              :object_type => [ '*', @type ], 
+              :object_type => object_type, 
               :input_type => [ '*', @sut.input.to_s ],
               :env => [ '*', *@env.to_s.split(";") ],
               :version => [ '*', @sut.ui_version.to_s ]
