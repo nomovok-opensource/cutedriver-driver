@@ -44,16 +44,19 @@ module MobyBase
       # verify that required keys is found from options hash and initialize the test object with these values.
       @test_object_factory = options.require_key( :test_object_factory )
       @test_object_adapter = options.require_key( :test_object_adapter )
-      @parent = options.require_key( :parent )
-      @sut = options.require_key( :sut )
+      @creation_attributes = options.require_key( :creation_attributes )
 
+      @sut = options.require_key( :sut )
       @sut_id = @sut.instance_variable_get( :@id )
 
-      # retrieve reference to sut parameters hash
-      #@sut_parameters = @sut.instance_variable_get( :@sut_parameters )
+      @parent = options.require_key( :parent )
+      @parent_application = options.require_key( :parent_application )
 
       # apply xml object if given; test object type, id and name are retrieved from the xml 
       self.xml_data = options[ :xml_object ] if options.has_key?( :xml_object )
+
+      # initialize cache object 
+      @child_object_cache = TDriver::TestObjectCache.new
 
       # empty test object behaviours list
       @object_behaviours = []
