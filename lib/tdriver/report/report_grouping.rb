@@ -453,14 +453,14 @@ class ReportingGroups
     table_body
   end
   def generate_report(status)
-    html_body=Array.new
-    group_body=Array.new
+    html_body=Array.new    
     if @grouping==true
       @main_groups.each do |group|
         @main_total=0
         @main_passed=0
         @main_failed=0
         @main_not_run=0
+        group_body=Array.new
         group_body << tog_list_begin(group,@group_test_case_arr,status,'main')
         group_body << generate_test_results_table(status,@group_test_case_arr,[group,group])
         tog_list1=0
