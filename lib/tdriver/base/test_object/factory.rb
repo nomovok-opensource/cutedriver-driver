@@ -307,8 +307,11 @@ module MobyBase
             
                 :parent => sut,          
                 :parent_application => nil,
-                :xml_object => application_test_object_xml
-            
+                :xml_object => application_test_object_xml,
+
+                # object identification attributes
+                :object_attributes_hash => { :name => object_name, :type => object_type }
+
               )
               
             end
