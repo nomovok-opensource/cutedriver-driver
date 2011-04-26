@@ -75,7 +75,7 @@ module TDriverReportCreator
         puts 'Report generated to:'
         puts $tdriver_reporter.report_folder()
         clean_video_files
-        ending_test_set_run if MobyUtil::Parameter[ :custom_error_recovery_module, nil ]!=nil
+        ending_test_set_run if MobyUtil::Parameter[ :custom_error_recovery_module, nil ]!=nil        
         if $tdriver_reporter.total_failed.to_i > 0
           Kernel.exit(1)
         elsif $tdriver_reporter.total_run.to_i == 0

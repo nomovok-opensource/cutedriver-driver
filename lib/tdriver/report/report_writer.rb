@@ -698,6 +698,7 @@ display: block;
     status_style='test_passed' if status=='passed' || @pass_statuses.include?(status)
     status_style='test_failed' if status=='failed' || @fail_statuses.include?(status)
     status_style='test_not_run' if status=='not run' || @not_run_statuses.include?(status)
+    
     begin
       used_memory_difference=@tc_memory_amount_start.to_i-@tc_memory_amount_end.to_i
     rescue
@@ -782,9 +783,18 @@ display: block;
       used_memory_difference.to_s<<
       '</td></tr>' <<
       '<tr><td><b>Device reboots</b></td><td>'<<
-      reboots.to_s<<
-      '</td></tr>' <<
-      '<tr>' <<
+      reboots.to_s <<
+      '</td></tr>'
+    if MobyUtil::Parameter[ :report_generate_rdoc, 'false' ]=='true' && test_case_name.include?('test_')
+      html_body << '<tr>' <<
+        '<td style="font-weight: 700">'<<
+        'RDoc</td>'<<
+        '<td style="font-size: small; font-weight: bold">'<<
+        get_rdoc_for_method(test_case_name)<<
+        '</td></tr>'
+    end
+
+    html_body << '<tr>' <<
       '<td style="font-weight: 700">'<<
       'Details</td>'<<
       '<td style="font-size: small; font-weight: bold">'<<
@@ -958,7 +968,7 @@ display: block;
       html_body << '<form action="save_results_to" ><input type="submit" name="save_results_to" value="Download report" /></form>' if @report_editable=='true'
       tdriver_group=nil
       html_result=nil
-   elsif @not_run_statuses.include?(status) || status == "not_run"
+    elsif @not_run_statuses.include?(status) || status == "not_run"
       title='<div class="page_title"><center><h1>Not run</h1></center></div>'<<
         '<div class="summary_not_run">' <<
         '<form action="save_total_run_results" >'
@@ -973,83 +983,83 @@ display: block;
       tdriver_group=nil
       html_result=nil
     else
-	case status
-    when 'crash'
-      title='<div class="page_title"><center><h1>Crash</h1></center></div>'<<
-        '<div class="summary_crash">' <<
-        '<form action="save_total_run_results" >'
-      tdriver_group=ReportingGroups.new(@reporting_groups,tc_arr,false)
-      tdriver_group.parse_groups()
-      html_result=tdriver_group.generate_report('all')
-      html_body << title
-      html_body << html_result
-      html_body << "<input type=\"submit\" name=\"save_changes\" value=\"Save changes\" />" if @report_editable=='true'
-      html_body << "</form>"
-      html_body << '<form action="save_results_to" ><input type="submit" name="save_results_to" value="Download report" /></form>' if @report_editable=='true'
-      tdriver_group=nil
-      html_result=nil
-    when 'reboot'
-      title='<div class="page_title"><center><h1>Reboot</h1></center></div>'<<
-        '<div class="summary_reboot">' <<
-        '<form action="save_total_run_results" >'
-      tdriver_group=ReportingGroups.new(@reporting_groups,tc_arr,false)
-      tdriver_group.parse_groups()
-      html_result=tdriver_group.generate_report('all')
-      html_body << title
-      html_body << html_result
-      html_body << "<input type=\"submit\" name=\"save_changes\" value=\"Save changes\" />" if @report_editable=='true'
-      html_body << "</form>"
-      html_body << '<form action="save_results_to" ><input type="submit" name="save_results_to" value="Download report" /></form>' if @report_editable=='true'
-      tdriver_group=nil
-      html_result=nil
-    when 'statistics'
-      title='<div class="page_title"><center><h1>Statistics</h1></center></div>'<<
-        '<div class="statistics">'
-      tdriver_group=ReportingStatistics.new(tc_arr)
-      html_result=tdriver_group.generate_statistics_table()
-      html_body << title
-      html_body << html_result
-      tdriver_group=nil
-      html_result=nil
-    else
-      chronological_html_body=Array.new
-      title='<div class="page_title"><center><h1>Total run</h1></center></div>'
-      view_selection='<div class="summary_view_select"><center><input type="button" value="Grouped view" ONCLICK="location.assign(\''+report_page.to_s+'_total_run_index.html\');"/>'<<
-        '<input type="button" value="Chronological view" ONCLICK="location.assign(\''+report_page.to_s+'_chronological_total_run_index.html\');"/></center></div>'<<
-        '<div class="summary_total_run">' <<
-        '<form action="save_total_run_results" >'
-      title << view_selection
-      tdriver_group=ReportingGroups.new(@reporting_groups,tc_arr)
-      tdriver_group.parse_groups()
-      html_result=tdriver_group.generate_report('all')
-      html_body << title
-      html_body << html_result
-      html_body << "<input type=\"submit\" name=\"save_changes\" value=\"Save changes\" />" if @report_editable=='true'
-      html_body << "</form>"
-      html_body << '<form action="save_results_to" ><input type="submit" name="save_results_to" value="Download report" /></form>' if @report_editable=='true'
-      html_body << '<form action="export_results_to_excel" ><input type="submit" name="export_results_to_excel" value="Export to Excel" /></form>' if @report_editable=='true'
+      case status
+      when 'crash'
+        title='<div class="page_title"><center><h1>Crash</h1></center></div>'<<
+          '<div class="summary_crash">' <<
+          '<form action="save_total_run_results" >'
+        tdriver_group=ReportingGroups.new(@reporting_groups,tc_arr,false)
+        tdriver_group.parse_groups()
+        html_result=tdriver_group.generate_report('all')
+        html_body << title
+        html_body << html_result
+        html_body << "<input type=\"submit\" name=\"save_changes\" value=\"Save changes\" />" if @report_editable=='true'
+        html_body << "</form>"
+        html_body << '<form action="save_results_to" ><input type="submit" name="save_results_to" value="Download report" /></form>' if @report_editable=='true'
+        tdriver_group=nil
+        html_result=nil
+      when 'reboot'
+        title='<div class="page_title"><center><h1>Reboot</h1></center></div>'<<
+          '<div class="summary_reboot">' <<
+          '<form action="save_total_run_results" >'
+        tdriver_group=ReportingGroups.new(@reporting_groups,tc_arr,false)
+        tdriver_group.parse_groups()
+        html_result=tdriver_group.generate_report('all')
+        html_body << title
+        html_body << html_result
+        html_body << "<input type=\"submit\" name=\"save_changes\" value=\"Save changes\" />" if @report_editable=='true'
+        html_body << "</form>"
+        html_body << '<form action="save_results_to" ><input type="submit" name="save_results_to" value="Download report" /></form>' if @report_editable=='true'
+        tdriver_group=nil
+        html_result=nil
+      when 'statistics'
+        title='<div class="page_title"><center><h1>Statistics</h1></center></div>'<<
+          '<div class="statistics">'
+        tdriver_group=ReportingStatistics.new(tc_arr)
+        html_result=tdriver_group.generate_statistics_table()
+        html_body << title
+        html_body << html_result
+        tdriver_group=nil
+        html_result=nil
+      else
+        chronological_html_body=Array.new
+        title='<div class="page_title"><center><h1>Total run</h1></center></div>'
+        view_selection='<div class="summary_view_select"><center><input type="button" value="Grouped view" ONCLICK="location.assign(\''+report_page.to_s+'_total_run_index.html\');"/>'<<
+          '<input type="button" value="Chronological view" ONCLICK="location.assign(\''+report_page.to_s+'_chronological_total_run_index.html\');"/></center></div>'<<
+          '<div class="summary_total_run">' <<
+          '<form action="save_total_run_results" >'
+        title << view_selection
+        tdriver_group=ReportingGroups.new(@reporting_groups,tc_arr)
+        tdriver_group.parse_groups()
+        html_result=tdriver_group.generate_report('all')
+        html_body << title
+        html_body << html_result
+        html_body << "<input type=\"submit\" name=\"save_changes\" value=\"Save changes\" />" if @report_editable=='true'
+        html_body << "</form>"
+        html_body << '<form action="save_results_to" ><input type="submit" name="save_results_to" value="Download report" /></form>' if @report_editable=='true'
+        html_body << '<form action="export_results_to_excel" ><input type="submit" name="export_results_to_excel" value="Export to Excel" /></form>' if @report_editable=='true'
 
-      tdriver_group=nil
-      html_result=nil
-      tdriver_group=ReportingGroups.new(@reporting_groups,tc_arr,false)
-      tdriver_group.parse_groups()
-      chronological_html_result=tdriver_group.generate_report('all')
-      chronological_html_body << title
-      chronological_html_body << chronological_html_result
-      chronological_html_body << "<input type=\"submit\" name=\"save_changes\" value=\"Save changes\" />" if @report_editable=='true'
-      chronological_html_body << "</form>"
-      chronological_html_body << '<form action="save_results_to" ><input type="submit" name="save_results_to" value="Download report" /></form>' if @report_editable=='true'
-      chronological_html_body << '<form action="export_results_to_excel" ><input type="submit" name="export_results_to_excel" value="Export to Excel" /></form>' if @report_editable=='true'
-      chronological_html_body << "</div>"
+        tdriver_group=nil
+        html_result=nil
+        tdriver_group=ReportingGroups.new(@reporting_groups,tc_arr,false)
+        tdriver_group.parse_groups()
+        chronological_html_result=tdriver_group.generate_report('all')
+        chronological_html_body << title
+        chronological_html_body << chronological_html_result
+        chronological_html_body << "<input type=\"submit\" name=\"save_changes\" value=\"Save changes\" />" if @report_editable=='true'
+        chronological_html_body << "</form>"
+        chronological_html_body << '<form action="save_results_to" ><input type="submit" name="save_results_to" value="Download report" /></form>' if @report_editable=='true'
+        chronological_html_body << '<form action="export_results_to_excel" ><input type="submit" name="export_results_to_excel" value="Export to Excel" /></form>' if @report_editable=='true'
+        chronological_html_body << "</div>"
 
-      File.open(chronological_page, 'a') do |f2|
-        f2.puts chronological_html_body
-      end
-      tdriver_group=nil
-      chronological_html_result=nil
-      chronological_html_body=nil
-    end # case
-	end # if
+        File.open(chronological_page, 'a') do |f2|
+          f2.puts chronological_html_body
+        end
+        tdriver_group=nil
+        chronological_html_result=nil
+        chronological_html_body=nil
+      end # case
+    end # if
 
     html_body << '</div>'
     File.open(page, 'a') do |f2|
@@ -1116,6 +1126,12 @@ display: block;
       '<td><b>Total device resets</b></td>'<<
       '<td>'+total_device_resets.to_s+'</td>'<<
       '</tr>'
+    if MobyUtil::Parameter[ :report_generate_rdoc, 'false' ]=='true'
+      html_body << '<tr>'<<
+        '<td><a href="doc/index.html"><b>Generated RDoc from</b></a></td>'<<
+        '<td>'+Dir.pwd+'</td>'<<
+        '</tr>'
+    end
     $tdriver_reporter.total_dump_count.each do |item|
       html_body << '<tr>'<<
         "<td><b>Total dump count from sut #{item[0].to_s}</b></td>"<<
@@ -1468,6 +1484,50 @@ display: block;
   def get_java_script()
     get_expand_collapse_java_script()
   end
+
+  def scan_rdoc_file_for_method(file,method_name)   
+    text = File.read(file)
+    if text.include?(method_name)
+      path=file.split('doc/')      
+      return path[1]
+    end    
+  end
+
+  def get_rdoc_for_method(method_name)
+    doc=Array.new
+    rdoc_files=[]
+    #Find method documentation from report doc folder
+    d = Dir.new("#{$tdriver_reporter.report_folder()}/doc/classes")
+    d.each do |entry|
+      if entry!="." && entry!=".."
+        if File.directory?("#{d.path}/#{entry}")
+          d1=Dir.new("#{d.path}/#{entry}")
+          d1.each do |entry1|
+            if entry1!="." && entry1!=".."
+              if !File.directory?("#{d1.path}/#{entry1}")
+                res=scan_rdoc_file_for_method("#{d1.path}/#{entry1}",method_name)
+                rdoc_files << res if res
+              end
+            end
+          end
+        else
+          res=scan_rdoc_file_for_method("#{d.path}/#{entry}",method_name)
+          rdoc_files << res if res
+        end
+      end
+    end
+    
+
+    rdoc_files.each do |rdoc|
+      doc << "<iframe src=\"../../doc/#{rdoc}\"
+      width=\"100%\" height=\"340\"
+      align=\"right\" scrolling=\"yes\">
+      <p><a href=\"../../doc/#{rdoc}\">#{method_name}</a>.</p>
+      </iframe>"
+    end
+    return doc
+  end
+
   def format_user_log_table(user_data_rows,user_data_columns)
     begin
       formatted_user_data=Array.new
