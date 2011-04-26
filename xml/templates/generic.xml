@@ -170,7 +170,7 @@
     <parameter name="report_crash_file_locations" value="C:,c:\data,E:,F:" /> <!-- posix="..." -->
     <parameter name="report_crash_file_names" value="MobileCrash" />
     <parameter name="report_disconnect_connected_devices" value="false" />
-    <parameter name="report_generate_rdoc" value="true" />
+    <parameter name="report_generate_rdoc" value="false" />
 
 
     <!-- Parameters for report details -->
