@@ -75,7 +75,7 @@ module TDriverReportCreator
         puts 'Report generated to:'
         puts $tdriver_reporter.report_folder()
         clean_video_files
-        ending_test_set_run if MobyUtil::Parameter[ :custom_error_recovery_module, nil ]!=nil
+        ending_test_set_run if MobyUtil::Parameter[ :custom_error_recovery_module, nil ]!=nil        
         if $tdriver_reporter.total_failed.to_i > 0
           Kernel.exit(1)
         elsif $tdriver_reporter.total_run.to_i == 0
@@ -97,9 +97,11 @@ module TDriverReportCreator
   # nil
   # === raises
   def error_in_connection_detected
-    $tdriver_reporter.set_total_device_resets(1)
-    $new_test_case.set_test_case_reboots(1) if $new_test_case!=nil
-    error_in_connection
+    if start_error_recovery()==true
+      $tdriver_reporter.set_total_device_resets(1)
+      $new_test_case.set_test_case_reboots(1) if $new_test_case!=nil
+    end
+    error_in_connection if MobyUtil::Parameter[ :custom_error_recovery_module, nil ]!=nil
   end
   #This method returns the group where the test case belongs
   #
@@ -386,9 +388,9 @@ module TDriverReportCreator
       end
       error_in_test_case(MobyBase::SUTFactory.instance.connected_suts) if MobyUtil::Parameter[ :custom_error_recovery_module, nil ]!=nil
       begin
-        if start_error_recovery()==true
+        
           error_in_connection_detected
-        end
+      
       rescue Exception => e
         update_test_case("Error recovery failed Exception: #{e.message} Backtrace: #{e.backtrace}")
         end_test_case($new_test_case.test_case_name,'failed')

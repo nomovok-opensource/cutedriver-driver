@@ -472,6 +472,10 @@ module TDriverReportCreator
         #write_page_end(@report_folder+'/cases/tdriver_log_index.html')
         write_page_start(@report_folder+'/cases/statistics_index.html','Statistics')
         write_page_end(@report_folder+'/cases/statistics_index.html')
+        if MobyUtil::Parameter[ :report_generate_rdoc, 'false' ]=='true'
+          system("rdoc --op #{@report_folder}/doc")
+          puts "RDoc generated from test folder: #{Dir.pwd}"
+        end
       rescue Exception => e
         Kernel::raise e, "Unable to create report folder: #{@report_folder}", caller
       end

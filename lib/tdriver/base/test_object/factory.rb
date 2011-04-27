@@ -307,8 +307,11 @@ module MobyBase
             
                 :parent => sut,          
                 :parent_application => nil,
-                :xml_object => application_test_object_xml
-            
+                :xml_object => application_test_object_xml,
+
+                # object identification attributes
+                :object_attributes_hash => { :name => object_name, :type => object_type }
+
               )
               
             end
@@ -411,6 +414,9 @@ module MobyBase
         # store xml_object to test object
         test_object.xml_data = xml_object
 
+        # update test objects creation attributes (either cached object or just newly created child object)
+        test_object.instance_variable_get( :@creation_attributes ).merge!( rules[ :object_attributes_hash ] )
+
       else
         
         # create test object
@@ -418,23 +424,28 @@ module MobyBase
         
           :test_object_factory => self,
           :test_object_adapter => @test_object_adapter,
+          :creation_attributes => rules[ :object_attributes_hash ],
           :xml_object => xml_object,
           :sut => sut, 
-          :parent => parent
+
+          # set given parent in rules hash as parent object for new child test object    
+          :parent => parent,
+
+          # set given application test object in rules hash as parent application for new child test object
+          :parent_application => rules[ :parent_application ]
 
         )
 
+        # temp. variable for object type
         obj_type = object_type.clone
 
         # apply all test object related behaviours unless object type is 'application'
-        #object_type << ';*' unless object_type == 'application'
         obj_type << ';*' unless obj_type == 'application'
 
         # apply behaviours to test object
         MobyBase::BehaviourFactory.instance.apply_behaviour!(
 
           :object => test_object,
-          #:object_type => [ *object_type.split(';') ], 
           :object_type => [ *obj_type.split(';') ], 
           :input_type => [ '*', sut.input.to_s ],
           :env => [ '*', *env.to_s.split(";") ],
@@ -444,12 +455,6 @@ module MobyBase
         # create child accessors
         @test_object_adapter.create_child_accessors!( xml_object, test_object )
 
-        # set given parent in rules hash as parent object for new child test object    
-        test_object.instance_variable_set( :@parent, parent )
-
-        # set given application test object in rules hash as parent application for new child test object
-        test_object.instance_variable_set( :@parent_application, rules[ :parent_application ] )
-
         # add created test object to parents child objects cache, unless explicitly disabled
         parent_cache.add_object( test_object ) unless identification_directives[ :__no_caching ] == true
 
@@ -457,9 +462,6 @@ module MobyBase
 
       # NOTE: Do not remove object_type from object attributes hash_rule due to it is used in find_objects service!
       #rules[ :object_attributes_hash ].delete( :type )
-
-      # update test objects creation attributes (either cached object or just newly created child object)
-      test_object.instance_variable_set( :@creation_attributes, rules[ :object_attributes_hash ] )
   
       # do not make test object verifications if we are operating on the sut itself (allow run to pass)
       unless parent.kind_of?( MobyBase::SUT )

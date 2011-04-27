@@ -330,6 +330,7 @@ module MobyBehaviour
 
     # == description
     # Method for executing sut specific setup method
+    # https://projects.forum.nokia.com/Testabilitydriver/wiki/FeatureSutSetupTeardown
     # == returns
     # Result
     #  description: -
@@ -378,6 +379,7 @@ module MobyBehaviour
 
     # == description
     # Method for executing sut specific teardown method
+    # https://projects.forum.nokia.com/Testabilitydriver/wiki/FeatureSutSetupTeardown
     # == returns
     # Result
     #  description: -

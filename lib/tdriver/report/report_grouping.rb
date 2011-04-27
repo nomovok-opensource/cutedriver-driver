@@ -453,15 +453,16 @@ class ReportingGroups
     table_body
   end
   def generate_report(status)
-    html_body=Array.new
+    html_body=Array.new    
     if @grouping==true
       @main_groups.each do |group|
         @main_total=0
         @main_passed=0
         @main_failed=0
         @main_not_run=0
-        html_body << tog_list_begin(group,@group_test_case_arr,status,'main')
-        html_body << generate_test_results_table(status,@group_test_case_arr,[group,group])
+        group_body=Array.new
+        group_body << tog_list_begin(group,@group_test_case_arr,status,'main')
+        group_body << generate_test_results_table(status,@group_test_case_arr,[group,group])
         tog_list1=0
         tog_list2=0
         tog_list3=0
@@ -472,61 +473,62 @@ class ReportingGroups
           if group.to_s == item1.at(0).to_s && @reporting_groups.include?(group.to_s+':'+item1.at(1).to_s)
             tog_list1=tog_list_begin(item1.at(1).to_s,@group_test_case_arr,status)
             if tog_list1 != 0
-              html_body << tog_list1
-              html_body << generate_test_results_table(status,@group_test_case_arr,item1)
+              group_body << tog_list1
+              group_body << generate_test_results_table(status,@group_test_case_arr,item1)
             end
             @main_groups_sub_level_two.each do |item2|
               if group.to_s == item2.at(0).to_s && @reporting_groups.include?(item1.at(1).to_s+':'+item2.at(1).to_s)
                 tog_list2=tog_list_begin(item2.at(1).to_s,@group_test_case_arr,status)
                 if tog_list2 != 0
-                  html_body << tog_list2
-                  html_body << generate_test_results_table(status,@group_test_case_arr,item2)
+                  group_body << tog_list2
+                  group_body << generate_test_results_table(status,@group_test_case_arr,item2)
                 end
                 @main_groups_sub_level_three.each do |item3|
                   if group.to_s == item3.at(0).to_s && @reporting_groups.include?(item2.at(1).to_s+':'+item3.at(1).to_s)
                     tog_list3=tog_list_begin(item3.at(1).to_s,@group_test_case_arr,status)
                     if tog_list3 != 0
-                      html_body << tog_list3
-                      html_body << generate_test_results_table(status,@group_test_case_arr,item3)
+                      group_body << tog_list3
+                      group_body << generate_test_results_table(status,@group_test_case_arr,item3)
                     end
                     @main_groups_sub_level_four.each do |item4|
                       if group.to_s == item4.at(0).to_s && @reporting_groups.include?(item3.at(1).to_s+':'+item4.at(1).to_s)
                         tog_list4=tog_list_begin(item4.at(1).to_s,@group_test_case_arr,status)
                         if tog_list4 != 0
-                          html_body << tog_list4
-                          html_body << generate_test_results_table(status,@group_test_case_arr,item4)
+                          group_body << tog_list4
+                          group_body << generate_test_results_table(status,@group_test_case_arr,item4)
                         end
                         @main_groups_sub_level_five.each do |item5|
                           if group.to_s == item5.at(0).to_s && @reporting_groups.include?(item4.at(1).to_s+':'+item5.at(1).to_s)
                             tog_list5=tog_list_begin(item5.at(1).to_s,@group_test_case_arr,status)
                             if tog_list5 != 0
-                              html_body << tog_list5
-                              html_body << generate_test_results_table(status,@group_test_case_arr,item5)
-                              html_body << tog_list_end()
+                              group_body << tog_list5
+                              group_body << generate_test_results_table(status,@group_test_case_arr,item5)
+                              group_body << tog_list_end()
                             end
                           end
                         end
                         if tog_list4 != 0
-                          html_body << tog_list_end()
+                          group_body << tog_list_end()
                         end
                       end
                     end
                     if tog_list3 != 0
-                      html_body << tog_list_end()
+                      group_body << tog_list_end()
                     end
                   end
                 end
                 if tog_list2 != 0
-                  html_body << tog_list_end()
+                  group_body << tog_list_end()
                 end
               end
             end
             if tog_list1 != 0
-              html_body << tog_list_end()
+              group_body << tog_list_end()
             end
           end
         end
-        html_body << tog_list_end('main')
+        group_body << tog_list_end('main')
+        html_body << group_body if @main_total > 0
       end
       html_body << generate_test_results_table(status,@group_test_case_arr,['not_in_any_user_defined_group','not_in_any_user_defined_group'])
     else
