@@ -68,7 +68,7 @@ class Hash
   
     fetch( key ){
     
-      raise ArgumentError, message
+      raise ArgumentError, message.gsub!( "$1", key.inspect )
     
     }
   
