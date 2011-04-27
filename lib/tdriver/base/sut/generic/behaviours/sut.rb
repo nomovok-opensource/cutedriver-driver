@@ -594,6 +594,7 @@ module MobyBehaviour
     #  |Key|Type|Description|Example|
     #  |:uid|String or Integer|Unique ID of the application|{ :uid => 268458181 }|
     #  |:name|String|Executable name of the application|{ :name => 'calculator' }|
+    #  |:restart_if_running|Boolean|Restart application if already running||{ :restart_if_running => true }|
     #  |:arguments|String|Comma separated list of arguments passed to the application when it is started|{ :arguments => '--nogui,-v' }|
     #  |:check_pid|Boolean|Overrides default value of SUT parameter :application_check_pid; When set to true, process id is used to test object identification|false|
     #	 |:sleep_time|Integer|Number of seconds to sleep immediately after launching the process|{ :sleep_time => 10 }|
@@ -656,7 +657,7 @@ module MobyBehaviour
         Kernel::raise ArgumentError, "Sleep time need to be >= 0" unless sleep_time >= 0
 
         # try to find an existing app with the current arguments
-        if target[ :try_attach ]
+        if target[ :try_attach ] || target[:restart_if_running]
 
           app_list = MobyBase::StateObject.new( self.list_apps )
 
@@ -669,8 +670,13 @@ module MobyBehaviour
 
           app = self.application(:id => app_info.id) if app_info
 
-          if app
+          if target[:restart_if_running] && app
 
+            # Close the application,
+            app.close # (:force_kill => true)
+
+          elsif app
+            
             begin
 
               app.bring_to_foreground
