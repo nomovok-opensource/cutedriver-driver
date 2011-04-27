@@ -346,7 +346,13 @@ module MobyBehaviour
       # button_state = app_state.Button( :text => "Backspace" ) #get the state for test object button
       # button_text = button_state.attribute( "text" ) #get attribute text from the button state object
 
-      MobyBase::StateObject.new( xml_data, self )
+      MobyBase::StateObject.new( 
+
+        :source_data => xml_data, 
+        :parent => self,
+        :test_object_adapter => @test_object_adapter
+
+      )
 
     end
 
@@ -753,13 +759,13 @@ module MobyBehaviour
 
       refresh_args = ( attributes[ :type ] == 'application' ? { :name => attributes[ :name ], :id => attributes[ :id ] } : { :id => get_application_id } )
 
-      refresh( refresh_args)
+      refresh( refresh_args )
 
       begin
 
         @parent.child( :type => @type, :id => @id )
 
-      rescue MobyBase::TestObjectNotFoundError => exception
+      rescue MobyBase::TestObjectNotFoundError
 
         Kernel::raise MobyBase::TestObjectNotVisibleError
 
@@ -827,9 +833,7 @@ module MobyBehaviour
 
           rescue MobyBase::AttributeNotFoundError
           
-            Kernel::raise MobyBase::AttributeNotFoundError.new(
-              "Could not find attribute #{ name.inspect } for test object of type #{ @type.to_s }"
-            )
+            Kernel::raise MobyBase::AttributeNotFoundError, "Could not find attribute #{ name.inspect } for test object of type #{ @type.to_s }"
 
           end
 
@@ -891,8 +895,8 @@ module MobyBehaviour
       #
       # == returns
       # TestObject:: test object that was used as parent when this object was created. Can also be of type SUT if sut was the parent (ie. application objects)
-
-      $stderr.puts "warning: TestObject#parent_object is deprecated, please use TestObject#parent instead."      
+  
+      warn_caller '$1:$2 warning: TestObject#parent_object is deprecated, please use TestObject#parent instead.'
 
       @parent
 
@@ -907,7 +911,7 @@ module MobyBehaviour
     #
     def state
 
-      warn "warning: deprecated method TestObject#state; please use TestObject#state_object instead"
+      warn_caller '$1:$2 warning: deprecated method TestObject#state; please use TestObject#state_object instead'
 
       state_object
 

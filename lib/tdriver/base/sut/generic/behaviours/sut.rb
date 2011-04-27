@@ -428,7 +428,7 @@ module MobyBehaviour
     # Creates a state object of current test object or given XML as argument. The state object is static and thus is not refreshed or synchronized.
     #
     # == arguments
-    # xml_source
+    # source_data
     #  String
     #   description: Object state as XML string
     #   example: -
@@ -457,36 +457,33 @@ module MobyBehaviour
     #  description: Wrong argmument type given
     # RuntimeError
     #  description: If the XML source for the object is not in initialized
-    def state_object( xml_source = nil, parent_object = nil )
+    def state_object( source_data = nil, parent_object = nil )
 
-      if xml_source.nil?
+      if source_data.nil?
 
         # refresh if xml data is empty
         self.refresh if @xml_data.empty?
 
         Kernel::raise RuntimeError, "Can not create state object of SUT with id #{ @id.inspect }, no XML content or SUT not initialized properly." if @xml_data.empty?
 
-        MobyBase::StateObject.new( 
+        source_data = @test_object_adapter.state_object_xml( @xml_data, @id )
 
-          @test_object_adapter.state_object_xml( @xml_data, @id ), 
-          self 
-
-        )
-
-      else
-
-        # verify that type of xml_source argument is correct
-        xml_source.check_type [ String, MobyUtil::XML::Element ], 'wrong argument type $1 for XML source (expected $2)'
-
-        MobyBase::StateObject.new( 
-
-          xml_source, 
-          parent_object, 
-          @test_object_adapter
-
-        )
+        parent_object = self
 
       end
+
+      # verify that type of xml_source argument is correct
+      source_data.check_type [ String, MobyUtil::XML::Element ], 'wrong argument type $1 for state object source data (expected $2)'
+
+      parent_object.check_type [ MobyBase::TestObject, MobyBase::StateObject, NilClass ], 'wrong argument type $1 for parent object (expected $2)'
+
+      MobyBase::StateObject.new( 
+
+        :source_data => source_data, 
+        :parent => parent_object,
+        :test_object_adapter => @test_object_adapter
+
+      )
 
     end
 
@@ -706,7 +703,13 @@ module MobyBehaviour
         # try to find an existing app with the current arguments
         if target[ :try_attach ] || target[:restart_if_running]
 
-          app_list = MobyBase::StateObject.new( self.list_apps )
+          app_list = MobyBase::StateObject.new( 
+
+            :source_data => self.list_apps,
+            :parent => nil,
+            :test_object_adapter => @test_object_adapter
+
+          )
 
           # either ID or NAME have been passed to identify the application
           # raise exception if more than one app has been found for this id/name

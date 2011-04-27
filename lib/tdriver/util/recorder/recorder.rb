@@ -53,7 +53,12 @@ module MobyUtil
 
       app.stop_recording
       
-      MobyUtil::Scripter.new( sut.id, object_identificators ).write_fragment( MobyBase::StateObject.new( xml_source ), app.name )
+      MobyUtil::Scripter.new( sut.id, object_identificators ).write_fragment( 
+
+        MobyBase::StateObject.new( :source_data => xml_source ), 
+        app.name 
+
+      )
 
     end
 

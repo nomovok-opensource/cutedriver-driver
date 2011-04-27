@@ -46,28 +46,56 @@ module MobyBase
 
     # Creation of a new StateObject from source data.
     # === params
-    # options:: Hash containing xml object describing the object and all other required configuration values e.g. test object factory, -adapter etc.
+    # options:: Hash containing source data describing the object and all other required configuration values e.g. test object factory, -adapter etc.
     # === returns
     # StateObject:: new StateObject instance
     # === raises
+    def initialize( *options )
 
-    # Creates a new StateObject from XML source data.
-    #
-    # === params
-    # source_data:: MobyUtil::XML::Element or String. Contains the root element of this state.
-    # parent:: TestObject, SUT or StateObject. Parent of this state object. Must be of type TestObjectComposition. 
-    # test_object_adapter:: Test object adapter class to be used
-    # === returns
-    # StateObject:: New StateObject
-    def initialize( source_data, parent = nil, test_object_adapter = nil )
+      # clone original options array; array is modified below
+      options = options.clone
 
-      # caller_method = caller.select{ | str | str !~ /^\(eval\)\:/ }[0]
- 
-      # verify that argument types are correct 
+      # determine is method called with new or deprecated API
+      if options.count > 1
+
+        # print warning if deprecated API is used
+        warn_caller '$1:$2 warning: deprecated API; use hash with :source_data, :parent, :test_object_adapter as argument instead of StateObject.new( source_data, parent, test_object_adapter )'
+
+        # retrieve source data
+        source_data = options.shift
+
+        # retrieve reference to parent object
+        parent = options.shift
+
+        # retrieve reference to test object adapter
+        test_object_adapter = options.shift
+
+      else
+
+        # retrieve first array element
+        options = options.shift
+
+        # verify options argument type
+        options.check_type Hash, 'wrong argument type $1 for StateObject options (expected $2)'
+
+        # verify that :source_data key exists in hash       
+        source_data = options.require_key :source_data
+
+        # retrieve reference to parent object
+        parent = options[ :parent ]
+
+        # retrieve reference to test object adapter
+        test_object_adapter = options[ :test_object_adapter ]
+
+      end
+
+      # verify that parent argument type is correct
       parent.check_type [ NilClass, MobyBase::StateObject, MobyBase::TestObject, MobyBase::SUT ], 'wrong argument type $1 for parent object (expected $2)'
 
+      # verify that test object adapter argument type is correct
       test_object_adapter.check_type [ NilClass, Class ], 'wrong argument type $1 for test object adapter (expected $2)'
 
+      # verify that source data argument type is correct
       source_data.check_type [ String, MobyUtil::XML::Element ], 'wrong argument type $1 for source data (expected $2)'
 
       # parse source data if given argument is type of string
@@ -303,7 +331,11 @@ module MobyBase
       # create state objects
       matches = matches.collect{ | object_xml |
 
-        result = StateObject.new( object_xml, self )
+        result = StateObject.new( 
+          :source_data => object_xml, 
+          :parent => self,
+          :test_object_adapter => @test_object_adapter
+        )
         
         # use cached state object if once already retrieved
         get_cached_test_object!( result ).tap{ | found_in_cache |
