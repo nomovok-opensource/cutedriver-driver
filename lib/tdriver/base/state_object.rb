@@ -38,41 +38,63 @@ module MobyBase
     attr_accessor :parent
 
     # TODO: document me
-    attr_reader :type, :name, :id
+    attr_reader(
+        :type,      # object type
+        :name,      # object name
+        :id         # object id
+    )
+
+    # Creation of a new StateObject from source data.
+    # === params
+    # options:: Hash containing xml object describing the object and all other required configuration values e.g. test object factory, -adapter etc.
+    # === returns
+    # StateObject:: new StateObject instance
+    # === raises
 
     # Creates a new StateObject from XML source data.
     #
     # === params
-    # xml_source:: MobyUtil::XML::Element or String. Contains the root element of this state.
+    # source_data:: MobyUtil::XML::Element or String. Contains the root element of this state.
     # parent:: TestObject, SUT or StateObject. Parent of this state object. Must be of type TestObjectComposition. 
+    # test_object_adapter:: Test object adapter class to be used
     # === returns
     # StateObject:: New StateObject
-    def initialize( xml_source, parent = nil )
+    def initialize( source_data, parent = nil, test_object_adapter = nil )
 
-      xml_element = nil
+      # caller_method = caller.select{ | str | str !~ /^\(eval\)\:/ }[0]
+ 
+      # verify that argument types are correct 
+      parent.check_type [ NilClass, MobyBase::StateObject, MobyBase::TestObject, MobyBase::SUT ], 'wrong argument type $1 for parent object (expected $2)'
 
-      if xml_source.kind_of?( MobyUtil::XML::Element )
+      test_object_adapter.check_type [ NilClass, Class ], 'wrong argument type $1 for test object adapter (expected $2)'
 
-        xml_element = xml_source
+      source_data.check_type [ String, MobyUtil::XML::Element ], 'wrong argument type $1 for source data (expected $2)'
 
-      elsif xml_source.kind_of?( String )
+      # parse source data if given argument is type of string
+      source_data = MobyUtil::XML.parse_string( source_data ).root if source_data.kind_of?( String )
 
-        xml_element = MobyUtil::XML.parse_string(xml_source).root
+      # store reference to parent object
+      @parent = parent
+
+      # store reference to test object adapter
+      if test_object_adapter.nil?
+
+        @test_object_adapter = TDriver::TestObjectAdapter
 
       else
 
-        Kernel::raise ArgumentError, "The XML source must be a String or MobyUtil::XML::Element, it was of type '#{ xml_source.class.to_s }'"
+        @test_object_adapter = test_object_adapter
 
       end
 
-      @parent = parent 
+      # retrieve object attributes
+      method( :xml_data= ).call( source_data )
 
-      method(:xml_data=).call( xml_element )
-
+      # initialize child objects cache for state object
       @child_object_cache = TDriver::TestObjectCache.new
 
-      # Create accessor methods for any child state objects.
-      TDriver::TestObjectAdapter.create_child_accessors!( xml_element, self )
+      # create accessor methods for any child state objects.
+      @test_object_adapter.create_child_accessors!( source_data, self )
 
     end
 
@@ -164,7 +186,7 @@ module MobyBase
      
       @_xml_data = xml_object
             
-      unused_xpath, @name, @type, @id = TDriver::TestObjectAdapter.get_test_object_identifiers( xml_object )
+      unused_xpath, @name, @type, @id = @test_object_adapter.get_test_object_identifiers( xml_object )
       
     end
     
@@ -195,7 +217,7 @@ module MobyBase
       begin
 
         # retrieve attribute(s) from test object; never access ui state xml data directly from behaviour implementation
-        TDriver::TestObjectAdapter.test_object_attribute( @_xml_data, name.to_s )
+        @test_object_adapter.test_object_attribute( @_xml_data, name.to_s )
 
       rescue MobyBase::AttributeNotFoundError
       
@@ -261,7 +283,7 @@ module MobyBase
       dynamic_attributes = rules.strip_dynamic_attributes!
 
       # retrieve application object from sut.xml_data
-      matches, unused_rule = TDriver::TestObjectAdapter.get_objects( @_xml_data, rules, true )
+      matches, unused_rule = @test_object_adapter.get_objects( @_xml_data, rules, true )
 
       if matches.count == 0
 
@@ -280,7 +302,7 @@ module MobyBase
       
       # create state objects
       matches = matches.collect{ | object_xml |
-      
+
         result = StateObject.new( object_xml, self )
         
         # use cached state object if once already retrieved

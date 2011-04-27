@@ -136,6 +136,27 @@ module TDriver
     
 	end
 
+  # TODO: document me
+  def self.state_object( options )
+
+    # make sure that data key was given
+    options.require_key :data
+
+    # source data format should be verified by test object adapter
+    #options[ :data ].check_type [ String, MobyUtil::XML::Element ], 'wrong argument type $1 for source data (expected $2)'
+
+    options[ :parent ].check_type [ NilClass, MobyBase::TestObject, MobyBase::SUT ], 'wrong argument type $1 for parent object (expected $2)'
+    options[ :test_object_adapter ].check_type [ NilClass, Class ], 'wrong argument type $1 for test object adapter (expected $2)'
+
+    MobyBase::StateObject.new( 
+      options[ :data ],
+      options[ :parent ],
+      options[ :test_object_adapter ]
+    )
+
+  end
+
+  # TODO: document me
   def self.init
   
     # initialize parameters
