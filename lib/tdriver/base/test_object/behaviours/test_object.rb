@@ -329,20 +329,22 @@ module MobyBehaviour
      end
 
     # == description
-    # Returns a StateObject containing the current state of this test object as XML.
-    # The state object is static and thus is not refreshed or synchronized etc.
+    # Returns a StateObject containing the current state of this test object as XML. The state object is static and thus is not refreshed or synchronized etc.
+    #
     # == returns
     # StateObject
     #  description: State of this test object
     #  example: -
+    #
     # == exceptions
     # ArgumentError
     #  description: If the xml source for the object cannot be read
-    # == example
-    # app_state = @sut.application( :name => "calculator" ).state #get the state object for the app
-    # button_state = app_state.Button( :text => "Backspace" ) #get the state for test object button
-    # button_text = button_state.attribute( "text" ) #get attribute text from the button state object
-    def state
+    def state_object
+
+      # == example
+      # app_state = @sut.application( :name => "calculator" ).state #get the state object for the app
+      # button_state = app_state.Button( :text => "Backspace" ) #get the state for test object button
+      # button_text = button_state.attribute( "text" ) #get attribute text from the button state object
 
       MobyBase::StateObject.new( xml_data, self )
 
@@ -880,7 +882,7 @@ module MobyBehaviour
     # == description
     # This method is deprecated, please use TestObject#parent
     #
-    def parent_object()
+    def parent_object
 
       # == description
       # Returns the actual test object that was used as the parent when this object instance was created. 
@@ -893,6 +895,21 @@ module MobyBehaviour
       $stderr.puts "warning: TestObject#parent_object is deprecated, please use TestObject#parent instead."      
 
       @parent
+
+    end
+
+    # This method is deprecated, please use [link="#GenericTestObject:state_object"]TestObject#state_object[/link] instead.
+    # == deprecated
+    # 1.1.1
+    #
+    # == description
+    # This method is deprecated, please use TestObject#state_object
+    #
+    def state
+
+      warn "warning: deprecated method TestObject#state; please use TestObject#state_object instead"
+
+      state_object
 
     end
 

@@ -425,23 +425,68 @@ module MobyBehaviour
     end
 
     # == description
-    # Returns a StateObject containing the current state of this test object as XML.
-    # The state object is static and thus is not refreshed or synchronized etc.
+    # Creates a state object of current test object or given XML as argument. The state object is static and thus is not refreshed or synchronized.
+    #
+    # == arguments
+    # xml_source
+    #  String
+    #   description: Object state as XML string
+    #   example: -
+    #  MobyBase::XML::Element
+    #   description: Object state as XML element
+    #   example: -
+    #
+    # parent_object
+    #  MobyBase::TestObject
+    #   description: Parent object
+    #   example: -
+    #  MobyBase::SUT
+    #   description: Parent object
+    #   example: -
+    #  NilClass
+    #   description: No parent object defined
+    #   example: nil
+    #
     # == returns
-    # StateObject
-    #  description: State of this test object
+    # MobyBase::StateObject
+    #  description: State of this SUT, test object or given XML
     #  example: -
+    #
     # == exceptions
+    # ArgumentError
+    #  description: Wrong argmument type given
     # RuntimeError
     #  description: If the XML source for the object is not in initialized
-    def state
+    def state_object( xml_source = nil, parent_object = nil )
 
-      # refresh if xml data is empty
-      self.refresh if @xml_data.empty?
+      if xml_source.nil?
 
-      Kernel::raise RuntimeError, "Can not create state object of SUT with id #{ @id.inspect }, no XML content or SUT not initialized properly." if @xml_data.empty?
+        # refresh if xml data is empty
+        self.refresh if @xml_data.empty?
 
-      MobyBase::StateObject.new( @test_object_adapter.state_object_xml( @xml_data, @id ), self )
+        Kernel::raise RuntimeError, "Can not create state object of SUT with id #{ @id.inspect }, no XML content or SUT not initialized properly." if @xml_data.empty?
+
+        MobyBase::StateObject.new( 
+
+          @test_object_adapter.state_object_xml( @xml_data, @id ), 
+          self 
+
+        )
+
+      else
+
+        # verify that type of xml_source argument is correct
+        xml_source.check_type [ String, MobyUtil::XML::Element ], 'wrong argument type $1 for XML source (expected $2)'
+
+        MobyBase::StateObject.new( 
+
+          xml_source, 
+          parent_object, 
+          @test_object_adapter
+
+        )
+
+      end
 
     end
 
@@ -1710,6 +1755,21 @@ module MobyBehaviour
       #$stderr.puts "warning: SUT#get_ui_dump is deprecated, please use SUT#refresh_ui_dump instead."
 
       refresh_ui_dump( refresh_args, {} )
+
+    end
+
+    # This method is deprecated, please use [link="#GenericSut:state_object"]SUT#state_object[/link] instead.
+    # == deprecated
+    # 1.1.1
+    #
+    # == description
+    # This method is deprecated, please use SUT#state_object
+    #
+    def state
+
+      warn "warning: deprecated method SUT#state; please use SUT#state_object instead"
+
+      state_object
 
     end
 
