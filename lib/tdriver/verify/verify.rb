@@ -45,15 +45,15 @@ module TDriverVerify
 
         @@on_error_verify_block.call
 
-      rescue Exception => exception
+      rescue Exception
 
-        raise exception.class.new( "Exception was raised while executing on_error_verify_block. Reason: %s" % [ exception.message ])
+        raise exception.class, "Exception was raised while executing on_error_verify_block. Reason: #{ $!.message.to_s }"
 
       end
 
     else
 
-      raise ArgumentError.new( "No verify block defined with on_error_verify_block method" )
+      raise ArgumentError, 'No verify block defined with on_error_verify_block method'
 
     end
 
@@ -127,7 +127,7 @@ module TDriverVerify
           raise if $!.kind_of?( MobyBase::ContinuousVerificationError )
 
           # refresh and retry unless timeout exceeded
-          Kernel::raise $! if Time.new > timeout_end_time
+          raise $! if Time.new > timeout_end_time
           
           # retry interval
           sleep TIMEOUT_CYCLE_SECONDS
@@ -139,7 +139,7 @@ module TDriverVerify
       
       end # do loop
         
-    rescue Exception
+    rescue
 
       # restore logger state
       $logger.enabled = logging_enabled
@@ -253,7 +253,7 @@ module TDriverVerify
         end
 
         # refresh and retry unless timeout exceeded
-        Kernel::raise $! if Time.new > timeout_end_time
+        raise $! if Time.new > timeout_end_time
         
         # retry interval
         sleep TIMEOUT_CYCLE_SECONDS
@@ -263,7 +263,7 @@ module TDriverVerify
       
       end # do loop
         
-    rescue Exception
+    rescue
 
       # restore logger state
       $logger.enabled = logging_enabled
@@ -387,7 +387,7 @@ module TDriverVerify
           raise if $!.kind_of?( MobyBase::ContinuousVerificationError )
 
           # refresh and retry unless timeout exceeded
-          Kernel::raise $! if Time.new > timeout_end_time
+          raise $! if Time.new > timeout_end_time
           
           # retry interval
           sleep TIMEOUT_CYCLE_SECONDS
@@ -399,7 +399,7 @@ module TDriverVerify
       
       end # do loop
         
-    rescue Exception
+    rescue
 
       # restore logger state
       $logger.enabled = logging_enabled
@@ -523,7 +523,7 @@ module TDriverVerify
           raise if $!.kind_of?( MobyBase::ContinuousVerificationError )
 
           # refresh and retry unless timeout exceeded
-          Kernel::raise $! if Time.new > timeout_end_time
+          raise $! if Time.new > timeout_end_time
           
           # retry interval
           sleep TIMEOUT_CYCLE_SECONDS
@@ -535,7 +535,7 @@ module TDriverVerify
       
       end # do loop
         
-    rescue Exception
+    rescue
 
       # restore logger state
       $logger.enabled = logging_enabled
@@ -657,7 +657,7 @@ module TDriverVerify
           raise if $!.kind_of?( MobyBase::ContinuousVerificationError )
 
           # refresh and retry unless timeout exceeded
-          Kernel::raise $! if Time.new > timeout_end_time
+          raise $! if Time.new > timeout_end_time
           
           # retry interval
           sleep TIMEOUT_CYCLE_SECONDS
@@ -669,7 +669,7 @@ module TDriverVerify
       
       end # do loop
         
-    rescue Exception
+    rescue
 
       # restore logger state
       $logger.enabled = logging_enabled
@@ -794,7 +794,7 @@ module TDriverVerify
           raise if $!.kind_of?( MobyBase::ContinuousVerificationError )
 
           # refresh and retry unless timeout exceeded
-          Kernel::raise $! if Time.new > timeout_end_time
+          raise $! if Time.new > timeout_end_time
           
           # retry interval
           sleep TIMEOUT_CYCLE_SECONDS
@@ -806,7 +806,7 @@ module TDriverVerify
       
       end # do loop
         
-    rescue Exception
+    rescue
 
       # restore logger state
       $logger.enabled = logging_enabled
@@ -873,36 +873,43 @@ module TDriverVerify
 
       $logger.enabled = false
 
-      Kernel::raise ArgumentError.new("Argument timeout was not a non negative Integer.") unless (timeout.kind_of?(Integer) && timeout >= 0)
-      Kernel::raise ArgumentError.new("Argument message was not a non empty String.") unless (message.nil? || (message.kind_of?(String) && !message.empty?))
+      raise ArgumentError, "Argument timeout was not a non negative Integer." unless (timeout.kind_of?(Integer) && timeout >= 0)
+      raise ArgumentError, "Argument message was not a non empty String." unless (message.nil? || (message.kind_of?(String) && !message.empty?))
 
       # wait for the signal
       begin
 
         self.wait_for_signal( timeout, signal_name, &block )
 
-      rescue Exception => e
+      rescue
 
         error_msg = "Verification #{message.nil? ? '' : '"' << message.to_s << '" '}at #{verify_caller} failed:"
         error_msg << MobyUtil::KernelHelper.find_source(verify_caller)
-        error_msg << "The signal #{signal_name} was not emitted in #{timeout} seconds."
-        error_msg << "\nNested exception:\n" << e.inspect
-        Kernel::raise MobyBase::VerificationError.new(error_msg)
+        error_msg << "The signal #{signal_name} was not emitted in #{timeout} seconds.\nNested exception:\n" << $!.inspect
+
+        raise MobyBase::VerificationError, error_msg
 
       end
 
-    rescue Exception => e
+    rescue
 
       execute_on_error_verify_block unless @@on_error_verify_block.nil?
 
       $logger.enabled = logging_enabled
-      $logger.log "behaviour" , "FAIL;Verification #{message.nil? ? '' : '\"' << message << '\" '}failed: #{e.to_s} using timeout '#{timeout}.;#{self.kind_of?(MobyBase::SUT) ? self.id.to_s + ';sut' : ';'};{};verify_signal;#{signal_name}"
-      Kernel::raise e
+
+      $logger.log "behaviour" , "FAIL;Verification #{message.nil? ? '' : '\"' << message << '\" '}failed: #{$!.to_s} using timeout '#{timeout}.;#{self.kind_of?(MobyBase::SUT) ? self.id.to_s + ';sut' : ';'};{};verify_signal;#{signal_name}"
+
+      raise
+
+    ensure
+    
+      $logger.enabled = logging_enabled
+      
     end
 
-    $logger.enabled = logging_enabled
     $logger.log "behaviour" , "PASS;Verification #{message.nil? ? '' : '\"' << message << '\" '}at #{verify_caller} was successful#{timeout.nil? ? '' : ' using timeout ' + timeout.to_s}.;#{self.kind_of?(MobyBase::SUT) ? self.id.to_s + ';sut' : ';'};{};verify_signal;#{signal_name}"
-    return nil
+    
+    nil
 
   end
 
@@ -1565,11 +1572,11 @@ module TDriverVerify
 
     if self.kind_of?( MobyBase::SUT )
 
-      Time.new + ( timeout.nil? ? MobyUtil::Parameter[ self.sut ][ :synchronization_timeout, '30' ].to_i : timeout.to_i )
+      Time.new + ( timeout.nil? ? MobyUtil::Parameter[ self.sut ][ :synchronization_timeout, '10' ].to_i : timeout.to_i )
 
     else
 
-      Time.new + ( timeout.nil? ? MobyUtil::Parameter[ :synchronization_timeout, '30' ].to_i : timeout.to_i )
+      Time.new + ( timeout.nil? ? MobyUtil::Parameter[ :synchronization_timeout, '10' ].to_i : timeout.to_i )
 
     end
 
@@ -1579,11 +1586,11 @@ module TDriverVerify
   
     if self.kind_of?( MobyBase::SUT )
 
-      timeout = MobyUtil::Parameter[ self.sut ][ :synchronization_timeout, '30' ].to_i if timeout.nil?
+      timeout = MobyUtil::Parameter[ self.sut ][ :synchronization_timeout, '10' ].to_i if timeout.nil?
 
     else
 
-      timeout = MobyUtil::Parameter[ :synchronization_timeout, '30' ].to_i if timeout.nil?
+      timeout = MobyUtil::Parameter[ :synchronization_timeout, '10' ].to_i if timeout.nil?
 
     end
     
