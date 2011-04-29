@@ -56,21 +56,8 @@ module MobyBase
       options = options.clone
 
       # determine is method called with new or deprecated API
-      if options.count > 1
-
-        # print warning if deprecated API is used
-        warn_caller '$1:$2 warning: deprecated API; use hash with :source_data, :parent, :test_object_adapter as argument instead of StateObject.new( source_data, parent, test_object_adapter )'
-
-        # retrieve source data
-        source_data = options.shift
-
-        # retrieve reference to parent object
-        parent = options.shift
-
-        # retrieve reference to test object adapter
-        test_object_adapter = options.shift
-
-      else
+      
+      if options.count == 1 and options.first.kind_of?( Hash )
 
         # retrieve first array element
         options = options.shift
@@ -86,6 +73,20 @@ module MobyBase
 
         # retrieve reference to test object adapter
         test_object_adapter = options[ :test_object_adapter ]
+      
+      else
+      
+        # print warning if deprecated API is used
+        warn_caller '$1:$2 warning: deprecated API; use hash with :source_data, :parent, :test_object_adapter as argument instead of StateObject.new( source_data, parent, test_object_adapter )'
+
+        # retrieve source data
+        source_data = options.shift
+
+        # retrieve reference to parent object
+        parent = options.shift
+
+        # retrieve reference to test object adapter
+        test_object_adapter = options.shift
 
       end
 
