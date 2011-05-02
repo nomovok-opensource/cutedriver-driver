@@ -199,19 +199,19 @@ module MobyBase
 
     rescue MobyUtil::EmptyFilenameError
 
-    Kernel::raise EmptyFilenameError.new( "Unable to load behaviours xml file due to filename is empty or nil" )
+      raise EmptyFilenameError, "Unable to load behaviours xml file due to filename is empty or nil" 
 
-    rescue MobyUtil::FileNotFoundError => ex
+    rescue MobyUtil::FileNotFoundError
 
-    Kernel::raise ex
+      raise
 
-    rescue IOError => ex
+    rescue IOError
 
-    Kernel::raise IOError.new("Error occured while loading behaviours xml file %s. Reason: %s" % [ @file_name, ex.message ] )
+      raise IOError, "Error occured while loading behaviours xml file %s. Reason: %s" % [ @file_name, $!.message ]
 
-    rescue => ex
+    rescue
 
-    Kernel::raise RuntimeError.new( "Error occured while parsing behaviours xml file %s. Reason: %s (%s)" % [ @file_name, ex.message, ex.class ] )
+      raise RuntimeError, "Error occured while parsing behaviours xml file %s. Reason: %s (%s)" % [ @file_name, $!.message, $!.class ]
 
     end
 
@@ -223,111 +223,175 @@ module MobyBase
 
     behaviour_files.each{ | behaviours | 
 
-    begin
+      begin
 
-      # skip parsing the xml if string is empty
-      next if behaviours[ :xml ].empty?
+        # skip parsing the xml if string is empty
+        next if behaviours[ :xml ].empty?
 
-      # parse behaviour xml
-      document = MobyUtil::XML.parse_string( behaviours[ :xml ] )
+        # parse behaviour xml
+        document = MobyUtil::XML.parse_string( behaviours[ :xml ] )
 
-    rescue => exception
+      rescue
 
-      Kernel::raise MobyUtil::XML::ParseError.new( 
-                            "Error occured while parsing behaviour XML file %s. Error: %s " % [ behaviours[ :filename ], exception.message ] 
-                            ) 
+        raise MobyUtil::XML::ParseError, "Error occured while parsing behaviour XML file #{ behaviours[ :filename ] }. Error: #{ $!.message }"
 
-    end
+      end
 
-    # retrieve root attributes
-    root_attributes = document.root.xpath( "/behaviours" ).first.attributes
-
-    # parse retrieve behaviour definitions
-    document.root.xpath( "/behaviours/behaviour" ).each{ | node |
-
-      # retrieve behaviour attributes & module node
-      attributes = node.attributes
-
-      name = attributes[ "name" ].to_s
-      object_type = attributes[ "object_type" ].to_s
-      input_type = attributes[ "input_type" ].to_s
-      sut_type = attributes[ "sut_type" ].to_s
-      version = attributes[ "version" ].to_s
-
-      env = ( attributes[ "env" ] || '*' ).to_s 
-
-      module_node = node.xpath( 'module' ).first
+      # process each behaviours element
+      document.root.xpath( "/behaviours" ).each{ | behaviours_element |
       
-      name = attributes[ "name" ].to_s
-      object_type = attributes[ "object_type" ].to_s
-      input_type = attributes[ "input_type" ].to_s
-      sut_type = attributes[ "sut_type" ].to_s
-      version = attributes[ "version" ].to_s
-      
-      # verify that all required attributes and nodes are found in behaviour xml node
-      #Kernel::raise RuntimeError.new("Behaviour does not have a name, please see behaviour XML files") if name.empty?
-      name.not_empty("Behaviour element does not have name (name) attribute defined, please see behaviour XML files", RuntimeError)
-      
-      #Kernel::raise RuntimeError.new("Behaviour target object type not defined for #{ name } in XML") if object_type.empty?
-      object_type.not_empty("Behaviour element does not have target object type (object_type) attribute defined, please see #{ name } in behaviour XML files", RuntimeError)
+        # retrieve root attributes
+        root_attributes = behaviours_element.attributes
 
-      #Kernel::raise RuntimeError.new("Behaviour target object input type not defined for #{ name } in XML") if input_type.empty?
-      input_type.not_empty("Behaviour element does not have target object input type (input_type) attribute defined, please see #{ name } in behaviour XML files", RuntimeError)
+        # process each behaviour element      
+        behaviours_element.xpath( "behaviour" ).each{ | node |
 
-      #Kernel::raise RuntimeError.new("Behaviour target object sut type not defined for #{ name } in XML") if sut_type.empty?
-      sut_type.not_empty("Behaviour element does not have target object sut type (sut_type) attribute defined, please see #{ name } in behaviour XML files", RuntimeError)
+          # retrieve behaviour attributes & module node
+          attributes = node.attributes
 
-      #Kernel::raise RuntimeError.new("Behaviour target object sut version not defined for #{ name } in XML") if version.empty?
-      version.not_empty("Behaviour element does not have target object SUT version (version) attribute defined, please see #{ name } in behaviour XML files", RuntimeError)
+          name = attributes[ "name" ].to_s
+          object_type = attributes[ "object_type" ].to_s
+          input_type = attributes[ "input_type" ].to_s
+          sut_type = attributes[ "sut_type" ].to_s
+          version = attributes[ "version" ].to_s
 
-      #Kernel::raise RuntimeError.new("Behaviour implementation module not defined for #{ name } in XML") if module_node.nil?
-      module_node.not_nil("Behaviour does not have implementation module element defined, please see #{ name } in behaviour XML files", RuntimeError)
-      
-      # retrieve module name & implementation filename
-      module_attributes = module_node.attributes
-      module_file = module_attributes[ "file" ].to_s # optional
-      module_name = module_attributes[ "name" ].to_s 
-      
-      #Kernel::raise RuntimeError.new( "Behaviour implementation module name not defined for #{ name } in XML") if module_name.empty?
-      module_name.not_empty("Behaviour does not have implementation module name defined, please see #{ name } in behaviour XML files", RuntimeError)
+          env = ( attributes[ "env" ] || '*' ).to_s 
 
-      methods_hash = {}
+          module_node = node.xpath( 'module' ).first
+          
+          # verify that all required attributes and nodes are found in behaviour xml node
+          name.not_empty "Behaviour element does not have name (name) attribute defined, please see behaviour XML files", RuntimeError
+          
+          object_type.not_empty "Behaviour element does not have target object type (object_type) attribute defined, please see #{ name } in behaviour XML files", RuntimeError
 
-      # create hash of methods
-      node.xpath( 'methods/method' ).each{ | method |
+          input_type.not_empty "Behaviour element does not have target object input type (input_type) attribute defined, please see #{ name } in behaviour XML files", RuntimeError
 
-        # retrieve method description & example and store to methods hash
-        methods_hash[ method.attribute( "name" ).to_s.to_sym ] = {
+          sut_type.not_empty "Behaviour element does not have target object sut type (sut_type) attribute defined, please see #{ name } in behaviour XML files", RuntimeError
 
-          :description => method.at_xpath( 'description/text()' ).to_s, 
+          version.not_empty "Behaviour element does not have target object SUT version (version) attribute defined, please see #{ name } in behaviour XML files", RuntimeError
 
-          :example     => method.at_xpath( 'example/text()' ).to_s
+          module_node.not_nil "Behaviour does not have implementation module element defined, please see #{ name } in behaviour XML files", RuntimeError
+          
+          # retrieve module name & implementation filename
+          module_attributes = module_node.attributes
+          module_file = module_attributes[ "file" ].to_s # optional
+          module_name = module_attributes[ "name" ].to_s 
+          
+          module_name.not_empty "Behaviour does not have implementation module name defined, please see #{ name } in behaviour XML files", RuntimeError
+
+          methods_hash = {}
+
+          # create hash of methods
+          node.xpath( 'methods/method' ).each{ | method |
+
+            # retrieve method description & example and store to methods hash
+            methods_hash[ method.attribute( "name" ).to_s.to_sym ] = {
+              :description => method.at_xpath( 'description/text()' ).to_s, 
+              :example     => method.at_xpath( 'example/text()' ).to_s
+            }
+
+          }
+
+          # create and store beahaviour hash
+          @@behaviours << {
+
+            :name => name,
+            :requires => root_attributes[ "plugin" ].to_s.split(";"),
+            :object_type => object_type.split(";"),
+            :input_type => input_type.split(";"),
+            #:sut_type => sut_type.split(";"),
+            :version => version.split(";"),
+            :env => env.split(";"),
+
+            :module => { 
+              :file => module_file, 
+              :name => module_name 
+            },
+
+            :methods => methods_hash
+
+          }
+
 
         }
 
       }
 
-      # create and store beahaviour hash
-      @@behaviours << {
+=begin
 
-      :name => name,
-      :requires => root_attributes[ "plugin" ].to_s.split(";"),
-      :object_type => object_type.split(";"),
-      :input_type => input_type.split(";"),
-#      :sut_type => sut_type.split(";"),
-      :version => version.split(";"),
-      :env => env.split(";"),
+      # parse retrieve behaviour definitions
+      document.root.xpath( "/behaviours/behaviour" ).each{ | node |
 
-      :module => { 
-        :file => module_file, 
-        :name => module_name 
-      },
+        # retrieve behaviour attributes & module node
+        attributes = node.attributes
 
-      :methods => methods_hash
+        name = attributes[ "name" ].to_s
+        object_type = attributes[ "object_type" ].to_s
+        input_type = attributes[ "input_type" ].to_s
+        sut_type = attributes[ "sut_type" ].to_s
+        version = attributes[ "version" ].to_s
+
+        env = ( attributes[ "env" ] || '*' ).to_s 
+
+        module_node = node.xpath( 'module' ).first
+        
+        # verify that all required attributes and nodes are found in behaviour xml node
+        name.not_empty("Behaviour element does not have name (name) attribute defined, please see behaviour XML files", RuntimeError)
+        
+        object_type.not_empty("Behaviour element does not have target object type (object_type) attribute defined, please see #{ name } in behaviour XML files", RuntimeError)
+
+        input_type.not_empty("Behaviour element does not have target object input type (input_type) attribute defined, please see #{ name } in behaviour XML files", RuntimeError)
+
+        sut_type.not_empty("Behaviour element does not have target object sut type (sut_type) attribute defined, please see #{ name } in behaviour XML files", RuntimeError)
+
+        version.not_empty("Behaviour element does not have target object SUT version (version) attribute defined, please see #{ name } in behaviour XML files", RuntimeError)
+
+        module_node.not_nil("Behaviour does not have implementation module element defined, please see #{ name } in behaviour XML files", RuntimeError)
+        
+        # retrieve module name & implementation filename
+        module_attributes = module_node.attributes
+        module_file = module_attributes[ "file" ].to_s # optional
+        module_name = module_attributes[ "name" ].to_s 
+        
+        #Kernel::raise RuntimeError.new( "Behaviour implementation module name not defined for #{ name } in XML") if module_name.empty?
+        module_name.not_empty("Behaviour does not have implementation module name defined, please see #{ name } in behaviour XML files", RuntimeError)
+
+        methods_hash = {}
+
+        # create hash of methods
+        node.xpath( 'methods/method' ).each{ | method |
+
+          # retrieve method description & example and store to methods hash
+          methods_hash[ method.attribute( "name" ).to_s.to_sym ] = {
+            :description => method.at_xpath( 'description/text()' ).to_s, 
+            :example     => method.at_xpath( 'example/text()' ).to_s
+          }
+
+        }
+
+        # create and store beahaviour hash
+        @@behaviours << {
+
+          :name => name,
+          :requires => root_attributes[ "plugin" ].to_s.split(";"),
+          :object_type => object_type.split(";"),
+          :input_type => input_type.split(";"),
+         #:sut_type => sut_type.split(";"),
+          :version => version.split(";"),
+          :env => env.split(";"),
+
+          :module => { 
+            :file => module_file, 
+            :name => module_name 
+          },
+
+          :methods => methods_hash
+
+        }
 
       }
-
-    }
+      
+=end
 
     }
 
@@ -413,20 +477,21 @@ module MobyBase
 
   end
 
-
   def get_behaviour_from_cache( target, sut_type, object_type, sut_version, input_type )
 
     if @_behaviour_cache.has_key?( object_type )
 
-    # apply modules to target object
-    @_behaviour_cache[ object_type ].each{ | module_name | target.instance_eval( "self.extend(#{ module_name })" ) }
+      # apply modules to target object
+      @_behaviour_cache[ object_type ].each{ | module_name | target.instance_eval( "self.extend(#{ module_name })" ) }
 
-    # return true
-    true
+      # return true
+      true
 
     else
-    # return false
-    false
+    
+      # return false
+      false
+      
     end
 
   end
