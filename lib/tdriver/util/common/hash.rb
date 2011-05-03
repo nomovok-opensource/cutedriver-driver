@@ -249,7 +249,7 @@ class Hash
   end # recursive_merge!
 
   # TODO: document me
-  def fetch!( key )
+  def if_found( key )
   
     if has_key?( key )
     
@@ -257,7 +257,7 @@ class Hash
     
     end
   
-  end # fetch!
+  end # if_found
 
   # TODO: document me
   def rename_key!( key, new )
