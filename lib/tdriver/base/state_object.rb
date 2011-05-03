@@ -38,41 +38,92 @@ module MobyBase
     attr_accessor :parent
 
     # TODO: document me
-    attr_reader :type, :name, :id
+    attr_reader(
+        :type,      # object type
+        :name,      # object name
+        :id         # object id
+    )
 
-    # Creates a new StateObject from XML source data.
-    #
+    # Creation of a new StateObject from source data.
     # === params
-    # xml_source:: MobyUtil::XML::Element or String. Contains the root element of this state.
-    # parent:: TestObject, SUT or StateObject. Parent of this state object. Must be of type TestObjectComposition. 
+    # options:: Hash containing source data describing the object and all other required configuration values e.g. test object factory, -adapter etc.
     # === returns
-    # StateObject:: New StateObject
-    def initialize( xml_source, parent = nil )
+    # StateObject:: new StateObject instance
+    # === raises
+    def initialize( *options )
 
-      xml_element = nil
+      # clone original options array; array is modified below
+      options = options.clone
 
-      if xml_source.kind_of?( MobyUtil::XML::Element )
+      # determine is method called with new or deprecated API
+      
+      if options.count == 1 and options.first.kind_of?( Hash )
 
-        xml_element = xml_source
+        # retrieve first array element
+        options = options.shift
 
-      elsif xml_source.kind_of?( String )
+        # verify options argument type
+        options.check_type Hash, 'wrong argument type $1 for StateObject options (expected $2)'
 
-        xml_element = MobyUtil::XML.parse_string(xml_source).root
+        # verify that :source_data key exists in hash       
+        source_data = options.require_key :source_data
 
+        # retrieve reference to parent object
+        parent = options[ :parent ]
+
+        # retrieve reference to test object adapter
+        test_object_adapter = options[ :test_object_adapter ]
+      
       else
+      
+        # print warning if deprecated API is used
+        warn_caller '$1:$2 warning: deprecated API; use hash with :source_data, :parent, :test_object_adapter as argument instead of StateObject.new( source_data, parent, test_object_adapter )'
 
-        Kernel::raise ArgumentError, "The XML source must be a String or MobyUtil::XML::Element, it was of type '#{ xml_source.class.to_s }'"
+        # retrieve source data
+        source_data = options.shift
+
+        # retrieve reference to parent object
+        parent = options.shift
+
+        # retrieve reference to test object adapter
+        test_object_adapter = options.shift
 
       end
 
-      @parent = parent 
+      # verify that parent argument type is correct
+      parent.check_type [ NilClass, MobyBase::StateObject, MobyBase::TestObject, MobyBase::SUT ], 'wrong argument type $1 for parent object (expected $2)'
 
-      method(:xml_data=).call( xml_element )
+      # verify that test object adapter argument type is correct
+      test_object_adapter.check_type [ NilClass, Class ], 'wrong argument type $1 for test object adapter (expected $2)'
 
+      # verify that source data argument type is correct
+      source_data.check_type [ String, MobyUtil::XML::Element ], 'wrong argument type $1 for source data (expected $2)'
+
+      # parse source data if given argument is type of string
+      source_data = MobyUtil::XML.parse_string( source_data ).root if source_data.kind_of?( String )
+
+      # store reference to parent object
+      @parent = parent
+
+      # store reference to test object adapter
+      if test_object_adapter.nil?
+
+        @test_object_adapter = TDriver::TestObjectAdapter
+
+      else
+
+        @test_object_adapter = test_object_adapter
+
+      end
+
+      # retrieve object attributes
+      method( :xml_data= ).call( source_data )
+
+      # initialize child objects cache for state object
       @child_object_cache = TDriver::TestObjectCache.new
 
-      # Create accessor methods for any child state objects.
-      TDriver::TestObjectAdapter.create_child_accessors!( xml_element, self )
+      # create accessor methods for any child state objects.
+      @test_object_adapter.create_child_accessors!( source_data, self )
 
     end
 
@@ -164,7 +215,7 @@ module MobyBase
      
       @_xml_data = xml_object
             
-      unused_xpath, @name, @type, @id = TDriver::TestObjectAdapter.get_test_object_identifiers( xml_object )
+      unused_xpath, @name, @type, @id = @test_object_adapter.get_test_object_identifiers( xml_object )
       
     end
     
@@ -195,7 +246,7 @@ module MobyBase
       begin
 
         # retrieve attribute(s) from test object; never access ui state xml data directly from behaviour implementation
-        TDriver::TestObjectAdapter.test_object_attribute( @_xml_data, name.to_s )
+        @test_object_adapter.test_object_attribute( @_xml_data, name.to_s )
 
       rescue MobyBase::AttributeNotFoundError
       
@@ -261,7 +312,7 @@ module MobyBase
       dynamic_attributes = rules.strip_dynamic_attributes!
 
       # retrieve application object from sut.xml_data
-      matches, unused_rule = TDriver::TestObjectAdapter.get_objects( @_xml_data, rules, true )
+      matches, unused_rule = @test_object_adapter.get_objects( @_xml_data, rules, true )
 
       if matches.count == 0
 
@@ -280,8 +331,12 @@ module MobyBase
       
       # create state objects
       matches = matches.collect{ | object_xml |
-      
-        result = StateObject.new( object_xml, self )
+
+        result = StateObject.new( 
+          :source_data => object_xml, 
+          :parent => self,
+          :test_object_adapter => @test_object_adapter
+        )
         
         # use cached state object if once already retrieved
         get_cached_test_object!( result ).tap{ | found_in_cache |

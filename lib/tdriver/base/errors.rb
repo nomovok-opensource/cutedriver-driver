@@ -93,9 +93,9 @@ module MobyBase
 	# This error should be raised when verification results were not as expected
 	class VerificationError < MobyStandardError; end;
 
-	# This verification error should overwrite standard verification procedure and
-	# fail immediately
-	class ContinuousVerificationError < VerificationError; end;
+	# This verification error should overwrite standard verification procedure and fail immediately
+	#class ContinuousVerificationError < VerificationError; end;
+	class ContinuousVerificationError < MobyStandardError; end;
 
 	# This error should be raised to indicate that a synchronization timeout has elapsed without 
 	# synchronization conditions having been met.

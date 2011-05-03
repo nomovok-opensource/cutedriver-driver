@@ -17,9 +17,45 @@
 ## 
 ############################################################################
 
+module Kernel
+
+  def warn_caller( message, remove_eval = true )
+
+    # verify that message argument type is correct
+    raise TypeError, "wrong argument type #{ message.class } for message (expected String)" unless message.kind_of?( String )
+
+    # verify that remove_eval argument type is correct
+    raise TypeError, "wrong argument type #{ remove_eval.class } for remove_eval value (expected TrueClass or FalseClass)" unless [ TrueClass, FalseClass ].include?( remove_eval.class )
+
+    # retrieve caller method, file and line number
+    begin
+
+      # remove evals if required
+      caller_stack = ( remove_eval == true ? caller.select{ | str | str !~ /^\(eval\)\:/ and str !~ /`eval'$/ } : caller )
+
+      # retrieve filename, line number and method name
+      /(.+)\:(\d+)\:in `(.+)'/.match( caller_stack.reverse[ -2 ] )
+
+      # store matches
+      file, line, method = $1, $2, $3
+
+    rescue
+
+      # could not retrieve filename, line number and method name
+      file, line, method = [ '##', '##', 'unknown' ]
+
+    end 
+  
+    # print warning to STDOUT
+    warn message.gsub( '$1', file ).gsub( '$2', line ).gsub( '$3', method )
+
+  end
+
+end
+
 module MobyUtil
 
-  # Helper class to store verifyblock for 
+  # Helper class to store verify block for 
   # constant verifications for sut state
   class VerifyBlock 
 

@@ -109,6 +109,13 @@ module MobyUtil
 
     end
 
+    # TODO: document me
+    def self.configured_suts
+    
+      $parameters.configured_suts
+    
+    end
+
     TDriver::Hooking.hook_methods( self ) if defined?( TDriver::Hooking )
 
   end # ParameterUserAPI

@@ -34,7 +34,7 @@ module TDriver
 
             # allow multiple values options for attribute, e.g. object which 'text' attribute value is either '1' or '2' 
             ( values.kind_of?( Array ) ? values : [ values ] ).collect{ | value |
-            
+
               # concatenate string if it contains single and double quotes, otherwise return as is
               value = xpath_literal_string( value )
 
@@ -71,7 +71,7 @@ module TDriver
             }.join( ' or ' ) # join attribute alternative values
                     
           }.join( ' and ' ) # join all required attributes
-                    
+
           # return created xpath or nil if no attributes given 
           if attributes.empty?
           
@@ -113,9 +113,24 @@ module TDriver
 
       # convert hash keys to downcased string
       rules = Hash[ 
+
         rules.collect{ | key, value | 
-          [ key.to_s.downcase, value.kind_of?( Regexp ) ? value : value.to_s ] 
+
+          case value
+
+            # pass the value as is if type of regexp or array; array is used in localisation cases e.g. [ 'one', 'yksi', 'uno' ] # etc
+            when Regexp, Array
+
+              [ key.to_s.downcase, value ] 
+
+          else
+
+              [ key.to_s.downcase, value.to_s ] 
+
+          end
+
         } 
+
       ]
 
       # xpath container array

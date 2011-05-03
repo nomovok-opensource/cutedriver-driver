@@ -136,6 +136,15 @@ module TDriver
     
 	end
 
+  # TODO: document me
+  def self.state_object( options )
+
+    # create state object with given options
+    MobyBase::StateObject.new( options )
+
+  end
+
+  # TODO: document me
   def self.init
   
     # initialize parameters
