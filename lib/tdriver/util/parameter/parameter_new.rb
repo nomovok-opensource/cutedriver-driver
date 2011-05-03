@@ -801,6 +801,13 @@ module MobyUtil
     end
 
     # TODO: document me
+    def self.if_found( key, &block )
+
+      @parameters.__send__( :if_found, key, &block )
+
+    end
+
+    # TODO: document me
     def self.delete( key )
     
       @parameters.delete( key )
