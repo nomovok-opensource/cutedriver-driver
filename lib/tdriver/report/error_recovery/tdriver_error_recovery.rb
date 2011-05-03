@@ -119,7 +119,7 @@ module TDriverErrorRecovery
   # === raises
   def ping_device(current_sut)
     begin
-      ui_xml=current_sut.refresh_ui_dump
+      ui_xml=current_sut.get_ui_dump
       if !ui_xml
         MobyUtil::Logger.instance.log "behaviour" , "WARNING;Device ping failed"
         false
