@@ -475,7 +475,7 @@ module MobyBehaviour
       # verify that type of xml_source argument is correct
       source_data.check_type [ String, MobyUtil::XML::Element ], 'wrong argument type $1 for state object source data (expected $2)'
 
-      parent_object.check_type [ MobyBase::TestObject, MobyBase::StateObject, NilClass ], 'wrong argument type $1 for parent object (expected $2)'
+      parent_object.check_type [ MobyBase::SUT, MobyBase::TestObject, MobyBase::StateObject, NilClass ], 'wrong argument type $1 for parent object (expected $2)'
 
       MobyBase::StateObject.new( 
 
