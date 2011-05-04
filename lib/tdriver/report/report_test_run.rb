@@ -57,7 +57,8 @@ module TDriverReportCreator
       :pass_statuses,
       :fail_statuses,
       :not_run_statuses,
-      :report_editable
+      :report_editable,
+      :test_fails
     )
     #class variables for summary report
     def initialize()
@@ -95,7 +96,31 @@ module TDriverReportCreator
       @not_run_statuses=MobyUtil::Parameter[ :report_not_run_statuses, "not run" ].split('|')
       @report_editable=MobyUtil::Parameter[ :report_editable, "false" ]
       @report_short_folders=MobyUtil::Parameter[ :report_short_folders, 'false']
+      @test_fails=Hash.new(0)  # return 0 by default if key not found
+    
+    
     end
+    
+	  def get_sequential_fails
+      test_identifier = $new_test_case.test_case_group + "::" + $new_test_case.test_case_name
+      return @test_fails[ test_identifier ]  # return 0 by default if key not found
+	  end
+	
+    def update_sequential_fails( status )
+    
+      test_identifier = $new_test_case.test_case_group + "::" + $new_test_case.test_case_name
+      
+      if @pass_statuses.include?(status)
+        @test_fails[ test_identifier ] = 0 unless @test_fails[ test_identifier ] == 0
+      elsif @fail_statuses.include?(status)
+        tempnum = @test_fails[ test_identifier ]
+        tempnum = tempnum + 1
+        @test_fails[ test_identifier ] = tempnum
+      end
+      
+
+    end
+    
     #This method sets the test case user defined status
     #
     # === params
