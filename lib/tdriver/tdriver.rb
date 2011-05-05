@@ -143,6 +143,34 @@ module TDriver
     MobyBase::StateObject.new( options )
 
   end
+  
+  # TODO: document me
+  def self.config_dir
+
+    if ENV['TDRIVER_HOME']
+    
+      config_dir = ENV['TDRIVER_HOME']
+          
+    elsif MobyUtil::EnvironmentHelper.windows?
+    
+      config_dir = "c:/tdriver"
+    
+    else
+
+      config_dir = "/etc/tdriver"
+    
+    end
+      
+    File.expand_path( config_dir )
+  
+  end
+  
+  # TODO: document me
+  def self.library_dir
+  
+    File.expand_path( File.dirname( __FILE__ ) )
+  
+  end
 
   # TODO: document me
   def self.init
