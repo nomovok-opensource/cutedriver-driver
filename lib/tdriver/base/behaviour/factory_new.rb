@@ -102,20 +102,17 @@ module TDriver
     public
 
       # initialize behaviours factory
-      def init
+      def init( options )
 
-        load_behaviours
+        load_behaviours( options[ :path ] )
 
       end
       
       # reset class configuration
       def reset
-      
-        # behaviours container
-        @behaviours = []
 
-        # behaviours folder
-        @path = File.join( TDriver.config_dir, 'behaviours' )
+        # reset default values
+        initialize_class      
       
       end
 
@@ -134,15 +131,16 @@ module TDriver
       # private methods and variables
       def initialize_class
 
-        reset
+        # behaviours container
+        @behaviours = []
             
       end
 
       # load and parse behaviours files
-      def load_behaviours
+      def load_behaviours( path )
 
         # behaviour xml files path
-        Dir.glob( File.join( @path, '*.xml' ) ){ | filename |
+        Dir.glob( File.join( path, '*.xml' ) ){ | filename |
       
           begin
       
@@ -244,4 +242,3 @@ module TDriver
   
 end
 
-TDriver::BehaviourFactory.init
