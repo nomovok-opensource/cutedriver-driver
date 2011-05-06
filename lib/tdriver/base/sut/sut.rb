@@ -35,13 +35,19 @@ module MobyBase
     # sut_controller:: Controller object that acts as a facade to the device represented by this SUT
     # test_object_factory:: TestObjectFactory object, a factory for generating creating test objects for this SUT
     # sut_id:: String representing the identification of this SUT - the identification will need to match with group id in parameters xml
-    def initialize( sut_controller, test_object_factory, sut_id )
+    def initialize( sut_controller, test_object_factory, sut_id, test_object_adapter = nil )
 
       @_sutController = sut_controller
       
-      @test_object_factory = test_object_factory #|| TDriver::TestObjectFactory.new( :test_object_adapter => TDriver::TestObjectAdapter )
+      @_sutController.test_object_factory = test_object_factory
+
+      @_sutController.test_object_adapter = test_object_adapter || TDriver::TestObjectAdapter
+
+      # remove this when possible
+      @test_object_factory = @_sutController.test_object_factory
       
-      @test_object_adapter = TDriver::TestObjectAdapter
+      # remove this when possible
+      @test_object_adapter = @_sutController.test_object_adapter
       
       @id = sut_id
 

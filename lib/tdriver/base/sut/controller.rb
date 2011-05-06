@@ -21,7 +21,7 @@ module MobyBase
 
 	class SutController
 
-		attr_accessor :sut_controllers, :execution_order
+		attr_accessor :sut_controllers, :execution_order, :test_object_adapter, :test_object_factory
 
 		# Creating new SutController associates SutAdapter to the controller
 		# == params
