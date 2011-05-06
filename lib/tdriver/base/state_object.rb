@@ -108,7 +108,15 @@ module MobyBase
       # store reference to test object adapter
       if test_object_adapter.nil?
 
-        @test_object_adapter = TDriver::TestObjectAdapter
+        if @parent.kind_of?( MobyBase::SUT )
+
+          @test_object_adapter = @parent.instance_variable_get( :@test_object_adapter )
+
+        else
+
+          @test_object_adapter = TDriver::TestObjectAdapter
+
+        end
 
       else
 

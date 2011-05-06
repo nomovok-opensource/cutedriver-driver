@@ -47,6 +47,7 @@ module MobyBase
       @creation_attributes = options.require_key( :creation_attributes )
 
       @sut = options.require_key( :sut )
+
       @sut_id = @sut.instance_variable_get( :@id )
 
       @parent = options.require_key( :parent )
