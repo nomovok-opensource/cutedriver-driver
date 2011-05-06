@@ -285,7 +285,7 @@ module MobyBehaviour
       begin
 
         # TODO: refactor me
-        child_test_object = @test_object_factory.get_test_objects(
+        child_test_object = @sut_controller.test_object_factory.get_test_objects(
 
           # current object as parent, can be either TestObject or SUT
           :parent => self,
@@ -853,7 +853,7 @@ module MobyBehaviour
           }
 
           # create application test object
-          foreground_app = @test_object_factory.make_test_object(
+          foreground_app = @sut_controller.test_object_factory.make_test_object(
 
             :parent => self,
 

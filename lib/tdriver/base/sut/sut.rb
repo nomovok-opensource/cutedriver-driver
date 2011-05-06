@@ -37,17 +37,21 @@ module MobyBase
     # sut_id:: String representing the identification of this SUT - the identification will need to match with group id in parameters xml
     def initialize( sut_controller, test_object_factory, sut_id, test_object_adapter = nil )
 
+
+      @sut_controller = sut_controller
+      
+      @sut_controller.test_object_factory = test_object_factory
+
+      @sut_controller.test_object_adapter = test_object_adapter || TDriver::TestObjectAdapter
+
+      # remove this line when possible
       @_sutController = sut_controller
-      
-      @_sutController.test_object_factory = test_object_factory
 
-      @_sutController.test_object_adapter = test_object_adapter || TDriver::TestObjectAdapter
-
-      # remove this when possible
-      @test_object_factory = @_sutController.test_object_factory
+      # remove this line when possible
+      @test_object_factory = @sut_controller.test_object_factory
       
-      # remove this when possible
-      @test_object_adapter = @_sutController.test_object_adapter
+      # remove this line when possible
+      @test_object_adapter = @sut_controller.test_object_adapter
       
       @id = sut_id
 
@@ -73,7 +77,7 @@ module MobyBase
     # Boolean:: what ever SutController returns 
     def execute_command( command )
 
-      @_sutController.execute_command( command )
+      @sut_controller.execute_command( command )
 
     end
 
