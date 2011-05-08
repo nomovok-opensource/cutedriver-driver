@@ -158,7 +158,7 @@ module MobyBase
         if ( !directives[ :__multiple_objects ] ) && ( matches.count > 1 && !directives[ :__index_given ] )
 
           # raise exception (with list of paths to all matching objects) if multiple objects flag is false and more than one match found
-          raise MobyBase::MultipleTestObjectsIdentifiedError, "Multiple test objects found with rule: #{ rules[ :object_attributes_hash ].inspect }\nMatching objects:\n#{ list_matching_test_objects_as_list( matches ) }\n"
+          raise MobyBase::MultipleTestObjectsIdentifiedError, "Multiple test objects found with rule: #{ rules[ :object_attributes_hash ].inspect }\nMatching objects:\n#{ list_matching_test_objects_as_list( test_object_adapter, matches ) }\n"
             
         end
 
@@ -552,31 +552,15 @@ module MobyBase
     end
 
     # TODO: document me
-    def list_matching_test_objects( matches )
+    def list_matching_test_objects_as_list( test_object_adapter, matches )
 
-      matches.collect{ | object |
-          
-        path = [ object.attribute( 'type' ) ]
+      test_object_adapter.list_test_objects_as_string( matches ).each_with_index.collect{ | object, object_index | 
 
-        while object.attribute( 'type' ) != 'application' do
-        
-          # object/objects/object/../..
-          object = object.parent.parent
-          
-          path << object.attribute( 'type' )
-        
-        end
+        "%3s) %s" % [ object_index + 1, object ] 
 
-        path.reverse.join( '.' )
-      
-      }.sort
-    
-    end
+      }.join( "\n" )
 
-    # TODO: document me
-    def list_matching_test_objects_as_list( matches )
-
-      list_matching_test_objects( matches ).each_with_index.collect{ | object, object_index | "%3s) %s" % [ object_index + 1, object ] }.join( "\n" )
+      #list_matching_test_objects( matches ).each_with_index.collect{ | object, object_index | "%3s) %s" % [ object_index + 1, object ] }.join( "\n" )
 
     end
 

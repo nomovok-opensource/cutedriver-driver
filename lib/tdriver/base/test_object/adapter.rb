@@ -681,6 +681,28 @@ module TDriver
 
     end
 
+    # TODO: document me
+    def self.list_test_objects_as_string( matches )
+
+      matches.collect{ | object |
+          
+        path = [ object.attribute( 'type' ) ]
+
+        while object.attribute( 'type' ) != 'application' do
+        
+          # object/objects/object/../..
+          object = object.parent.parent
+          
+          path << object.attribute( 'type' )
+        
+        end
+
+        path.reverse.join( '.' )
+      
+      }.sort
+    
+    end
+
     # enable hooking for performance measurement & debug logging
     TDriver::Hooking.hook_methods( self ) if defined?( TDriver::Hooking )
 
