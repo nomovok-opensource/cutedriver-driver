@@ -473,7 +473,7 @@ module TDriverReportCreator
         write_page_start(@report_folder+'/cases/statistics_index.html','Statistics')
         write_page_end(@report_folder+'/cases/statistics_index.html')
         if MobyUtil::Parameter[ :report_generate_rdoc, 'false' ]=='true'
-          system("rdoc --op #{@report_folder}/doc")
+          system("rdoc --exclude test_run --op #{@report_folder}/doc")
           puts "RDoc generated from test folder: #{Dir.pwd}"
         end
       rescue Exception => e
