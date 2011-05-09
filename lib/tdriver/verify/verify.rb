@@ -897,7 +897,7 @@ module TDriverVerify
 
       $logger.enabled = logging_enabled
 
-      $logger.log "behaviour" , "FAIL;Verification #{message.nil? ? '' : '\"' << message << '\" '}failed: #{$!.to_s} using timeout '#{timeout}.;#{self.kind_of?(MobyBase::SUT) ? self.id.to_s + ';sut' : ';'};{};verify_signal;#{signal_name}"
+      $logger.behaviour "FAIL;Verification #{message.nil? ? '' : '\"' << message << '\" '}failed: #{$!.to_s} using timeout '#{timeout}.;#{self.kind_of?(MobyBase::SUT) ? self.id.to_s + ';sut' : ';'};{};verify_signal;#{signal_name}"
 
       raise
 
@@ -907,7 +907,7 @@ module TDriverVerify
       
     end
 
-    $logger.log "behaviour" , "PASS;Verification #{message.nil? ? '' : '\"' << message << '\" '}at #{verify_caller} was successful#{timeout.nil? ? '' : ' using timeout ' + timeout.to_s}.;#{self.kind_of?(MobyBase::SUT) ? self.id.to_s + ';sut' : ';'};{};verify_signal;#{signal_name}"
+    $logger.behaviour "PASS;Verification #{message.nil? ? '' : '\"' << message << '\" '}at #{verify_caller} was successful#{timeout.nil? ? '' : ' using timeout ' + timeout.to_s}.;#{self.kind_of?(MobyBase::SUT) ? self.id.to_s + ';sut' : ';'};{};verify_signal;#{signal_name}"
     
     nil
 
@@ -1038,7 +1038,7 @@ module TDriverVerify
 
       $logger.enabled = logging_enabled
             
-      $logger.log "behaviour" , "FAIL;Verification #{message.nil? ? '' : '\"' << message << '\" '}failed:#{ $!.to_s }.\n#{ timeout.nil? ? '' : ' using timeout ' + timeout.to_s }.;#{ self.kind_of?( MobyBase::SUT ) ? "#{ self.id.to_s };sut" : ';' };{};verify_regexp;#{ expected.inspect }" 
+      $logger.behaviour "FAIL;Verification #{message.nil? ? '' : '\"' << message << '\" '}failed:#{ $!.to_s }.\n#{ timeout.nil? ? '' : ' using timeout ' + timeout.to_s }.;#{ self.kind_of?( MobyBase::SUT ) ? "#{ self.id.to_s };sut" : ';' };{};verify_regexp;#{ expected.inspect }" 
 
       raise $!
 
@@ -1050,7 +1050,7 @@ module TDriverVerify
       
     end
 
-    $logger.log "behaviour", "PASS;Verification #{ message.nil? ? '' : '\"' << message << '\" ' }at #{ verify_caller } was successful#{ timeout.nil? ? '' : ' using timeout ' + timeout.to_s}.;#{ self.kind_of?( MobyBase::SUT ) ? "#{ self.id.to_s };sut" : ';'};{};verify_regexp;#{ expected.inspect }"
+    $logger.behaviour "PASS;Verification #{ message.nil? ? '' : '\"' << message << '\" ' }at #{ verify_caller } was successful#{ timeout.nil? ? '' : ' using timeout ' + timeout.to_s}.;#{ self.kind_of?( MobyBase::SUT ) ? "#{ self.id.to_s };sut" : ';'};{};verify_regexp;#{ expected.inspect }"
 
     nil
 
@@ -1117,7 +1117,7 @@ module TDriverVerify
             rescue Exception
               # failed to load line from file, do nothing
               $logger.enabled = logging_enabled
-              $logger.log "behaviour" , "WARNING;Failed to load source line: #{e.backtrace.inspect}.;#{self.kind_of?(MobyBase::SUT) ? self.id.to_s + ';sut' : ';'};{};verify;"
+              $logger.behaviour "WARNING;Failed to load source line: #{e.backtrace.inspect}.;#{self.kind_of?(MobyBase::SUT) ? self.id.to_s + ';sut' : ';'};{};verify;"
             end
 
             if !source_contents.empty?
@@ -1145,7 +1145,7 @@ module TDriverVerify
       raise if e.kind_of? MobyBase::ContinuousVerificationError
 
       $logger.enabled = logging_enabled
-      $logger.log "behaviour" , "FAIL;Verification #{message.nil? ? '' : '\"' << message << '\" '}failed: #{e.to_s}#{timeout.nil? ? '' : ' using timeout ' + timeout.to_s}.;#{self.kind_of?(MobyBase::SUT) ? self.id.to_s + ';sut' : ';'};{};verify;"
+      $logger.behaviour "FAIL;Verification #{message.nil? ? '' : '\"' << message << '\" '}failed: #{e.to_s}#{timeout.nil? ? '' : ' using timeout ' + timeout.to_s}.;#{self.kind_of?(MobyBase::SUT) ? self.id.to_s + ';sut' : ';'};{};verify;"
       Kernel::raise e
 
     ensure
@@ -1155,7 +1155,7 @@ module TDriverVerify
     end
 
     $logger.enabled = logging_enabled
-    $logger.log "behaviour" , "PASS;Verification #{message.nil? ? '' : '\"' << message << '\" '}at #{verify_caller} was successful#{timeout.nil? ? '' : ' using timeout ' + timeout.to_s}.;#{self.kind_of?(MobyBase::SUT) ? self.id.to_s + ';sut' : ';'};{};verify;"
+    $logger.behaviour "PASS;Verification #{message.nil? ? '' : '\"' << message << '\" '}at #{verify_caller} was successful#{timeout.nil? ? '' : ' using timeout ' + timeout.to_s}.;#{self.kind_of?(MobyBase::SUT) ? self.id.to_s + ';sut' : ';'};{};verify;"
 
     return nil
 
@@ -1239,7 +1239,7 @@ module TDriverVerify
       raise if e.kind_of? MobyBase::ContinuousVerificationError
 
       $logger.enabled = logging_enabled
-      $logger.log "behaviour" , "FAIL;Verification #{message.nil? ? '' : '\"' << message << '\" '}failed: #{e.to_s}#{timeout.nil? ? '' : ' using timeout ' + timeout.to_s}.;#{self.kind_of?(MobyBase::SUT) ? self.id.to_s + ';sut' : ';'};{};verify_not;"
+      $logger.behaviour "FAIL;Verification #{message.nil? ? '' : '\"' << message << '\" '}failed: #{e.to_s}#{timeout.nil? ? '' : ' using timeout ' + timeout.to_s}.;#{self.kind_of?(MobyBase::SUT) ? self.id.to_s + ';sut' : ';'};{};verify_not;"
       Kernel::raise e
 
     ensure
@@ -1249,7 +1249,7 @@ module TDriverVerify
     end
 
     $logger.enabled = logging_enabled
-    $logger.log "behaviour" , "PASS;Verification #{message.nil? ? '' : '\"' << message << '\" '}at #{verify_caller} was successful#{timeout.nil? ? '' : ' using timeout ' + timeout.to_s}.;#{self.kind_of?(MobyBase::SUT) ? self.id.to_s + ';sut' : ';'};{};verify_not;"
+    $logger.behaviour "PASS;Verification #{message.nil? ? '' : '\"' << message << '\" '}at #{verify_caller} was successful#{timeout.nil? ? '' : ' using timeout ' + timeout.to_s}.;#{self.kind_of?(MobyBase::SUT) ? self.id.to_s + ';sut' : ';'};{};verify_not;"
     return nil
 
   end
@@ -1337,14 +1337,14 @@ module TDriverVerify
       raise if e.kind_of? MobyBase::ContinuousVerificationError
 
       $logger.enabled = logging_enabled
-      $logger.log "behaviour" , "FAIL;Verification #{message.nil? ? '' : '\"' << message << '\" '}failed:#{e.to_s}.\n#{timeout.nil? ? '' : ' using timeout ' + timeout.to_s}.;#{self.kind_of?(MobyBase::SUT) ? self.id.to_s + ';sut' : ';'};{};verify_equal;" << expected.to_s
+      $logger.behaviour "FAIL;Verification #{message.nil? ? '' : '\"' << message << '\" '}failed:#{e.to_s}.\n#{timeout.nil? ? '' : ' using timeout ' + timeout.to_s}.;#{self.kind_of?(MobyBase::SUT) ? self.id.to_s + ';sut' : ';'};{};verify_equal;" << expected.to_s
       Kernel::raise e
     ensure
       MobyBase::TestObjectFactory.instance.timeout = original_sync_timeout unless original_sync_timeout.nil?
     end
 
     $logger.enabled = logging_enabled
-    $logger.log "behaviour" , "PASS;Verification #{message.nil? ? '' : '\"' << message << '\" '}at #{verify_caller} was successful#{timeout.nil? ? '' : ' using timeout ' + timeout.to_s}.;#{self.kind_of?(MobyBase::SUT) ? self.id.to_s + ';sut' : ';'};{};verify_equal;" << expected.to_s
+    $logger.behaviour "PASS;Verification #{message.nil? ? '' : '\"' << message << '\" '}at #{verify_caller} was successful#{timeout.nil? ? '' : ' using timeout ' + timeout.to_s}.;#{self.kind_of?(MobyBase::SUT) ? self.id.to_s + ';sut' : ';'};{};verify_equal;" << expected.to_s
     return nil
 
   end
@@ -1451,14 +1451,14 @@ module TDriverVerify
     rescue Exception => e
       raise if e.kind_of? MobyBase::ContinuousVerificationError
       $logger.enabled = logging_enabled
-      $logger.log "behaviour" , "FAIL;Verification #{message.nil? ? '' : '\"' << message << '\" '}failed:#{e.to_s}.\n#{timeout.nil? ? '' : ' using timeout ' + timeout.to_s}.;#{self.kind_of?(MobyBase::SUT) ? self.id.to_s + ';sut' : ';'};{};verify_true;"
+      $logger.behaviour "FAIL;Verification #{message.nil? ? '' : '\"' << message << '\" '}failed:#{e.to_s}.\n#{timeout.nil? ? '' : ' using timeout ' + timeout.to_s}.;#{self.kind_of?(MobyBase::SUT) ? self.id.to_s + ';sut' : ';'};{};verify_true;"
       Kernel::raise e
     ensure
       MobyBase::TestObjectFactory.instance.timeout = original_sync_timeout unless original_sync_timeout.nil?
     end
 
     $logger.enabled = logging_enabled
-    $logger.log "behaviour" , "PASS;Verification #{message.nil? ? '' : '\"' << message << '\" '}at #{verify_caller} was successful#{timeout.nil? ? '' : ' using timeout ' + timeout.to_s}.;#{self.kind_of?(MobyBase::SUT) ? self.id.to_s + ';sut' : ';'};{};verify_true;"
+    $logger.behaviour "PASS;Verification #{message.nil? ? '' : '\"' << message << '\" '}at #{verify_caller} was successful#{timeout.nil? ? '' : ' using timeout ' + timeout.to_s}.;#{self.kind_of?(MobyBase::SUT) ? self.id.to_s + ';sut' : ';'};{};verify_true;"
     return nil
 
   end
@@ -1550,7 +1550,7 @@ module TDriverVerify
       raise if e.kind_of? MobyBase::ContinuousVerificationError
 
       $logger.enabled = logging_enabled
-      $logger.log "behaviour" , "FAIL;Verification #{message.nil? ? '' : '\"' << message << '\" '}failed:#{e.to_s}.\n #{timeout.nil? ? '' : ' using timeout ' + timeout.to_s}.;#{self.kind_of?(MobyBase::SUT) ? self.id.to_s + ';sut' : ';'};{};verify_false;"
+      $logger.behaviour "FAIL;Verification #{message.nil? ? '' : '\"' << message << '\" '}failed:#{e.to_s}.\n #{timeout.nil? ? '' : ' using timeout ' + timeout.to_s}.;#{self.kind_of?(MobyBase::SUT) ? self.id.to_s + ';sut' : ';'};{};verify_false;"
 
       Kernel::raise e
 
@@ -1559,7 +1559,7 @@ module TDriverVerify
     end
 
     $logger.enabled = logging_enabled
-    $logger.log "behaviour" , "PASS;Verification #{message.nil? ? '' : '\"' << message << '\" '}at #{verify_caller} was successful#{timeout.nil? ? '' : ' using timeout ' + timeout.to_s}.;#{self.kind_of?(MobyBase::SUT) ? self.id.to_s + ';sut' : ';'};{};verify_false;"
+    $logger.behaviour "PASS;Verification #{message.nil? ? '' : '\"' << message << '\" '}at #{verify_caller} was successful#{timeout.nil? ? '' : ' using timeout ' + timeout.to_s}.;#{self.kind_of?(MobyBase::SUT) ? self.id.to_s + ';sut' : ';'};{};verify_false;"
     return nil
 
   end
