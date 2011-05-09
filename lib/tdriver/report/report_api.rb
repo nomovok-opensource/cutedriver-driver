@@ -38,6 +38,15 @@ module TDriverReportAPI
     return ret
   end
 
+  def tdriver_get_sequential_fails    
+    return $tdriver_reporter.get_sequential_fails if $tdriver_reporter
+  end
+  
+  
+  def tdriver_update_sequential_fails( status )
+     $tdriver_reporter.update_sequential_fails( status ) if $tdriver_reporter
+  end
+  
   def tdriver_log_data(data)
     Kernel::raise TypeError.new("Argument to method cannot be nil.") if data.nil?
     if $tdriver_reporter!=nil

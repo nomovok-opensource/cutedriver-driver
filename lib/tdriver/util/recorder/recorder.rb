@@ -55,7 +55,8 @@ module MobyUtil
       
       MobyUtil::Scripter.new( sut.id, object_identificators ).write_fragment( 
 
-        MobyBase::StateObject.new( :source_data => xml_source ), 
+        #MobyBase::StateObject.new( :source_data => xml_source ), 
+        sut.state_object( xml_source ), 
         app.name 
 
       )

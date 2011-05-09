@@ -38,7 +38,7 @@ module MobyBase
       # get timeout retry interval from parameters, use default value if parameter not found
       @_retry_interval = $parameters[ :application_synchronization_retry_interval, "1" ].to_f
 
-      @test_object_adapter = TDriver::TestObjectAdapter
+      #@test_object_adapter = TDriver::TestObjectAdapter
 
     end
 
@@ -66,6 +66,11 @@ module MobyBase
       
       # retrieve sut object
       sut = rules[ :parent ].instance_variable_get( :@sut )
+
+      # retrieve sut objects test object adapter
+      #test_object_adapter = sut.instance_variable_get( :@sut_controller ).test_object_adapter
+
+      test_object_adapter = sut.instance_variable_get( :@test_object_adapter )
 
       # search parameters for find_objects feature    
       search_parameters = make_object_search_params( rules[ :parent ], rules[ :object_attributes_hash ] )
@@ -116,7 +121,7 @@ module MobyBase
         sut.refresh( directives[ :__refresh_arguments ], search_parameters )
 
         # retrieve objects from xml
-        matches, rule = @test_object_adapter.get_objects(
+        matches, rule = test_object_adapter.get_objects(
         
          rules[ :parent ].xml_data, 
          rules[ :object_attributes_hash ], 
@@ -153,7 +158,7 @@ module MobyBase
         if ( !directives[ :__multiple_objects ] ) && ( matches.count > 1 && !directives[ :__index_given ] )
 
           # raise exception (with list of paths to all matching objects) if multiple objects flag is false and more than one match found
-          raise MobyBase::MultipleTestObjectsIdentifiedError, "Multiple test objects found with rule: #{ rules[ :object_attributes_hash ].inspect }\nMatching objects:\n#{ list_matching_test_objects_as_list( matches ) }\n"
+          raise MobyBase::MultipleTestObjectsIdentifiedError, "Multiple test objects found with rule: #{ rules[ :object_attributes_hash ].inspect }\nMatching objects:\n#{ list_matching_test_objects_as_list( test_object_adapter, matches ) }\n"
             
         end
 
@@ -161,9 +166,9 @@ module MobyBase
         if directives[ :__xy_sorting ] == true
                   
           # sort elements
-          @test_object_adapter.sort_elements( 
+          test_object_adapter.sort_elements( 
             matches, 
-            @test_object_adapter.application_layout_direction( sut )
+            test_object_adapter.application_layout_direction( sut )
           )
 
         end
@@ -187,6 +192,13 @@ module MobyBase
 
     # TODO: document me
     def get_test_objects( rules )
+
+      # retrieve sut object
+      sut = rules[ :parent ].instance_variable_get( :@sut )
+
+      # retrieve sut objects test object adapter
+      #test_object_adapter = sut.instance_variable_get( :@sut_controller ).test_object_adapter
+      test_object_adapter = sut.instance_variable_get( :@test_object_adapter )
 
       # store rules hash to variable
       object_attributes_hash = rules[ :object_attributes_hash ].clone
@@ -274,24 +286,21 @@ module MobyBase
         unless identification_directives.has_key?( :__parent_application ) || rules.has_key?( :parent_application )
               
           # retrieve application test object xml element
-          application_test_object_xml = @test_object_adapter.retrieve_parent_application( test_object_xml )
+          application_test_object_xml = test_object_adapter.retrieve_parent_application( test_object_xml )
 
           unless application_test_object_xml.nil?
 
-            # retrieve sut object
-            sut = rules[ :parent ].instance_variable_get( :@sut )
-
             # retrieve test object id from xml
-            object_id = @test_object_adapter.test_object_element_attribute( application_test_object_xml, 'id', nil ).to_i
+            object_id = test_object_adapter.test_object_element_attribute( application_test_object_xml, 'id', nil ).to_i
 
             # retrieve test object name from xml
-            object_name = @test_object_adapter.test_object_element_attribute( application_test_object_xml, 'name', nil ).to_s
+            object_name = test_object_adapter.test_object_element_attribute( application_test_object_xml, 'name', nil ).to_s
 
             # retrieve test object type from xml
-            object_type = @test_object_adapter.test_object_element_attribute( application_test_object_xml, 'type', nil ).to_s 
+            object_type = test_object_adapter.test_object_element_attribute( application_test_object_xml, 'type', nil ).to_s 
               
             # calculate object cache hash key
-            hash_key = @test_object_adapter.test_object_hash( object_id, object_type, object_name )
+            hash_key = test_object_adapter.test_object_hash( object_id, object_type, object_name )
               
             parent_cache = sut.instance_variable_get( :@child_object_cache )                       
             
@@ -362,6 +371,14 @@ module MobyBase
 
       # retrieve sut object
       sut = parent.instance_variable_get( :@sut )
+
+      # retrieve sut objects test object adapter
+      #test_object_adapter = sut.instance_variable_get( :@sut_controller ).test_object_adapter
+      test_object_adapter = sut.instance_variable_get( :@test_object_adapter )
+
+      # retrieve sut objects test object factory
+      #test_object_factory = sut.instance_variable_get( :@sut_controller ).test_object_factory
+      test_object_factory = sut.instance_variable_get( :@test_object_factory )
       
       # xml object element      
       xml_object = rules[ :xml_object ]
@@ -375,16 +392,16 @@ module MobyBase
       if xml_object.kind_of?( MobyUtil::XML::Element )
 
         # retrieve test object id from xml
-        object_id = @test_object_adapter.test_object_element_attribute( xml_object, 'id', nil ).to_i
+        object_id = test_object_adapter.test_object_element_attribute( xml_object, 'id', nil ).to_i
 
         # retrieve test object name from xml
-        object_name = @test_object_adapter.test_object_element_attribute( xml_object, 'name', nil ).to_s
+        object_name = test_object_adapter.test_object_element_attribute( xml_object, 'name', nil ).to_s
 
         # retrieve test object type from xml
-        object_type = @test_object_adapter.test_object_element_attribute( xml_object, 'type', nil ).to_s 
+        object_type = test_object_adapter.test_object_element_attribute( xml_object, 'type', nil ).to_s 
 
         # retrieve test object type from xml
-        env = @test_object_adapter.test_object_element_attribute( xml_object, 'env' ){ $parameters[ sut.id ][ :env ] }.to_s
+        env = test_object_adapter.test_object_element_attribute( xml_object, 'env' ){ $parameters[ sut.id ][ :env ] }.to_s
         
       else
       
@@ -400,7 +417,7 @@ module MobyBase
       end
       
       # calculate object cache hash key
-      hash_key = @test_object_adapter.test_object_hash( object_id, object_type, object_name )
+      hash_key = test_object_adapter.test_object_hash( object_id, object_type, object_name )
       
       # get reference to parent objects child objects cache
       parent_cache = rules[ :parent ].instance_variable_get( :@child_object_cache )
@@ -422,8 +439,8 @@ module MobyBase
         # create test object
         test_object = MobyBase::TestObject.new( 
         
-          :test_object_factory => self,
-          :test_object_adapter => @test_object_adapter,
+          :test_object_factory => test_object_factory, #self,
+          :test_object_adapter => test_object_adapter, #@test_object_adapter,
           :creation_attributes => rules[ :object_attributes_hash ],
           :xml_object => xml_object,
           :sut => sut, 
@@ -452,8 +469,9 @@ module MobyBase
           :version => [ '*', sut.ui_version.to_s ]
 
         )
+
         # create child accessors
-        @test_object_adapter.create_child_accessors!( xml_object, test_object )
+        test_object_adapter.create_child_accessors!( xml_object, test_object )
 
         # add created test object to parents child objects cache, unless explicitly disabled
         parent_cache.add_object( test_object ) unless identification_directives[ :__no_caching ] == true
@@ -534,31 +552,15 @@ module MobyBase
     end
 
     # TODO: document me
-    def list_matching_test_objects( matches )
+    def list_matching_test_objects_as_list( test_object_adapter, matches )
 
-      matches.collect{ | object |
-          
-        path = [ object.attribute( 'type' ) ]
+      test_object_adapter.list_test_objects_as_string( matches ).each_with_index.collect{ | object, object_index | 
 
-        while object.attribute( 'type' ) != 'application' do
-        
-          # object/objects/object/../..
-          object = object.parent.parent
-          
-          path << object.attribute( 'type' )
-        
-        end
+        "%3s) %s" % [ object_index + 1, object ] 
 
-        path.reverse.join( '.' )
-      
-      }.sort
-    
-    end
+      }.join( "\n" )
 
-    # TODO: document me
-    def list_matching_test_objects_as_list( matches )
-
-      list_matching_test_objects( matches ).each_with_index.collect{ | object, object_index | "%3s) %s" % [ object_index + 1, object ] }.join( "\n" )
+      #list_matching_test_objects( matches ).each_with_index.collect{ | object, object_index | "%3s) %s" % [ object_index + 1, object ] }.join( "\n" )
 
     end
 

@@ -46,7 +46,7 @@ class Object
   def check_type( types, message = "wrong argument type $1 (expected $2)" )
 
     # raise exception if message is not type of String
-    raise TypeError, "wrong argument type #{ message.class } for message (expected String)" unless message.kind_of?( String )
+    raise TypeError, "wrong argument type #{ message.class } for message (expected String)", caller unless message.kind_of?( String )
 
     # create array of types
     type_array = Array( types )
@@ -57,7 +57,7 @@ class Object
     # collect verbose type list
     verbose_type_list = type_array.each_with_index.collect{ | type, index | 
 
-      raise TypeError, "invalid argument type #{ type } for check_type. Did you mean #{ type.class }?" unless type.kind_of?( Class )
+      raise TypeError, "invalid argument type #{ type } for check_type. Did you mean #{ type.class }?", caller unless type.kind_of?( Class )
 
       if self.kind_of?( type )
 
@@ -79,7 +79,7 @@ class Object
       [ self.class, verbose_type_list.join, self.inspect ].each_with_index{ | param, index | message.gsub!( "$#{ index + 1 }", param.to_s ) }
 
       # raise the exception
-      raise TypeError, message
+      raise TypeError, message, caller
 
     end
 

@@ -32,6 +32,9 @@ require File.expand_path( File.join( File.dirname( __FILE__ ), 'cache' ) )
 # load test object adapter
 require File.expand_path( File.join( File.dirname( __FILE__ ), 'adapter' ) )
 
+# load test object adapter
+require File.expand_path( File.join( File.dirname( __FILE__ ), 'xml/adapter' ) )
+
 # load verify ui module
 require File.expand_path( File.join( File.dirname( __FILE__ ), 'verification' ) )
 
