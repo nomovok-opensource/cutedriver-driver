@@ -628,8 +628,11 @@ module MobyBehaviour
     # == arguments
     # target
     #  Hash
-    #   description: used to indetify the application to be executed. All symbols defined in the hash must match with the launched application. See application [link="#run_hash_arguments"]run argument hash keys[/link] table.
-    #   example: { :name => 'calculator' }
+    #   description: Used to indetify the application to be executed. All symbols defined in the hash must match with the launched application. See application [link="#run_hash_arguments"]run argument hash keys[/link] table.
+    #   example: { :name => "calculator" }
+    #  String
+    #   description: If target application is given in String format it is interpreted as application name. String "calculator"' is equivalent to {:name => "calculator"} hash.
+    #   example: "calculator"
     #
     # == tables
     # run_hash_arguments
@@ -672,7 +675,10 @@ module MobyBehaviour
         #sut_parameters[ :refresh_interval ] = '0'
 
         # raise exception if argument type other than hash
-        target.check_type( Hash, "Wrong argument type $1 for run method (expected $2)" )
+        target.check_type( [ String, Hash ], "Wrong argument type $1 for run method (expected $2)" )
+
+        # if target application is given as string, interpret it as application name
+        target = { :name => target.to_s } if target.kind_of?( String )
 
         # default value for missing keys
         target.default = nil
@@ -1490,7 +1496,7 @@ module MobyBehaviour
               @xml_data_crc = crc
 
               # mark that child objects needs to be updated 
-              @update_childs = true unless from_cache
+              @update_childs = true #unless from_cache
 
           end
 
