@@ -1490,7 +1490,7 @@ module MobyBehaviour
               @xml_data_crc = crc
 
               # mark that child objects needs to be updated 
-              @update_childs = true unless from_cache
+              @update_childs = true #unless from_cache
 
           end
 
