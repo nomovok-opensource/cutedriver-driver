@@ -1084,7 +1084,7 @@ module TDriverReportCreator
           xml_data = Nokogiri::XML(io){ |config| config.options = Nokogiri::XML::ParseOptions::STRICT }
           io.close
           if case_name
-            nodes=xml_data.root.xpath("//tests/test[name='#{case_name}']")
+            nodes=xml_data.root.xpath("//tests/test[name='#{case_name}' and status='#{results}']")
           elsif results=='crash'
             nodes=xml_data.root.xpath("//tests/test[crashes>0]")
           elsif results=='reboot'
