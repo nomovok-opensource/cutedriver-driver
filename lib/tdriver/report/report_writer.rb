@@ -1366,7 +1366,7 @@ display: block;
         total_run_link="1_total_run_index.html\""
         statistics_link='statistics_index.html"'
         passed_link="1_passed_index.html\""
-        failed_link="#{report_page}_failed_index.html\" class=\"current\""
+        failed_link="1_failed_index.html\""
         not_run_link="1_not_run_index.html\""
       else
         tdriver_test_results_link='../../index.html"'
