@@ -68,8 +68,6 @@ module MobyBase
       sut = rules[ :parent ].instance_variable_get( :@sut )
 
       # retrieve sut objects test object adapter
-      #test_object_adapter = sut.instance_variable_get( :@sut_controller ).test_object_adapter
-
       test_object_adapter = sut.instance_variable_get( :@test_object_adapter )
 
       # search parameters for find_objects feature    
@@ -120,6 +118,9 @@ module MobyBase
         # refresh sut
         sut.refresh( directives[ :__refresh_arguments ], search_parameters )
 
+        # in case of test object adapter was change during the refresh (if connected the SUT first time, see possible 'connect_after' hook from sut plugin)
+        test_object_adapter = sut.instance_variable_get( :@test_object_adapter )
+
         # retrieve objects from xml
         matches, rule = test_object_adapter.get_objects(
         
@@ -131,7 +132,9 @@ module MobyBase
         
         # Temporary prevent users misleading :Text with :text (as they are different)
         if ( rules[ :object_attributes_hash ].has_key?(:Text) )
+
           rules[ :object_attributes_hash ][:text] = rules[ :object_attributes_hash ][:Text]
+
         end
         
         # If retrying and regexp search is turned on then update the rules for text search converting it to a regex 
@@ -150,15 +153,17 @@ module MobyBase
             elided_regex = Regexp.new( text_string[0..3] + ellipsis_char )
             rules[ :object_attributes_hash ][ :text ] = elided_regex
         end
-        
+
         # raise exception if no matching object(s) found
         raise MobyBase::TestObjectNotFoundError, "Cannot find object with rule:\n#{ rules[ :object_attributes_hash ].inspect }" if matches.empty?
 
         # raise exception if multiple matches found and only one expected 
         if ( !directives[ :__multiple_objects ] ) && ( matches.count > 1 && !directives[ :__index_given ] )
 
+          message = "Multiple test objects found with rule: #{ rules[ :object_attributes_hash ].inspect }\nMatching objects:\n#{ list_matching_test_objects_as_list( test_object_adapter, matches ) }\n"
+
           # raise exception (with list of paths to all matching objects) if multiple objects flag is false and more than one match found
-          raise MobyBase::MultipleTestObjectsIdentifiedError, "Multiple test objects found with rule: #{ rules[ :object_attributes_hash ].inspect }\nMatching objects:\n#{ list_matching_test_objects_as_list( test_object_adapter, matches ) }\n"
+          raise MobyBase::MultipleTestObjectsIdentifiedError, message
             
         end
 
@@ -197,7 +202,6 @@ module MobyBase
       sut = rules[ :parent ].instance_variable_get( :@sut )
 
       # retrieve sut objects test object adapter
-      #test_object_adapter = sut.instance_variable_get( :@sut_controller ).test_object_adapter
       test_object_adapter = sut.instance_variable_get( :@test_object_adapter )
 
       # store rules hash to variable
@@ -281,6 +285,9 @@ module MobyBase
       MobyUtil::DynamicAttributeFilter.instance.add_attributes( object_attributes_hash.keys )
 
       child_objects = identify_object( rules ).collect{ | test_object_xml |
+
+        # in case of test object adapter was change during the refresh (if connected the SUT first time, see possible 'connect_after' hook from sut plugin)
+        test_object_adapter = sut.instance_variable_get( :@test_object_adapter )
                 
         # create parent application test object if none defined in rules; most likely the call is originated from SUT#child, but not by using SUT#application
         unless identification_directives.has_key?( :__parent_application ) || rules.has_key?( :parent_application )
