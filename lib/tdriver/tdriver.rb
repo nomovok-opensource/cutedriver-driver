@@ -28,8 +28,8 @@
 # initializing TDriver
 $TDRIVER_INITIALIZED = false
 
-# unicode support
-$KCODE = 'u'
+# unicode support for 1.8.7
+$KCODE = 'u' if RUBY_VERSION < "1.9"
 
 # prevent Object#id Warnings
 Object.send( :undef_method, :id ) if Object.respond_to?( :id )
