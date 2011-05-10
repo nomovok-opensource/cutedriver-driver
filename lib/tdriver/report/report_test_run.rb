@@ -58,7 +58,9 @@ module TDriverReportCreator
       :fail_statuses,
       :not_run_statuses,
       :report_editable,
-      :test_fails
+      :test_fails,
+      :report_exclude_passed_cases
+
     )
     #class variables for summary report
     def initialize()
@@ -96,20 +98,21 @@ module TDriverReportCreator
       @not_run_statuses=MobyUtil::Parameter[ :report_not_run_statuses, "not run" ].split('|')
       @report_editable=MobyUtil::Parameter[ :report_editable, "false" ]
       @report_short_folders=MobyUtil::Parameter[ :report_short_folders, 'false']
+      @report_exclude_passed_cases=MobyUtil::Parameter[ :report_exclude_passed_cases, 'false' ]
       @test_fails=Hash.new(0)  # return 0 by default if key not found
-    
-    
+
+
     end
-    
+
 	  def get_sequential_fails
       test_identifier = $new_test_case.test_case_group + "::" + $new_test_case.test_case_name
       return @test_fails[ test_identifier ]  # return 0 by default if key not found
 	  end
-	
+
     def update_sequential_fails( status )
-    
+
       test_identifier = $new_test_case.test_case_group + "::" + $new_test_case.test_case_name
-      
+
       if @pass_statuses.include?(status)
         @test_fails[ test_identifier ] = 0 unless @test_fails[ test_identifier ] == 0
       elsif @fail_statuses.include?(status)
@@ -117,10 +120,10 @@ module TDriverReportCreator
         tempnum = tempnum + 1
         @test_fails[ test_identifier ] = tempnum
       end
-      
+
 
     end
-    
+
     #This method sets the test case user defined status
     #
     # === params
@@ -475,7 +478,7 @@ module TDriverReportCreator
         if File::directory?(@report_folder)==false
           FileUtils.mkdir_p @report_folder+'/environment'
           FileUtils.mkdir_p @report_folder+'/cases'
-          FileUtils.mkdir_p @report_folder+'/junit_xml'          
+          FileUtils.mkdir_p @report_folder+'/junit_xml'
         else
           if b_fixed_report_folder==true
             FileUtils::remove_entry_secure(@report_folder, :force => true)
@@ -928,7 +931,7 @@ module TDriverReportCreator
               row_hash.sort{|a,b| a[0]<=>b[0]}.each do |value|
                 data_value=Nokogiri::XML::Node.new("column",test_data)
                 data_value.set_attribute("name",value[0].to_s)
-                data_value.content = value[1].to_s                
+                data_value.content = value[1].to_s
                 test_data << data_value
               end
             end
@@ -967,7 +970,7 @@ module TDriverReportCreator
                 xml.dump_count calculate_total_values_from_hash(total_dump)
                 xml.sent_bytes calculate_total_values_from_hash(total_sent)
                 xml.received_bytes calculate_total_values_from_hash(total_received)
-                
+
                 if user_data!=nil && !user_data.empty?
                   xml.user_display_data {
                     (0..counter).each { |i|
@@ -978,7 +981,7 @@ module TDriverReportCreator
                     }
                   }
                 end
-                
+
                 if user_data_rows!=nil && !user_data_columns.empty?
 
                   xml.user_table_data{
@@ -986,7 +989,7 @@ module TDriverReportCreator
                     user_data_rows.each do |row_hash|
                       row_hash.sort{|a,b| a[0]<=>b[0]}.each do |value|
                         xml.column("name"=>value[0].to_s){
-                            xml.text value[1].to_s
+                          xml.text value[1].to_s
                         }
                       end
                     end
@@ -1073,6 +1076,8 @@ module TDriverReportCreator
         result_storage=Array.new
         storage_file='all_cases.xml'
 
+        nodes=Nokogiri::XML::NodeSet
+
         file=@report_folder+'/'+storage_file
         if File.exist?(file)
           io = File.open(file, 'rb')
@@ -1080,9 +1085,34 @@ module TDriverReportCreator
           io.close
           if case_name
             nodes=xml_data.root.xpath("//tests/test[name='#{case_name}']")
+          elsif results=='crash'
+            nodes=xml_data.root.xpath("//tests/test[crashes>0]")
+          elsif results=='reboot'
+            nodes=xml_data.root.xpath("//tests/test[reboots>0]")
+          elsif results!='all' && results!='crash' && results!='reboot'
+            case results
+            when 'passed'
+
+                nodes=xml_data.root.xpath("//tests/test[status='#{@pass_statuses.first}']")
+
+            when 'failed'
+
+                nodes=xml_data.root.xpath("//tests/test[status='#{@fail_statuses.first}']")
+
+            when 'not_run'
+
+                nodes=xml_data.root.xpath("//tests/test[status='#{@not_run_statuses.first}']")
+
+            end
           else
-            nodes=xml_data.root.xpath("//tests/test")
+            if @report_exclude_passed_cases=='true'
+              nodes=xml_data.root.xpath("//tests/test[status!='passed']")
+            else
+              nodes=xml_data.root.xpath("//tests/test")
+            end
+
           end
+
           nodes.each do |node|
             value=node.search("name").text #0
             group=node.search("group").text #1
@@ -1123,73 +1153,9 @@ module TDriverReportCreator
               sent_bytes,
               received_bytes
             ]
-            case results
-            when 'passed'
-              if case_name
-                if @pass_statuses.include?(status) && value==case_name
-                  result_storage << current_record
-                end
-              else
-                if @pass_statuses.include?(status)
-                  result_storage << current_record
-                end
-              end
 
-            when 'failed'
-              if case_name
-                if @fail_statuses.include?(status) && value==case_name
-                  result_storage << current_record
-                end
-              else
-                if @fail_statuses.include?(status)
-                  result_storage << current_record
-                end
-              end
+            result_storage << current_record
 
-            when 'not_run'
-              if case_name
-                if @not_run_statuses.include?(status) && value==case_name
-                  result_storage << current_record
-                end
-              else
-                if @not_run_statuses.include?(status)
-                  result_storage << current_record
-                end
-              end
-
-            when 'crash'
-              if crashes.to_i > 0
-                result_storage << current_record
-              end
-
-            when 'reboot'
-              if reboots.to_i > 0
-                result_storage << current_record
-              end
-
-            when 'all'
-              if case_name
-                if value==case_name
-                  result_storage << current_record
-                end
-              else
-                result_storage << current_record
-              end
-            else
-              if @pass_statuses.include?(status)
-                if (( case_name and value==case_name ) or !case_name )
-                  result_storage << current_record
-                end
-              elsif @fail_statuses.include?(status)
-                if (( case_name and value==case_name ) or !case_name )
-                  result_storage << current_record
-                end
-              elsif @not_run_statuses.include?(status)
-                if (( case_name and value==case_name ) or !case_name )
-                  result_storage << current_record
-                end
-              end
-            end
           end
           xml_data=nil
           $result_storage_in_use=false
@@ -1268,6 +1234,7 @@ module TDriverReportCreator
       search_case = nil
       if @pass_statuses.include?(status)
         search_case = "passed"
+        return if @report_exclude_passed_cases=='true'
       elsif @fail_statuses.include?(status)
         search_case = "failed"
       elsif @not_run_statuses.include?(status)

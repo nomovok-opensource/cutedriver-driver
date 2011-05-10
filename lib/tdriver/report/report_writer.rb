@@ -1487,7 +1487,7 @@ display: block;
 
   def scan_rdoc_file_for_method(file,method_name)   
     text = File.read(file)
-    if text.include?(method_name)
+    if text =~ /\b#{method_name}\b/
       path=file.split('doc/')      
       return path[1]
     end    

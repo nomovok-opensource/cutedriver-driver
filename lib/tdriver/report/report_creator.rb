@@ -61,14 +61,35 @@ module TDriverReportCreator
         end
         puts 'Generating report summary...'
         $tdriver_reporter.update_summary_page('finished')
+        puts 'Summary generated...'
+        puts 'Generating total run table...'
         $tdriver_reporter.update_test_case_summary_pages('all')
-        $tdriver_reporter.update_test_case_summary_pages('passed')
+        puts 'Total run table generated...'
+        if $tdriver_reporter.report_exclude_passed_cases=='false'          
+          puts 'Generating passed cases table...'
+          $tdriver_reporter.update_test_case_summary_pages('passed')
+          puts 'Passed table generated...'
+        end
+        puts 'Generating failed cases table...'
         $tdriver_reporter.update_test_case_summary_pages('failed')
+        puts 'Failed table generated...'
+        puts 'Generating not run cases table...'
         $tdriver_reporter.update_test_case_summary_pages('not run')
+        puts 'Not run table generated...'
+        puts 'Generating statistics table...'
         $tdriver_reporter.update_test_case_summary_pages('statistics')
+        puts 'Statistics generated...'
+        puts 'Grouping results by result and name...'
         $tdriver_reporter.group_results_by_test_case()
-        $tdriver_reporter.create_csv if MobyUtil::Parameter[ :create_run_table_csv, false ]=='true'
+        puts 'Tests grouped by result and name...'
+        if MobyUtil::Parameter[ :create_run_table_csv, false ]=='true'
+          puts 'Generating CSV...'
+          $tdriver_reporter.create_csv
+          puts 'CSV generated...'
+        end
+        puts 'Generating Junit xml...'
         $new_junit_xml_results.create_junit_xml()
+        puts 'Junit generated...'
         #$tdriver_reporter.delete_result_storage()
         $tdriver_reporter.disconnect_connected_devices()
         #tdriver_log_page $tdriver_reporter.update_tdriver_log_page()
@@ -183,7 +204,7 @@ module TDriverReportCreator
           begin
             #Update test case summary pages
             $tdriver_reporter.update_test_case_summary_pages('all')
-            $tdriver_reporter.update_test_case_summary_pages('passed')
+            $tdriver_reporter.update_test_case_summary_pages('passed') if $tdriver_reporter.report_exclude_passed_cases=='false'
             $tdriver_reporter.update_test_case_summary_pages('failed')
             $tdriver_reporter.update_test_case_summary_pages('not run')
             $tdriver_reporter.update_test_case_summary_pages('statistics')
