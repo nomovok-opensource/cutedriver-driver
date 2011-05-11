@@ -31,6 +31,7 @@ MobyUtil::GemHelper.install( MobyUtil::FileHelper.tdriver_home ){ | tdriver_home
     [ "../config/sut_parameters.rb", "sut_parameters.rb", true ],
     [ "../config/sut_setup.rb", "sut_setup.rb", true ],
     [ "../config/sut_teardown.rb", "sut_teardown.rb", true ],
+    [ "../config/tdriver_custom_error_recovery.rb", "tdriver_custom_error_recovery.rb", true ],
 
     # templates
     [ "../xml/templates/*.xml",  "templates/", true ],
