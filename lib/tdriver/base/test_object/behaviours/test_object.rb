@@ -826,8 +826,14 @@ module MobyBehaviour
 
             end
 
-            #lets refresh if attribute not found on first attempt
-            refresh( refresh_args )
+            #refresh( refresh_args )
+
+            # lets refresh if attribute not found on first attempt
+            @sut.refresh( 
+
+              refresh_args, @test_object_factory.make_object_search_params( parent, @creation_attributes )
+
+            )
 
             # retrieve updated xml data
             _xml_data = xml_data
@@ -835,7 +841,7 @@ module MobyBehaviour
           end
 
           # raise eception if xml data is empty or nil
-          Kernel::raise MobyBase::TestObjectNotInitializedError.new if _xml_data.nil? || _xml_data.to_s.empty?
+          raise MobyBase::TestObjectNotInitializedError.new if _xml_data.nil? || _xml_data.to_s.empty?
 
           begin
           
@@ -844,7 +850,7 @@ module MobyBehaviour
 
           rescue MobyBase::AttributeNotFoundError
           
-            Kernel::raise MobyBase::AttributeNotFoundError, "Could not find attribute #{ name.inspect } for test object of type #{ @type.to_s }"
+            raise MobyBase::AttributeNotFoundError, "Could not find attribute #{ name.inspect } for test object of type #{ @type.to_s }"
 
           end
 
