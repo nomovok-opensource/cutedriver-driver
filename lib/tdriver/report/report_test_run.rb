@@ -501,8 +501,16 @@ module TDriverReportCreator
         write_page_start(@report_folder+'/cases/statistics_index.html','Statistics')
         write_page_end(@report_folder+'/cases/statistics_index.html')
         if MobyUtil::Parameter[ :report_generate_rdoc, 'false' ]=='true'
-          system("rdoc --exclude test_run --op #{@report_folder}/doc")
-          puts "RDoc generated from test folder: #{Dir.pwd}"
+
+          if MobyUtil::Parameter[ :ats4_error_recovery_enabled, 'false' ]=='true'
+            ats4_drop_folder_arr=@report_folder.split('ats4-results')
+            system("rdoc --include #{ats4_drop_folder_arr[0]} --exclude test_run --op #{@report_folder}/doc")
+          else
+            system("rdoc --exclude test_run --op #{@report_folder}/doc")
+            puts "RDoc generated from test folder: #{Dir.pwd}"
+          end
+          
+          
         end
       rescue Exception => e
         Kernel::raise e, "Unable to create report folder: #{@report_folder}", caller

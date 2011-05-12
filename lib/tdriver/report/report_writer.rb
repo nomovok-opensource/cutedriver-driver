@@ -1497,35 +1497,39 @@ display: block;
     doc=Array.new
     rdoc_files=[]
     #Find method documentation from report doc folder
-    d = Dir.new("#{$tdriver_reporter.report_folder()}/doc/classes")
-    d.each do |entry|
-      if entry!="." && entry!=".."
-        if File.directory?("#{d.path}/#{entry}")
-          d1=Dir.new("#{d.path}/#{entry}")
-          d1.each do |entry1|
-            if entry1!="." && entry1!=".."
-              if !File.directory?("#{d1.path}/#{entry1}")
-                res=scan_rdoc_file_for_method("#{d1.path}/#{entry1}",method_name)
-                rdoc_files << res if res
+    if File.directory?("#{$tdriver_reporter.report_folder()}/doc/classes")
+      d = Dir.new("#{$tdriver_reporter.report_folder()}/doc/classes")
+      d.each do |entry|
+        if entry!="." && entry!=".."
+          if File.directory?("#{d.path}/#{entry}")
+            d1=Dir.new("#{d.path}/#{entry}")
+            d1.each do |entry1|
+              if entry1!="." && entry1!=".."
+                if !File.directory?("#{d1.path}/#{entry1}")
+                  res=scan_rdoc_file_for_method("#{d1.path}/#{entry1}",method_name)
+                  rdoc_files << res if res
+                end
               end
             end
+          else
+            res=scan_rdoc_file_for_method("#{d.path}/#{entry}",method_name)
+            rdoc_files << res if res
           end
-        else
-          res=scan_rdoc_file_for_method("#{d.path}/#{entry}",method_name)
-          rdoc_files << res if res
         end
       end
-    end
     
 
-    rdoc_files.each do |rdoc|
-      doc << "<iframe src=\"../../doc/#{rdoc}\"
+      rdoc_files.each do |rdoc|
+        doc << "<iframe src=\"../../doc/#{rdoc}\"
       width=\"100%\" height=\"340\"
       align=\"right\" scrolling=\"yes\">
       <p><a href=\"../../doc/#{rdoc}\">#{method_name}</a>.</p>
       </iframe>"
+      end
+      return doc
+    else
+      return '-'
     end
-    return doc
   end
 
   def format_user_log_table(user_data_rows,user_data_columns)
