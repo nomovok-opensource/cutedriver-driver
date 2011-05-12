@@ -1333,9 +1333,17 @@ module MobyBehaviour
 
         }
 
-      end
+        @update_childs = false
 
-      @update_childs = false
+        # childs were updated
+        true
+
+      else
+
+        # nothing was updated
+        false
+
+      end
 
     end
 
@@ -1344,7 +1352,7 @@ module MobyBehaviour
 
       refresh_ui_dump( refresh_args, creation_attributes )
 
-      # update childs only if ui state is new
+      # update childs if required, returns true or false
       update_childs
 
     end
@@ -1462,7 +1470,9 @@ module MobyBehaviour
           if use_find_objects
 
             # retrieve new ui dump xml and crc
-            new_xml_data, crc = find_object( refresh_arguments, creation_attributes )
+            new_xml_data, crc = find_object( refresh_arguments, creation_attributes, @xml_data_crc )
+
+            crc = @xml_data_crc if new_xml_data.empty?
 
           else
 

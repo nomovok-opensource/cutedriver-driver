@@ -250,9 +250,20 @@ module MobyBehaviour
     # @sut.refresh might have a side effect that changes the @_active instance variable.
     # === raises
     # TestObjectNotFoundError:: if TestObject is not identified within synch timeout.
-    def refresh( refresh_args = {} )
+    def refresh( refresh_args = nil )
 
-      @sut.refresh( refresh_args, @test_object_factory.make_object_search_params( parent, @creation_attributes ) )
+      refresh_args = @creation_attributes if refresh_args.nil?
+
+      refresh_args.check_type Hash, "wrong argument type $1 for #{ application? ? 'application' : 'test object' } refresh attributes (expected $2)"
+
+      @sut.refresh( 
+
+        refresh_args, @test_object_factory.make_object_search_params( parent, @creation_attributes )
+
+      )
+
+      # update childs if required, returns true or false
+      update( xml_data )
 
     end
 
