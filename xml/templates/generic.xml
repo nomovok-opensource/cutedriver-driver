@@ -171,7 +171,7 @@
     <parameter name="report_crash_file_names" value="MobileCrash" />
     <parameter name="report_disconnect_connected_devices" value="false" />
     <parameter name="report_generate_rdoc" value="false" />
-
+    <parameter name="custom_error_recovery_module" value="/etc/tdriver/tdriver_custom_error_recovery.rb" windows="/tdriver/tdriver_custom_error_recovery.rb" />
 
     <!-- Parameters for report details -->
     <parameter name="report_outputter_path" value="tdriver_reports/" />

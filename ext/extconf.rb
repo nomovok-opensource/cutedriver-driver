@@ -29,8 +29,9 @@ MobyUtil::GemHelper.install( MobyUtil::FileHelper.tdriver_home ){ | tdriver_home
     [ "../xml/parameters/tdriver_parameters.xml", "tdriver_parameters.xml", false ],
     [ "../xml/parameters/tdriver_parameters.xml", "default/tdriver_parameters.xml", true ],
     [ "../config/sut_parameters.rb", "sut_parameters.rb", true ],
-    [ "../config/sut_setup.rb", "sut_setup.rb", true ],
-    [ "../config/sut_teardown.rb", "sut_teardown.rb", true ],
+    [ "../config/sut_setup.rb", "sut_setup.rb", false ],
+    [ "../config/sut_teardown.rb", "sut_teardown.rb", false ],
+    [ "../config/tdriver_custom_error_recovery.rb", "tdriver_custom_error_recovery.rb", false ],
 
     # templates
     [ "../xml/templates/*.xml",  "templates/", true ],
