@@ -69,9 +69,23 @@ module MobyCommand
       arguments.default = nil
 
       @command_arguments = arguments
-  
-			self.command( command )
-			
+
+      @_command = command
+
+      @_application_name = nil
+      @_application_uid = nil
+      @_sut = nil
+      @_arguments = nil
+      @_events_to_listen = nil
+      @_signals_to_listen = nil
+      @_environment = nil
+      @_working_directory = nil
+      @_flags = nil
+      @_start_command = nil
+      @_refresh_args = nil
+      @_attribute_csv_string = nil
+
+=begin			
       # store values from arguments 
 			self.name( arguments[ :application_name ] )
 			self.uid( arguments[ :application_uid ] )
@@ -85,7 +99,60 @@ module MobyCommand
 			self.start_command( arguments[ :start_command ] )
 	    self.refresh_args( arguments[ :refresh_arguments ] )
 			self.attribute_filter( arguments[ :attribute_filter ] )
+=end
+      
+      # store values from arguments - call setter method only when required			
+			arguments.each_pair{ | key, value |
+			
+			  # skip if value is nil (default)   
+			  next if value.nil?
+			
+			  case key
+			  
+			    when :application_name
+			      name( value )
+			      
+			    when :application_uid
+      			uid( value )
 
+          when :sut
+      			sut( value )
+			    
+			    when :arguments
+			      arguments( value )
+			    
+			    when :events_to_listen
+            events_to_listen( value )
+
+			    when :signals_to_listen
+			      signals_to_listen( value )
+
+			    when :environment
+            environment( value )
+
+			    when :working_directory
+			      working_directory( value )
+			       			    
+			    when :flags
+			      flags( value )
+
+			    when :start_command
+      			start_command( value ) 
+
+			    when :refresh_arguments
+            refresh_args( value )
+
+			    when :attribute_filter
+            attribute_filter( value )
+
+        else
+
+          # show warning/exception?        
+			    			    			  
+			  end
+			
+			}
+			
 			self
     
     end
