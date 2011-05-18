@@ -501,10 +501,10 @@ module TDriverReportCreator
         write_page_start(@report_folder+'/cases/statistics_index.html','Statistics')
         write_page_end(@report_folder+'/cases/statistics_index.html')
         if MobyUtil::Parameter[ :report_generate_rdoc, 'false' ]=='true'
-
           if MobyUtil::Parameter[ :ats4_error_recovery_enabled, 'false' ]=='true'
             ats4_drop_folder_arr=@report_folder.split('ats4-results')
-            system("rdoc --include #{ats4_drop_folder_arr[0]} --exclude test_run --op #{@report_folder}/doc")
+            system("rdoc --include #{ats4_drop_folder_arr[0]}/* --exclude test_run --op #{@report_folder}/doc")
+            puts "RDoc generated from test folder: #{ats4_drop_folder_arr[0]}/*"
           else
             system("rdoc --exclude test_run --op #{@report_folder}/doc")
             puts "RDoc generated from test folder: #{Dir.pwd}"
@@ -581,7 +581,7 @@ module TDriverReportCreator
         language='-'
         loc='-'
         #Copy behaviour and parameter xml files in to the report folder
-        if /win/ =~ MobyUtil::EnvironmentHelper.ruby_platform
+        if /win/ =~ MobyUtil::EnvironmentHelper.ruby_platform || /mingw32/ =~ MobyUtil::EnvironmentHelper.ruby_platform
           FileUtils.cp_r 'C:/tdriver/behaviours', @report_folder+'/environment' if File.directory?('C:/tdriver/behaviours')
           FileUtils.cp_r 'C:/tdriver/templates', @report_folder+'/environment' if File.directory?('C:/tdriver/templates')
           FileUtils.cp_r 'C:/tdriver/defaults', @report_folder+'/environment' if File.directory?('C:/tdriver/defaults')
