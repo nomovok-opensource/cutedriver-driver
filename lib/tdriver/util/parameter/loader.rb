@@ -20,9 +20,6 @@
 # Parameter related errors
 require File.expand_path( File.join( File.dirname( __FILE__ ), 'error.rb' ) )
 
-# parameters end user api
-require File.expand_path( File.join( File.dirname( __FILE__ ), 'parameter_user_api.rb' ) )
-
 # parameters related classes
 require File.expand_path( File.join( File.dirname( __FILE__ ), 'parameter.rb' ) )
 

@@ -985,6 +985,8 @@ module MobyUtil
   class Parameter
   
     class << self
+
+      undef :inspect
             
       def new
       
@@ -1019,6 +1021,8 @@ module MobyUtil
   
     class << self
 
+      undef :inspect
+
       def new
       
         warn_caller "$1:$2 warning: #{ self.to_s } is static class; unable initialize new instance of it"
@@ -1028,7 +1032,7 @@ module MobyUtil
       end
     
       def method_missing( id, *args )
-      
+              
         warn_caller "$1:$2 warning: deprecated method; use TDriver::ParameterUserAPI##{ id.to_s } instead of MobyUtil::ParameterUserAPI##{ id.to_s }"
       
         TDriver::ParameterUserAPI.__send__( id, *args )
