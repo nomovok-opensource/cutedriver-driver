@@ -30,6 +30,7 @@ static const CRC_16[ 16 ] = {
 
 };
 
+/*
 static VALUE crc16_ibm( VALUE self, VALUE string ) {
 
   // verify argument type
@@ -54,6 +55,35 @@ static VALUE crc16_ibm( VALUE self, VALUE string ) {
 
 
 	return INT2FIX( ~crc & 0xffff );
+
+}
+*/
+
+static VALUE crc16_ibm( VALUE self, VALUE string ) {
+
+  // verify argument type
+  Check_Type( string, T_STRING );
+  
+  const char* data = RSTRING_PTR( string );
+  
+  int len = RSTRING_LEN( string );
+    
+  int crc = 0xffff;
+
+  int c = 0;
+
+  while( len-- ){
+
+    c = *data++;
+
+    crc = ( crc >> 4 ) ^ CRC_16[ ( crc ^ c ) & 15 ];
+              
+    crc = ( crc >> 4 ) ^ CRC_16[ ( crc ^ ( c >> 4 ) ) & 15 ];
+
+  }
+
+	return INT2FIX( ~crc & 0xffff );
+
 
 }
 
