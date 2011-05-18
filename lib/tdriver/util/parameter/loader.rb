@@ -24,5 +24,5 @@ require File.expand_path( File.join( File.dirname( __FILE__ ), 'error.rb' ) )
 require File.expand_path( File.join( File.dirname( __FILE__ ), 'parameter_user_api.rb' ) )
 
 # parameters related classes
-require File.expand_path( File.join( File.dirname( __FILE__ ), 'parameter_new.rb' ) )
+require File.expand_path( File.join( File.dirname( __FILE__ ), 'parameter.rb' ) )
 
