@@ -59,17 +59,38 @@ static VALUE crc16_ibm( VALUE self, VALUE string ) {
 }
 */
 
-static VALUE crc16_ibm( VALUE self, VALUE string ) {
+//static VALUE crc16_ibm( VALUE self, VALUE string, VALUE unused_crc ) {
+static VALUE crc16_ibm( int argc, VALUE* argv, VALUE self ) { 
+  //klass VALUE self, VALUE string, VALUE unused_crc ) {
 
+  // variables for arguments
+  VALUE string, initial_crc;
+
+  // retrieve arguments
+  rb_scan_args(argc, argv, "11", &string, &initial_crc);
+
+  int crc; // = 0xffff;
+  
+  if (NIL_P(initial_crc)){
+  
+    crc = 0xffff; 
+  
+  } else {
+
+    // verify initial crc value
+    Check_Type( initial_crc, T_FIXNUM );
+  
+    crc = NUM2INT( initial_crc );
+  
+  }
+  
   // verify argument type
   Check_Type( string, T_STRING );
-  
+
   const char* data = RSTRING_PTR( string );
   
   int len = RSTRING_LEN( string );
-    
-  int crc = 0xffff;
-
+  
   int c = 0;
 
   while( len-- ){
@@ -89,12 +110,19 @@ static VALUE crc16_ibm( VALUE self, VALUE string ) {
 
 void Init_native_extensions() {
 
+  // main tdriver module
 	VALUE mTDriver = rb_define_module( "TDriver" );
 
+  // checksum module
+	VALUE cChecksum = rb_define_class_under( mTDriver, "Checksum", rb_cObject );
+	
+	// checksum methods
+	rb_define_singleton_method( cChecksum, "crc16_ibm", crc16_ibm, -1 );
+
+  // deprecated - for backwards compatibility
 	VALUE mNativeExtensions = rb_define_module_under( mTDriver, "NativeExtensions" );
-
 	VALUE mCRC = rb_define_module_under( mNativeExtensions, "CRC" );
+	rb_define_singleton_method( mCRC, "crc16_ibm", crc16_ibm, -1 );
 
-	rb_define_singleton_method( mCRC, "crc16_ibm", crc16_ibm, 1 );
 
 }
