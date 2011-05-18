@@ -26,6 +26,7 @@ require 'rbconfig'  # ??
   'numeric.rb', 
   'hash.rb', 
   'string.rb',
+  'boolean.rb',
   
   'exceptions.rb', 
   'error.rb', # TODO: move custom exceptions to exceptions.rb

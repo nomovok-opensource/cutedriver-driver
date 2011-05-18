@@ -27,6 +27,18 @@ class Object
   
   end
 
+  def true?
+
+    false
+  
+  end
+  
+  def false?
+  
+    false
+  
+  end
+
   def not_blank( message = "Object must not be blank", exception = ArgumentError )
 
     raise exception, message, caller if blank? 
