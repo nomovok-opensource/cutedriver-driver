@@ -349,7 +349,7 @@ module MobyUtil
       set_debug_exceptions # if enabled
 
       # returns logging level as string
-      logging_level = Parameter[ :logging_level, nil ]
+      logging_level = $parameters[ :logging_level, nil ]
 
       # do not enable logging if no logging level is not defined
       return nil if logging_level.nil?
@@ -384,7 +384,7 @@ module MobyUtil
               # create error dump folder if not exist, used e.g. when xml parse error
               MobyUtil::FileHelper.mkdir_path( MobyUtil::FileHelper.expand_path( $last_parameter ) )
 
-            rescue #Exception
+            rescue
 
               warn("warning: Unable to create log folder #{ $parameters[ :logging_xml_parse_error_dump_path ] } for corrupted XML UI state files")
 
@@ -403,12 +403,12 @@ module MobyUtil
 
           end
 
-        rescue ArgumentError => exception
+        rescue ArgumentError
 
           # disable xml logging
           $parameters[ :logging_xml_parse_error_dump ] = 'false'
 
-        rescue #Exception => exception
+        rescue
 
           # disable xml logging
           warn( "warning: Disabling logging due to failure (#{ $!.class }: #{ $!.message })" )

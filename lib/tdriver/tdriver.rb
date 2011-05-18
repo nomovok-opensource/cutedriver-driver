@@ -184,9 +184,6 @@ module TDriver
     # set xml cache buffer size 
     MobyUtil::XML.buffer_size = $parameters[ :xml_cache_buffer_size, 10 ].to_i
 
-    # reporting modules
-    require File.expand_path( File.join( File.dirname( __FILE__ ), 'report/report.rb' ) ) if MobyUtil::Parameter[ :enable_reporter, 'true' ]=='true'
-
     # initialization done, everything is ready
     $TDRIVER_INITIALIZED = true
 
