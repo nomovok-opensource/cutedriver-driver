@@ -17,53 +17,111 @@
 ##
 ############################################################################
 
-module MobyUtil
+module TDriver
+
+  class ParameterUserAPI
+
+    class << self
+
+      def new
+      
+        warn_caller "$1:$2 warning: #{ self.to_s } is static class; unable initialize new instance of it"
+      
+        nil
+      
+      end
+
+      # TODO: document me
+      def []=( key, value )
+
+        $parameters[ key ] = value
+
+      end
+
+      # TODO: document me
+      def []( *args )
+
+        $parameters[ *args ]
+
+      end
+
+      # TODO: document me
+      def fetch( *args, &block )
+
+        $parameters.fetch( *args, &block )
+
+      end
+
+      # TODO: document me
+      def files
+
+        $parameters.files
+
+      end
+
+      # TODO: document me
+      def clear
+
+        $parameters.clear
+
+      end
+
+      # TODO: document me
+      def load_xml( filename )
+
+        $parameters.parse_file( filename )
+
+      end
+
+      # TODO: document me
+      def reset( *keys )
+
+        $parameters.reset
+
+      end
+
+      # TODO: document me
+      def inspect
+
+        $parameters.inspect
+
+      end
+
+      # TODO: document me
+      def to_s
+
+        $parameters.to_s
+
+      end
+
+      # TODO: document me
+      def keys
+
+        $parameters.keys
+
+      end
+
+      # TODO: document me
+      def values
+
+        $parameters.values
+
+      end
+
+      # TODO: document me
+      def configured_suts
+      
+        $parameters.configured_suts
+      
+      end
+
+    end # self
+
+    TDriver::Hooking.hook_methods( self ) if defined?( TDriver::Hooking )
+
+  end # ParameterUserAPI
 
   class ParameterHash < Hash
-
-=begin
-    # TODO: document me
-    def initialize #( hash = {} )
-
-      hash.check_type( [ Hash, ParameterHash ], "Wrong argument type $1 for hash (expected $2)" )
-
-      merge!( 
-
-        convert_hash( hash )
-
-      ) unless hash.empty?
-
-    end
-=end
-
-    # TODO: document me
-    def convert_hash( value )
-
-=begin
-      if value.kind_of?( Hash )
-        
-        # convert hash to parameter hash                
-        ParameterHash[
-        
-          value.collect{ | key, value |
-          
-            [ key, value.kind_of?( Hash ) ? convert_hash( value ) : value ]
-            
-          }
-
-        ]
-        
-      else
-
-        # return as is
-        value
-        
-      end
-=end
-
-      value.kind_of?( Hash ) ? ParameterHash[ value.collect{ | key, value | [ key, value.kind_of?( Hash ) ? convert_hash( value ) : value ] } ] : value
-
-    end
 
     # TODO: document me
     def []( key, *default, &block )
@@ -72,20 +130,21 @@ module MobyUtil
 
         if default.empty?
 
-          raise ParameterNotFoundError, "Parameter #{ key } not found" unless block_given?
+          raise MobyUtil::ParameterNotFoundError, "Parameter #{ key } not found" unless block_given?
 
           # yield with key if block given
-          yield( key )
+          yield key
 
         else
         
-          raise ArgumentError, "Only one default value allowed for parameter (#{ default.join(", ") })" unless default.size == 1
+          raise ArgumentError, "Only one default value allowed for parameter (#{ default.join(', ') })" unless default.size == 1
           
-          # convert_hash( default.first )
-
-          result = default.first
+          #result = default.first
           
-          result.kind_of?( Hash ) ? convert_hash( result ) : result
+          #result.kind_of?( Hash ) ? convert_hash( result ) : result
+          
+          convert_hash( default.first )
+          
           
         end
 
@@ -96,35 +155,57 @@ module MobyUtil
     # TODO: document me
     def []=( key, value )
 
-      raise ParameterNotFoundError, "Parameter key nil is not valid" unless key
+      raise MobyUtil::ParameterNotFoundError, 'Parameter key nil is not valid' unless key
 
-      super key, value.kind_of?( Hash ) ? convert_hash( value ) : value
+      super key, convert_hash( value ) # value.kind_of?( Hash ) ? convert_hash( value ) : value
 
     end
+    
+    # for backwards compatibility
+    def kind_of?( klass )
+    
+      if klass == MobyUtil::ParameterHash
+      
+        warn_caller '$1:$2 warning: deprecated class MobyUtil::ParameterHash, use TDriver::ParameterHash instead'
+      
+        true
+      
+      else
+        
+        super klass
+      
+      end
+        
+    end
+    
+  private
 
+    # TODO: document me
+    def convert_hash( value )
+    
+      value.kind_of?( Hash ) ? ParameterHash[ value.collect{ | key, value | [ key, value.kind_of?( Hash ) ? convert_hash( value ) : value ] } ] : value
+
+      #value.class == Hash ? ParameterHash[ value.collect{ | key, value | [ key, value.class == Hash ? convert_hash( value ) : value ] } ] : value
+
+    end
+    
     TDriver::Hooking.hook_methods( self ) if defined?( TDriver::Hooking )
 
   end # ParameterHash
 
   class Parameter
   
-    # private methods
+    # singleton and private methods
     class << self
 
-      public 
-
-      # TODO: document me
-      def instance
+      def new
       
-        # get caller methods file name and line number   
-        file, line = caller.first.split(":")
+        warn_caller "$1:$2 warning: #{ self.to_s } is static class; unable initialize new instance of it"
       
-        warn "#{ file }:#{ line } warning: deprecated method #{ self.name }##{ __method__ }; please use #{ self.name } class static methods instead"
-        
-        self
+        nil
       
       end
-
+      
       # TODO: document me
       def init
 
@@ -209,7 +290,7 @@ module MobyUtil
         # raise exception if "--tdriver_parameters" option found but no filenames defined 
         if capture_elements && @command_line_argument_files.empty? 
         
-          raise ArgumentError, "TDriver parameters command line argument given without a filename"
+          raise ArgumentError, 'TDriver parameters command line argument given without a filename'
         
         end
         
@@ -297,11 +378,11 @@ module MobyUtil
 
         rescue MobyUtil::EmptyFilenameError
 
-          raise $!, "Unable to load parameters XML file due to filename is empty or nil"
+          raise $!, 'Unable to load parameters XML file due to filename is empty or nil'
 
         rescue MobyUtil::FileNotFoundError
 
-          raise $!
+          raise
 
         rescue IOError
 
@@ -324,7 +405,7 @@ module MobyUtil
         return @cache[ xml_hash ] if @cache.has_key?( xml_hash )
 
         # default results 
-        results = MobyUtil::ParameterHash.new
+        results = ParameterHash.new
 
         # go through each element in xml
         xml.xpath( "*" ).each{ | element |
@@ -333,16 +414,16 @@ module MobyUtil
           attributes = element.attributes
 
           # default value
-          value = attributes[ "value" ]
+          value = attributes[ 'value' ]
 
           # generic posix value - overwrites attribute["value"] if found
-          value = attributes[ "posix" ] unless attributes[ "posix" ].nil? if @is_posix
+          value = attributes[ 'posix' ] unless attributes[ 'posix' ].nil? if @is_posix
 
           # platform specific value - overwrites existing value
           value = attributes[ @platform.to_s ] unless attributes[ @platform.to_s ].nil?
 
           # retrieve name attribute
-          name = attributes[ "name" ]
+          name = attributes[ 'name' ]
 
           case element.name
 
@@ -352,10 +433,10 @@ module MobyUtil
               name = element.name
 
               # read xml file from given location if defined - otherwise pass content as is
-              if attributes[ "xml_file" ]
+              if attributes[ 'xml_file' ]
 
                 # merge hash values (value type of hash)
-                value = process_file( attributes[ "xml_file" ] )
+                value = process_file( attributes[ 'xml_file' ] )
 
               else
 
@@ -379,9 +460,9 @@ module MobyUtil
 
                value = { 
                
-                 :plugin => attributes[ "plugin" ].not_blank( "No name defined for fixture with value #{ name }", SyntaxError ),
+                 :plugin => attributes[ 'plugin' ].not_blank( "No name defined for fixture with value #{ name }", SyntaxError ),
                   
-                 :env => attributes[ "env" ]
+                 :env => attributes[ 'env' ]
                  
                }
                
@@ -393,7 +474,7 @@ module MobyUtil
               # return value as is
               #value.not_nil( "No value defined for parameter with name #{ name }", SyntaxError )
 
-              value = "" if value.nil?
+              value = '' if value.nil?
 
             when 'method'
 
@@ -403,7 +484,7 @@ module MobyUtil
               # return value as is
               #value.not_nil( "No value defined for parameter with name #{ name }", SyntaxError )
 
-              value = attributes[ "args" ]
+              value = attributes[ 'args' ]
 
             when 'sut'
 
@@ -417,7 +498,7 @@ module MobyUtil
               @sut_list << name unless @sut_list.include?( name ) 
    
               # retrieve names of used templates 
-              templates = attributes[ "template" ]
+              templates = attributes[ 'template' ]
 
               # empty value by default
               value = ParameterHash.new
@@ -425,7 +506,7 @@ module MobyUtil
               unless templates.blank?
 
                 # retrieve each defined template
-                templates.split(";").each{ | template |
+                templates.split( ';' ).each{ | template |
                 
                   # merge template with current value hash
                   value.recursive_merge!( 
@@ -448,10 +529,10 @@ module MobyUtil
             name = element.name
 
             # read xml file from given location if defined - otherwise pass content as is
-            if attributes[ "xml_file" ]
+            if attributes[ 'xml_file' ]
 
               # merge hash values (value type of hash)
-              value = process_file( attributes[ "xml_file" ] )
+              value = process_file( attributes[ 'xml_file' ] )
 
             else
 
@@ -880,11 +961,97 @@ module MobyUtil
     initialize_class
 
   end # Parameter
+
+end
+
+module MobyUtil
+
+  class ParameterHash
+
+    class << self
+            
+      def new
+      
+        warn_caller "$1:$2 warning: #{ self.to_s } is deprecated; use TDriver::ParameterHash instead"
+      
+        TDriver::ParameterHash.new
+      
+      end
+
+    end # self
   
+  end # ParameterHash
+
+  class Parameter
+  
+    class << self
+            
+      def new
+      
+        warn_caller "$1:$2 warning: #{ self.to_s } is static class; unable initialize new instance of it"
+      
+        nil
+      
+      end
+        
+      def method_missing( id, *args )
+          
+        warn_caller "$1:$2 warning: deprecated method; use TDriver::Parameter##{ id.to_s } instead of MobyUtil::Parameter##{ id.to_s }"
+      
+        TDriver::Parameter.__send__( id, *args ) 
+            
+      end
+
+      # TODO: document me
+      def instance
+      
+        warn_caller "$1:$2 warning: deprecated method #{ self.name }##{ __method__ }; please use #{ self.name } class static methods instead"
+        
+        TDriver::Parameter
+      
+      end
+    
+    end # self
+  
+  end # Parameter
+  
+  class ParameterUserAPI
+  
+    class << self
+
+      def new
+      
+        warn_caller "$1:$2 warning: #{ self.to_s } is static class; unable initialize new instance of it"
+      
+        nil
+      
+      end
+    
+      def method_missing( id, *args )
+      
+        warn_caller "$1:$2 warning: deprecated method; use TDriver::ParameterUserAPI##{ id.to_s } instead of MobyUtil::ParameterUserAPI##{ id.to_s }"
+      
+        TDriver::ParameterUserAPI.__send__( id, *args )
+            
+      end
+
+      # TODO: document me
+      def instance
+
+        warn_caller "$1:$2 warning: deprecated method #{ self.name }##{ __method__ }; please use #{ self.name } class static methods instead"
+
+        TDriver::ParameterUserAPI
+
+      end
+    
+    end # self
+  
+  end # ParameterUserAPI
+
 end # MobyUtil
 
 # set global variable pointing to parameter class
-$parameters = MobyUtil::Parameter
+$parameters = TDriver::Parameter #MobyUtil::Parameter
 
 # set global variable pointing to parameter API class
-$parameters_api = MobyUtil::ParameterUserAPI
+$parameters_api = TDriver::ParameterUserAPI

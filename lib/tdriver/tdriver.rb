@@ -50,7 +50,6 @@ module TDriver
 	# Function to create and (or if already created re-) connect SUT object 
 	# === params
 	# hash:: Defines SUT type, identification attributes etc. 
-	#   :type:: Valid values are :S60 (for Series 60) and :QT (for QT)
 	#   :id:: Valid id that can be matched in tdriver_parameters.xml
 	# === raises
 	# ArgumentError:: Wrong argument Type '%s' (Expected Hash)

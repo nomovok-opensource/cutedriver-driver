@@ -17,107 +17,134 @@
 ## 
 ############################################################################
 
-module MobyUtil
+=begin
+module TDriver
 
   class ParameterUserAPI
 
-    #include Singleton
+    class << self
 
-    # TODO: document me
-    def self.instance
+      # TODO: document me
+      def []=( key, value )
 
-      warn("warning: #{ self.name } is static class, use MobyUtil::ParameterUserAPI#method instead of using instance method")
+        $parameters[ key ] = value
 
-      MobyUtil::ParameterUserAPI
+      end
 
-    end
+      # TODO: document me
+      def []( *args )
 
-    # TODO: document me
-    def self.[]=( key, value )
+        $parameters[ *args ]
 
-      $parameters[ key ] = value
+      end
 
-    end
+      # TODO: document me
+      def fetch( *args, &block )
 
-    # TODO: document me
-    def self.[]( *args )
+        $parameters.fetch( *args, &block )
 
-      $parameters[ *args ]
+      end
 
-    end
+      # TODO: document me
+      def files
 
-    # TODO: document me
-    def self.fetch( *args, &block )
+        $parameters.files
 
-      $parameters.fetch( *args, &block )
+      end
 
-    end
+      # TODO: document me
+      def clear
 
-    # TODO: document me
-    def self.files
+        $parameters.clear
 
-      $parameters.files
+      end
 
-    end
+      # TODO: document me
+      def load_xml( filename )
 
-    # TODO: document me
-    def self.clear
+        $parameters.parse_file( filename )
 
-      $parameters.clear
+      end
 
-    end
+      # TODO: document me
+      def reset( *keys )
 
-    # TODO: document me
-    def self.load_xml( filename )
+        $parameters.reset
 
-      $parameters.parse_file( filename )
+      end
 
-    end
+      # TODO: document me
+      def inspect
 
-    # TODO: document me
-    def self.reset( *keys )
+        $parameters.inspect
 
-      $parameters.reset
+      end
 
-    end
+      # TODO: document me
+      def to_s
 
-    # TODO: document me
-    def self.inspect
+        $parameters.to_s
 
-      $parameters.inspect
+      end
 
-    end
+      # TODO: document me
+      def keys
 
-    # TODO: document me
-    def self.to_s
+        $parameters.keys
 
-      $parameters.to_s
+      end
 
-    end
+      # TODO: document me
+      def values
 
-    # TODO: document me
-    def self.keys
+        $parameters.values
 
-      $parameters.keys
+      end
 
-    end
+      # TODO: document me
+      def configured_suts
+      
+        $parameters.configured_suts
+      
+      end
 
-    # TODO: document me
-    def self.values
-
-      $parameters.values
-
-    end
-
-    # TODO: document me
-    def self.configured_suts
-    
-      $parameters.configured_suts
-    
-    end
+    end # self
 
     TDriver::Hooking.hook_methods( self ) if defined?( TDriver::Hooking )
 
   end # ParameterUserAPI
 
-end # MobyUtil
+end # TDriver
+
+module MobyUtil
+
+  class ParameterUserAPI
+  
+    class << self
+    
+      def method_missing( id, *args )
+      
+        warn_caller "$1:$2 warning: deprecated method, use TDriver::ParameterUserAPI##{ id.to_s } instead of MobyUtil::ParameterUserAPI##{ id.to_s }"
+      
+        TDriver::ParameterUserAPI.__send__( id, *args )
+            
+      end
+
+      # TODO: document me
+      def instance
+
+        warn_caller "$1:$2 warning: #{ self.name } is static class, use TDriver::ParameterUserAPI#method instead of using instance method"
+
+        TDriver::ParameterUserAPI
+
+      end
+    
+    end
+
+    # enable hooking for performance measurement & debug logging
+    TDriver::Hooking.hook_methods( self ) if defined?( TDriver::Hooking )
+  
+  end
+  
+end
+=end
