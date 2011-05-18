@@ -250,9 +250,20 @@ module MobyBehaviour
     # @sut.refresh might have a side effect that changes the @_active instance variable.
     # === raises
     # TestObjectNotFoundError:: if TestObject is not identified within synch timeout.
-    def refresh( refresh_args = {} )
+    def refresh( refresh_args = nil )
 
-      @sut.refresh( refresh_args, @test_object_factory.make_object_search_params( parent, @creation_attributes ) )
+      refresh_args = @creation_attributes if refresh_args.nil?
+
+      refresh_args.check_type Hash, "wrong argument type $1 for #{ application? ? 'application' : 'test object' } refresh attributes (expected $2)"
+
+      @sut.refresh( 
+
+        refresh_args, @test_object_factory.make_object_search_params( parent, @creation_attributes )
+
+      )
+
+      # update childs if required, returns true or false
+      update( xml_data )
 
     end
 
@@ -815,8 +826,14 @@ module MobyBehaviour
 
             end
 
-            #lets refresh if attribute not found on first attempt
-            refresh( refresh_args )
+            #refresh( refresh_args )
+
+            # lets refresh if attribute not found on first attempt
+            @sut.refresh( 
+
+              refresh_args, @test_object_factory.make_object_search_params( parent, @creation_attributes )
+
+            )
 
             # retrieve updated xml data
             _xml_data = xml_data
@@ -824,7 +841,7 @@ module MobyBehaviour
           end
 
           # raise eception if xml data is empty or nil
-          Kernel::raise MobyBase::TestObjectNotInitializedError.new if _xml_data.nil? || _xml_data.to_s.empty?
+          raise MobyBase::TestObjectNotInitializedError.new if _xml_data.nil? || _xml_data.to_s.empty?
 
           begin
           
@@ -833,7 +850,7 @@ module MobyBehaviour
 
           rescue MobyBase::AttributeNotFoundError
           
-            Kernel::raise MobyBase::AttributeNotFoundError, "Could not find attribute #{ name.inspect } for test object of type #{ @type.to_s }"
+            raise MobyBase::AttributeNotFoundError, "Could not find attribute #{ name.inspect } for test object of type #{ @type.to_s }"
 
           end
 

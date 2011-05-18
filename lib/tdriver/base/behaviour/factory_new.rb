@@ -17,7 +17,7 @@
 ## 
 ############################################################################
 
-require 'lib/tdriver'
+#require 'lib/tdriver'
 
 module TDriver
 
@@ -56,6 +56,24 @@ module TDriver
 
       rule.default = [ '*' ]
       
+      case rule[ :name ]
+      
+        when @name
+        
+          true
+        
+        when ['*'] 
+          
+          !( rule[ :object_type ] & @object_type ).empty? && 
+          !( rule[ :input_type ] & @input_type ).empty? &&
+          !( rule[ :env ] & @env ).empty? && 
+          !( rule[ :version ] & @version ).empty? 
+
+        else
+        
+          false
+
+      end      
 
 =begin
       # calculate hash for behaviour rule / hash value will be used to identify similar objects
@@ -104,7 +122,11 @@ module TDriver
       # initialize behaviours factory
       def init( options )
 
-        load_behaviours( options[ :path ] )
+        load_behaviours( 
+        
+          options[ :path ] 
+          
+        )
 
       end
       
@@ -116,13 +138,148 @@ module TDriver
       
       end
 
-      def apply_behaviour( rule )
+      def collect_behaviours( rule )
+
+        cache_key = rule.reject{ | key, value | key == :object }
+
+        if @behaviours_cache.has_key?( cache_key )
+        
+          @behaviours_cache[ cache_key ]
+        
+        else
+        
+          # retrieve enabled plugins from PluginService
+          enabled_plugins = TDriver::PluginService.enabled_plugins 
+
+          @behaviours_cache[ cache_key ] = @behaviours.select do | behaviour |
+
+            # skip if required plugin is not registered or enabled; compare requires array and enabled_plugins array
+            next unless ( behaviour[ 'requires' ] - enabled_plugins ).empty?
+
+            rule.default = [ '*' ]
+            
+            case rule[ :name ]
+            
+              when @name
+              
+                # exact match with name
+                true
+              
+              when ['*'] 
+   
+                # compare rules and behaviour attributes             
+                !( rule[ :object_type ] & behaviour[ 'object_type' ] ).empty? && 
+                !( rule[ :input_type ] & behaviour[ 'input_type' ] ).empty? &&
+                !( rule[ :env ] & behaviour[ 'env' ] ).empty? && 
+                !( rule[ :version ] & behaviour[ 'version' ] ).empty? 
+
+              else
+              
+                false
+
+            end
+
+          end
+
+        end
       
-        @behaviours.each{ | behaviour |
+      end
+
+      def apply_behaviour( rule )
         
-          behaviour.applies_to?( rule )
+        collected_indexes = [] 
         
+        rule[ :object ].instance_variable_get( :@object_behaviours )
+        
+        collect_behaviours( rule ).each do | behaviour |
+
+          begin
+        
+            # retrieve behaviour module
+            behaviour[ 'module' ] = MobyUtil::KernelHelper.get_constant( behaviour[ 'module' ].to_s ) unless behaviour[ 'module' ].kind_of?( Module )
+
+            # extend target object with behaviour module
+            rule[ :object ].extend( behaviour[ 'module' ] )
+
+            # store behaviour indexes
+            collected_indexes << behaviour[ 'index' ]
+
+          rescue NameError
+
+            raise NameError, "Implementation for #{ behaviour[ 'name' ] } behaviour does not exist. (#{ behaviour[ 'module' ] })"
+          
+          rescue
+          
+            raise RuntimeError, "Error while applying #{ behaviour[ 'name' ] } (#{ behaviour[ 'module' ] }) behaviour to target object due to #{ $!.message } (#{ $!.class })"
+          
+          end
+
+        
+        end
+        
+        rule[ :object ].instance_variable_get( :@object_behaviours ).tap{ | indexes | indexes = indexes | collected_indexes }
+                  
+=begin     
+        # retrieve enabled plugins from PluginService
+        enabled_plugins = TDriver::PluginService.enabled_plugins 
+
+        @behaviours.each_with_index{ | behaviour, index |
+        
+          # skip if required plugin is not registered or enabled; compare requires array and enabled_plugins array
+          next unless ( behaviour.requires - enabled_plugins ).empty?
+        
+          if behaviour.applies_to?( rule )
+            
+            begin
+                                     
+             behaviour_module = behaviour.module
+                                     
+              # retrieve behaviour module
+              if behaviour_module.kind_of?( String )
+                behaviour_module = behaviour.instance_variable_set(:@module, MobyUtil::KernelHelper.get_constant( behaviour.module )) 
+              end
+
+              # extend target object with behaviour module
+              rule[ :object ].extend( behaviour_module )
+          
+            rescue NameError
+
+              raise NameError, "Implementation for #{ behaviour.name } behaviour does not exist. (#{ behaviour.module })"
+            
+            rescue
+            
+              raise RuntimeError, "Error while applying #{ behaviour.name } (#{ behaviour.module }) behaviour to target object due to #{ $!.message } (#{ $!.class })"
+            
+            end
+
+# new
+#MobyBase::BehaviourFactory::apply_behaviour!                                          631      2.25980600      2.21837500    3.178%      0.00358131
+
+# old
+#MobyBase::BehaviourFactory::apply_behaviour!                                          631      2.27668800      2.23749700    3.178%      0.00360806
+#MobyBase::BehaviourFactory::apply_behaviour!                                          631      0.87363100      0.77245300    1.131%      0.00138452
+#MobyBase::BehaviourFactory::apply_behaviour!                                          631      0.51659900      0.48817000    0.720%      0.00081870
+#MobyBase::BehaviourFactory::apply_behaviour!                                          631      0.73310700      0.70426600    1.030%      0.00116182
+#MobyBase::BehaviourFactory::apply_behaviour!                                          631      0.58667000      0.55826300    0.824%      0.00092975
+
+#=begin           
+            # add behaviour information to test object
+            rule[ :object ].instance_variable_get( :@object_behaviours ).tap{ | indexes |
+            
+              indexes.push( index ) unless indexes.include?( index )
+            
+            }
+#=end
+      
+            # add behaviour information to test object
+            indexes = rule[ :object ].instance_variable_get( :@object_behaviours )
+
+            indexes.push( index ) unless indexes.include?( index )
+              
+          end # if applies.to?
+          
         }
+=end
       
       end
 
@@ -133,6 +290,8 @@ module TDriver
 
         # behaviours container
         @behaviours = []
+        
+        @behaviours_cache = {}
             
       end
 
@@ -141,7 +300,7 @@ module TDriver
 
         # behaviour xml files path
         Dir.glob( File.join( path, '*.xml' ) ){ | filename |
-      
+ 
           begin
       
             # read file contents
@@ -183,8 +342,13 @@ module TDriver
                 module_name.not_empty "behaviour #{ attributes[ "name" ].inspect } does not have module name defined or is empty", RuntimeError
                 
                 # store behaviour 
-                @behaviours << Behaviour.new( 
+                #@behaviours << Behaviour.new( 
 
+                # store behaviour 
+                @behaviours << { #Behaviour.new( 
+
+                  "index"       => @behaviours.count,
+    
                   "name"        => attributes[ 'name'        ],
                   "object_type" => attributes[ 'object_type' ].split(';'),
                   "input_type"  => attributes[ 'input_type'  ].split(';'),
@@ -209,7 +373,9 @@ module TDriver
                     }
                   ]
                 
-                )
+                }
+                
+                # )
 
               end # behaviour.each
 
@@ -241,4 +407,3 @@ module TDriver
   end
   
 end
-

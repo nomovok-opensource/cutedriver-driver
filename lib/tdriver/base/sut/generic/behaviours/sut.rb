@@ -1333,9 +1333,17 @@ module MobyBehaviour
 
         }
 
-      end
+        @update_childs = false
 
-      @update_childs = false
+        # childs were updated
+        true
+
+      else
+
+        # nothing was updated
+        false
+
+      end
 
     end
 
@@ -1344,7 +1352,7 @@ module MobyBehaviour
 
       refresh_ui_dump( refresh_args, creation_attributes )
 
-      # update childs only if ui state is new
+      # update childs if required, returns true or false
       update_childs
 
     end
@@ -1456,13 +1464,15 @@ module MobyBehaviour
           :tries => @refresh_tries,
           :interval => @refresh_interval,
           :unless => [ MobyBase::ControllerNotFoundError, MobyBase::CommandNotFoundError, MobyBase::ApplicationNotAvailableError ]
-        ) {
+        ){
 
           #use find_object if set on and the method exists
           if use_find_objects
 
             # retrieve new ui dump xml and crc
-            new_xml_data, crc = find_object( refresh_arguments, creation_attributes )
+            new_xml_data, crc = find_object( refresh_arguments, creation_attributes, @xml_data_crc )
+
+            crc = @xml_data_crc if new_xml_data.empty?
 
           else
 
@@ -1475,11 +1485,14 @@ module MobyBehaviour
                   :application_name => refresh_args[ :FullName ] || refresh_args[ :name ],
                   :application_uid => refresh_args[ :id ],
                   :sut => self,
-                  :refresh_arguments => refresh_args
+                  :refresh_arguments => refresh_args,
+                  :checksum => @xml_data_crc
                 }
               )
             
             )
+
+            crc = @xml_data_crc if new_xml_data.empty?
 
           end
 
