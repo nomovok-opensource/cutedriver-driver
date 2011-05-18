@@ -20,23 +20,9 @@
 # Parameter related errors
 require File.expand_path( File.join( File.dirname( __FILE__ ), 'error.rb' ) )
 
+# parameters end user api
 require File.expand_path( File.join( File.dirname( __FILE__ ), 'parameter_user_api.rb' ) )
 
+# parameters related classes
 require File.expand_path( File.join( File.dirname( __FILE__ ), 'parameter_new.rb' ) )
 
-=begin
-# Parameter hash class 
-require File.expand_path( File.join( File.dirname( __FILE__ ), 'parameter_hash.rb' ) )
-
-# Parameter API etc
-require File.expand_path( File.join( File.dirname( __FILE__ ), 'parameter_template.rb' ) )
-
-# Parameter API etc
-require File.expand_path( File.join( File.dirname( __FILE__ ), 'parameter_xml.rb' ) )
-
-# Parameter end user API etc
-require File.expand_path( File.join( File.dirname( __FILE__ ), 'parameter_user_api.rb' ) )
-
-# Parameter API etc
-require File.expand_path( File.join( File.dirname( __FILE__ ), 'parameter.rb' ) )
-=end
