@@ -17,9 +17,6 @@
 ##
 ############################################################################
 
-
-
-
 module TDriverReportCreator
   include TDriverErrorRecovery
   include TDriverCustomErrorRecovery
@@ -82,7 +79,7 @@ module TDriverReportCreator
         puts 'Grouping results by result and name...'
         $tdriver_reporter.group_results_by_test_case()
         puts 'Tests grouped by result and name...'
-        if MobyUtil::Parameter[ :create_run_table_csv, false ]=='true'
+        if $parameters[ :create_run_table_csv, false ]=='true'
           puts 'Generating CSV...'
           $tdriver_reporter.create_csv
           puts 'CSV generated...'
@@ -96,7 +93,7 @@ module TDriverReportCreator
         puts 'Report generated to:'
         puts $tdriver_reporter.report_folder()
         clean_video_files
-        ending_test_set_run if MobyUtil::Parameter[ :custom_error_recovery_module, nil ]!=nil        
+        ending_test_set_run if $parameters[ :custom_error_recovery_module, nil ]!=nil        
         if $tdriver_reporter.total_failed.to_i > 0
           Kernel.exit(1)
         elsif $tdriver_reporter.total_run.to_i == 0
@@ -108,7 +105,7 @@ module TDriverReportCreator
     else
       initialize_error_recovery
     end
-    starting_test_set_run if MobyUtil::Parameter[ :custom_error_recovery_module, nil ]!=nil
+    starting_test_set_run if $parameters[ :custom_error_recovery_module, nil ]!=nil
   end
   #This method registers a connection error
   #
@@ -122,7 +119,7 @@ module TDriverReportCreator
       $tdriver_reporter.set_total_device_resets(1)
       $new_test_case.set_test_case_reboots(1) if $new_test_case!=nil
     end
-    error_in_connection if MobyUtil::Parameter[ :custom_error_recovery_module, nil ]!=nil
+    error_in_connection if $parameters[ :custom_error_recovery_module, nil ]!=nil
   end
   #This method returns the group where the test case belongs
   #
@@ -133,7 +130,7 @@ module TDriverReportCreator
   # === raises
   def extract_group_from_test_case_name(test_case_name)
     found_in_group='not_in_any_user_defined_group'
-    groups=MobyUtil::Parameter[ :report_groups, nil ]
+    groups=$parameters[ :report_groups, nil ]
     unless groups == nil
       groups_ar=groups.split('|')
       groups_ar.each do |group|
@@ -197,7 +194,7 @@ module TDriverReportCreator
     $tdriver_reporter.set_total_run(1)
     $tdriver_reporter.update_summary_page('inprogress')
     $tdriver_reporter.update_environment_page()
-    if MobyUtil::Parameter[ :realtime_status_page_update, false ]=='true'
+    if $parameters[ :realtime_status_page_update, false ]=='true'
       if $run_status_thread_active == false
         $run_status_thread_active=true
         Thread.new do
@@ -280,7 +277,7 @@ module TDriverReportCreator
 
     $new_test_case.read_file_monitor_settings()
     
-    $new_test_case.clean_crash_files_from_sut() if $test_case_run_index==1 && MobyUtil::Parameter[ :report_crash_file_monitor_crash_file_cleanup, false ]=='true'
+    $new_test_case.clean_crash_files_from_sut() if $test_case_run_index==1 && $parameters[ :report_crash_file_monitor_crash_file_cleanup, false ]=='true'
 
     amount_of_crash_files=$new_test_case.check_if_crash_files_exist()
     
@@ -299,7 +296,7 @@ module TDriverReportCreator
       $new_test_case.set_test_case_crash_files(amount_of_files.to_i)
     end
 
-    if MobyUtil::Parameter[ :report_monitor_memory, 'false']=='true'
+    if $parameters[ :report_monitor_memory, 'false']=='true'
       begin
         MobyBase::SUTFactory.instance.connected_suts.each do |sut_id, sut_attributes|
           $new_test_case.set_tc_memory_amount_total($tdriver_reporter.get_sut_total_memory(sut_id,sut_attributes))
@@ -313,7 +310,7 @@ module TDriverReportCreator
     logging_enabled = MobyUtil::Logger.instance.enabled
     begin
 
-      if MobyUtil::Parameter[:report_video, "false"] != "false"
+      if $parameters[:report_video, "false"] != "false"
         # copy previous recording
         MobyUtil::Logger.instance.enabled=false
 
@@ -336,7 +333,7 @@ module TDriverReportCreator
       MobyUtil::Logger.instance.enabled=logging_enabled
     end
     update_test_case_user_data()
-    starting_test_case(test_case, MobyBase::SUTFactory.instance.connected_suts) if MobyUtil::Parameter[ :custom_error_recovery_module, nil ]!=nil
+    starting_test_case(test_case, MobyBase::SUTFactory.instance.connected_suts) if $parameters[ :custom_error_recovery_module, nil ]!=nil
   end
   #This method updates the current test case execution log
   #
@@ -358,8 +355,8 @@ module TDriverReportCreator
       else
         $new_test_case.set_test_case_execution_log(details,true)
       end
-      updating_test_case_details(details) if MobyUtil::Parameter[ :custom_error_recovery_module, nil ]!=nil
-      if  MobyUtil::Parameter[ :report_monitor_memory, 'false']=='true'
+      updating_test_case_details(details) if $parameters[ :custom_error_recovery_module, nil ]!=nil
+      if  $parameters[ :report_monitor_memory, 'false']=='true'
         begin
           start_memory=$new_test_case.tc_memory_amount_start()
           if start_memory=='-'
@@ -407,7 +404,7 @@ module TDriverReportCreator
       if $new_test_case.video_recording?
         $new_test_case.copy_video_capture()
       end
-      error_in_test_case(MobyBase::SUTFactory.instance.connected_suts) if MobyUtil::Parameter[ :custom_error_recovery_module, nil ]!=nil
+      error_in_test_case(MobyBase::SUTFactory.instance.connected_suts) if $parameters[ :custom_error_recovery_module, nil ]!=nil
       begin
         
           error_in_connection_detected
@@ -452,7 +449,7 @@ module TDriverReportCreator
   # === raises
   def update_test_case_behaviour_log()
     begin
-      if MobyUtil::Parameter[:behaviour_logging] == 'true'
+      if $parameters[:behaviour_logging] == 'true'
         if $new_test_case.test_case_logging_level.to_i > 0
           $tdriver_report_log_output.string.each do |line|
             $new_test_case.set_test_case_behaviour_log(line,nil)
@@ -515,7 +512,7 @@ module TDriverReportCreator
     update_test_case_user_data()
     if $new_test_case != nil
       calculate_execution_footprint_data_for_test_case
-      if MobyUtil::Parameter[:report_crash_file_monitor] == 'true'
+      if $parameters[:report_crash_file_monitor] == 'true'
         found_crash_files = $new_test_case.check_if_crash_files_exist()
         if found_crash_files.to_i > 0
           $tdriver_reporter.set_total_crash_files(found_crash_files.to_i)
@@ -523,12 +520,12 @@ module TDriverReportCreator
           status='failed'
         end
       end
-      if MobyUtil::Parameter[:report_file_monitor] == 'true'
+      if $parameters[:report_file_monitor] == 'true'
         found_files = $new_test_case.check_if_files_exist()
         if found_files.to_i > 0
           $tdriver_reporter.set_total_crash_files(found_files.to_i)
           $new_test_case.set_test_case_crash_files(found_files.to_i)
-          status='failed' if MobyUtil::Parameter[:report_fail_test_if_files_found]=='true'
+          status='failed' if $parameters[:report_fail_test_if_files_found]=='true'
         end
       end
 
@@ -551,7 +548,7 @@ module TDriverReportCreator
       if(status=='passed')
 
         no_activity_videos = ""
-        if MobyUtil::Parameter[:report_check_device_active, 'false']=='true'
+        if $parameters[:report_check_device_active, 'false']=='true'
           if temp_rec
             no_activity_videos = $new_test_case.target_video_alive
           end
@@ -581,9 +578,9 @@ module TDriverReportCreator
       end
       $new_test_case.set_test_case_end_time(Time.now)
       update_test_case_behaviour_log()
-      update_test_case_memory_usage() if MobyUtil::Parameter[ :report_monitor_memory, 'false']=='true'
+      update_test_case_memory_usage() if $parameters[ :report_monitor_memory, 'false']=='true'
       execution_log=$new_test_case.test_case_execution_log
-      if MobyUtil::Parameter[:report_trace_capture_only_in_failed_case, 'true']!='true'
+      if $parameters[:report_trace_capture_only_in_failed_case, 'true']!='true'
         $new_test_case.capture_trace_files()
       else
         if status=='failed'
@@ -599,13 +596,13 @@ module TDriverReportCreator
       update_run($new_test_case.test_case_name.to_s,status,$new_test_case.test_case_reboots,$new_test_case.test_case_crash_files,execution_log)
       
       $new_junit_xml_results.add_test_result(status, $new_test_case.test_case_start_time, $new_test_case.test_case_end_time)
-      tdriver_update_sequential_fails( status ) if MobyUtil::Parameter[ :runner_sequence_skip, "false" ] == "true"   
+      tdriver_update_sequential_fails( status ) if $parameters[ :runner_sequence_skip, "false" ] == "true"   
       
       $new_test_case=nil
       execution_log=nil
 
     end
-    ending_test_case(status, MobyBase::SUTFactory.instance.connected_suts) if MobyUtil::Parameter[ :custom_error_recovery_module, nil ]!=nil
+    ending_test_case(status, MobyBase::SUTFactory.instance.connected_suts) if $parameters[ :custom_error_recovery_module, nil ]!=nil
   end
   def add_report_group(value)
     $tdriver_reporter.set_generic_reporting_groups(value)
@@ -633,10 +630,10 @@ module TDriverReportCreator
 
   def each_video_device
 
-    if MobyUtil::Parameter[:report_video, nil] != nil
+    if $parameters[:report_video, nil] != nil
 
       device_index = 0
-      MobyUtil::Parameter[:report_video].split("|").each do | video_device |
+      $parameters[:report_video].split("|").each do | video_device |
         if !video_device.strip.empty?
           yield video_device.strip, device_index.to_s
           device_index += 1

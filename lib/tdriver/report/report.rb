@@ -53,7 +53,7 @@ require File.expand_path( File.join( File.dirname( __FILE__ ), 'report_data_pres
 
 unless $parameters[ :custom_error_recovery_module, nil ].nil?
 
-  require MobyUtil::Parameter[ :custom_error_recovery_module ]
+  require  $parameters[ :custom_error_recovery_module ]
 
 end
 

@@ -39,9 +39,9 @@ class ReportingGroups
     @main_not_run=0
     @group_test_case_arr=Array.new(test_cases_array)
     @grouping=grouping
-    @pass_statuses=MobyUtil::Parameter[ :report_passed_statuses, "passed" ].split('|')
-    @fail_statuses=MobyUtil::Parameter[ :report_failed_statuses, "failed" ].split('|')
-    @not_run_statuses=MobyUtil::Parameter[ :report_not_run_statuses, "not run" ].split('|')
+    @pass_statuses= $parameters[ :report_passed_statuses, "passed" ].split('|')
+    @fail_statuses= $parameters[ :report_failed_statuses, "failed" ].split('|')
+    @not_run_statuses= $parameters[ :report_not_run_statuses, "not run" ].split('|')
   end
   def clean_reporting_groups(report_group_string)
     cleaned_group_string=''

@@ -40,10 +40,10 @@ class TDriverReportCrashFileCapture
   end
 
   def read_crash_monitor_settings()
-    @crash_file_locations=return_settings_value_array(MobyUtil::Parameter[ :report_crash_file_locations, nil ])
-    @crash_file_suts=return_settings_value_array(MobyUtil::Parameter[ :report_crash_file_monitored_sut_ids, nil ])
-    @crash_file_names=return_settings_value_array(MobyUtil::Parameter[ :report_crash_file_names, nil ])
-    @monitor_crash_files = MobyUtil::Parameter[ :report_crash_file_monitor, 'false' ]
+    @crash_file_locations=return_settings_value_array( $parameters[ :report_crash_file_locations, nil ])
+    @crash_file_suts=return_settings_value_array( $parameters[ :report_crash_file_monitored_sut_ids, nil ])
+    @crash_file_names=return_settings_value_array( $parameters[ :report_crash_file_names, nil ])
+    @monitor_crash_files =  $parameters[ :report_crash_file_monitor, 'false' ]
   end
 
   def clean_crash_files_from_sut()

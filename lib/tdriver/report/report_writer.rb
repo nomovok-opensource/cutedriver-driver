@@ -785,7 +785,7 @@ display: block;
       '<tr><td><b>Device reboots</b></td><td>'<<
       reboots.to_s <<
       '</td></tr>'
-    if MobyUtil::Parameter[ :report_generate_rdoc, 'false' ]=='true' && test_case_name.include?('test_')
+    if  $parameters[ :report_generate_rdoc, 'false' ]=='true' && test_case_name.include?('test_')
       html_body << '<tr>' <<
         '<td style="font-weight: 700">'<<
         'RDoc</td>'<<
@@ -1126,7 +1126,7 @@ display: block;
       '<td><b>Total device resets</b></td>'<<
       '<td>'+total_device_resets.to_s+'</td>'<<
       '</tr>'
-    if MobyUtil::Parameter[ :report_generate_rdoc, 'false' ]=='true'
+    if  $parameters[ :report_generate_rdoc, 'false' ]=='true'
       html_body << '<tr>'<<
         '<td><a href="doc/index.html"><b>Generated RDoc from</b></a></td>'<<
         '<td>'+Dir.pwd+'</td>'<<
