@@ -468,6 +468,7 @@ display: block;
       m, s = seconds.divmod(60)
       duration_str="#{m}m#{'%.3f' % s}s"
     end
+    duration_str='0' if duration_str==nil
     duration_str
   end
 
