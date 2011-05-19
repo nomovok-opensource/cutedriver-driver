@@ -22,7 +22,7 @@ class Hash
 
   def not_empty( message = "Hash must not be empty", exception = ArgumentError )
 
-    raise exception, message if empty? 
+    raise exception, message, caller if empty? 
 
     self
 
@@ -55,7 +55,7 @@ class Hash
       [ verbose_keys_list.join ].each_with_index{ | param, index | message.gsub!( "$#{ index + 1 }", param.to_s ) }
 
       # raise the exception
-      raise ArgumentError, message
+      raise ArgumentError, message, caller
 
     end
 
@@ -68,7 +68,7 @@ class Hash
   
     fetch( key ){
     
-      raise ArgumentError, message.gsub!( "$1", key.inspect )
+      raise ArgumentError, message.gsub!( "$1", key.inspect ), caller
     
     }
   
@@ -98,7 +98,7 @@ class Hash
       [ verbose_keys_list.join ].each_with_index{ | param, index | message.gsub!( "$#{ index + 1 }", param.to_s ) }
 
       # raise the exception
-      raise ArgumentError, message
+      raise ArgumentError, message, caller
 
     end
 
@@ -274,7 +274,7 @@ class Hash
         
       else
         
-        raise IndexError, "key #{ key.inspect } not found"
+        raise IndexError, "key #{ key.inspect } not found", caller
       
       end
           

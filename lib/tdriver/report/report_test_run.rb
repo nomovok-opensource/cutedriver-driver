@@ -91,14 +91,14 @@ module TDriverReportCreator
       @total_received_data=Hash.new
       @total_sent_data=Hash.new
       $result_storage_in_use=false
-      @pages=MobyUtil::Parameter[ :report_results_per_page, 50]
-      @duration_graph=MobyUtil::Parameter[ :report_generate_duration_graph, false]
-      @pass_statuses=MobyUtil::Parameter[ :report_passed_statuses, "passed" ].split('|')
-      @fail_statuses=MobyUtil::Parameter[ :report_failed_statuses, "failed" ].split('|')
-      @not_run_statuses=MobyUtil::Parameter[ :report_not_run_statuses, "not run" ].split('|')
-      @report_editable=MobyUtil::Parameter[ :report_editable, "false" ]
-      @report_short_folders=MobyUtil::Parameter[ :report_short_folders, 'false']
-      @report_exclude_passed_cases=MobyUtil::Parameter[ :report_exclude_passed_cases, 'false' ]
+      @pages=$parameters[ :report_results_per_page, 50]
+      @duration_graph=$parameters[ :report_generate_duration_graph, false]
+      @pass_statuses=$parameters[ :report_passed_statuses, "passed" ].split('|')
+      @fail_statuses=$parameters[ :report_failed_statuses, "failed" ].split('|')
+      @not_run_statuses=$parameters[ :report_not_run_statuses, "not run" ].split('|')
+      @report_editable=$parameters[ :report_editable, "false" ]
+      @report_short_folders=$parameters[ :report_short_folders, 'false']
+      @report_exclude_passed_cases=$parameters[ :report_exclude_passed_cases, 'false' ]
       @test_fails=Hash.new(0)  # return 0 by default if key not found
 
 
@@ -408,7 +408,7 @@ module TDriverReportCreator
     # nil
     # === raises
     def get_reporting_groups()
-      @reporting_groups=MobyUtil::Parameter[ :report_groups, nil ]
+      @reporting_groups=$parameters[ :report_groups, nil ]
       if @reporting_groups==nil
         @reporting_groups=@generic_reporting_groups
       end
@@ -465,9 +465,9 @@ module TDriverReportCreator
       t = Time.now
       b_fixed_report_folder=false
       @start_time=t
-      @reporter_base_folder = MobyUtil::Parameter[ :report_outputter_path, 'tdriver_reports/' ]
-      if MobyUtil::Parameter[ :report_outputter_folder, nil ] != nil
-        @report_folder=@reporter_base_folder+MobyUtil::Parameter[ :report_outputter_folder, nil ]
+      @reporter_base_folder = $parameters[ :report_outputter_path, 'tdriver_reports/' ]
+      if $parameters[ :report_outputter_folder, nil ] != nil
+        @report_folder=@reporter_base_folder+$parameters[ :report_outputter_folder, nil ]
         b_fixed_report_folder=true
       else
         @report_folder=@reporter_base_folder+"test_run_"+t.strftime( "%Y%m%d%H%M%S" )
@@ -500,8 +500,8 @@ module TDriverReportCreator
         #write_page_end(@report_folder+'/cases/tdriver_log_index.html')
         write_page_start(@report_folder+'/cases/statistics_index.html','Statistics')
         write_page_end(@report_folder+'/cases/statistics_index.html')
-        if MobyUtil::Parameter[ :report_generate_rdoc, 'false' ]=='true'
-          if MobyUtil::Parameter[ :ats4_error_recovery_enabled, 'false' ]=='true'
+        if $parameters[ :report_generate_rdoc, 'false' ]=='true'
+          if $parameters[ :ats4_error_recovery_enabled, 'false' ]=='true'
             ats4_drop_folder_arr=@report_folder.split('ats4-results')
             system("rdoc --include #{ats4_drop_folder_arr[0]}/* --exclude test_run --op #{@report_folder}/doc")
             puts "RDoc generated from test folder: #{ats4_drop_folder_arr[0]}/*"
@@ -592,7 +592,7 @@ module TDriverReportCreator
           FileUtils.cp_r '/etc/tdriver/defaults', @report_folder+'/environment' if File.directory?('/etc/tdriver/defaults')
           FileUtils.copy('/etc/tdriver/tdriver_parameters.xml',@report_folder+'/environment/tdriver_parameters.xml') if File.file?('/etc/tdriver/tdriver_parameters.xml')
         end
-        if MobyUtil::Parameter[ :report_monitor_memory, 'false']=='true'
+        if $parameters[ :report_monitor_memory, 'false']=='true'
           MobyBase::SUTFactory.instance.connected_suts.each do |sut_id, sut_attributes|
             if sut_attributes[:is_connected]
               @memory_amount_start=get_sut_used_memory(sut_id, sut_attributes) if @memory_amount_start==nil || @memory_amount_start=='-'
@@ -604,7 +604,7 @@ module TDriverReportCreator
             end
           end
         end
-        if MobyUtil::Parameter[ :report_collect_environment_data_from_sut, 'true']=='true'
+        if $parameters[ :report_collect_environment_data_from_sut, 'true']=='true'
           MobyBase::SUTFactory.instance.connected_suts.each do |sut_id, sut_attributes|
             begin
               if sut_attributes[:is_connected]
@@ -613,9 +613,9 @@ module TDriverReportCreator
                 @memory_amount_start=get_sut_used_memory(sut_id, sut_attributes) if @memory_amount_start==nil || @memory_amount_start=='-'
                 @memory_amount_end=get_sut_used_memory(sut_id, sut_attributes)
                 @memory_amount_total=get_sut_total_memory(sut_id, sut_attributes)
-                product=MobyUtil::Parameter[sut_id][:product]
-                language=MobyUtil::Parameter[sut_id][:language]
-                loc=MobyUtil::Parameter[sut_id][:localisation_server_database_tablename]
+                product=$parameters[sut_id][:product]
+                language=$parameters[sut_id][:language]
+                loc=$parameters[sut_id][:localisation_server_database_tablename]
               end
               @memory_amount_start='-' if @memory_amount_start==nil
               @memory_amount_end='-' if @memory_amount_end==nil
@@ -668,10 +668,10 @@ module TDriverReportCreator
       MobyUtil::Logger.instance.enabled=false
       lang_version='-'
       begin
-        if MobyUtil::Parameter[sut_id][:type]=='S60' || MobyUtil::Parameter[sut_id][:type]=='Symbian'
+        if $parameters[sut_id][:type]=='S60' || $parameters[sut_id][:type]=='Symbian'
           lang_version=sut_attributes[:sut].sysinfo( :Lang_version )
         end
-        if MobyUtil::Parameter[sut_id][:type]=='QT'
+        if $parameters[sut_id][:type]=='QT'
           if /win/ =~ MobyUtil::EnvironmentHelper.ruby_platform
             lang_version=0
           else
@@ -680,7 +680,7 @@ module TDriverReportCreator
         end
       rescue
       ensure
-        if MobyUtil::Parameter[ :logging_level, 0 ].to_i > 0
+        if $parameters[ :logging_level, 0 ].to_i > 0
           MobyUtil::Logger.instance.enabled=true
         else
           MobyUtil::Logger.instance.enabled=false
@@ -699,10 +699,10 @@ module TDriverReportCreator
       MobyUtil::Logger.instance.enabled=false
       sw_version='-'
       begin
-        if MobyUtil::Parameter[sut_id][:type]=='S60' || MobyUtil::Parameter[sut_id][:type]=='Symbian'
+        if $parameters[sut_id][:type]=='S60' || $parameters[sut_id][:type]=='Symbian'
           sw_version=sut_attributes[:sut].sysinfo( :Sw_version )
         end
-        if MobyUtil::Parameter[sut_id][:type]=='QT'
+        if $parameters[sut_id][:type]=='QT'
           if /win/ =~ MobyUtil::EnvironmentHelper.ruby_platform
             sw_version=0
           else
@@ -711,7 +711,7 @@ module TDriverReportCreator
         end
       rescue
       ensure
-        if MobyUtil::Parameter[ :logging_level, 0 ].to_i > 0
+        if $parameters[ :logging_level, 0 ].to_i > 0
           MobyUtil::Logger.instance.enabled=true
         else
           MobyUtil::Logger.instance.enabled=false
@@ -730,10 +730,10 @@ module TDriverReportCreator
       MobyUtil::Logger.instance.enabled=false
       memory=0
       begin
-        if MobyUtil::Parameter[sut_id][:type]=='S60' || MobyUtil::Parameter[sut_id][:type]=='Symbian'
+        if $parameters[sut_id][:type]=='S60' || $parameters[sut_id][:type]=='Symbian'
           memory=sut_attributes[:sut].sysinfo( :Get_used_ram )
         end
-        if MobyUtil::Parameter[sut_id][:type]=='QT'
+        if $parameters[sut_id][:type]=='QT'
           if /win/ =~ MobyUtil::EnvironmentHelper.ruby_platform
             memory=0
           else
@@ -742,7 +742,7 @@ module TDriverReportCreator
         end
       rescue
       ensure
-        if MobyUtil::Parameter[ :logging_level, 0 ].to_i > 0
+        if $parameters[ :logging_level, 0 ].to_i > 0
           MobyUtil::Logger.instance.enabled=true
         else
           MobyUtil::Logger.instance.enabled=false
@@ -762,10 +762,10 @@ module TDriverReportCreator
       MobyUtil::Logger.instance.enabled=false
       memory=0
       begin
-        if MobyUtil::Parameter[sut_id][:type]=='S60' || MobyUtil::Parameter[sut_id][:type]=='Symbian'
+        if $parameters[sut_id][:type]=='S60' || $parameters[sut_id][:type]=='Symbian'
           memory=sut_attributes[:sut].sysinfo( :Get_total_ram )
         end
-        if MobyUtil::Parameter[sut_id][:type]=='QT'
+        if $parameters[sut_id][:type]=='QT'
           if /win/ =~ MobyUtil::EnvironmentHelper.ruby_platform
             memory=0
           else
@@ -774,7 +774,7 @@ module TDriverReportCreator
         end
       rescue
       ensure
-        if MobyUtil::Parameter[ :logging_level, 0 ].to_i > 0
+        if $parameters[ :logging_level, 0 ].to_i > 0
           MobyUtil::Logger.instance.enabled=true
         else
           MobyUtil::Logger.instance.enabled=false
@@ -1212,7 +1212,7 @@ module TDriverReportCreator
     # nil
     # === raises
     def disconnect_connected_devices()
-      if MobyUtil::Parameter[ :report_disconnect_connected_devices, false ] == 'true'
+      if $parameters[ :report_disconnect_connected_devices, false ] == 'true'
         MobyBase::SUTFactory.instance.connected_suts.each do |sut_id, sut_attributes|
           sut_attributes[:sut].disconnect() if sut_attributes[:is_connected]
         end

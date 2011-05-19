@@ -22,10 +22,10 @@ class ReportingStatistics
   def initialize(test_cases_array, summary=nil)
     @all_statuses=Array.new
     @group_test_case_arr=Array.new(test_cases_array)
-    @pass_statuses=MobyUtil::Parameter[ :report_passed_statuses, "passed" ].split('|')
-    @fail_statuses=MobyUtil::Parameter[ :report_failed_statuses, "failed" ].split('|')
-    @not_run_statuses=MobyUtil::Parameter[ :report_not_run_statuses, "not run" ].split('|')
-    @test_results_per_page=MobyUtil::Parameter[ :report_results_per_page, 50]
+    @pass_statuses= $parameters[ :report_passed_statuses, "passed" ].split('|')
+    @fail_statuses= $parameters[ :report_failed_statuses, "failed" ].split('|')
+    @not_run_statuses= $parameters[ :report_not_run_statuses, "not run" ].split('|')
+    @test_results_per_page= $parameters[ :report_results_per_page, 50]
     @statistics_arr=Array.new
     @total_statistics_arr=Array.new
     @summary=summary

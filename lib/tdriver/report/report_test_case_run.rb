@@ -107,15 +107,15 @@ module TDriverReportCreator
       @test_case_data_sent_at_end=Hash.new
       @test_case_data_received_at_start=Hash.new
       @test_case_data_received_at_end=Hash.new
-      @pass_statuses=MobyUtil::Parameter[ :report_passed_statuses, "passed" ].split('|')
-      @fail_statuses=MobyUtil::Parameter[ :report_failed_statuses, "failed" ].split('|')
-      @not_run_statuses=MobyUtil::Parameter[ :report_not_run_statuses, "not run" ].split('|')
-      @test_case_logging_level = MobyUtil::Parameter[ :logging_level, nil ]
-      @trace_directory=MobyUtil::Parameter[ :report_trace_folder, nil]
-      @report_short_folders=MobyUtil::Parameter[ :report_short_folders, 'false']
+      @pass_statuses= $parameters[ :report_passed_statuses, "passed" ].split('|')
+      @fail_statuses= $parameters[ :report_failed_statuses, "failed" ].split('|')
+      @not_run_statuses= $parameters[ :report_not_run_statuses, "not run" ].split('|')
+      @test_case_logging_level =  $parameters[ :logging_level, nil ]
+      @trace_directory= $parameters[ :report_trace_folder, nil]
+      @report_short_folders= $parameters[ :report_short_folders, 'false']
       $tdriver_report_log_output = StringIO.new ""
       begin
-        if MobyUtil::Parameter[:behaviour_logging] == 'true'
+        if  $parameters[:behaviour_logging] == 'true'
           if @test_case_logging_level.to_i > 0
             logger_instance = MobyUtil::Logger.instance.get_logger( 'TDriver' )
             begin
@@ -340,17 +340,17 @@ module TDriverReportCreator
       tc_video_fps = 30
 
       begin
-        tc_video_width = MobyUtil::Parameter[ :report_video_width ].to_i
+        tc_video_width =  $parameters[ :report_video_width ].to_i
       rescue
         # parameter not loaded, do nothing
       end
       begin
-        tc_video_height = MobyUtil::Parameter[ :report_video_height ].to_i
+        tc_video_height =  $parameters[ :report_video_height ].to_i
       rescue
         # parameter not loaded, do nothing
       end
       begin
-        tc_video_fps = MobyUtil::Parameter[ :report_video_fps ].to_i
+        tc_video_fps =  $parameters[ :report_video_fps ].to_i
       rescue
         # parameter not loaded, do nothing
       end
@@ -385,9 +385,9 @@ module TDriverReportCreator
       ret = ""
       each_video_device do | video_device, device_index |
 
-        check_fps = MobyUtil::Parameter[:report_activity_fps, '3']
-        check_frame_min = MobyUtil::Parameter[:report_activity_frame_treshold, '8']
-        check_video_min = MobyUtil::Parameter[:report_activity_video_treshold, '29']
+        check_fps =  $parameters[:report_activity_fps, '3']
+        check_frame_min =  $parameters[:report_activity_frame_treshold, '8']
+        check_video_min =  $parameters[:report_activity_video_treshold, '29']
 
         ret_n = MobyUtil.video_alive? "cam_" + device_index + "_" + @tc_video_filename, check_fps.to_f, check_frame_min.to_f, check_video_min.to_f, false
 
@@ -583,7 +583,7 @@ module TDriverReportCreator
         @capture_screen_error="Unable to capture state: " + e.message
         self.set_test_case_execution_log(@capture_screen_error.to_s)
       ensure
-        if MobyUtil::Parameter[ :logging_level, 0 ].to_i > 0
+        if  $parameters[ :logging_level, 0 ].to_i > 0
           MobyUtil::Logger.instance.enabled=true
         else
           MobyUtil::Logger.instance.enabled=false
@@ -599,8 +599,8 @@ module TDriverReportCreator
     # nil
     # === raises
     def capture_trace_files()
-      if MobyUtil::Parameter[ :report_trace_capture, false]=="true"
-        trace_folder=MobyUtil::Parameter[ :report_trace_folder, nil]
+      if  $parameters[ :report_trace_capture, false]=="true"
+        trace_folder= $parameters[ :report_trace_folder, nil]
         if trace_folder!=nil
           if File::directory?(trace_folder)==true
             dump_folder=@test_case_folder+'/trace_files'

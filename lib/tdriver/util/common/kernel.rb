@@ -19,6 +19,15 @@
 
 module Kernel
 
+  # TODO: document me
+  def require_relative( file )
+
+    # require with full expanded path
+    require File.expand_path( File.join( File.dirname( caller.first.scan( /(.*?):/ ).to_s ), file ) )
+
+  end
+
+  # TODO: document me
   def warn_caller( message, remove_eval = true )
 
     # verify that message argument type is correct

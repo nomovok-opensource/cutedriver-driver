@@ -20,9 +20,21 @@
 # extend Ruby String class functionality
 class String
 
+  def true?
+
+    /^true$/i.match( self.to_s ) != nil
+  
+  end
+  
+  def false?
+  
+    /^false$/i.match( self.to_s ) != nil
+  
+  end
+
   def not_empty( message = "String must not be empty", exception = ArgumentError )
 
-    raise exception, message if empty? 
+    raise exception, message, caller if empty? 
 
     self
 
@@ -85,7 +97,7 @@ class String
       else
       
         # raise exception if no default given
-        Kernel::raise TypeError, "Unable to convert string \"#{ self }\" to boolean (Expected \"true\" or \"false\")"
+        raise TypeError, "Unable to convert string \"#{ self }\" to boolean (Expected \"true\" or \"false\")", caller
 
       end
 

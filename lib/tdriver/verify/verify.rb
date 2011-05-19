@@ -1572,11 +1572,11 @@ module TDriverVerify
 
     if self.kind_of?( MobyBase::SUT )
 
-      Time.new + ( timeout.nil? ? MobyUtil::Parameter[ self.sut ][ :synchronization_timeout, '10' ].to_i : timeout.to_i )
+      Time.new + ( timeout.nil? ? $parameters[ self.sut ][ :synchronization_timeout, '10' ].to_i : timeout.to_i )
 
     else
 
-      Time.new + ( timeout.nil? ? MobyUtil::Parameter[ :synchronization_timeout, '10' ].to_i : timeout.to_i )
+      Time.new + ( timeout.nil? ? $parameters[ :synchronization_timeout, '10' ].to_i : timeout.to_i )
 
     end
 
@@ -1586,11 +1586,11 @@ module TDriverVerify
   
     if self.kind_of?( MobyBase::SUT )
 
-      timeout = MobyUtil::Parameter[ self.sut ][ :synchronization_timeout, '10' ].to_i if timeout.nil?
+      timeout = $parameters[ self.sut ][ :synchronization_timeout, '10' ].to_i if timeout.nil?
 
     else
 
-      timeout = MobyUtil::Parameter[ :synchronization_timeout, '10' ].to_i if timeout.nil?
+      timeout = $parameters[ :synchronization_timeout, '10' ].to_i if timeout.nil?
 
     end
     

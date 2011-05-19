@@ -26,8 +26,8 @@ class ReportJUnitXml
     @test_case_arr=Array.new
     @test_run_properties_arr=Array.new
     
-    @test_set_name=MobyUtil::Parameter[ :quality_center_testset_name, "TestSetName" ]
-    @test_set_path =MobyUtil::Parameter[ :quality_center_testset_path, "TestSetPath" ]
+    @test_set_name=$parameters[ :quality_center_testset_name, "TestSetName" ]
+    @test_set_path =$parameters[ :quality_center_testset_path, "TestSetPath" ]
     @test_class_name=nil
     @junit_xml_filename = convert_to_file_name('tdriver_junit_xml')
     @failures = 0
@@ -37,9 +37,9 @@ class ReportJUnitXml
     @tests_start_time = Time.now
     @tc_start_time = nil
     @tc_end_time = nil
-    @pass_statuses=MobyUtil::Parameter[ :report_passed_statuses, "passed" ].split('|')
-    @fail_statuses=MobyUtil::Parameter[ :report_failed_statuses, "failed" ].split('|')
-    @not_run_statuses=MobyUtil::Parameter[ :report_not_run_statuses, "not run" ].split('|')
+    @pass_statuses=$parameters[ :report_passed_statuses, "passed" ].split('|')
+    @fail_statuses=$parameters[ :report_failed_statuses, "failed" ].split('|')
+    @not_run_statuses=$parameters[ :report_not_run_statuses, "not run" ].split('|')
   end
   def convert_to_file_name(value)
     "TEST-"+value.gsub(/[^\w_\.]/, '_') + ".xml"

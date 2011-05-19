@@ -17,9 +17,9 @@
 ##
 ############################################################################
 
-
 require 'fileutils'
 require 'date'
+
 require File.expand_path( File.join( File.dirname( __FILE__ ), 'error_recovery/tdriver_error_recovery_settings' ) )
 require File.expand_path( File.join( File.dirname( __FILE__ ), 'error_recovery/tdriver_error_recovery' ) )
 require File.expand_path( File.join( File.dirname( __FILE__ ), 'error_recovery/tdriver_custom_error_recovery' ) )
@@ -51,14 +51,10 @@ require File.expand_path( File.join( File.dirname( __FILE__ ), 'report_grouping'
 require File.expand_path( File.join( File.dirname( __FILE__ ), 'report_execution_statistics' ) )
 require File.expand_path( File.join( File.dirname( __FILE__ ), 'report_data_presentation' ) )
 
+unless $parameters[ :custom_error_recovery_module, nil ].nil?
 
-if MobyUtil::Parameter[ :custom_error_recovery_module, nil ]!=nil
-
-  require MobyUtil::Parameter[ :custom_error_recovery_module ]
+  require  $parameters[ :custom_error_recovery_module ]
 
 end
+
 include TDriverReportAPI
-
-
-
- 

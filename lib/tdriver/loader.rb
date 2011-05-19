@@ -42,4 +42,16 @@ require File.expand_path( File.join( File.dirname( __FILE__ ), 'base/loader.rb' 
 # verify module
 require File.expand_path( File.join( File.dirname( __FILE__ ), 'verify/verify.rb' ) )
 
+# reporting modules
+if $parameters[ :enable_reporter, true ].true?
 
+  require File.expand_path( File.join( File.dirname( __FILE__ ), 'report/report.rb' ) ) 
+  
+end
+
+# load report api for continuous verification reporting purposes
+if $parameters[ :report_attach_continuous_verification_to_reporter, false ].true?
+
+  require File.expand_path( File.join( File.dirname( __FILE__ ), 'report/report_api' ) ) 
+
+end

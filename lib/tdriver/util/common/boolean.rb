@@ -17,9 +17,35 @@
 ## 
 ############################################################################
 
-# Parameter related errors
-require File.expand_path( File.join( File.dirname( __FILE__ ), 'error.rb' ) )
+# extend Ruby TrueClass and FalseClass class functionality
+class TrueClass
 
-# parameters related classes
-require File.expand_path( File.join( File.dirname( __FILE__ ), 'parameter.rb' ) )
+  def true?
 
+    /^true$/i.match( self.to_s ) != nil
+  
+  end
+  
+  def false?
+  
+    false
+  
+  end
+
+end
+
+class FalseClass
+
+  def true?
+  
+    false
+  
+  end
+  
+  def false?
+  
+    /^false$/i.match( self.to_s ) != nil
+  
+  end
+
+end

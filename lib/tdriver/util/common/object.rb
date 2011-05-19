@@ -27,9 +27,21 @@ class Object
   
   end
 
+  def true?
+
+    false
+  
+  end
+  
+  def false?
+  
+    false
+  
+  end
+
   def not_blank( message = "Object must not be blank", exception = ArgumentError )
 
-    raise exception, message if blank? 
+    raise exception, message, caller if blank? 
 
     self
 
@@ -90,7 +102,7 @@ class Object
 
   def not_nil( message = "Value must not be nil", exception = ArgumentError )
 
-    raise exception, message unless self
+    raise exception, message, caller unless self
 
     self
 
@@ -99,7 +111,7 @@ class Object
   def validate( values, message = "Unexpected value $3 for $1 (expected $2)" )
 
     # raise exception if message is not type of String
-    raise TypeError, "wrong argument type #{ message.class } for message (expected String)" unless message.kind_of?( String )
+    raise TypeError, "wrong argument type #{ message.class } for message (expected String)", caller unless message.kind_of?( String )
 
     # create array of values
     values_array = Array( values )
@@ -110,7 +122,7 @@ class Object
     # collect verbose type list
     verbose_values_list = values_array.each_with_index.collect{ | value, index | 
 
-      raise TypeError.new( "Invalid argument type #{ value.class } for value (expected #{ self.class })" ) unless value.kind_of?( self.class )
+      raise TypeError, "Invalid argument type #{ value.class } for value (expected #{ self.class })", caller unless value.kind_of?( self.class )
 
       if self == value
       
@@ -132,7 +144,7 @@ class Object
       [ self.class, verbose_values_list.join, self.inspect ].each_with_index{ | param, index | message.gsub!( "$#{ index + 1 }", param.to_s ) }
 
       # raise the exception
-      raise ArgumentError, message
+      raise ArgumentError, message, caller
 
     end
 

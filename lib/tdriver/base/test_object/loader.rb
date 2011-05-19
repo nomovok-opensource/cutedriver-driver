@@ -40,7 +40,3 @@ require File.expand_path( File.join( File.dirname( __FILE__ ), 'verification' ) 
 
 # load test object behaviours
 MobyUtil::FileHelper.load_modules( File.expand_path( File.join( File.dirname( __FILE__ ), 'behaviours' ) ) )
-
-# load report api for continous verification reporting purposes
-require File.expand_path( File.join( File.dirname( __FILE__ ), '../../report/report_api' ) ) if MobyUtil::Parameter[ :report_attach_continuous_verification_to_reporter, nil ]=='true'
-

@@ -37,11 +37,11 @@ module TDriverReportFileCapture
   end
 
   def read_file_monitor_settings()
-    @file_locations=return_settings_value_array(MobyUtil::Parameter[ :report_file_locations, nil ])
-    @file_suts=return_settings_value_array(MobyUtil::Parameter[ :report_file_monitored_sut_ids, nil ])
-    @file_names=return_settings_value_array(MobyUtil::Parameter[ :report_file_names, nil ])
-    @clean_files=MobyUtil::Parameter[ :report_clean_files_from_sut_after_capture, 'true' ]
-    @monitor_files = MobyUtil::Parameter[ :report_file_monitor, 'false' ]
+    @file_locations=return_settings_value_array($parameters[ :report_file_locations, nil ])
+    @file_suts=return_settings_value_array($parameters[ :report_file_monitored_sut_ids, nil ])
+    @file_names=return_settings_value_array($parameters[ :report_file_names, nil ])
+    @clean_files=$parameters[ :report_clean_files_from_sut_after_capture, 'true' ]
+    @monitor_files = $parameters[ :report_file_monitor, 'false' ]
   end
 
   def clean_files_from_sut()
