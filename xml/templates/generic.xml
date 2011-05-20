@@ -13,7 +13,7 @@
 
   -->
 
-  <!-- this template will be loaded automatically as global parameters; usage example: value = MobyUtil::Parameter[:app_path] -->
+  <!-- this template will be loaded automatically as global parameters; usage example: value = TDriver.parameter(:app_path) -->
   <template name="global" inherits="logging;dbaccess;reporting">
 
     <!-- test application path -->
@@ -30,7 +30,7 @@
     
   </template>
 
-  <!-- default values for each SUT. Usage example: value = MobyUtil::Parameter[sut_id][:type]-->
+  <!-- default values for each SUT. Usage example: value = @sut.parameter(:type)-->
   <template name="sut_generic">
 
     <parameter name="type" value="" />
