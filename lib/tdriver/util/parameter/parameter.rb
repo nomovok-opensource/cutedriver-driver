@@ -672,8 +672,12 @@ module TDriver
 
         end
 
-        # apply global parameters to root level (e.g. MobyUtil::Parameter[ :logging_outputter_enabled ])
-        @parameters.recursive_merge!( get_template( 'global' ) )
+        # apply global parameters to root level (e.g. TDriver::Parameter[ :logging_outputter_enabled ])
+        @parameters.recursive_merge!( 
+
+          get_template( 'global' ) 
+
+        )
 
         # load and apply default parameter values
         load_default_parameters if options[ :load_default_parameters ] == true
