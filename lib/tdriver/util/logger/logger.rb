@@ -452,10 +452,14 @@ module MobyUtil
           @logger_instance = get_logger( 'TDriver' )
 
           # create unique name for logfile or use default (TDriver.log)
-          filename = ( MobyUtil::StringHelper.to_boolean( Parameter[ :logging_outputter_unique_filename ] ) ? "TDriver_#{ Time.now.to_i }.log" : "TDriver.log" )
+          if $parameters[ :logging_outputter_unique_filename, false ].true?
+            filename = "TDriver_#{ Time.now.to_i }.log"
+          else
+            filename = 'TDriver.log'
+          end
 
           # check if outputter is enabled
-          if MobyUtil::StringHelper.to_boolean( Parameter[ :logging_outputter_enabled ] )
+          if $parameters[ :logging_outputter_enabled, false ].true? 
 
             # create new outputter instance type of FileOutputter
             outputter = create_outputter(
@@ -470,7 +474,7 @@ module MobyUtil
               :filename => File.join( outputter_path, filename ), 
 
               # append to or truncate file
-              :trunc => MobyUtil::StringHelper.to_boolean( Parameter[ :logging_outputter_append ] ) == false, 
+              :trunc => $parameters[ :logging_outputter_append, false ].false?, 
 
               # logging level
               :level => logging_level
@@ -478,7 +482,7 @@ module MobyUtil
             ) 
 
             # set outputter log event write pattern
-            set_outputter_pattern( outputter, Parameter[ :logging_outputter_pattern ] )
+            set_outputter_pattern( outputter, $parameters[ :logging_outputter_pattern, '%d [%c] [%l] %M' ] )
 
             # add outputter to logger instance
             add_outputter( @logger_instance, outputter )
@@ -486,14 +490,16 @@ module MobyUtil
           end
 		  
           # Add stdout outputter if set on configuration parameters
-          if MobyUtil::StringHelper.to_boolean( Parameter[ :logging_stdout_outputter_enabled ] )
+          if $parameters[ :logging_stdout_outputter_enabled, false ].true?
             stdout_outputter = create_outputter(
               Log4r::StdoutOutputter, # outputter type
               "TDriver_LOG_stdout",	# outputter name
               :level => logging_level # logging level
             ) 
-            set_outputter_pattern( stdout_outputter, Parameter[ :logging_outputter_pattern ] )
+            set_outputter_pattern( stdout_outputter, $parameters[ :logging_outputter_pattern, '%d [%c] [%l] %M' ] )
+
             add_outputter( @logger_instance, stdout_outputter )
+
           end
 
         rescue
