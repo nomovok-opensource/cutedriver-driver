@@ -252,7 +252,7 @@ module TDriver
       rescue 
 
         # raise all other exceptions as PluginError
-        raise PluginError, "Error occured during calling #{ method_name } method for #{ plugin_name } (#{ $!.class }: #{ $!.message })"
+        raise MobyUtil::PluginError, "Error occured during calling #{ method_name } method for #{ plugin_name } (#{ $!.class }: #{ $!.message })"
 
       end
 

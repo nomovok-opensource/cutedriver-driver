@@ -23,6 +23,32 @@ module MobyController
 	# Abstract class SutAdapter. Not supposed to be instantiated as is
 	class SutAdapter
 	  
+      def add_hook( id, &block )
+
+        raise ArgumentError, 'Unable to add hook due to no block was given' unless block_given?
+		@hooks = {} unless @hooks
+        @hooks[ id ] = block
+
+      end
+
+	  private
+
+      # TODO: document me
+      def execute_hook( id, *arguments )
+
+        @hooks[ id ].call( *arguments )
+
+      end
+
+      # TODO: document me
+      def hooked? ( id )
+		@hooks = {} unless @hooks
+        @hooks.has_key?( id )
+
+      end
+
+
+
 	end # SutAdapter
 
 end # MobyController

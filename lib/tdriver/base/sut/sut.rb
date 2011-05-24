@@ -30,6 +30,11 @@ module MobyBase
       :type         # type of object ("SUT"), used when applying behaviour
     )
 
+	#added for now
+    attr_reader(
+	  :test_object_adapter
+	)
+
     # Initialize SUT by giving references to the used controller and test object factory
     # == params
     # sut_controller:: Controller object that acts as a facade to the device represented by this SUT
