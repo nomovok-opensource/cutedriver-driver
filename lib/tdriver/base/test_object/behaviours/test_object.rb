@@ -277,7 +277,9 @@ module MobyBehaviour
     # @sut.force_refresh might have a side effect that changes the @_active instance variable.
     # === raises
     # TestObjectNotFoundError:: if TestObject is not identified within synch timeout.
-    def force_refresh( refresh_args = {} )
+    def force_refresh( refresh_args = nil )
+
+      refresh_args = @creation_attributes if refresh_args.nil?
 
       refresh( refresh_args )
 
