@@ -129,7 +129,7 @@ module MobyBase
     #rules = { :sut_type => ['*'], :object_type => ['*'], :input_type => ['*'], :version => ['*'] }.merge!( rules )
 
     raise ArgumentError, 'Target object not defined in rules hash' if rules[ :object ].nil?      
-
+  
     rules.default = ['*']
 
     # retrieve enabled plugins from PluginService
@@ -164,17 +164,33 @@ module MobyBase
 
       rescue
 
-        raise RuntimeError, "Error while applying #{ behaviour_data[ :name ] } (#{ behaviour_data[ :module ][ :name ] }) behaviour to target object. Reason: #{ $!.message } (#{ $!.class })"
+        raise RuntimeError, "Error while applying #{ behaviour_data[ :name ] } (#{ behaviour_data[ :module ][ :name ] }) behaviour to target object. Reason: #{ $!.message } (#{ $!.class })", caller
 
       end
 
+      unless rules[ :object ].instance_variable_defined?( :@object_behaviours )
+      
+        rules[ :object ].instance_variable_set( :@object_behaviours, [ behaviour_index ] )
+      
+      else
+      
+        # add behaviour information to test object
+        rules[ :object ].instance_variable_get( :@object_behaviours ).tap{ | indexes | 
+
+          indexes.push( behaviour_index ) unless indexes.include?( behaviour_index )
+
+        }
+
+      end
+
+=begin
       # add behaviour information to test object
       rules[ :object ].instance_exec{ 
-
+      
         @object_behaviours.push( behaviour_index ) unless @object_behaviours.include?( behaviour_index )
 
       }
-
+=end
     }
 
   end

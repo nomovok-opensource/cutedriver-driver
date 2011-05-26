@@ -189,7 +189,7 @@ module TDriver
         
         collected_indexes = [] 
         
-        rule[ :object ].instance_variable_get( :@object_behaviours )
+        #?? rule[ :object ].instance_variable_get( :@object_behaviours )
         
         collect_behaviours( rule ).each do | behaviour |
 
@@ -216,8 +216,20 @@ module TDriver
 
         
         end
+
+        unless rule[ :object ].instance_variable_defined?( :@object_behaviours )
+
+          # set behaviour indexes to test object
+          rule[ :object ].instance_variable_set( :@object_behaviours, collected_indexes )
         
-        rule[ :object ].instance_variable_get( :@object_behaviours ).tap{ | indexes | indexes = indexes | collected_indexes }
+        else
+        
+          # add behaviour indexes to test object
+          rule[ :object ].instance_variable_get( :@object_behaviours ).tap{ | indexes | indexes = indexes | collected_indexes }
+
+        end
+
+        
                   
 =begin     
         # retrieve enabled plugins from PluginService
