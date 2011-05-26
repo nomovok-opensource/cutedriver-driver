@@ -19,110 +19,127 @@
 
 module MobyBase
 
-	class SutController
+  class SutController
 
-		attr_accessor :sut_controllers, :execution_order #, :test_object_adapter, :test_object_factory
+    attr_accessor :sut_controllers, :execution_order #, :test_object_adapter, :test_object_factory
 
-		# Creating new SutController associates SutAdapter to the controller
-		# == params
-		# sut_adapter:: MobyController::SutAdapter descendant, e.g. MobyController::QT::SutAdapter
-		# == raises
+    # Creating new SutController associates SutAdapter to the controller
+    # == params
+    # sut_adapter:: MobyController::SutAdapter descendant, e.g. MobyController::QT::SutAdapter
+    # == raises
     # TypeError:: Wrong argument type $1 for SUT controller (expected $2)
-		# NameError:: No SUT controller found for %s (%s)
-		def initialize( sut_controllers, sut_adapter )
+    # NameError:: No SUT controller found for %s (%s)
+    def initialize( sut_controllers, sut_adapter )
 
-      sut_controllers.check_type( String, "Wrong argument type $1 for SUT controller (expected $2)" )
+      sut_controllers.check_type String, 'Wrong argument type $1 for SUT controller (expected $2)'
 
-			@sut_adapter = sut_adapter
+      @sut_adapter = sut_adapter
 
-			# empty sut controllers hash
-			@sut_controllers = {}
+      # empty sut controllers hash
+      @sut_controllers = {}
 
-			# empty sut controller execution order, this will be used when multiple sut controllers given
-			@execution_order = []
+      # empty sut controller execution order, this will be used when multiple sut controllers given
+      @execution_order = []
 
-			sut_controllers.split(";").each{ | sut_controller |
+      sut_controllers.split( ';' ).each{ | sut_type |
 
-				begin
+        begin
 
-					# controller module to extend
-					controller_module = eval( ( module_name = "MobyController::#{ sut_controller }::SutController" ) )
+          # add sut_controller to execution order list
+          @execution_order << sut_type
 
-					# add sut_controller to execution order list
-					@execution_order << sut_controller
+          # store sut controller
+          @sut_controllers[ sut_type ] = "MobyController::#{ sut_type }"
 
-					# store controller module to cache
-					@sut_controllers[ sut_controller ] = module_name.scan( /(.+)::/ )
+          # extend controller module
+          extend( eval( "#{ @sut_controllers[ sut_type ] }::SutController" ) )
 
-					# extend required controller behaviour
-					self.extend controller_module
+        rescue NameError
 
-				rescue NameError
+          raise MobyBase::ControllerNotFoundError, "No SUT controller found for #{ sut_type } (#{ @sut_controllers[ sut_type ] }::SutController)"
 
-					Kernel::raise MobyBase::ControllerNotFoundError.new( 'No SUT controller found for %s (%s)' % [ sut_controller, module_name ] )
+        end
 
-				end
+      }
 
-			}
+    end
 
-		end
+    # Function to execute a command on a SutController
+    # This method is not meant to be overwritten in descendants.
+    #
+    # Associates MobyCommand::CommandData implementation based on the MobyCommand class name,
+    # by finding implementation from the same module as the SutController instance. 
+    #
+    # example: MobyController::QT::SutController instance associates MobyController::QT::Application (module)
+    # implementation to MobyCommand::Application command_data object
+    #
+    # == params
+    # command_data:: MobyCommand::CommandData descendant
+    # == returns
+    # command_data implementation specific return value
+    # == raises
+    # TypeError:: Wrong argument type $1 for command_data (expected $2)
+    # MobyBase::CommandNotFoundError:: if no implementation is found for the CommandData object
+    def execute_command( command_data )
 
-		# Function to execute a command on a SutController
-		# This method is not meant to be overwritten in descendants.
-		#
-		# Associates MobyCommand::CommandData implementation based on the MobyCommand class name,
-		# by finding implementation from the same module as the SutController instance. 
-		#
-		# example: MobyController::QT::SutController instance associates MobyController::QT::Application (module)
-		# implementation to MobyCommand::Application command_data object
-		#
-		# == params
-		# command_data:: MobyCommand::CommandData descendant
-		# == returns
-		# command_data implementation specific return value
-		# == raises
-		# TypeError:: Wrong argument type $1 for command_data (expected $2)
-		# MobyBase::CommandNotFoundError:: if no implementation is found for the CommandData object
-		def execute_command( command_data )
-        command_data.check_type( MobyCommand::CommandData, "Wrong argument type $1 for command_data (expected $2)" )
-        
-        @execution_order.each{ | controller |
+      command_data.check_type MobyCommand::CommandData, 'Wrong argument type $1 for command_data (expected $2)'
+
+      # retrieve controller for command; iterate through each sut controller      
+      @execution_order.each_with_index do | controller, index |
+      
+        begin 
+
+          # extend command_data with combinination of corresponding sut specific controller  
+          command_data.extend eval("#{ @sut_controllers[ controller ] }::#{ command_data.class.name.gsub(/^MobyCommand::/, '') }")
           
-          begin 
-            
-            # extend command_data with combinination of command data object name and module name to be extended  
-            eval 'command_data.extend %s::%s' % [ @sut_controllers[ controller ].first.first, command_data.class.name.scan( /::(.+)/ ).first.first ]
+          break
+        
+        rescue NameError
+                
+          # raise exception only if none controller found
+          if ( index + 1 ) == @execution_order.count
 
-            # break if controller associated succesfully 
-            break
+            raise MobyBase::ControllerNotFoundError, "No controller found for command data object #{ command_data.inspect }"
 
-          rescue NameError
-
-            # raise exception only if none controller found
-            Kernel::raise MobyBase::ControllerNotFoundError.new( 'No controller found for CommandData object %s' % command_data.inspect ) unless controller.object_id != @execution_order.last.object_id
           end
 
-        }
-        
-        command_data.set_adapter( @sut_adapter )      
-      retries = 0
-      begin 
-        command_data.execute
-      rescue Errno::EPIPE, IOError => e
-         raise if retries == 1
-         retries += 1
-         if MobyBase::SUTFactory.instance.connected_suts.include?(@sut_adapter.sut_id.to_sym)
-           @sut_adapter.disconnect
-           @sut_adapter.connect(@sut_adapter.sut_id)
-         end
-        retry
+        end
+      
       end
-		end
 
-		# enable hooking for performance measurement & debug logging
-		TDriver::Hooking.hook_methods( self ) if defined?( TDriver::Hooking )
+      # pass sut_adapter for command_data
+      command_data.set_adapter( @sut_adapter )
 
+      retries = 0
 
-	end # SutController
+      begin 
+
+        # execute the command
+        command_data.execute
+
+      rescue Errno::EPIPE, IOError
+
+        raise if retries == 1
+
+        retries += 1
+
+        if MobyBase::SUTFactory.instance.connected_suts.include?( @sut_adapter.sut_id.to_sym )
+
+          @sut_adapter.disconnect
+
+          @sut_adapter.connect( @sut_adapter.sut_id )
+
+        end
+
+        retry
+        
+      end
+      
+    end # execute_command
+
+    # enable hooking for performance measurement & debug logging
+    TDriver::Hooking.hook_methods( self ) if defined?( TDriver::Hooking )
+
+  end # SutController
 
 end # MobyBase
