@@ -81,7 +81,7 @@ module MobyBehaviour
     #  example: true
     def connect( id )
 
-      @_sutController.connect( id )
+      @sut_controller.connect( id )
 
     end
 
@@ -95,7 +95,7 @@ module MobyBehaviour
     #  @sut.disconnect
     def disconnect
 
-      @_sutController.disconnect
+      @sut_controller.disconnect
 
     end
 
@@ -109,7 +109,7 @@ module MobyBehaviour
     #  @sut.disconnect
     def received_data
 
-      @_sutController.received_bytes
+      @sut_controller.received_bytes
 
     end
 
@@ -123,7 +123,7 @@ module MobyBehaviour
     #  @sut.sent_data
     def sent_data
 
-      @_sutController.sent_bytes
+      @sut_controller.sent_bytes
 
     end
 
