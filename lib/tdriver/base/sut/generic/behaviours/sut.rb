@@ -1431,6 +1431,16 @@ module MobyBehaviour
       end
 
     end
+    
+    # == nodoc
+    # == description
+    # == returns
+    def agent
+
+      # pass agent command service object          
+      TDriver::AgentService.new( :sut => self )
+    
+    end
 
   private
 

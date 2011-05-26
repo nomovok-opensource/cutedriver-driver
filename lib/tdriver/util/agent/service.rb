@@ -19,7 +19,7 @@
 
 module TDriver
 
-  class AgentCommandService
+  class AgentService
 
 =begin
     # remove all public methods
