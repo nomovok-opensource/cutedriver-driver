@@ -23,17 +23,17 @@ module MobyBase
   class SUT
 
     attr_accessor(
-      :id,          # id of current SUT
-      :ui_type,     # ui type
-      :ui_version,  # ui version
-      :input,       # the input method used for interacting with this sut as a symbol, eg. :key or :touch. 
-      :type         # type of object ("SUT"), used when applying behaviour
+      :id,                  # id of current SUT
+      :ui_type,             # ui type
+      :ui_version,          # ui version
+      :input                # the input method used for interacting with this sut as a symbol, eg. :key or :touch. 
     )
 
-	#added for now
     attr_reader(
-	  :test_object_adapter
-	)
+      :type,                # type of object ("SUT"), used when applying behaviour
+  	  :environment,         # sut environment from parameters file
+  	  :test_object_adapter  # test object adapter -- added for now?
+  	)
 
     # Initialize SUT by giving references to the used controller and test object factory
     # == params
@@ -67,6 +67,8 @@ module MobyBase
       @type = "sut"
 
       @object_behaviours = []
+
+      @environment = $parameters[ sut_id ][ :env ]
 
       @forced_xml = false
 

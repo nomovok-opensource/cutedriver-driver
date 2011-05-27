@@ -494,4 +494,17 @@
 
     </behaviour>
 
+    <behaviour name="GenericAgentCommandServices" object_type="AgentCommandService" sut_type="*" input_type="*" version="*">
+
+        <module name="MobyBehaviour::AgentCommands" />
+
+        <methods>
+            <method name="version">
+                <description>Retrieves version number of the agent</description>
+                <example>version</example>
+            </method>
+        </methods>
+
+    </behaviour>
+
 </behaviours>

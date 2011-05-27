@@ -61,6 +61,9 @@ require 'rubygems'
   # recorder and scripter modules
   'recorder/loader.rb', 
 
+  # agent service command modules
+  'agent/loader.rb', 
+
   # video capture/util modules
   'video/loader.rb',
 

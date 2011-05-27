@@ -66,9 +66,12 @@ class Hash
   # verify that receiver object contains all of given keys. Raises exception is key not found.
   def require_key( key, message = 'required key $1 not found from hash' )
   
+    # store caller backtrace before calling fetch
+    backtrace = caller
+  
     fetch( key ){
     
-      raise ArgumentError, message.gsub!( "$1", key.inspect ), caller
+      raise ArgumentError, message.gsub( "$1", key.inspect ), backtrace
     
     }
   

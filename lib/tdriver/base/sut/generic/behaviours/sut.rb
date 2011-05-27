@@ -68,6 +68,53 @@ module MobyBehaviour
 
     )
 
+  private
+
+
+    # this method will be automatically invoked after module is extended to sut object
+    def self.extended( target_object )
+
+      target_object.instance_exec{
+
+        initialize_settings
+
+      }
+
+    end
+
+    # TODO: document me
+    def initialize_settings
+
+      # default values
+      @x_path = '.'
+      @xml_data = ""
+      @dump_count = 0
+
+      # determines that should child test objects be updated
+      @update_childs = true
+      
+      @last_xml_data = nil
+      @frozen = false
+
+      # initialize cache for sut children
+      @child_object_cache = TDriver::TestObjectCache.new
+
+      @current_application_id = nil
+
+      # create empty hash for sut parameters if sut id not found from parameters
+      $parameters[ @id ] = {} unless $parameters.has_key?( @id )
+
+      @input            = sut_parameters[ :input_type,             'key' ].to_sym
+      @refresh_tries    = sut_parameters[ :ui_state_refresh_tries, '5'   ].to_f
+      @refresh_interval = sut_parameters[ :refresh_interval,       '0.5' ].to_f
+
+      # load verify blocks from defined sut configuration file 
+      @verify_blocks    = load_verify_blocks( sut_parameters[ :verify_blocks, nil ] )
+      
+    end
+    
+  public
+
     # == description
     # Connects selected SUT according to configuration in tdriver_parameters.xml.
     # == arguments
@@ -81,7 +128,7 @@ module MobyBehaviour
     #  example: true
     def connect( id )
 
-      @_sutController.connect( id )
+      @sut_controller.connect( id )
 
     end
 
@@ -95,7 +142,7 @@ module MobyBehaviour
     #  @sut.disconnect
     def disconnect
 
-      @_sutController.disconnect
+      @sut_controller.disconnect
 
     end
 
@@ -109,7 +156,7 @@ module MobyBehaviour
     #  @sut.disconnect
     def received_data
 
-      @_sutController.received_bytes
+      @sut_controller.received_bytes
 
     end
 
@@ -123,7 +170,7 @@ module MobyBehaviour
     #  @sut.sent_data
     def sent_data
 
-      @_sutController.sent_bytes
+      @sut_controller.sent_bytes
 
     end
 
@@ -297,23 +344,23 @@ module MobyBehaviour
 
         )
 
-      rescue MobyBase::MultipleTestObjectsIdentifiedError => exception
+      rescue MobyBase::MultipleTestObjectsIdentifiedError
 
         $logger.behaviour "FAIL;Multiple child objects matched criteria.;#{ id };sut;{};child;#{ attributes.inspect }"
 
-        Kernel::raise exception
+        raise
 
-      rescue MobyBase::TestObjectNotFoundError => exception
+      rescue MobyBase::TestObjectNotFoundError
 
         $logger.behaviour "FAIL;The child object could not be found.;#{ id };sut;{};child;#{ attributes.inspect }"
 
-        Kernel::raise exception
+        raise
 
-      rescue Exception => exception
+      rescue Exception
 
         $logger.behaviour "FAIL;Failed when trying to find child object.;#{ id };sut;{};child;#{ attributes.inspect }"
 
-        Kernel::raise exception
+        raise
 
       ensure
 
@@ -370,7 +417,8 @@ module MobyBehaviour
       else
         $logger.behaviour "FAIL;No methods or parameters found for sut.setup"
 
-        Kernel::raise MobyBase::BehaviourError.new("Setup", "Failed to load sut.setup method check the :sut_setup parameter")
+        raise MobyBase::BehaviourError.new("Setup", "Failed to load sut.setup method check the :sut_setup parameter")
+        
       end
 
 
@@ -419,7 +467,8 @@ module MobyBehaviour
       else
         $logger.behaviour "FAIL;No method or parameters found for sut.teardown"
 
-        Kernel::raise MobyBase::BehaviourError.new("Teardown", "Failed to load sut.teardown method check the :sut_teardown parameter")
+        raise MobyBase::BehaviourError.new("Teardown", "Failed to load sut.teardown method check the :sut_teardown parameter")
+        
       end
 
     end
@@ -464,7 +513,7 @@ module MobyBehaviour
         # refresh if xml data is empty
         self.refresh if @xml_data.empty?
 
-        Kernel::raise RuntimeError, "Can not create state object of SUT with id #{ @id.inspect }, no XML content or SUT not initialized properly." if @xml_data.empty?
+        raise RuntimeError, "Can not create state object of SUT with id #{ @id.inspect }, no XML content or SUT not initialized properly." if @xml_data.empty?
 
         source_data = @test_object_adapter.state_object_xml( @xml_data, @id )
 
@@ -532,7 +581,7 @@ module MobyBehaviour
         )
 
         # raise same exception
-        Kernel::raise $!
+        raise
 
       ensure
 
@@ -611,7 +660,7 @@ module MobyBehaviour
 
         $logger.behaviour "FAIL;Failed to capture screen.;#{ id.to_s };sut;{};capture_screen;#{ arguments.kind_of?( Hash ) ? arguments.inspect : arguments.class.to_s }"
 
-        Kernel::raise $!
+        raise
 
       end
 
@@ -704,7 +753,7 @@ module MobyBehaviour
 
         end
 
-        Kernel::raise ArgumentError, "Sleep time need to be >= 0" unless sleep_time >= 0
+        raise ArgumentError, "Sleep time need to be >= 0" unless sleep_time >= 0
 
         # try to find an existing app with the current arguments
         if target[ :try_attach ] || target[:restart_if_running]
@@ -751,7 +800,7 @@ module MobyBehaviour
 
         if ( target[ :start_command ] != nil )
 
-          Kernel::raise MobyBase::BehaviourError.new("Run", "Failed to load execute_shell_method") unless self.respond_to?("execute_shell_command")
+          raise MobyBase::BehaviourError.new("Run", "Failed to load execute_shell_method") unless self.respond_to?("execute_shell_command")
 
           execute_shell_command( target[ :start_command ], :detached => "true" )
 
@@ -879,11 +928,11 @@ module MobyBehaviour
 
         rescue MobyBase::TestObjectNotFoundError
 
-          Kernel::raise MobyBase::VerificationError, "No application type test object was found on the device after starting the application."
+          raise MobyBase::VerificationError, "No application type test object was found on the device after starting the application."
 
         rescue MobyBase::SyncTimeoutError
 
-          Kernel::raise MobyBase::VerificationError, "The application (#{ error_details }) was not found on the sut after being launched."
+          raise MobyBase::VerificationError, "The application (#{ error_details }) was not found on the sut after being launched."
 
         end
 
@@ -892,7 +941,7 @@ module MobyBehaviour
 
         $logger.behaviour "FAIL;Failed to launch application.;#{ id.to_s };sut;{};run;#{ target.kind_of?( Hash ) ? target.inspect : target.class.to_s }"
 
-        Kernel::raise MobyBase::BehaviourError.new("Run", "Failed to launch application")
+        raise MobyBase::BehaviourError.new("Run", "Failed to launch application")
 
       end
 
@@ -968,7 +1017,7 @@ module MobyBehaviour
 
         $logger.behaviour "FAIL;Failed to press key(s).;#{id.to_s};sut;{};press_key;#{ value }"
 
-        Kernel::raise $!
+        raise
 
       end
 
@@ -1086,7 +1135,7 @@ module MobyBehaviour
     #
     def translate( logical_name, file_name = nil, plurality = nil, numerus = nil, lengthvariant = nil )
 
-      Kernel::raise LogicalNameNotFoundError, "Logical name is nil" if logical_name.nil?
+      raise LogicalNameNotFoundError, "Logical name is nil" if logical_name.nil?
 
       translation_type = "localisation"
 
@@ -1140,7 +1189,7 @@ module MobyBehaviour
 
         end
 
-        Kernel::raise LanguageNotFoundError, "Language cannot be determind to perform translation" if ( language.nil? || language.empty? )
+        raise LanguageNotFoundError, "Language cannot be determind to perform translation" if ( language.nil? || language.empty? )
 
         translation = MobyUtil::Localisation.translation(
           logical_name,
@@ -1431,6 +1480,16 @@ module MobyBehaviour
       end
 
     end
+    
+    # == nodoc
+    # == description
+    # == returns
+    def agent
+
+      # pass agent command service object          
+      TDriver::AgentService.new( :sut => self )
+    
+    end
 
   private
 
@@ -1673,17 +1732,6 @@ module MobyBehaviour
       app_info
     end
 
-    # this method will be automatically invoked after module is extended to sut object
-    def self.extended( target_object )
-
-      target_object.instance_exec{
-
-        initialize_settings
-
-      }
-
-    end
-
     def load_verify_blocks( filename )
 
       # load verify blocks if filename not empty
@@ -1714,37 +1762,6 @@ module MobyBehaviour
 
     end
 
-    # TODO: document me
-    def initialize_settings
-
-      # default values
-      @x_path = '.'
-      @xml_data = ""
-      @dump_count = 0
-
-      # determines that should child test objects be updated
-      @update_childs = true
-      
-      @last_xml_data = nil
-      @frozen = false
-
-      # initialize cache for sut children
-      @child_object_cache = TDriver::TestObjectCache.new
-
-      @current_application_id = nil
-
-      # create empty hash for sut parameters if sut id not found from parameters
-      $parameters[ @id ] = {} unless $parameters.has_key?( @id )
-
-      @input            = sut_parameters[ :input_type,             'key' ].to_sym
-      @refresh_tries    = sut_parameters[ :ui_state_refresh_tries, '5'   ].to_f
-      @refresh_interval = sut_parameters[ :refresh_interval,       '0.5' ].to_f
-
-      # load verify blocks from defined sut configuration file 
-      @verify_blocks    = load_verify_blocks( sut_parameters[ :verify_blocks, nil ] )
-      
-    end
-
     # accessor for sut parameters
     def sut_parameters
     
@@ -1752,7 +1769,7 @@ module MobyBehaviour
     
     end
 
-    public # deprecated
+  public # deprecated
 
     # == nodoc
     # function to get TestObject

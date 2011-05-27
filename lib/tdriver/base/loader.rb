@@ -17,12 +17,14 @@
 ## 
 ############################################################################
 
-
 # behaviour abstraction class, factory and all other related modules etc
 require File.expand_path( File.join( File.dirname( __FILE__ ), 'behaviour/loader' ) )
 
 # command_data abstraction class etc.
 require File.expand_path( File.join( File.dirname( __FILE__ ), 'command_data/loader' ) )
+
+# command_data controller abstraction class etc.
+require File.expand_path( File.join( File.dirname( __FILE__ ), 'controller/loader' ) )
 
 # sut abstract class, generic sut etc
 require File.expand_path( File.join( File.dirname( __FILE__ ), 'sut/loader' ) )
