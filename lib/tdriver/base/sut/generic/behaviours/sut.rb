@@ -690,7 +690,7 @@ module MobyBehaviour
     #  |Key|Type|Description|Example|
     #  |:uid|String or Integer|Unique ID of the application|{ :uid => 268458181 }|
     #  |:name|String|Executable name of the application|{ :name => 'calculator' }|
-    #  |:restart_if_running|Boolean|Restart application if already running||{ :restart_if_running => true }|
+    #  |:restart_if_running|Boolean|Restart application if already running|{ :restart_if_running => true }|
     #  |:arguments|String|Comma separated list of arguments passed to the application when it is started|{ :arguments => '--nogui,-v' }|
     #  |:check_pid|Boolean|Overrides default value of SUT parameter :application_check_pid; When set to true, process id is used to test object identification|false|
     #   |:sleep_time|Integer|Number of seconds to sleep immediately after launching the process|{ :sleep_time => 10 }|
