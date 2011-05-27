@@ -324,7 +324,31 @@ module TDriverReportCreator
     def set_test_case_behaviour_log(value,test_case)
       @test_case_behaviour_log << [value.to_s,test_case]
     end
-    #Thid methods sets video recording of the test case
+
+    #This methods checks the available video devices
+    #
+    # === params
+    # 
+    # === returns
+    # nil
+    def each_video_device
+
+      if $parameters[:report_video, nil] != nil
+
+        device_index = 0
+        $parameters[:report_video].split("|").each do | video_device |
+          if !video_device.strip.empty?
+            yield video_device.strip, device_index.to_s
+            device_index += 1
+          end
+        end
+
+      end
+
+    end
+
+
+    #This methods sets video recording of the test case
     #
     # === params
     # rec_name: String, name of video file to create
