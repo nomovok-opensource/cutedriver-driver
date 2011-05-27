@@ -316,7 +316,7 @@ module TDriverReportCreator
 
         each_video_device do | video_device, device_index |
           begin
-            FileUtils.copy( "cam_" + device_index + "_" + @_video_file_name, "cam_" + device_index + "_" + @_previous_video_file_name )
+            FileUtils.mv( "cam_" + device_index + "_" + @_video_file_name, "cam_" + device_index + "_" + @_previous_video_file_name )
           rescue
             # do nothing..
           end
@@ -344,7 +344,7 @@ module TDriverReportCreator
   # === raises
   def update_test_case(details)
     if $new_test_case==nil
-      @_stored_details<<details
+      @_stored_details << details
     else
       if @_stored_details!=[]
         @_stored_details.each do |detail|

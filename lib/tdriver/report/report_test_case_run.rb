@@ -338,6 +338,7 @@ module TDriverReportCreator
       tc_video_width = 640
       tc_video_height = 480
       tc_video_fps = 30
+      tc_max_time = '99:00:00'
 
       begin
         tc_video_width =  $parameters[ :report_video_width ].to_i
@@ -351,6 +352,11 @@ module TDriverReportCreator
       end
       begin
         tc_video_fps =  $parameters[ :report_video_fps ].to_i
+      rescue
+        # parameter not loaded, do nothing
+      end
+      begin 
+        tc_max_time =  $parameters[ :report_video_max_time ].to_i
       rescue
         # parameter not loaded, do nothing
       end

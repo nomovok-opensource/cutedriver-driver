@@ -17,6 +17,8 @@
 ## 
 ############################################################################
 
+require 'open3'
+
 module MobyUtil
   
   # Linux streamer webcam implementation
@@ -25,7 +27,7 @@ module MobyUtil
 
     STARTUP_TIMEOUT = 60
 
-    DEFAULT_OPTIONS = { :device => '/dev/video0', :width => 320, :height => 240, :fps => 5 }
+    DEFAULT_OPTIONS = { :device => '/dev/video0', :width => 320, :height => 240, :fps => 5, :max_time => '99:00:00' }
 
     # TODO: document me
     def self.new_cam( *args )
@@ -51,6 +53,7 @@ module MobyUtil
       @_video_file = video_file
       @_rec_options = DEFAULT_OPTIONS.merge user_options
           
+      @rec_app = 'streamer'
     end
     
     # Starts recording based on options given during initialization
@@ -67,15 +70,13 @@ module MobyUtil
           # no reaction to failed file ops, unless recording fails
         end
       end  
-
-      rec_command = 'streamer -q -c ' + @_rec_options[ :device ].to_s + ' -f rgb24 -r ' + @_rec_options[ :fps ].to_s + ' -t 99:00:00 -o ' +  @_video_file.to_s + ' -s ' + @_rec_options[ :width ].to_s + 'x' + @_rec_options[ :height ].to_s
-
-      @_streamer_pid = fork do
-        begin
-          Kernel::exec( rec_command )
-        rescue Exception => e
-          raise RuntimeError.new( "An error was encountered while launching streamer:\n" << e.inspect )
-        end
+      
+      rec_opts = ' -q -c ' + @_rec_options[ :device ].to_s + ' -f rgb24 -r ' + @_rec_options[ :fps ].to_s + ' -t ' + 
+        @_rec_options[:max_time] + ' -o ' +  @_video_file.to_s + ' -s ' + @_rec_options[ :width ].to_s + 'x' + @_rec_options[ :height ].to_s 
+      begin         
+        @stdin, @stdout, @stderr = Open3.popen3(@rec_app + rec_opts)
+      rescue => e
+        raise RuntimeError.new( "An error was encountered while launching streamer:\n" << e.inspect )
       end
 
       file_timed_out = false
@@ -94,11 +95,8 @@ module MobyUtil
       if file_timed_out
 
         # make sure recording is not initializing, clean up any failed file        
-        begin
-          Process.kill( 9, @_streamer_pid.to_i )
-        rescue
-        end
-        
+        stop_recording
+
         if File.exists?( @_video_file )
           begin
             File.delete( @_video_file )
@@ -113,8 +111,9 @@ module MobyUtil
       @_recording = true
       
       nil
-      
     end
+
+
         
     # Stops ongoing recording    
     def stop_recording 
@@ -122,14 +121,29 @@ module MobyUtil
       if @_recording      
 
         @_recording = false            
-
-        Process.kill( 9, @_streamer_pid.to_i )
-
+        
+        begin
+          @stdin.close unless @stdin.closed?
+          @stdout.close unless @stdout.closed?
+          @stderr.close unless @stderr.closed?
+          
+          sleep 10 # allow some time to close (yes, it can take up to 10 seconds)
+          pid = `pidof #{@rec_app}`.to_i
+          begin 
+            if pid != 0
+              Process.kill(9,pid)
+            end
+          rescue => e
+            puts "Got error " + e.inspect
+          end
+        rescue => e
+          raise RuntimeError.new( "Failed to end recording. Errror:\n " << e.inspect)
+        end
       end
-
+      
       nil
-
-    end    
+      
+    end
     
     # enable hooking for performance measurement & debug logging
     TDriver::Hooking.hook_methods( self ) if defined?( TDriver::Hooking )
