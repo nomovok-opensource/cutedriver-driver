@@ -48,6 +48,7 @@ require File.expand_path( File.join( File.dirname( __FILE__ ), 'report_cucumber_
 require File.expand_path( File.join( File.dirname( __FILE__ ), 'report_rspec' ) )
 require File.expand_path( File.join( File.dirname( __FILE__ ), 'report_test_unit' ) )
 require File.expand_path( File.join( File.dirname( __FILE__ ), 'report_grouping' ) )
+require File.expand_path( File.join( File.dirname( __FILE__ ), 'report_graph_generator' ) )
 require File.expand_path( File.join( File.dirname( __FILE__ ), 'report_execution_statistics' ) )
 require File.expand_path( File.join( File.dirname( __FILE__ ), 'report_data_presentation' ) )
 

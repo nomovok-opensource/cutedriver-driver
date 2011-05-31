@@ -890,6 +890,7 @@ display: block;
         format_behaviour_log(@test_case_behaviour_log)<<
         '</dd>'<<
         '</dl>'
+
     end
     if @test_case_user_data!=nil && !@test_case_user_data.empty?
       html_body=html_body<<
@@ -899,6 +900,17 @@ display: block;
         format_user_log_table( @test_case_user_data,@test_case_user_data_columns)<<
         '</dd>'<<
         '</dl>'
+      if $parameters[ :report_generate_duration_graph, false]=='true'
+        graph=ReportGraphGenerator.new(@test_case_user_data_columns,@test_case_user_data)        
+        graph.generate_graph("#{folder}/graph.png")
+         html_body=html_body<<
+        '<dl class="togList">'<<
+        '<dt onclick="tog(this)" style="background-color: #CCCCCC;"><b style="font-size: large"><span><input id="Button1" type="button" value="Close" class="btn" /></span> Graph</b></dt>'<<
+        '<dd style="font-size: small">'<<
+        '<img border="0" src="graph.png"/>'<<
+        '</dd>'<<
+        '</dl>'
+      end
     end
     html_body=html_body<<
       '</div>'
