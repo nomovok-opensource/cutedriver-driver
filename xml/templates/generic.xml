@@ -190,6 +190,7 @@
 
     <parameter name="report_monitor_memory" value="false" /> <!-- monitor memory consumption in test cases if set to true -->
     <parameter name="report_collect_environment_data_from_sut" value="false" /> <!-- collect enviroment data from sut -->
+    <parameter name="report_generate_duration_graph" value="false" />
 
     <!-- Parameters for generic file capturing -->
     <parameter name="report_file_monitor" value="false" />

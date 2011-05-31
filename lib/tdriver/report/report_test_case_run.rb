@@ -579,7 +579,9 @@ module TDriverReportCreator
             begin
               sut_attributes[:sut].capture_screen( :Filename => dump_folder+'/'+time_stamp+'_'+sut_id.to_s+'_state.png', :Redraw => true ) if sut_attributes[:is_connected]
               if arguments[:file]
-                sut_attributes[:sut].capture_screen( :Filename => arguments[:file], :Redraw => true ) if sut_attributes[:is_connected]
+                base_name=File.basename(arguments[:file])
+                base_folder=File.dirname(arguments[:file])
+                sut_attributes[:sut].capture_screen( :Filename => "#{base_folder}/#{sut_id.to_s}_#{base_name}", :Redraw => true ) if sut_attributes[:is_connected]
               end
               image_html='<div class="img"><a href="state_xml/'<<
                 time_stamp+'_'+sut_id.to_s+'_state.png'<<
