@@ -161,7 +161,7 @@
   <template name="reporting" inherits="error_recovery">
     <!-- parameter for reporter modules enable disable enabled by default -->
     <parameter name="enable_reporter" value="true" />
-    <parameter name="report_short_folders" value="false" />
+    <parameter name="report_short_folders" value="true" />
     
     <!-- Parameters for report crash file monitoring -->
     <parameter name="report_crash_file_monitor" value="false" />
