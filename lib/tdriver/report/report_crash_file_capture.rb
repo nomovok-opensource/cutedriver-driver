@@ -64,6 +64,18 @@ class TDriverReportCrashFileCapture
     end
   end
 
+  def confirm_crash_notes
+    MobyBase::SUTFactory.instance.connected_suts.each do |sut_id, sut_attributes|
+        if sut_attributes[:is_connected]
+          @crash_file_suts.each do |monitored_sut|
+            if monitored_sut == sut_id.to_s
+              sut_attributes[:sut].clear_crash_notes(5)
+            end
+          end
+        end
+      end
+  end
+
   def list_sut_crash_files(current_sut)
     crash_file_arr=Array.new
     @crash_file_count=0

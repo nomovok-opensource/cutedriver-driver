@@ -169,6 +169,7 @@
     <parameter name="report_crash_file_monitored_sut_ids" value="s60,qt_sut" />
     <parameter name="report_crash_file_locations" value="C:,c:\data,E:,F:" /> <!-- posix="..." -->
     <parameter name="report_crash_file_names" value="MobileCrash" />
+    <parameter name="report_crash_file_monitor_confirm_any_crash_note" value="false" />
     <parameter name="report_disconnect_connected_devices" value="false" />
     <parameter name="report_generate_rdoc" value="false" />
     <parameter name="custom_error_recovery_module" value="/etc/tdriver/tdriver_custom_error_recovery.rb" windows="/tdriver/tdriver_custom_error_recovery.rb" />

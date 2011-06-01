@@ -286,6 +286,10 @@ module TDriverReportCreator
       $new_test_case.clean_crash_files_from_sut()
       $tdriver_reporter.set_total_crash_files(amount_of_crash_files.to_i)
       $new_test_case.set_test_case_crash_files(amount_of_crash_files.to_i)
+    else
+      if $parameters[ :report_crash_file_monitor_confirm_any_crash_note, false ]=='true'
+        $new_test_case.confirm_crash_notes
+      end
     end
 
     amount_of_files=$new_test_case.check_if_files_exist()
