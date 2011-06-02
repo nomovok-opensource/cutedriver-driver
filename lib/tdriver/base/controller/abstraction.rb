@@ -36,7 +36,7 @@ module MobyController
 
 			@sut_adapter.send_service_request( 
 			
-			  make_message
+			  *make_message
 
       )
 
