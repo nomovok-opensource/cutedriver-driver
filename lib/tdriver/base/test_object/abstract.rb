@@ -41,26 +41,28 @@ module MobyBase
       # verify that given argument is type of hash    
       options.check_type Hash, 'wrong argument type $1 for TestObject#new (expected $2)'
 
-      # verify that required keys is found from options hash and initialize the test object with these values.
-      @test_object_factory = options.require_key( :test_object_factory )
-      @test_object_adapter = options.require_key( :test_object_adapter )
-      @creation_attributes = options.require_key( :creation_attributes )
+      # verify that required keys is found from options hash and initialize the test object with these values
+      @sut                  = options.require_key :sut
 
-      @sut = options.require_key( :sut )
+      @test_object_factory  = options.require_key :test_object_factory
+      @test_object_adapter  = options.require_key :test_object_adapter
+      @creation_attributes  = options.require_key :creation_attributes
 
-      @sut_id = @sut.instance_variable_get( :@id )
+      # verify that parent object and parent application is given in options hash
+      @parent               = options.require_key :parent
+      @parent_application   = options.require_key :parent_application
 
-      @parent = options.require_key( :parent )
-      @parent_application = options.require_key( :parent_application )
-
-      # apply xml object if given; test object type, id and name are retrieved from the xml 
-      self.xml_data = options[ :xml_object ] if options.has_key?( :xml_object )
+      # store sut id
+      @sut_id               = @sut.instance_variable_get :@id
 
       # initialize cache object 
-      @child_object_cache = TDriver::TestObjectCache.new
+      @child_object_cache   = TDriver::TestObjectCache.new
 
       # empty test object behaviours list
-      @object_behaviours = []
+      @object_behaviours    = []
+
+      # apply xml object if given; test object type, id and name are retrieved from the xml 
+      __send__ :xml_data=, options[ :xml_object ] if options.has_key?( :xml_object )
  
     end
 
@@ -75,7 +77,7 @@ module MobyBase
     # nothing
     def eql?( test_object )
 
-      self == test_object
+      __send__ :==, test_object
 
     end
 
@@ -95,9 +97,9 @@ module MobyBase
     def ==( test_object )
 
       #return false unless test_object.instance_of?( MobyBase::TestObject ) 
-      #return false unless self.type == test_object.type
-      #return false unless self.id == test_object.id
-      #return false unless self.name == test_object.name
+      #return false unless @type == test_object.type
+      #return false unless @id == test_object.id
+      #return false unless @name == test_object.name
       #return true
 
       # optimized version
@@ -112,11 +114,10 @@ module MobyBase
     # Fixnum:: hash number representing current TestObject
     def hash
 
-
       #result = 17
-      #result = result * 37 + self.id.to_i
-      #result = result * 37 + type.hash
-      #result = result * 37 + name.hash
+      #result = result * 37 + @id.to_i
+      #result = result * 37 + @hash
+      #result = result * 37 + @hash
       #return result
 
       # optimized version
@@ -131,17 +132,17 @@ module MobyBase
     # should not be used normally. Thus, not documented.
     def <=>( test_object )
 
-      #self_type = self.type
+      #self_type = @type
       #other_type = test_object.type
       #return -1 if self_type < other_type
       #return 1  if self_type > other_type
 
-      #self_name = self.name
+      #self_name = @name
       #other_name = test_object.name
       #return -1 if self_name < other_name
       #return 1  if self_name > other_name
 
-      #self_id = self.id
+      #self_id = @id
       #other_id = test_object.id
       #return -1 if self_id < other_id
       #return 1  if self_id > other_id
