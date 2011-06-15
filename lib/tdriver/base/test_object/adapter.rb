@@ -87,6 +87,40 @@ module TDriver
           
         end # xpath_attributes
  
+          #merges elements from the nodeset, used in hybrid app situations
+          def create_merged_element(nodeset, environments, close_element=true)
+            merged_element_set = false
+
+            merged_xml = ""
+
+            nodeset.each{ | object |        
+             
+              # only one top element
+              unless merged_element_set
+
+                # retrieve object attributes
+                attributes = object.attributes
+                
+                # merge env to attributes hash
+                attributes['env'] = environments.join(';')
+                
+                # add application object xml element to new xml string
+                merged_xml << "<object #{ hash_to_element_attributes( attributes ) }>"
+                
+                # merged element is now set, no need to do it again
+                merged_element_set = true
+                
+              end
+              
+              # append all found elements
+              object.xpath('./*').each{ | object | merged_xml << object.to_s }
+            }
+            merged_xml << "</object>" if close_element and merged_element_set
+            merged_xml
+          end
+
+
+
         # TODO: document me
         def initialize_class
 
@@ -642,32 +676,18 @@ module TDriver
         # collect environment values
         environments = document_root.xpath('/tasMessage/tasInfo/object[@type="application"]/@env').collect{ | attribute | attribute.to_s }
 
-        # iterate through each object found in xml
-        nodeset.each{ | object |        
-  
-          # only one application element
-          unless application_element_set
-          
-            #application_objects << object
+        #limit to apps
+        nodeset = document_root.xpath('/tasMessage/tasInfo/object[@type="application"]')
+        close_vkb = false
+        if nodeset.count > 0
+          new_xml << create_merged_element(nodeset, environments, false) 
+          close_vkb = true
+        end
 
-            # retrieve object attributes
-            attributes = object.attributes
-
-            # merge env to attributes hash
-            attributes['env'] = environments.join(';')
-
-            # add application object xml element to new xml string
-            new_xml << "<object #{ hash_to_element_attributes( attributes ) }>"
-          
-            # application element is now set, no need to do it again
-            application_element_set = true
-            
-          end
-
-          # append all found elements
-          object.xpath('./*').each{ | object | new_xml << object.to_s }
-          
-        }
+        # do the same to the vkbs
+        environments = document_root.xpath('/tasMessage/tasInfo/object[@type="vkb_app"]/@env').collect{ | attribute | attribute.to_s }
+        nodeset = document_root.xpath('/tasMessage/tasInfo/object[@type="vkb_app"]')
+        new_xml << create_merged_element(nodeset, environments, close_vkb)
 
         # multiple applications found, return merged application xml
         new_xml << "</object></tasInfo></tasMessage>"

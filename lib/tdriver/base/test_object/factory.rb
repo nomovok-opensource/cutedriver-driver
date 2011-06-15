@@ -443,6 +443,9 @@ module MobyBase
 
       else
         
+        #trick
+        #rules[ :parent_application ] = parent if parent.type == 'vkb'
+
         # create test object
         test_object = MobyBase::TestObject.new( 
         
