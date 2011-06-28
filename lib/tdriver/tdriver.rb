@@ -167,6 +167,14 @@ module TDriver
       File.expand_path( File.dirname( __FILE__ ) )
     
     end
+
+    # == nodoc
+    # TODO: document me
+    def version
+
+      ENV['TDRIVER_VERSION'] || "unknown"
+
+    end
   
   private
 
