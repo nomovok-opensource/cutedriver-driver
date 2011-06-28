@@ -61,7 +61,7 @@ module TDriver
         _object = rule[ :object ]
 
         # generate cache key, drop :object value from hash
-        cache_key = rule.reject{ | key, value | key == :object }.to_s.hash
+        cache_key = rule.reject{ | key, value | key == :object }.hash
 
         # retrieve behaviour from cache if found
         if @behaviours_cache.has_key?( cache_key )
@@ -70,10 +70,10 @@ module TDriver
         
         else
 
-          # add each collected behaviour to object
+          # collect behaviours that meets given rules
           behaviours = collect_behaviours( rule )
 
-          # store to cache
+          # store behaviour collection to cache for future reuse
           @behaviours_cache[ cache_key ] = behaviours
 
         end
