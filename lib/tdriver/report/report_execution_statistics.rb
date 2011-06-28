@@ -122,12 +122,13 @@ class ReportingStatistics
     total_run=0
     total_not_run=0
     total_passed=0
-    @statistics_arr.each do |total_status|        
-      if total_status[1]==tc_status && total_status[0]==tc_name    
+    total_not_run_index=0
+    total_passed_index=0
+    pass_rate_index=0
+    @statistics_arr.each do |total_status|
+      if total_status[1]==tc_status && total_status[0]==tc_name
         b_test_in_statistics=true
         @statistics_arr[current_index]=[tc_name,tc_status,total_status[2].to_i+1,tc_execution,tc_link]
-        total_passed=total_status[2].to_i+1 if @pass_statuses.include?(total_status[1])
-        total_not_run=total_status[2].to_i+1 if @not_run_statuses.include?(total_status[1])        
       end
       if total_status[1]=="reboots" && total_status[0]==tc_name
         b_test_in_statistics=true
@@ -164,17 +165,32 @@ class ReportingStatistics
       end
       if total_status[1]=="pass rate" && total_status[0]==tc_name
         b_test_in_statistics=true
-        pass_rate=(total_passed.to_f/(total_run.to_f-total_not_run.to_f))*100
-        pass_rate="%0.2f" % pass_rate
-        @statistics_arr[current_index]=[tc_name,"pass rate",pass_rate,tc_execution,tc_link]
+        pass_rate_index=current_index
+      end
+      if @pass_statuses.include?(total_status[1]) && total_status[0]==tc_name
+        total_passed_index=current_index
+      end
+      if @not_run_statuses.include?(total_status[1]) && total_status[0]==tc_name
+        total_not_run_index=current_index
       end
       current_index+=1
     end
+
+    if b_test_in_statistics==true
+      total_passed_result=@statistics_arr[total_passed_index]
+      total_not_run_result=@statistics_arr[total_not_run_index]
+      total_passed=total_passed_result[2].to_i
+      total_not_run=total_not_run_result[2].to_i
+      pass_rate=(total_passed.to_f/(total_run.to_f-total_not_run.to_f))*100
+      pass_rate="%0.2f" % pass_rate
+      @statistics_arr[pass_rate_index]=[tc_name,"pass rate",pass_rate,tc_execution,tc_link]
+    end
+
     b_test_in_statistics
   end
 
   def collect_test_case_statistics()
-    total_duration = 0.0   
+    total_duration = 0.0
     @group_test_case_arr.each do |test_case|
       tc_status=test_case[7]
       tc_name=test_case[0].to_s.gsub('_',' ')
@@ -188,7 +204,7 @@ class ReportingStatistics
       memory_usage=test_case[6].to_i
 
       duration=test_case[5].to_f
-      total_duration = total_duration + duration      
+      total_duration = total_duration + duration
       b_test_in_statistics=false
 
       #Update total statistics
@@ -290,8 +306,8 @@ class ReportingStatistics
       @statistics_arr.each do |test_case|
         tc_name=test_case[0].to_s.gsub('_',' ')
         if test_case_added.include?(tc_name)==false && test_case[1].to_s=="duration"
-	      	durations << test_case[2]
-	      	labels[current_index] = "#{current_index + 1}" #tc_name
+          durations << test_case[2]
+          labels[current_index] = "#{current_index + 1}" #tc_name
           current_index += 1
           test_case_added << tc_name
         end

@@ -201,6 +201,14 @@
     <parameter name="report_clean_files_from_sut_after_capture" value="true" />
     <parameter name="report_fail_test_if_files_found" value="true" />
 
+    <!-- setting report_video to "true" will record using any device TDriver can find. -->
+    <parameter name="report_video" value="false" />
+    <parameter name="report_video_fps" value="10" />
+    <parameter name="report_video_width" value="640" />
+    <parameter name="report_video_height" value="480" />
+    <parameter name="realtime_status_page_update" value="false" />
+
+
 
   </template>
 
