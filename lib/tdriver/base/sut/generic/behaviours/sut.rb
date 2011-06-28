@@ -51,25 +51,24 @@ module MobyBehaviour
       :current_application_id,    # id of the current appication if set
       :input,                     # the input method used for interacting with this sut as a symbol, eg. :key or :touch.
       :refresh_tries,             # number of retries for ui dump on error case
-      :refresh_timeout           # timeout between timeout retry
+      :refresh_timeout            # timeout between timeout retry
 
     )
 
     # == nodoc
     attr_reader(
 
-      :xml_data,      # sut xml_data
-      :x_path,        # x_path pattern for xml_data
-      :ui_type,       # type of the UI used on the sut, ie. s60, qt, windows
-      :ui_version,    # version of the ui used on the sut, ie 3.2.3
-      :frozen,        # flag that tells if the ui dump getting is disabled
-      :xml_data_crc,  # crc of the previous ui state message
-      :verify_blocks  # verify blocks
+      :xml_data,          # sut xml_data
+      :x_path,            # x_path pattern for xml_data
+      :ui_type,           # type of the UI used on the sut, ie. s60, qt, windows
+      :ui_version,        # version of the ui used on the sut, ie 3.2.3
+      :frozen,            # flag that tells if the ui dump getting is disabled
+      :xml_data_checksum, # checksum of the previous ui state message
+      :verify_blocks      # verify blocks
 
     )
 
   private
-
 
     # this method will be automatically invoked after module is extended to sut object
     def self.extended( target_object )
@@ -1509,7 +1508,7 @@ module MobyBehaviour
 
       current_time = Time.now
 
-      if !@frozen #&& ( @_previous_refresh.nil? || ( current_time - @_previous_refresh ).to_f >= @refresh_interval )
+      unless @frozen
 
         # determine should FindObjects service be used
         use_find_objects =  sut_parameters[ :use_find_object, 'false' ] == 'true' and self.respond_to?( 'find_object' ) == true
@@ -1518,23 +1517,26 @@ module MobyBehaviour
         refresh_arguments = refresh_args.clone
 
         MobyUtil::Retryable.while(
-          :tries => @refresh_tries,
-          :interval => @refresh_interval,
-          :unless => [ MobyBase::ControllerNotFoundError, MobyBase::CommandNotFoundError, MobyBase::ApplicationNotAvailableError ]
+
+          :tries => @refresh_tries, :interval => @refresh_interval, :unless => [ MobyBase::ControllerNotFoundError, MobyBase::CommandNotFoundError, MobyBase::ApplicationNotAvailableError ]
+
         ){
+
+          # store as local variable for less AST lookups
+          xml_data_checksum = @xml_data_checksum
 
           #use find_object if set on and the method exists
           if use_find_objects
 
-            # retrieve new ui dump xml and crc
-            new_xml_data, crc = find_object( refresh_arguments, creation_attributes, @xml_data_crc )
+            # retrieve new ui dump xml and checksum
+            new_xml_data, new_checksum = find_object( refresh_arguments, creation_attributes, xml_data_checksum )
 
-            crc = @xml_data_crc if new_xml_data.empty?
+            new_checksum = xml_data_checksum if new_xml_data.empty?
 
           else
 
-            # retrieve new ui dump xml and crc
-            new_xml_data, crc = execute_command(  
+            # retrieve new ui dump xml and checksum
+            new_xml_data, new_checksum = execute_command(  
             
               MobyCommand::Application.new(
                 :State,
@@ -1543,30 +1545,30 @@ module MobyBehaviour
                   :application_uid => refresh_args[ :id ],
                   :sut => self,
                   :refresh_arguments => refresh_args,
-                  :checksum => @xml_data_crc
+                  :checksum => xml_data_checksum
                 }
               )
             
             )
 
-            crc = @xml_data_crc if new_xml_data.empty?
+            new_checksum = xml_data_checksum if new_xml_data.empty?
 
           end
 
-          # parse the xml if crc does not match with previously retrieved crc
-          if ( @xml_data_crc == 0 || crc != @xml_data_crc || crc.nil? )
+          # parse the xml if checksum does not match with previously retrieved checksum
+          if ( xml_data_checksum == 0 || new_checksum != xml_data_checksum || new_checksum.blank? )
 
-              # parse new xml string, return cached object if one is found; crc is used for caching and identifying the duplicate xml strings
-              xml_data, from_cache = MobyUtil::XML.parse_string( new_xml_data, crc )
+            # parse new xml string, return cached object if one is found; checksum is used for caching and identifying the duplicate xml strings
+            xml_data, from_cache = MobyUtil::XML.parse_string( new_xml_data, new_checksum )
 
-              # store new xml data object
-              @xml_data = xml_data.root
+            # store new xml data object
+            @xml_data = xml_data.root
 
-              # store xml crc to be compared while next ui dump request; do not reparse xml if crc values are equal
-              @xml_data_crc = crc
+            # store xml checksum to be compared while next ui dump request; do not reparse xml if checksum values are equal
+            @xml_data_checksum = new_checksum
 
-              # mark that child objects needs to be updated 
-              @update_childs = true #unless from_cache
+            # mark that child objects needs to be updated 
+            @update_childs = true #unless from_cache
 
           end
 
