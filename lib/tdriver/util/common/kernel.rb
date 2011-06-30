@@ -28,6 +28,17 @@ module Kernel
   end
 
   # TODO: document me
+  def __method_path__
+
+    # retrieve filename, line number and method name
+    /^(.+?):(\d+)(?::in `(.*)')?/.match( caller.reverse[ -2 ].to_s )
+
+    # construct string with module/class and method name
+    "#{ ( [ Class, Module ].include?( self.class ) ? self.name : self.class.name ).to_s }##{ caller.first.to_s.scan(/`(.+)'$/).to_s }"
+
+  end
+
+  # TODO: document me
   def warn_caller( message, remove_eval = true )
 
     # verify that message argument type is correct

@@ -141,6 +141,7 @@ module MobyUtil
 
       begin
 
+=begin
         unless crc.nil?
 
           [ Document.new( xml_string ), false ]
@@ -150,9 +151,10 @@ module MobyUtil
           Document.new( xml_string )
         
         end
+=end
 
 # JKo: disable xml caching for now, need more investigation why tests starts to fail
-=begin
+#=begin
         unless crc.nil?
 
           if @document_cache[ :cache ].include?( crc )
@@ -202,7 +204,7 @@ module MobyUtil
           Document.new( xml_string )
 
         end
-=end
+#=end
       rescue
 
         if $TDRIVER_INITIALIZED == true

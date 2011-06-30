@@ -17,101 +17,7 @@
 ## 
 ############################################################################
 
-#require 'lib/tdriver'
-
 module TDriver
-
-  class Behaviour
-
-    def initialize( values )
-
-      # add each hash pair as class instance attribute    
-      values.each_pair do | key, value |
-
-        # cast to string; might need additional verification for invalid characters
-        key = key.to_s
-
-        # add attribute reader for hash key 
-        eval <<-CODE 
-        
-          # add attribute reader     
-          class << self; attr_reader :#{ key }; end
-
-          # set value
-          @#{ key } = #{ value.inspect };
-          
-        CODE
-      
-      end
-    
-    end
-
-    def method_missing( name, *args )
-    
-      nil
-    
-    end
-    
-    def applies_to?( rule )
-
-      rule.default = [ '*' ]
-      
-      case rule[ :name ]
-      
-        when @name
-        
-          true
-        
-        when ['*'] 
-          
-          !( rule[ :object_type ] & @object_type ).empty? && 
-          !( rule[ :input_type ] & @input_type ).empty? &&
-          !( rule[ :env ] & @env ).empty? && 
-          !( rule[ :version ] & @version ).empty? 
-
-        else
-        
-          false
-
-      end      
-
-=begin
-      # calculate hash for behaviour rule / hash value will be used to identify similar objects
-      @@behaviours_cache.fetch( rule.delete_keys( :object ).hash ){ | behaviour_hash |
-
-        rule.default = [ '*' ]
-
-        @@behaviours_cache[ behaviour_hash ] = @@behaviours.each_with_index.collect{ | behaviour, index |
-
-          case rule[ :name ]
-
-            when behaviour[ :name ]
-
-              index
-
-            when [ '*' ]
-
-              index if ( 
-                !( rule[ :object_type ] & behaviour[ :object_type ] ).empty? && 
-                !( rule[ :input_type ] & behaviour[ :input_type ] ).empty? &&
-                !( rule[ :env ] & behaviour[ :env ] ).empty? && 
-                !( rule[ :version ] & behaviour[ :version ] ).empty? 
-              )
-
-          else
-
-            nil
-
-          end
-
-        }.compact
-
-      }
-=end
-
-    end
-  
-  end
 
   class BehaviourFactory
   
@@ -122,9 +28,13 @@ module TDriver
       # initialize behaviours factory
       def init( options )
 
+        # verify that argument is type of hash
+        options.check_type Hash, 'wrong argument type $1 for TDriver::BehaviourFactory#init options argument (expected $2)'
+
+        # load behaviour configuration files
         load_behaviours( 
-        
-          options[ :path ] 
+
+          options.require_key( :path, 'required key $1 not found from TDriver::BehaviourFactory#init options argument' )
           
         )
 
@@ -138,160 +48,77 @@ module TDriver
       
       end
 
-      def collect_behaviours( rule )
-
-        cache_key = rule.reject{ | key, value | key == :object }
-
-        if @behaviours_cache.has_key?( cache_key )
-        
-          @behaviours_cache[ cache_key ]
-        
-        else
-        
-          # retrieve enabled plugins from PluginService
-          enabled_plugins = TDriver::PluginService.enabled_plugins 
-
-          @behaviours_cache[ cache_key ] = @behaviours.select do | behaviour |
-
-            # skip if required plugin is not registered or enabled; compare requires array and enabled_plugins array
-            next unless ( behaviour[ 'requires' ] - enabled_plugins ).empty?
-
-            rule.default = [ '*' ]
-            
-            case rule[ :name ]
-            
-              when @name
-              
-                # exact match with name
-                true
-              
-              when ['*'] 
-   
-                # compare rules and behaviour attributes             
-                !( rule[ :object_type ] & behaviour[ 'object_type' ] ).empty? && 
-                !( rule[ :input_type ] & behaviour[ 'input_type' ] ).empty? &&
-                !( rule[ :env ] & behaviour[ 'env' ] ).empty? && 
-                !( rule[ :version ] & behaviour[ 'version' ] ).empty? 
-
-              else
-              
-                false
-
-            end
-
-          end
-
-        end
-      
-      end
-
+      # TODO: document me
       def apply_behaviour( rule )
         
+        # verify that rule is given as hash
+        rule.check_type Hash, 'wrong argument type $1 for TDriver::BehaviourFactory#apply_behaviour rule argument (expected $2)'
+
+        # empty collected indexes variable
         collected_indexes = [] 
         
-        #?? rule[ :object ].instance_variable_get( :@object_behaviours )
+        # retrieve object from hash
+        _object = rule[ :object ]
+
+        # generate cache key, drop :object value from hash
+        cache_key = rule.reject{ | key, value | key == :object }.hash
+
+        # retrieve behaviour from cache if found
+        if @behaviours_cache.has_key?( cache_key )
         
-        collect_behaviours( rule ).each do | behaviour |
+          behaviours = @behaviours_cache[ cache_key ]
+        
+        else
+
+          # collect behaviours that meets given rules
+          behaviours = collect_behaviours( rule )
+
+          # store behaviour collection to cache for future reuse
+          @behaviours_cache[ cache_key ] = behaviours
+
+        end
+
+        # iterate through each collected behaviour 
+        behaviours.each do | behaviour |
 
           begin
         
-            # retrieve behaviour module
-            behaviour[ 'module' ] = MobyUtil::KernelHelper.get_constant( behaviour[ 'module' ].to_s ) unless behaviour[ 'module' ].kind_of?( Module )
+            # retrieve module from hash
+            _module = behaviour[ :module ]
+
+            unless _module.kind_of?( Module )
+
+              # retrieve behaviour module
+              _module = MobyUtil::KernelHelper.get_constant( _module.to_s ) 
+
+              # store pointer to module (implementation) back to hash
+              behaviour[ :module ] = _module
+
+            end
 
             # extend target object with behaviour module
-            rule[ :object ].extend( behaviour[ 'module' ] )
+            _object.extend( _module )
 
             # store behaviour indexes
-            collected_indexes << behaviour[ 'index' ]
+            collected_indexes << behaviour[ :index ]
 
           rescue NameError
 
-            raise NameError, "Implementation for #{ behaviour[ 'name' ] } behaviour does not exist. (#{ behaviour[ 'module' ] })"
+            raise NameError, "Implementation for #{ behaviour[ :name ] } behaviour does not exist. (#{ _module })"
           
           rescue
           
-            raise RuntimeError, "Error while applying #{ behaviour[ 'name' ] } (#{ behaviour[ 'module' ] }) behaviour to target object due to #{ $!.message } (#{ $!.class })"
+            raise RuntimeError, "Error while applying #{ behaviour[ :name ] } (#{ _module }) behaviour to target object due to #{ $!.message } (#{ $!.class })"
           
           end
-
         
-        end
+        end # behaviours.each
 
-        unless rule[ :object ].instance_variable_defined?( :@object_behaviours )
+        # retrieve objects behaviour index array if already set
+        collected_indexes = _object.instance_variable_get( :@object_behaviours ) | collected_indexes if _object.instance_variable_defined?( :@object_behaviours )
 
-          # set behaviour indexes to test object
-          rule[ :object ].instance_variable_set( :@object_behaviours, collected_indexes )
-        
-        else
-        
-          # add behaviour indexes to test object
-          rule[ :object ].instance_variable_get( :@object_behaviours ).tap{ | indexes | indexes = indexes | collected_indexes }
-
-        end
-
-        
-                  
-=begin     
-        # retrieve enabled plugins from PluginService
-        enabled_plugins = TDriver::PluginService.enabled_plugins 
-
-        @behaviours.each_with_index{ | behaviour, index |
-        
-          # skip if required plugin is not registered or enabled; compare requires array and enabled_plugins array
-          next unless ( behaviour.requires - enabled_plugins ).empty?
-        
-          if behaviour.applies_to?( rule )
-            
-            begin
-                                     
-             behaviour_module = behaviour.module
-                                     
-              # retrieve behaviour module
-              if behaviour_module.kind_of?( String )
-                behaviour_module = behaviour.instance_variable_set(:@module, MobyUtil::KernelHelper.get_constant( behaviour.module )) 
-              end
-
-              # extend target object with behaviour module
-              rule[ :object ].extend( behaviour_module )
-          
-            rescue NameError
-
-              raise NameError, "Implementation for #{ behaviour.name } behaviour does not exist. (#{ behaviour.module })"
-            
-            rescue
-            
-              raise RuntimeError, "Error while applying #{ behaviour.name } (#{ behaviour.module }) behaviour to target object due to #{ $!.message } (#{ $!.class })"
-            
-            end
-
-# new
-#MobyBase::BehaviourFactory::apply_behaviour!                                          631      2.25980600      2.21837500    3.178%      0.00358131
-
-# old
-#MobyBase::BehaviourFactory::apply_behaviour!                                          631      2.27668800      2.23749700    3.178%      0.00360806
-#MobyBase::BehaviourFactory::apply_behaviour!                                          631      0.87363100      0.77245300    1.131%      0.00138452
-#MobyBase::BehaviourFactory::apply_behaviour!                                          631      0.51659900      0.48817000    0.720%      0.00081870
-#MobyBase::BehaviourFactory::apply_behaviour!                                          631      0.73310700      0.70426600    1.030%      0.00116182
-#MobyBase::BehaviourFactory::apply_behaviour!                                          631      0.58667000      0.55826300    0.824%      0.00092975
-
-#=begin           
-            # add behaviour information to test object
-            rule[ :object ].instance_variable_get( :@object_behaviours ).tap{ | indexes |
-            
-              indexes.push( index ) unless indexes.include?( index )
-            
-            }
-#=end
-      
-            # add behaviour information to test object
-            indexes = rule[ :object ].instance_variable_get( :@object_behaviours )
-
-            indexes.push( index ) unless indexes.include?( index )
-              
-          end # if applies.to?
-          
-        }
-=end
+        # add behaviour information to test object
+        _object.instance_variable_set( :@object_behaviours, collected_indexes )
       
       end
 
@@ -303,8 +130,54 @@ module TDriver
         # behaviours container
         @behaviours = []
         
+        # behaviour cache; re-collecting behaviours is not required for similar target objects
         @behaviours_cache = {}
             
+      end
+
+      # TODO: document me
+      def collect_behaviours( rule )
+
+        # default value for rule if not defined
+        rule.default = [ '*' ]
+
+        # retrieve enabled plugins from PluginService
+        enabled_plugins = TDriver::PluginService.enabled_plugins 
+
+        # store as local variable for less AST lookups
+        _object_type  = rule[ :object_type  ]
+        _input_type   = rule[ :input_type   ]
+        _env          = rule[ :env          ]
+        _version      = rule[ :version      ]
+
+        @behaviours.select do | behaviour |
+
+          # skip if required plugin is not registered or enabled; compare requires array and enabled_plugins array
+          next unless ( behaviour[ :requires ] - enabled_plugins ).empty?
+          
+          case rule[ :name ]
+          
+            when behaviour[ :name ]
+            
+              # exact match with name
+              true
+            
+            when ['*']
+
+              # compare rules and behaviour attributes             
+              !( _object_type & behaviour[ :object_type ] ).empty? && 
+              !( _input_type  & behaviour[ :input_type  ] ).empty? &&
+              !( _env         & behaviour[ :env         ] ).empty? && 
+              !( _version     & behaviour[ :version     ] ).empty? 
+
+          else
+            
+            false
+
+          end
+
+        end # behaviours.select
+      
       end
 
       # load and parse behaviours files
@@ -328,16 +201,16 @@ module TDriver
               root_attributes = behaviours.attributes
 
               # process each behaviour element
-              behaviours.xpath( 'behaviour' ).each do | behaviour |
+              behaviours.xpath( './behaviour' ).each do | behaviour |
 
                 # retrieve behaviour attributes - set default values if not found from element
                 attributes = behaviour.attributes.default_values(
-                  "name"        => '', 
-                  "object_type" => '', 
-                  "input_type"  => '', 
-                  "sut_type"    => '', 
-                  "version"     => '',
-                  "env"         => '*'
+                  'name'        => '', 
+                  'object_type' => '', 
+                  'input_type'  => '', 
+                  'sut_type'    => '', 
+                  'version'     => '',
+                  'env'         => '*'
                 )
 
                 # verify that behaviour attributes are not empty
@@ -352,42 +225,37 @@ module TDriver
 
                 # verify that module name is defined
                 module_name.not_empty "behaviour #{ attributes[ "name" ].inspect } does not have module name defined or is empty", RuntimeError
-                
-                # store behaviour 
-                #@behaviours << Behaviour.new( 
 
                 # store behaviour 
-                @behaviours << { #Behaviour.new( 
+                @behaviours << {  
 
-                  "index"       => @behaviours.count,
+                  :index       => @behaviours.count,
     
-                  "name"        => attributes[ 'name'        ],
-                  "object_type" => attributes[ 'object_type' ].split(';'),
-                  "input_type"  => attributes[ 'input_type'  ].split(';'),
-                  "version"     => attributes[ 'version'     ].split(';'),
-                  "env"         => attributes[ 'env'         ].split(';'),
+                  :name        => attributes[ 'name'        ],
+                  :object_type => attributes[ 'object_type' ].split(';'),
+                  :input_type  => attributes[ 'input_type'  ].split(';'),
+                  :version     => attributes[ 'version'     ].split(';'),
+                  :env         => attributes[ 'env'         ].split(';'),
 
-                  "requires"    => root_attributes[ 'plugin' ].to_s.split(';'),
+                  :requires    => root_attributes[ 'plugin' ].to_s.split(';'),
 
-                  "module"      => module_name,
-                  "file"        => behaviour.at_xpath( 'module/text()' ).to_s, # optional 
+                  :module      => module_name,
+                  :file        => behaviour.at_xpath( 'module/text()' ).to_s, # optional 
                   
-                  "methods"     => Hash[ 
+                  :methods     => Hash[ 
                     # collect method details from behaviour 
                     behaviour.xpath( 'methods/method' ).collect{ | method |                
                       [ 
-                        method.attribute('name'),
+                        method.attribute( 'name' ),
                         {
-                          "description" => method.at_xpath( 'description/text()' ).to_s,
-                          "example" => method.at_xpath( 'example/text()' ).to_s
+                          :description => method.at_xpath( 'description/text()' ).to_s,
+                          :example     => method.at_xpath( 'example/text()'     ).to_s
                         }
                       ]                  
                     }
                   ]
                 
                 }
-                
-                # )
 
               end # behaviour.each
 
@@ -410,12 +278,15 @@ module TDriver
         } # Dir.glob
       
       end # behaviours
-      
+   
     end # self
    
     # initialize behaviour factory
     initialize_class
 
-  end
+    # enable hooking for performance measurement & debug logging
+    TDriver::Hooking.hook_methods( self ) if defined?( TDriver::Hooking )
+
+  end # BehaviourFactory
   
-end
+end # TDriver
