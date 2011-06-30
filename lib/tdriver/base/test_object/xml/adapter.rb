@@ -471,34 +471,36 @@ module TDriver
 
       # TODO: document me
       def self.test_object_attributes( source_data, inclusive_filter = [] )
-        
+
         # convert all keys to lowercase
         inclusive_filter.collect!{ | key | key.to_s.downcase } unless inclusive_filter.empty?
-        
-        # return hash of test object attributes
-        Hash[ 
 
-          # iterate each attribute and collect name and value      
-          source_data.xpath( 'attr' ).collect{ | value | 
+        # return hash of test object attributes
+        object_attributes=Hash.new
+
+          # iterate each attribute and collect name and value
+          source_data.xpath( 'attr' ).collect{ | value |
 
             # retrieve attribute name
             name = value.attribute('name').to_s
 
             # collect attribute elements name and content
             unless inclusive_filter.empty?
-            
-              [ name, value.content ] if inclusive_filter.include?( name.downcase )
-                      
-            else
 
+              object_attributes[name]=value.content if inclusive_filter.include?( name.downcase )
+
+            else
               # pass the attribute pair - no filtering done
-              [ name, value.content ]
-            
+              if object_attributes[name]
+                object_attributes[name]="#{object_attributes[name]},#{value.content}"
+              else
+                object_attributes[name]=value.content
+              end
             end
 
           }
 
-        ]
+        object_attributes
 
       end
 
