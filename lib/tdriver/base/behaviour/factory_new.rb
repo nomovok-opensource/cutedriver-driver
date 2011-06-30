@@ -122,6 +122,166 @@ module TDriver
       
       end
 
+      # TODO: document me
+      def collect_behaviours( rule )
+
+
+        # retrieve enabled plugins from PluginService
+        enabled_plugins = TDriver::PluginService.enabled_plugins 
+
+
+        # default value for rule if not defined
+        rule.default = [ '*' ]
+
+        # store as local variable for less AST lookups
+        _index        = rule.fetch( :index ){ [] }
+        _object_type  = rule[ :object_type  ]
+        _input_type   = rule[ :input_type   ]
+        _env          = rule[ :env          ]
+        _version      = rule[ :version      ]
+
+        @behaviours.select do | behaviour |
+
+          # skip if required plugin is not registered or enabled; compare requires array and enabled_plugins array
+          next unless ( behaviour[ :requires ] - enabled_plugins ).empty?
+
+          # match other rules if no exact index given          
+          if _index.empty?
+
+            case rule[ :name ]
+            
+              when behaviour[ :name ]
+              
+                # exact match with name
+                true
+              
+              when ['*']
+
+                # compare rules and behaviour attributes
+                !( _object_type & behaviour[ :object_type ] ).empty? && 
+                !( _input_type  & behaviour[ :input_type  ] ).empty? &&
+                !( _env         & behaviour[ :env         ] ).empty? && 
+                !( _version     & behaviour[ :version     ] ).empty? 
+
+            else
+              
+              false
+
+            end
+
+          else
+
+            # index given
+            true if Array( _index ).include?( behaviour[ :index ] )
+
+          end
+
+        end # behaviours.select
+      
+      end
+
+      def to_xml( rule )
+
+        MobyUtil::XML.build{ | xml |
+
+          # root element
+          xml.behaviours{
+
+            # iterate each behaviour that meets the rule
+            collect_behaviours( rule ).each{ | behaviour | 
+
+              # behaviour element
+              xml.behaviour( :name => behaviour[ :name ], :object_type => behaviour[ :object_type ].sort.join(";") ){
+
+                # behaviour methods element
+                xml.object_methods{
+
+                  behaviour[ :methods ].each_pair{ | key, value |
+
+                    xml.object_method( :name => key.to_s ){
+
+                      xml.description value[ :description ].upcase
+                      xml.example     value[ :example     ].upcase
+
+                    } # object_method
+
+                  } # methods.each_pair
+
+                } # object_methods
+
+              }  # behaviour
+
+            } # behaviours.each
+
+          } # root
+
+        }.to_xml
+
+=begin
+
+
+            object_methods{
+              @@behaviours[ @_method_index ][ :methods ].each { | key, value |
+              object_method( :name => key.to_s ) {  
+                description( value[:description] )
+                example( value[:example] )
+              }
+              }
+            }
+
+
+        @_method_index = nil
+
+        rules.default = [ '*' ]
+
+        rules.each_pair{ | key, value |
+
+        rules[ key ] = [ value ] if value.kind_of?( String )
+
+        }
+
+        MobyUtil::XML.build{
+
+        behaviours{
+
+          @@behaviours.each_index{ | index |
+
+          @_method_index = index
+
+          behaviour = @@behaviours[ @_method_index ]
+
+          if ( ( rules[ :name ] == behaviour[ :name ] ) ||  
+
+            ( rules[ :name ] == [ '*' ] ) &&
+
+    #        ( !( rules[ :sut_type ] & behaviour[ :sut_type ] ).empty? ) && 
+            ( !( rules[ :input_type ] & behaviour[ :input_type ] ).empty? ) && 
+            ( !( rules[ :object_type ] & behaviour[ :object_type ] ).empty? ) && 
+            ( !( rules[ :version ] & behaviour[ :version ] ).empty? )
+
+            ) 
+
+            behaviour( :name => @@behaviours[ @_method_index ][ :name ], :object_type => @@behaviours[ @_method_index ][ :object_type ].join(";") ){ 
+            object_methods{
+              @@behaviours[ @_method_index ][ :methods ].each { | key, value |
+              object_method( :name => key.to_s ) {  
+                description( value[:description] )
+                example( value[:example] )
+              }
+              }
+            }
+            }
+
+          end
+
+          }
+
+        }
+
+        }.to_xml
+=end
+      end
+
     private
       
       # private methods and variables
@@ -135,50 +295,6 @@ module TDriver
             
       end
 
-      # TODO: document me
-      def collect_behaviours( rule )
-
-        # default value for rule if not defined
-        rule.default = [ '*' ]
-
-        # retrieve enabled plugins from PluginService
-        enabled_plugins = TDriver::PluginService.enabled_plugins 
-
-        # store as local variable for less AST lookups
-        _object_type  = rule[ :object_type  ]
-        _input_type   = rule[ :input_type   ]
-        _env          = rule[ :env          ]
-        _version      = rule[ :version      ]
-
-        @behaviours.select do | behaviour |
-
-          # skip if required plugin is not registered or enabled; compare requires array and enabled_plugins array
-          next unless ( behaviour[ :requires ] - enabled_plugins ).empty?
-          
-          case rule[ :name ]
-          
-            when behaviour[ :name ]
-            
-              # exact match with name
-              true
-            
-            when ['*']
-
-              # compare rules and behaviour attributes             
-              !( _object_type & behaviour[ :object_type ] ).empty? && 
-              !( _input_type  & behaviour[ :input_type  ] ).empty? &&
-              !( _env         & behaviour[ :env         ] ).empty? && 
-              !( _version     & behaviour[ :version     ] ).empty? 
-
-          else
-            
-            false
-
-          end
-
-        end # behaviours.select
-      
-      end
 
       # load and parse behaviours files
       def load_behaviours( path )
