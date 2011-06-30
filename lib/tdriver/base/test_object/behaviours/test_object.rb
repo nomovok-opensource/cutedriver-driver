@@ -313,7 +313,15 @@ module MobyBehaviour
 
       # return application object or nil if no parent found
       # Does is make sense to return nil - should  n't all test objects belong to an application? Maybe throw exception if application not found
-      return @sut.child( :type => 'application' ) rescue nil
+      begin 
+
+        @sut.child( :type => 'application' ) 
+
+      rescue 
+
+        nil
+
+      end
 
     end
 
@@ -326,11 +334,17 @@ module MobyBehaviour
     # puts @app.Node( :name => 'Node1' ).get_application_id() #print the application id, this should print @app.id
     def get_application_id
 
-      return @parent_application.id if @parent_application
+      if @parent_application
 
-      # workaround
-      # What about the case when get_application returns nil? This line will throw an exception in that case.
-      get_application.id
+        @parent_application.id
+
+      else
+
+        # workaround
+        # What about the case when get_application returns nil? This line will throw an exception in that case.
+        get_application.id
+
+      end
 
     end
 
