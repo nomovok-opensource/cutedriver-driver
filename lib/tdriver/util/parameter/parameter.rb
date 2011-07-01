@@ -427,6 +427,65 @@ module TDriver
 
           case element.name
 
+            when 'include'
+
+              directory = MobyUtil::FileHelper.expand_path( attributes[ 'directory' ] )
+
+              files_pattern = Regexp.new( attributes[ 'files' ] )
+
+=begin
+              pattern_flags = attributes[ 'flags' ].to_s.each_char.inject( 0 ){ | flags, char | 
+
+                case char
+
+                  when /m/i
+
+                    flags += Regexp::MULTILINE
+
+                  when /i/i
+
+                    flags += Regexp::IGNORECASE
+
+                  when /x/i
+
+                    flags += Regexp::EXTENDED
+
+                else
+
+                  raise ArgumentError, "Invalid regular expression pattern flag #{ char.inspect } (expected: 'm', 'i' or 'x')"
+
+                end
+
+              }
+=end
+  
+              value = ParameterHash.new
+
+              included_files = []
+
+              # iterate each found file from given directory
+              Dir.glob( File.join( directory, '*' ) ).each do | file |
+
+                # and merge content of the file if filename matches with given files pattern
+                if File.basename( file ) =~ files_pattern
+
+                  value.merge!( process_file( file, false ) ) 
+
+                  included_files << file
+
+                end
+
+              end
+
+              # merge included values to results
+              results.merge!( value )
+
+              # store included files to :included_files value
+              name = "included_files"
+
+              # append to :included files value
+              value = ( results[ name.to_sym, [] ].concat( included_files ) ).compact.uniq
+
             when 'keymap'
 
               # use element name as parameter name ("keymap")
@@ -698,7 +757,7 @@ module TDriver
       end
 
       # TODO: document me
-      def process_file( filename )
+      def process_file( filename, root = true )
 
         begin
         
@@ -706,7 +765,9 @@ module TDriver
           file_content = load_file( filename )
         
           # parse file content and retrieve root element
-          root_element = MobyUtil::XML.parse_string( file_content ).root
+          root_element = MobyUtil::XML.parse_string( file_content ) #.root
+
+          root_element = root_element.root if root == true
         
           # parse root element
           process_element( root_element )
