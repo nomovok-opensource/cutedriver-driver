@@ -831,192 +831,196 @@ module TDriver
       
     end # self
     
-    # TODO: document me
-    def self.parse_file( filename, reset_parameters = false )
+    class << self
 
-      # check argument type for filename
-      filename.check_type [ String ], 'wrong argument type $1 for filename argument (expected $2)'
+      # TODO: document me
+      def parse_file( filename, reset_parameters = false )
 
-      # check argument type for filename
-      reset_parameters.check_type [ TrueClass, FalseClass ], 'wrong argument type $1 for reset_parameters boolean argument (expected $2)'
+        # check argument type for filename
+        filename.check_type [ String ], 'wrong argument type $1 for filename argument (expected $2)'
 
-      # reset parameter hash if requested
-      @parameters.clear if reset_parameters == true
-    
-      # load and parse given file
-      load_parameters_file( filename )
-    
-    end
-    
-    # TODO: document me
-    def self.parse_string( source, merge_hashes = true )
-    
-      # check argument type for source
-      source.check_type [ String ], 'wrong argument type $1 for source XML argument (expected $2)'
+        # check argument type for filename
+        reset_parameters.check_type [ TrueClass, FalseClass ], 'wrong argument type $1 for reset_parameters boolean argument (expected $2)'
 
-      # check argument type for merge_hashes
-      merge_hashes.check_type [ TrueClass, FalseClass ], 'wrong argument type $1 for merge_hashes argument (expected $2)'
-
-      # process xml string, returns hash as result
-      hash = process_string( source )  
-
-      if merge_hashes
+        # reset parameter hash if requested
+        @parameters.clear if reset_parameters == true
       
-        @parameters.recursive_merge!( hash )
+        # load and parse given file
+        load_parameters_file( filename )
       
-      else
+      end
+      
+      # TODO: document me
+      def parse_string( source, merge_hashes = true )
+      
+        # check argument type for source
+        source.check_type [ String ], 'wrong argument type $1 for source XML argument (expected $2)'
 
-        @parameters.merge!( hash )
+        # check argument type for merge_hashes
+        merge_hashes.check_type [ TrueClass, FalseClass ], 'wrong argument type $1 for merge_hashes argument (expected $2)'
+
+        # process xml string, returns hash as result
+        hash = process_string( source )  
+
+        if merge_hashes
+        
+          @parameters.recursive_merge!( hash )
+        
+        else
+
+          @parameters.merge!( hash )
+        
+        end
+      
+      end
+          
+      # TODO: document me
+      def clear
+      
+        @parameter_files.clear
+      
+        @parameters.clear
+      
+      end
+
+      # TODO: document me
+      def files
+      
+        # return loaded parameter files list
+        @parameter_files
+      
+      end
+
+      # TODO: document me
+      def template_files
+      
+        # return loaded parameter files list
+        @template_files
+      
+      end
+
+      # TODO: document me
+      def has_key?( key )
+      
+        @parameters.has_key?( key )
+      
+      end
+
+      # TODO: document me
+      def has_value?( key )
+      
+        @parameters.has_value?( key )
+      
+      end
+
+      # TODO: document me
+      def keys
+      
+        @parameters.keys
+      
+      end
+
+      # TODO: document me
+      def values
+      
+        @parameters.values
+      
+      end
+
+      # TODO: document me
+      def []( key, *default )
+      
+        @parameters[ key, *default ]
+            
+      end
+
+      # TODO: document me
+      def []=( key, value )
+      
+        @parameters[ key ] = value
+      
+      end
+
+      # TODO: document me
+      def fetch( key, *default, &block )
+
+        @parameters.__send__( :[], key, *default, &block )
+
+      end
+
+      # TODO: document me
+      def if_found( key, &block )
+
+        @parameters.__send__( :if_found, key, &block )
+
+      end
+
+      # TODO: document me
+      def delete( key )
+      
+        @parameters.delete( key )
+      
+      end
+      
+      # TODO: document me
+      def inspect
+      
+        @parameters.inspect
+      
+      end
+
+      # TODO: document me
+      def templates
+      
+        @templates
+      
+      end
+
+      def parameters
+
+        warn "warning: deprecated method #{ self.name }##{ __method__ }; please use #{ self.name }#hash instead"
+      
+        hash
+        
+      end
+
+      def hash
+      
+        @parameters
+        
+      end
+
+      # TODO: document me
+      def reset
+
+        reset_hashes
+            
+      end
+
+      # TODO: document me
+      def configured_suts
+      
+        @sut_list
       
       end
     
-    end
-        
-    # TODO: document me
-    def self.clear
-    
-      @parameter_files.clear
-    
-      @parameters.clear
-    
-    end
-
-    # TODO: document me
-    def self.files
-    
-      # return loaded parameter files list
-      @parameter_files
-    
-    end
-
-    # TODO: document me
-    def self.template_files
-    
-      # return loaded parameter files list
-      @template_files
-    
-    end
-
-    # TODO: document me
-    def self.has_key?( key )
-    
-      @parameters.has_key?( key )
-    
-    end
-
-    # TODO: document me
-    def self.has_value?( key )
-    
-      @parameters.has_value?( key )
-    
-    end
-
-    # TODO: document me
-    def self.keys
-    
-      @parameters.keys
-    
-    end
-
-    # TODO: document me
-    def self.values
-    
-      @parameters.values
-    
-    end
-
-    # TODO: document me
-    def self.[]( key, *default )
-    
-      @parameters[ key, *default ]
-          
-    end
-
-    # TODO: document me
-    def self.[]=( key, value )
-    
-      @parameters[ key ] = value
-    
-    end
-
-    # TODO: document me
-    def self.fetch( key, *default, &block )
-
-      @parameters.__send__( :[], key, *default, &block )
-
-    end
-
-    # TODO: document me
-    def self.if_found( key, &block )
-
-      @parameters.__send__( :if_found, key, &block )
-
-    end
-
-    # TODO: document me
-    def self.delete( key )
-    
-      @parameters.delete( key )
-    
-    end
-    
-    # TODO: document me
-    def self.inspect
-    
-      @parameters.inspect
-    
-    end
-
-    # TODO: document me
-    def self.templates
-    
-      @templates
-    
-    end
-
-    def self.parameters
-
-      warn "warning: deprecated method #{ self.name }##{ __method__ }; please use #{ self.name }#hash instead"
-    
-      hash
+      # deprecated methods
+      def reset_parameters
       
-    end
-
-    def self.hash
-    
-      @parameters
+        warn "warning: deprecated method #{ self.name }##{ __method__ }; please use #{ self.name }#reset instead"
       
-    end
+        reset
+      
+      end
 
-    # TODO: document me
-    def self.reset
+      # load parameter xml files
+      def load_parameters_xml( filename, reset = false )
 
-      reset_hashes
-          
-    end
+        warn "warning: deprecated method #{ self.name }##{ __method__ }; please use #{ self.name }#parse_file instead"
 
-    # TODO: document me
-    def self.configured_suts
-    
-      @sut_list
-    
-    end
-  
-    # deprecated methods
-    def self.reset_parameters
-    
-      warn "warning: deprecated method #{ self.name }##{ __method__ }; please use #{ self.name }#reset instead"
-    
-      reset
-    
-    end
+        parse_file( filename, reset )
 
-    # load parameter xml files
-    def self.load_parameters_xml( filename, reset = false )
-
-      warn "warning: deprecated method #{ self.name }##{ __method__ }; please use #{ self.name }#parse_file instead"
-
-      parse_file( filename, reset )
+      end
 
     end
   
