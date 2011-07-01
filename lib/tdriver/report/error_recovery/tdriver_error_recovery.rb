@@ -45,6 +45,7 @@ module TDriverErrorRecovery
   # === raises
   def start_error_recovery()
     resetted=false
+    initialize_error_recovery if @recovery_settings==nil
     if @recovery_settings.get_error_recovery_enabled=='true'
       MobyUtil::Logger.instance.log "behaviour" , "PASS;Starting error recovery"
       if @recovery_settings.get_reconnect_device=='true'
