@@ -218,6 +218,14 @@ module TDriver
 
       end
 
+      # TODO: document me
+      def reset_cache
+
+        # reset behaviour cache
+        @behaviours_cache = {}
+
+      end
+
     private
       
       # private methods and variables
@@ -230,7 +238,6 @@ module TDriver
         @behaviours_cache = {}
             
       end
-
 
       # load and parse behaviours files
       def load_behaviours( path )
