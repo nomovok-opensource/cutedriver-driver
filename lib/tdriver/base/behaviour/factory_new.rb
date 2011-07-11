@@ -125,10 +125,8 @@ module TDriver
       # TODO: document me
       def collect_behaviours( rule )
 
-
         # retrieve enabled plugins from PluginService
         enabled_plugins = TDriver::PluginService.enabled_plugins 
-
 
         # default value for rule if not defined
         rule.default = [ '*' ]
@@ -180,6 +178,7 @@ module TDriver
       
       end
 
+      # TODO: document me
       def to_xml( rule )
 
         MobyUtil::XML.build{ | xml |
@@ -200,8 +199,8 @@ module TDriver
 
                     xml.object_method( :name => key.to_s ){
 
-                      xml.description value[ :description ].upcase
-                      xml.example     value[ :example     ].upcase
+                      xml.description value[ :description ]
+                      xml.example     value[ :example     ]
 
                     } # object_method
 
@@ -217,69 +216,6 @@ module TDriver
 
         }.to_xml
 
-=begin
-
-
-            object_methods{
-              @@behaviours[ @_method_index ][ :methods ].each { | key, value |
-              object_method( :name => key.to_s ) {  
-                description( value[:description] )
-                example( value[:example] )
-              }
-              }
-            }
-
-
-        @_method_index = nil
-
-        rules.default = [ '*' ]
-
-        rules.each_pair{ | key, value |
-
-        rules[ key ] = [ value ] if value.kind_of?( String )
-
-        }
-
-        MobyUtil::XML.build{
-
-        behaviours{
-
-          @@behaviours.each_index{ | index |
-
-          @_method_index = index
-
-          behaviour = @@behaviours[ @_method_index ]
-
-          if ( ( rules[ :name ] == behaviour[ :name ] ) ||  
-
-            ( rules[ :name ] == [ '*' ] ) &&
-
-    #        ( !( rules[ :sut_type ] & behaviour[ :sut_type ] ).empty? ) && 
-            ( !( rules[ :input_type ] & behaviour[ :input_type ] ).empty? ) && 
-            ( !( rules[ :object_type ] & behaviour[ :object_type ] ).empty? ) && 
-            ( !( rules[ :version ] & behaviour[ :version ] ).empty? )
-
-            ) 
-
-            behaviour( :name => @@behaviours[ @_method_index ][ :name ], :object_type => @@behaviours[ @_method_index ][ :object_type ].join(";") ){ 
-            object_methods{
-              @@behaviours[ @_method_index ][ :methods ].each { | key, value |
-              object_method( :name => key.to_s ) {  
-                description( value[:description] )
-                example( value[:example] )
-              }
-              }
-            }
-            }
-
-          end
-
-          }
-
-        }
-
-        }.to_xml
-=end
       end
 
     private

@@ -17,12 +17,12 @@
 ## 
 ############################################################################
 
-
-
-
 # behaviour abstract class
-require File.expand_path( File.join( File.dirname( __FILE__ ), 'behaviour' ) )
-require File.expand_path( File.join( File.dirname( __FILE__ ), 'factory' ) )
+require File.expand_path( File.join( File.dirname( __FILE__ ), 'behaviour.rb' ) )
+
+# factory class
+require File.expand_path( File.join( File.dirname( __FILE__ ), 'factory.rb' ) )
+require File.expand_path( File.join( File.dirname( __FILE__ ), 'factory_new.rb' ) )
 
 # load generic behaviours
 MobyUtil::FileHelper.load_modules( File.expand_path( File.join( File.dirname( __FILE__ ), 'behaviours' ) ) )
