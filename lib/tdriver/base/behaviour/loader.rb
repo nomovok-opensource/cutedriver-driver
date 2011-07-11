@@ -21,7 +21,7 @@
 require File.expand_path( File.join( File.dirname( __FILE__ ), 'behaviour.rb' ) )
 
 # factory class
-require File.expand_path( File.join( File.dirname( __FILE__ ), 'factory.rb' ) )
+#require File.expand_path( File.join( File.dirname( __FILE__ ), 'factory.rb' ) )
 require File.expand_path( File.join( File.dirname( __FILE__ ), 'factory_new.rb' ) )
 
 # load generic behaviours

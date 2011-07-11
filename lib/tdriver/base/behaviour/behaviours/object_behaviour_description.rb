@@ -67,7 +67,15 @@ module MobyBehaviour
     #
 		def behaviours( return_indexes = false )
 
-			return_indexes ? @object_behaviours : @object_behaviours.collect{ | index | MobyBase::BehaviourFactory.instance.get_behaviour_at_index( index )[ :name ] }.uniq.compact.sort
+      if return_indexes
+
+        @object_behaviours
+
+      else
+
+        TDriver::BehaviourFactory.collect_behaviours( :index => @object_behaviours ).collect{ | behaviour | behaviour[ :name ] }.uniq.compact.sort
+
+      end
 
 		end
 
@@ -79,11 +87,21 @@ module MobyBehaviour
     #  example: ["application?", "close", "closable?", "describe"]
 		def object_methods
 
-			[].tap{ | methods | 
-				@object_behaviours.each{ | index | 
-					MobyBase::BehaviourFactory.instance.get_behaviour_at_index( index )[ :methods ].keys.each{ | key | methods << key.to_s }
-				} 
-			}.uniq.compact.sort
+      TDriver::BehaviourFactory.collect_behaviours( :index => @object_behaviours ).inject( [] ){ | result, behaviour |
+
+        # append method names to result array
+        result.concat( 
+
+          behaviour[ :methods ].keys.collect{ | key | 
+
+            # make sure that method name is returned in type of string
+            key.to_s 
+
+          } 
+
+        ) 
+
+      }.uniq.compact.sort
 
 		end
 
@@ -134,52 +152,44 @@ module MobyBehaviour
     #
 		def describe_method( method_name, print = true, return_result = false )
 			
-      # verify that method_name is type of Symbol or String 
-      method_name.check_type( [ Symbol, String ], "Wrong argument type $1 for method name (expected $2)" )
+      # verify that method_name is type of Symbol or String and convert it to Symbol
+      method_name = method_name.check_type( [ Symbol, String ], "wrong argument type $1 for method name (expected $2)" ).to_s
 
-			# convert to symbol if method_name is a string
-			method_name = method_name.to_sym if method_name.kind_of?( String )
-
-			# print result to stdout if argument not boolean
-			print = true unless [ TrueClass, FalseClass ].include?( print.class )
+      # verify that print argument is boolean
+      print = print.check_type( [ TrueClass, FalseClass ], "wrong argument type $1 for verbose output (expected $2)" ).true?
 
 			# return result not printed out to stdout 
-			return_result = true unless print
+			return_result = true if print.false?
 
-			result_hash = nil
+      behaviours = TDriver::BehaviourFactory.collect_behaviours( :index => @object_behaviours ).select{ | behaviour |
 
-			@object_behaviours.each{ | index | 
+        behaviour[ :methods ].keys.include?( method_name )
 
-				behaviour = MobyBase::BehaviourFactory.instance.get_behaviour_at_index( index )
+      }.compact.last
 
-				if behaviour[ :methods ].keys.include? method_name
-					method_details = behaviour[:methods][ method_name ]
-					result_hash = { :description => method_details[ :description ], :example => method_details[ :example ] }
-					break;
-				end
-				
-			}
+      # verify that method was found
+      behaviours.not_blank "Test object type of #{ @type } does not have method #{ method_name.inspect }"
 
-			Kernel::raise ArgumentError.new( "Test object type of %s does not have method %s" % [ self.type, method_name ] ) if result_hash.nil?
+      result = { 
+        :name => method_name, 
+        :description => behaviours[ :methods ][ method_name ][ :description ], 
+        :example => behaviours[ :methods ][ method_name ][ :example ] 
+      }
 
-			if print
+      if print
 
-				result = ""
+        result = [ :name, :description, :example ].inject( "" ){ | tmp_result, key |
 
-				[ :description, :example ].each{ | key | 
-					tmp_hash = result_hash[ key ]
-					result << "\n#{ key.to_s.capitalize }:\n#{ tmp_hash }\n"
-				}
+					tmp_result << "\n#{ key.to_s.capitalize }:\n#{ result[ key ] }\n"
 
-				puts result
+        }
 
-			else
+        puts result
 
-				result = result_hash
+      end
 
-			end
-
-			( return_result ? result : nil )
+      # result
+      return_result ? result : nil    
 
 		end
 

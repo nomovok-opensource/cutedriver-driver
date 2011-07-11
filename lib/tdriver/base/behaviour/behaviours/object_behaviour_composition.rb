@@ -17,7 +17,7 @@
 ## 
 ############################################################################
 
-# deprecated: use MobyUtil::BehaviourFactory instead
+# deprecated: use TDriver::BehaviourFactory instead
 
 =begin
 module MobyBehaviour
@@ -72,7 +72,7 @@ module MobyBehaviour
 
 			sut = ( sut = self ).kind_of?( MobyBase::SUT ) ? sut : sut.sut 
 
-			MobyBase::BehaviourFactory.instance.apply_behaviour!( { :sut_type => [ '*', sut.ui_type ], :version => [ '*', sut.ui_version ] }.merge( rules ).merge( { :object => self } ) )
+			TDriver::BehaviourFactory.apply_behaviour( { :sut_type => [ '*', sut.ui_type ], :version => [ '*', sut.ui_version ] }.merge( rules ).merge( { :object => self } ) )
 
 		end
 

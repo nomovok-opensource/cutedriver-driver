@@ -177,6 +177,15 @@ module TDriver
         end # behaviours.select
       
       end
+ 
+      # remove me when migration ready
+      def apply_behaviour!( *args )
+
+        warn_caller '$1:$2 warning: deprecated method apply_behaviour!; please use TDriver::BehaviourFactory.apply_behaviour instead'
+
+        apply_behaviour( *args )
+
+      end
 
       # TODO: document me
       def to_xml( rule )

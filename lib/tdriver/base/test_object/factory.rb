@@ -470,13 +470,13 @@ module MobyBase
         obj_type << ';*' unless obj_type == 'application'
 
         # apply behaviours to test object
-        MobyBase::BehaviourFactory.instance.apply_behaviour!(
+        TDriver::BehaviourFactory.apply_behaviour(
 
-          :object => test_object,
-          :object_type => [ *obj_type.split(';') ], 
-          :input_type => [ '*', sut.input.to_s ],
-          :env => [ '*', *env.to_s.split(";") ],
-          :version => [ '*', sut.ui_version.to_s ]
+          :object       => test_object,
+          :object_type  => [ *obj_type.split(';')       ], 
+          :input_type   => [ '*', sut.input.to_s        ],
+          :env          => [ '*', *env.to_s.split(";")  ],
+          :version      => [ '*', sut.ui_version.to_s   ]
 
         )
 
