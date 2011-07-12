@@ -358,3 +358,25 @@ module TDriver
   end # BehaviourFactory
   
 end # TDriver
+
+# backwards compatibility; e.g. if visualizer is too old
+module MobyBase
+
+  # TODO: document me
+  class BehaviourFactory
+
+    class << self
+
+      def instance
+
+        warn_caller "$1:$2 warning: deprecated class MobyBase::BehaviourFactory; please use TDriver::BehaviourFactory instead"
+        
+        TDriver::BehaviourFactory
+
+      end
+
+    end
+
+  end # BehaviourFactory
+
+end # MobyBase
