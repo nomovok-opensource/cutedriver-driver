@@ -37,8 +37,8 @@ require 'rubygems'
   # statistics module
   'statistics/statistics.rb',
 
-  # dynamic attribute filter module
-  'filters/dynamic_attributes.rb', 
+  # filter modules
+  'filters/loader.rb', 
 
   # plugin service modules
   'plugin/loader.rb', 
