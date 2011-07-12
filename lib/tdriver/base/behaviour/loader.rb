@@ -18,11 +18,29 @@
 ############################################################################
 
 # behaviour abstract class
-require File.expand_path( File.join( File.dirname( __FILE__ ), 'behaviour.rb' ) )
+#require File.expand_path( File.join( File.dirname( __FILE__ ), 'abstract.rb' ) )
 
 # factory class
 #require File.expand_path( File.join( File.dirname( __FILE__ ), 'factory.rb' ) )
-require File.expand_path( File.join( File.dirname( __FILE__ ), 'factory_new.rb' ) )
+
+[
+  # behaviour abstract class
+  'abstract.rb',
+
+  # behaviour factory class
+  'factory.rb'
+
+].each{ | filename |
+
+  require File.expand_path( 
+    File.join( File.dirname( __FILE__ ), filename ) 
+  )
+
+}
 
 # load generic behaviours
-MobyUtil::FileHelper.load_modules( File.expand_path( File.join( File.dirname( __FILE__ ), 'behaviours' ) ) )
+MobyUtil::FileHelper.load_modules( 
+  File.expand_path( 
+    File.join( File.dirname( __FILE__ ), 'behaviours' ) 
+  )
+)

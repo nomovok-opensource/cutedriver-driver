@@ -17,16 +17,13 @@
 ## 
 ############################################################################
 
-
-
-
 # Module is used to be as template for all behaviours 
 # TestObject can verify whether it has some behaviour by calling:
 # TestObject.kind_of? MobyBehaviour::Abstract
-
 module MobyBehaviour
 
 	module Behaviour
 
-	end
-end
+	end # Behaviour
+
+end # MobyBehaviour
