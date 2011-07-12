@@ -876,7 +876,7 @@ module MobyBehaviour
           if ( attempt == 1 )
 
             # add to attribute filter 
-            MobyUtil::DynamicAttributeFilter.instance.add_attribute( name )
+            TDriver::AttributeFilter.add_attribute( name )
 
             # refresh test object ui state
             refresh

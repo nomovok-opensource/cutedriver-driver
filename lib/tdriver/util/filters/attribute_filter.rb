@@ -32,6 +32,8 @@ module TDriver
 
         @attributes_string = @attributes.join( ',' )
 
+        yield if block_given?
+
       end
 
     end
@@ -46,6 +48,8 @@ module TDriver
         @attributes = updated_list
         
         @attributes_string = @attributes.join( ',' )
+
+        yield if block_given?
 
       end
 
@@ -72,7 +76,7 @@ module TDriver
       # TODO: document me
       def initialize_class
 
-        @filter_string = ""
+        @attributes_string = ""
 
         @attributes = []
 

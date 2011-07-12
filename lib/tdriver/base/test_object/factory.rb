@@ -282,7 +282,7 @@ module MobyBase
       end
       
       # add object identification attribute keys to dynamic attributes white list
-      MobyUtil::DynamicAttributeFilter.instance.add_attributes( object_attributes_hash.keys )
+      TDriver::AttributeFilter.add_attributes( object_attributes_hash.keys )
 
       child_objects = identify_object( rules ).collect{ | test_object_xml |
 
