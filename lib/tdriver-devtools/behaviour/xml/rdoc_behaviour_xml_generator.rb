@@ -1438,17 +1438,22 @@ EXAMPLE
 
       # generate arguments xml
       arguments = ( feature.last[:arguments] || {} ).collect{ | arg |
+
+    p arg
                 
         # generate argument types template
         arg.collect{ | argument |
 
          argument_type = argument_types[ argument.first[0].chr ]
+
          argument_name = "%s" % argument.first          
+
          argument_name[0]="" if argument_types.has_key?( argument_name[0].chr )
 
          argument_type = "block_argument" if argument_type == "block" && argument_name.include?( "#" )          
 
          default_value_set = false 
+
          default_value = nil
         
          if argument.last.has_key?( :argument_type_order )
@@ -1464,7 +1469,7 @@ EXAMPLE
          end
 
          argument_types_in_order ||= []
-            
+
          # in case of argument is not documented at all...
          if argument_types_in_order.empty?
 
@@ -1476,6 +1481,15 @@ EXAMPLE
 
            end
 
+         end
+
+         if argument_types_in_order.empty?
+
+          default_value = nil
+          default_value_set = false
+
+          argument_types_in_order = [[nil, {}]]
+         
          end
 
          types_xml = argument_types_in_order.collect{ | type |
