@@ -238,7 +238,8 @@
 
       span.optional_argument
       {
-        font-style: italic;
+        #font-style: italic;
+        color: #777777;
       }
 
       pre
@@ -362,9 +363,11 @@
 
         color: #a06060;
 
-        text-shadow: #ff8f6f 1px 1px 4px;
+        color: #605555;
 
-        text-shadow: #b0a0a0 1px 1px 4px;
+        #text-shadow: #ff8f6f 1px 1px 4px;
+
+        #text-shadow: #b0a0a0 1px 1px 4px;
 
         border-bottom: 1px dotted #515151;
         font-weight: bold;
@@ -374,7 +377,8 @@
       a.link:hover
       {
       
-        border-bottom: 1px solid #515151;
+        border-bottom: 1px dotted #000000;
+        color: #000000;
 
       }
 
@@ -519,7 +523,7 @@
                          <xsl:text></xsl:text>        
                        </xsl:if>
 
-                        <xsl:text>[ </xsl:text>
+                        <xsl:text></xsl:text>
                         <span class="hover_text">
                           <xsl:value-of select="@name"/>
                            <xsl:if test="@type='multi'">
@@ -527,7 +531,7 @@
                            </xsl:if>
                         </span>
 
-                        <xsl:text> ]</xsl:text>
+                        <xsl:text></xsl:text>
 
                       </span>
 
