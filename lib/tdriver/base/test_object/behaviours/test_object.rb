@@ -76,6 +76,7 @@ module MobyBehaviour
 
     end
 
+=begin
     # == description
     # Determines if the current test object is of type 'application'
     # == returns
@@ -87,6 +88,7 @@ module MobyBehaviour
       @type == 'application'
 
     end
+=end
 
     # == description
     # Return all test object attributes
