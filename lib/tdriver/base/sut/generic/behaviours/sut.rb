@@ -64,7 +64,8 @@ module MobyBehaviour
       :ui_version,        # version of the ui used on the sut, ie 3.2.3
       :frozen,            # flag that tells if the ui dump getting is disabled
       :xml_data_checksum, # checksum of the previous ui state message
-      :verify_blocks      # verify blocks
+      :verify_blocks,     # verify blocks
+      :sut
 
     )
 
