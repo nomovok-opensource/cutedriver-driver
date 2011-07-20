@@ -64,6 +64,9 @@ require 'rubygems'
   # agent service command modules
   'agent/loader.rb', 
 
+  # fixture service modules
+  'fixture/loader.rb', 
+
   # video capture/util modules
   'video/loader.rb',
 
