@@ -418,7 +418,7 @@ module MobyBehaviour
     def child( attributes )
 
       # verify attributes argument format
-      attributes.check_type [ Hash, String, Symbol ], "wrong argument type $1 for attributes (expected $2)"
+      attributes.check_type [ Hash, String, Symbol, Regexp, Array ], "wrong argument type $1 for attributes (expected $2)"
 
       # set rules hash to empty Hash if rules hash is not type of Hash
       unless attributes.kind_of?( Hash ) 
@@ -430,7 +430,7 @@ module MobyBehaviour
 
         else
 
-          attributes = { :name => attributes.to_s }
+          attributes = { :name => attributes }
 
         end
 
@@ -618,7 +618,7 @@ module MobyBehaviour
 
         else
 
-          rules_hash = { :name => rules_hash.to_s }
+          rules_hash = { :name => rules_hash }
 
         end
 
