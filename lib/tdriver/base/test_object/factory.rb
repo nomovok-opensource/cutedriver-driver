@@ -481,7 +481,7 @@ module MobyBase
         )
 
         # create child accessors
-        test_object_adapter.create_child_accessors!( xml_object, test_object )
+        #test_object_adapter.create_child_accessors!( xml_object, test_object )
 
         # add created test object to parents child objects cache, unless explicitly disabled
         parent_cache.add_object( test_object ) unless identification_directives[ :__no_caching ] == true

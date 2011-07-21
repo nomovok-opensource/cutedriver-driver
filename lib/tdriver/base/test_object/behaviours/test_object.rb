@@ -418,8 +418,24 @@ module MobyBehaviour
     def child( attributes )
 
       # verify attributes argument format
-      attributes.check_type( Hash, "wrong argument type $1 for attributes (expected $2)" )
-    
+      attributes.check_type [ Hash, String, Symbol ], "wrong argument type $1 for attributes (expected $2)"
+
+      # set rules hash to empty Hash if rules hash is not type of Hash
+      unless attributes.kind_of?( Hash ) 
+
+        # pass empty rules hash if no argument given, otherwise assume value to be object name
+        if attributes.blank?
+
+          attributes = {}
+
+        else
+
+          attributes = { :name => attributes.to_s }
+
+        end
+
+      end
+
       get_child_objects( attributes )
     
     end
@@ -593,7 +609,20 @@ module MobyBehaviour
       rules_hash = method_arguments.first
 
       # set rules hash to empty Hash if rules hash is not type of Hash
-      rules_hash = {} unless rules_hash.kind_of?( Hash ) 
+      unless rules_hash.kind_of?( Hash ) 
+
+        # pass empty rules hash if no argument given, otherwise assume value to be object name
+        if rules_hash.blank?
+
+          rules_hash = {}
+
+        else
+
+          rules_hash = { :name => rules_hash.to_s }
+
+        end
+
+      end
 
       # set test object type
       rules_hash[ :type ] = method_id.to_s
