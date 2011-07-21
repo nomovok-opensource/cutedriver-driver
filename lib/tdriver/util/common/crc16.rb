@@ -86,7 +86,14 @@ module TDriver
 
       # check if implementation is already loaded from TDriver native Ruby C Extension; native crc routines are ~10% faster
       unless instance_methods.include?( 'crc16_ibm' )
-      
+
+        # determines that native extension is not in use    
+        def native_extension
+
+          false
+
+        end 
+
         # IBM-CRC-16: fallback when native extensions are not supported (e.g. jruby)
         def crc16_ibm( buf, crc = 0xffff )
 

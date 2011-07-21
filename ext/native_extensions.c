@@ -108,6 +108,13 @@ static VALUE crc16_ibm( int argc, VALUE* argv, VALUE self ) {
 
 }
 
+// determines that native extension is in use
+static VALUE native_extension( VALUE self ) { 
+
+  return Qtrue;
+
+}
+
 void Init_native_extensions() {
 
   // main tdriver module
@@ -118,6 +125,9 @@ void Init_native_extensions() {
 	
 	// checksum methods
 	rb_define_singleton_method( cChecksum, "crc16_ibm", crc16_ibm, -1 );
+
+  // determines that native extension is in use
+	rb_define_singleton_method( cChecksum, "native_extension", native_extension, 0 );
 
   // deprecated - for backwards compatibility
 	VALUE mNativeExtensions = rb_define_module_under( mTDriver, "NativeExtensions" );
