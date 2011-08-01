@@ -70,9 +70,12 @@ module MobyBase
       # retrieve sut objects test object adapter
       test_object_adapter = sut.instance_variable_get( :@test_object_adapter )
 
+      # add object identification attribute keys to dynamic attributes white list
+      TDriver::AttributeFilter.add_attributes( rules[ :object_attributes_hash ].keys )
+
       # search parameters for find_objects feature    
       search_parameters = make_object_search_params( rules[ :parent ], rules[ :object_attributes_hash ] )
-            
+      
       # default rules      
       directives.default_values(
       
@@ -282,7 +285,7 @@ module MobyBase
       end
       
       # add object identification attribute keys to dynamic attributes white list
-      TDriver::AttributeFilter.add_attributes( object_attributes_hash.keys )
+      #TDriver::AttributeFilter.add_attributes( object_attributes_hash.keys )
 
       child_objects = identify_object( rules ).collect{ | test_object_xml |
 

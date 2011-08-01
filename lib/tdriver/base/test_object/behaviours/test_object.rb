@@ -719,7 +719,7 @@ module MobyBehaviour
         # TODO: refactor me
         child_test_object = @test_object_factory.get_test_objects(
 
-          # current objec  t as parent, can be either TestObject or SUT
+          # current object as parent, can be either TestObject or SUT
           :parent => self,
  
           # pass parent application
