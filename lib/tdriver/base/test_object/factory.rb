@@ -282,7 +282,7 @@ module MobyBase
       end
       
       # add object identification attribute keys to dynamic attributes white list
-      MobyUtil::DynamicAttributeFilter.instance.add_attributes( object_attributes_hash.keys )
+      TDriver::AttributeFilter.add_attributes( object_attributes_hash.keys )
 
       child_objects = identify_object( rules ).collect{ | test_object_xml |
 
@@ -470,18 +470,18 @@ module MobyBase
         obj_type << ';*' unless obj_type == 'application'
 
         # apply behaviours to test object
-        MobyBase::BehaviourFactory.instance.apply_behaviour!(
+        TDriver::BehaviourFactory.apply_behaviour(
 
-          :object => test_object,
-          :object_type => [ *obj_type.split(';') ], 
-          :input_type => [ '*', sut.input.to_s ],
-          :env => [ '*', *env.to_s.split(";") ],
-          :version => [ '*', sut.ui_version.to_s ]
+          :object       => test_object,
+          :object_type  => [ *obj_type.split(';')       ], 
+          :input_type   => [ '*', sut.input.to_s        ],
+          :env          => [ '*', *env.to_s.split(";")  ],
+          :version      => [ '*', sut.ui_version.to_s   ]
 
         )
 
         # create child accessors
-        test_object_adapter.create_child_accessors!( xml_object, test_object )
+        #test_object_adapter.create_child_accessors!( xml_object, test_object )
 
         # add created test object to parents child objects cache, unless explicitly disabled
         parent_cache.add_object( test_object ) unless identification_directives[ :__no_caching ] == true

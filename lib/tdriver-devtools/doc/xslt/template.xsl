@@ -21,9 +21,14 @@
          color: black;
          font-size: 13px;
          cursor: default;
-         text-shadow: #909090 1px 1px 4px;
+         #text-shadow: #909090 1px 1px 1px;
       }
-     
+      
+      h2
+      {
+         text-shadow: #909090 1px 1px 2px;
+      }
+      
       div.feature_title
       {
 
@@ -65,7 +70,7 @@
         font-size: 13px;
         font-weight: bold;
         color: #000000;
-        text-shadow: #909090 1px 1px 4px;
+        #text-shadow: #A0A0A0 1px 1px 0px;
 
       }
       
@@ -233,7 +238,8 @@
 
       span.optional_argument
       {
-        font-style: italic;
+        #font-style: italic;
+        color: #777777;
       }
 
       pre
@@ -297,6 +303,7 @@
       
         font-size: 14px;
         font-weight: bold;
+        #text-shadow: #909090 1px 1px 1px;
       
       }
       
@@ -356,9 +363,11 @@
 
         color: #a06060;
 
-        text-shadow: #ff8f6f 1px 1px 4px;
+        color: #605555;
 
-        text-shadow: #b0a0a0 1px 1px 4px;
+        #text-shadow: #ff8f6f 1px 1px 4px;
+
+        #text-shadow: #b0a0a0 1px 1px 4px;
 
         border-bottom: 1px dotted #515151;
         font-weight: bold;
@@ -368,7 +377,8 @@
       a.link:hover
       {
       
-        border-bottom: 1px solid #515151;
+        border-bottom: 1px dotted #000000;
+        color: #000000;
 
       }
 
@@ -397,7 +407,7 @@
   <body>
 
     <a name="top">
-      <h2>Documentation</h2>
+      <h2>Testability Driver API Documentation</h2>
     </a>
     
     <xsl:apply-templates/>
@@ -513,7 +523,7 @@
                          <xsl:text></xsl:text>        
                        </xsl:if>
 
-                        <xsl:text>[ </xsl:text>
+                        <xsl:text></xsl:text>
                         <span class="hover_text">
                           <xsl:value-of select="@name"/>
                            <xsl:if test="@type='multi'">
@@ -521,7 +531,7 @@
                            </xsl:if>
                         </span>
 
-                        <xsl:text> ]</xsl:text>
+                        <xsl:text></xsl:text>
 
                       </span>
 
@@ -643,10 +653,10 @@
   <table class="default">
     <tr class="header">
       <td class="header">Type</td>
-      <td class="header">Target object(s)</td>
-      <td class="header">SUT type(s)</td>
-      <td class="header">SUT version(s)</td>
-      <td class="header">SUT input type(s)</td>
+      <td class="header">Target object</td>
+      <td class="header">SUT type</td>
+      <td class="header">SUT version</td>
+      <td class="header">SUT input type</td>
       <td class="header">Behaviour module and name</td>
       <td class="header">Required plugin</td>
     </tr>

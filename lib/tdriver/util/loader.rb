@@ -37,8 +37,8 @@ require 'rubygems'
   # statistics module
   'statistics/statistics.rb',
 
-  # dynamic attribute filter module
-  'filters/dynamic_attributes.rb', 
+  # filter modules
+  'filters/loader.rb', 
 
   # plugin service modules
   'plugin/loader.rb', 
@@ -63,6 +63,9 @@ require 'rubygems'
 
   # agent service command modules
   'agent/loader.rb', 
+
+  # fixture service modules
+  'fixture/loader.rb', 
 
   # video capture/util modules
   'video/loader.rb',

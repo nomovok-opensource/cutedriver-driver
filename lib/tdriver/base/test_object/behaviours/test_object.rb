@@ -76,6 +76,7 @@ module MobyBehaviour
 
     end
 
+=begin
     # == description
     # Determines if the current test object is of type 'application'
     # == returns
@@ -87,6 +88,7 @@ module MobyBehaviour
       @type == 'application'
 
     end
+=end
 
     # == description
     # Return all test object attributes
@@ -313,7 +315,15 @@ module MobyBehaviour
 
       # return application object or nil if no parent found
       # Does is make sense to return nil - should  n't all test objects belong to an application? Maybe throw exception if application not found
-      return @sut.child( :type => 'application' ) rescue nil
+      begin 
+
+        @sut.child( :type => 'application' ) 
+
+      rescue 
+
+        nil
+
+      end
 
     end
 
@@ -326,11 +336,17 @@ module MobyBehaviour
     # puts @app.Node( :name => 'Node1' ).get_application_id() #print the application id, this should print @app.id
     def get_application_id
 
-      return @parent_application.id if @parent_application
+      if @parent_application
 
-      # workaround
-      # What about the case when get_application returns nil? This line will throw an exception in that case.
-      get_application.id
+        @parent_application.id
+
+      else
+
+        # workaround
+        # What about the case when get_application returns nil? This line will throw an exception in that case.
+        get_application.id
+
+      end
 
     end
 
@@ -402,8 +418,24 @@ module MobyBehaviour
     def child( attributes )
 
       # verify attributes argument format
-      attributes.check_type( Hash, "wrong argument type $1 for attributes (expected $2)" )
-    
+      attributes.check_type [ Hash, String, Symbol, Regexp, Array ], "wrong argument type $1 for attributes (expected $2)"
+
+      # set rules hash to empty Hash if rules hash is not type of Hash
+      unless attributes.kind_of?( Hash ) 
+
+        # pass empty rules hash if no argument given, otherwise assume value to be object name
+        if attributes.blank?
+
+          attributes = {}
+
+        else
+
+          attributes = { :name => attributes }
+
+        end
+
+      end
+
       get_child_objects( attributes )
     
     end
@@ -504,19 +536,19 @@ module MobyBehaviour
           if @env != previous_environment
 
             # remove cached behaviour module 
-            MobyBase::BehaviourFactory.instance.reset_modules_cache
+            TDriver::BehaviourFactory.reset_cache
 
             # apply only application behaviours if test object is type of 'application'
             object_type = ( @type == "application" ? [ @type ] : [ '*', @type ] )
 
             # reapply behaviours to test object if environment value has changed
-            MobyBase::BehaviourFactory.instance.apply_behaviour!(
+            TDriver::BehaviourFactory.apply_behaviour(
 
-              :object => self,
-              :object_type => object_type, 
-              :input_type => [ '*', @sut.input.to_s ],
-              :env => [ '*', *@env.to_s.split(";") ],
-              :version => [ '*', @sut.ui_version.to_s ]
+              :object       => self,
+              :object_type  => object_type, 
+              :input_type   => [ '*', @sut.input.to_s       ],
+              :env          => [ '*', *@env.to_s.split(";") ],
+              :version      => [ '*', @sut.ui_version.to_s  ]
 
             )
             
@@ -577,7 +609,20 @@ module MobyBehaviour
       rules_hash = method_arguments.first
 
       # set rules hash to empty Hash if rules hash is not type of Hash
-      rules_hash = {} unless rules_hash.kind_of?( Hash ) 
+      unless rules_hash.kind_of?( Hash ) 
+
+        # pass empty rules hash if no argument given, otherwise assume value to be object name
+        if rules_hash.blank?
+
+          rules_hash = {}
+
+        else
+
+          rules_hash = { :name => rules_hash }
+
+        end
+
+      end
 
       # set test object type
       rules_hash[ :type ] = method_id.to_s
@@ -862,7 +907,7 @@ module MobyBehaviour
           if ( attempt == 1 )
 
             # add to attribute filter 
-            MobyUtil::DynamicAttributeFilter.instance.add_attribute( name )
+            TDriver::AttributeFilter.add_attribute( name )
 
             # refresh test object ui state
             refresh

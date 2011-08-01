@@ -17,30 +17,6 @@
 ## 
 ############################################################################
 
-# behaviour abstract class
-#require File.expand_path( File.join( File.dirname( __FILE__ ), 'abstract.rb' ) )
+# fixture services module
+require File.expand_path( File.join( File.dirname( __FILE__ ), 'service.rb' ) )
 
-# factory class
-#require File.expand_path( File.join( File.dirname( __FILE__ ), 'factory.rb' ) )
-
-[
-  # behaviour abstract class
-  'abstract.rb',
-
-  # behaviour factory class
-  'factory.rb'
-
-].each{ | filename |
-
-  require File.expand_path( 
-    File.join( File.dirname( __FILE__ ), filename ) 
-  )
-
-}
-
-# load generic behaviours
-MobyUtil::FileHelper.load_modules( 
-  File.expand_path( 
-    File.join( File.dirname( __FILE__ ), 'behaviours' ) 
-  )
-)

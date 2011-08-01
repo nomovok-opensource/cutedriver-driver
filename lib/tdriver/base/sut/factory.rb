@@ -195,14 +195,14 @@ module MobyBase
     end
 
     # apply sut generic behaviours
-    MobyBase::BehaviourFactory.instance.apply_behaviour!(
+    TDriver::BehaviourFactory.apply_behaviour(
 
-     :object => created_sut,
-     :object_type => [ 'sut' ], 
-     :sut_type => [ '*', created_sut.ui_type ],
-     :input_type => [ '*', created_sut.input.to_s ],
-     :env => [ '*', *sut_env.to_s.split(";") ],
-     :version => [ '*', created_sut.ui_version.to_s ]
+      :object        => created_sut,
+      :object_type   => [ 'sut'                             ], 
+      :sut_type      => [ '*', created_sut.ui_type          ],
+      :input_type    => [ '*', created_sut.input.to_s       ],
+      :env           => [ '*', *sut_env.to_s.split(";")     ],
+      :version       => [ '*', created_sut.ui_version.to_s  ]
 
     )
 

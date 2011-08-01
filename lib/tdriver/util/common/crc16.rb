@@ -73,20 +73,27 @@ module TDriver
 
     public
 
-      # CRC-16-CCITT    
-      def crc16( buf, crc = 0 )
-
-        # calculate the checksum
-        buf.each_byte{ | x | crc = ( ( crc << 8 ) ^ @CCITT_16[ ( crc >> 8 ) ^ x ] ) & 0xffff }
-
-        # result
-        crc
-
-      end # crc16
-
       # check if implementation is already loaded from TDriver native Ruby C Extension; native crc routines are ~10% faster
-      unless instance_methods.include?( 'crc16_ibm' )
-      
+      unless instance_methods.include?( 'native_extension' )
+  
+        # CRC-16-CCITT    
+        def crc16( buf, crc = 0 )
+
+          # calculate the checksum
+          buf.each_byte{ | x | crc = ( ( crc << 8 ) ^ @CCITT_16[ ( crc >> 8 ) ^ x ] ) & 0xffff }
+
+          # result
+          crc
+
+        end # crc16
+
+        # determines that native extension is not in use    
+        def native_extension
+
+          false
+
+        end 
+
         # IBM-CRC-16: fallback when native extensions are not supported (e.g. jruby)
         def crc16_ibm( buf, crc = 0xffff )
 

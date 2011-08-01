@@ -17,504 +17,366 @@
 ## 
 ############################################################################
 
-module MobyBase
+module TDriver
 
-  # TODO: document BehaviourFactory class
   class BehaviourFactory
-
-  include Singleton
   
-  def initialize
+    class << self
 
-    @@behaviours = []
-    @@behaviours_cache = {}
-    @@modules_cache = {}
+    public
 
-    @@plugin_cache = []
-    
-    # behaviour xml files path
-    @@path = File.join( MobyUtil::FileHelper.tdriver_home, '/behaviours/*.xml' )
+      # initialize behaviours factory
+      def init( options )
 
-    parse_behaviour_files( 
+        # verify that argument is type of hash
+        options.check_type Hash, 'wrong argument type $1 for TDriver::BehaviourFactory#init options argument (expected $2)'
 
-      load_behaviours( @@path ) 
+        # load behaviour configuration files
+        load_behaviours( 
 
-    )
-
-  end
-
-  public
-
-  def to_xml( rules = {} ) 
-
-    @_method_index = nil
-
-    rules.default = [ '*' ]
-
-    rules.each_pair{ | key, value |
-
-    rules[ key ] = [ value ] if value.kind_of?( String )
-
-    }
-
-    MobyUtil::XML.build{
-
-    behaviours{
-
-      @@behaviours.each_index{ | index |
-
-      @_method_index = index
-
-      behaviour = @@behaviours[ @_method_index ]
-
-      if ( ( rules[ :name ] == behaviour[ :name ] ) ||  
-
-        ( rules[ :name ] == [ '*' ] ) &&
-
-#        ( !( rules[ :sut_type ] & behaviour[ :sut_type ] ).empty? ) && 
-        ( !( rules[ :input_type ] & behaviour[ :input_type ] ).empty? ) && 
-        ( !( rules[ :object_type ] & behaviour[ :object_type ] ).empty? ) && 
-        ( !( rules[ :version ] & behaviour[ :version ] ).empty? )
-
-        ) 
-
-        behaviour( :name => @@behaviours[ @_method_index ][ :name ], :object_type => @@behaviours[ @_method_index ][ :object_type ].join(";") ){ 
-        object_methods{
-          @@behaviours[ @_method_index ][ :methods ].each { | key, value |
-          object_method( :name => key.to_s ) {  
-            description( value[:description] )
-            example( value[:example] )
-          }
-          }
-        }
-        }
-
-      end
-
-      }
-
-    }
-
-    }.to_xml
-
-  end
-
-  def get_behaviour_at_index( index )
-
-    result = @@behaviours[ index ]
-
-    if result.nil? 
-
-    Kernel::raise RuntimeError.new( "No behaviour at index #{ index }" )
-
-    else
-
-    result
-
-    end
-
-  end
-  
-  # TODO: document me
-  def reset_modules_cache
-  
-    # reset modules cache hash; needed if new behaviour plugins loaded later than when initializing TDriver/SUT
-    @@modules_cache.clear
-  
-  end
-
-  def apply_behaviour!( rules = {} )
-
-    # merge user-defined rules on top of default rules set
-    #rules = { :sut_type => ['*'], :object_type => ['*'], :input_type => ['*'], :version => ['*'] }.merge!( rules )
-
-    raise ArgumentError, 'Target object not defined in rules hash' if rules[ :object ].nil?      
-  
-    rules.default = ['*']
-
-    # retrieve enabled plugins from PluginService
-    enabled_plugins = TDriver::PluginService.enabled_plugins 
-
-    # apply behaviours to target object
-    get_object_behaviours( rules ).each{ | behaviour_index |
-
-      behaviour_data = @@behaviours[ behaviour_index ]
-
-      # skip if required plugin is not registered or enabled; compare requires array and enabled_plugins array
-      next unless ( behaviour_data[ :requires ] - enabled_plugins ).empty?
-
-      begin
-
-        # retrieve behaviour module from cache and extend target object
-        rules[ :object ].extend( 
-
-          @@modules_cache.fetch( behaviour_data[ :module ][ :name ] ){ | name |                  
-
-            # ... or store to cache for the next time if not found 
-            @@modules_cache[ name ] = MobyUtil::KernelHelper.get_constant( name )
-
-          } 
-
+          options.require_key( :path, 'required key $1 not found from TDriver::BehaviourFactory#init options argument' )
+          
         )
 
-      rescue NameError
+      end
+      
+      # reset class configuration
+      def reset
 
-        raise NameError, "Implementation for behaviour #{ behaviour_data[ :name ] } does not exist. (#{ behaviour_data[ :module ][ :name ] })"
-
-
-      rescue
-
-        raise RuntimeError, "Error while applying #{ behaviour_data[ :name ] } (#{ behaviour_data[ :module ][ :name ] }) behaviour to target object. Reason: #{ $!.message } (#{ $!.class })", caller
-
+        # reset default values
+        initialize_class      
+      
       end
 
-      unless rules[ :object ].instance_variable_defined?( :@object_behaviours )
-      
-        rules[ :object ].instance_variable_set( :@object_behaviours, [ behaviour_index ] )
-      
-      else
-      
-        # add behaviour information to test object
-        rules[ :object ].instance_variable_get( :@object_behaviours ).tap{ | indexes | 
-
-          indexes.push( behaviour_index ) unless indexes.include?( behaviour_index )
-
-        }
-
-      end
-
-=begin
-      # add behaviour information to test object
-      rules[ :object ].instance_exec{ 
-      
-        @object_behaviours.push( behaviour_index ) unless @object_behaviours.include?( behaviour_index )
-
-      }
-=end
-    }
-
-  end
-
-  private
-
-  def load_behaviours( behaviour_files )
-
-    behaviours_data = []
-
-    @file_name = ""
-
-    begin
-
-    Dir.glob( behaviour_files ).each{ | behaviour | 
-
-      @file_name = behaviour
-
-      behaviours_data << { :filename => @file_name, :xml => MobyUtil::FileHelper.get_file( @file_name ) }
-
-    }
-
-    rescue MobyUtil::EmptyFilenameError
-
-      raise EmptyFilenameError, "Unable to load behaviours xml file due to filename is empty or nil" 
-
-    rescue MobyUtil::FileNotFoundError
-
-      raise
-
-    rescue IOError
-
-      raise IOError, "Error occured while loading behaviours xml file %s. Reason: %s" % [ @file_name, $!.message ]
-
-    rescue
-
-      raise RuntimeError, "Error occured while parsing behaviours xml file %s. Reason: %s (%s)" % [ @file_name, $!.message, $!.class ]
-
-    end
-
-    behaviours_data
-
-  end
-
-  def parse_behaviour_files( behaviour_files )
-
-    behaviour_files.each{ | behaviours | 
-
-      begin
-
-        # skip parsing the xml if string is empty
-        next if behaviours[ :xml ].empty?
-
-        # parse behaviour xml
-        document = MobyUtil::XML.parse_string( behaviours[ :xml ] )
-
-      rescue
-
-        raise MobyUtil::XML::ParseError, "Error occured while parsing behaviour XML file #{ behaviours[ :filename ] }. Error: #{ $!.message }"
-
-      end
-
-      # process each behaviours element
-      document.root.xpath( "/behaviours" ).each{ | behaviours_element |
-      
-        # retrieve root attributes
-        root_attributes = behaviours_element.attributes
-
-        # process each behaviour element      
-        behaviours_element.xpath( "behaviour" ).each{ | node |
-
-          # retrieve behaviour attributes & module node
-          attributes = node.attributes
-
-          name = attributes[ "name" ].to_s
-          object_type = attributes[ "object_type" ].to_s
-          input_type = attributes[ "input_type" ].to_s
-          sut_type = attributes[ "sut_type" ].to_s
-          version = attributes[ "version" ].to_s
-
-          env = ( attributes[ "env" ] || '*' ).to_s 
-
-          module_node = node.xpath( 'module' ).first
-          
-          # verify that all required attributes and nodes are found in behaviour xml node
-          name.not_empty "Behaviour element does not have name (name) attribute defined, please see behaviour XML files", RuntimeError
-          
-          object_type.not_empty "Behaviour element does not have target object type (object_type) attribute defined, please see #{ name } in behaviour XML files", RuntimeError
-
-          input_type.not_empty "Behaviour element does not have target object input type (input_type) attribute defined, please see #{ name } in behaviour XML files", RuntimeError
-
-          sut_type.not_empty "Behaviour element does not have target object sut type (sut_type) attribute defined, please see #{ name } in behaviour XML files", RuntimeError
-
-          version.not_empty "Behaviour element does not have target object SUT version (version) attribute defined, please see #{ name } in behaviour XML files", RuntimeError
-
-          module_node.not_nil "Behaviour does not have implementation module element defined, please see #{ name } in behaviour XML files", RuntimeError
-          
-          # retrieve module name & implementation filename
-          module_attributes = module_node.attributes
-          module_file = module_attributes[ "file" ].to_s # optional
-          module_name = module_attributes[ "name" ].to_s 
-          
-          module_name.not_empty "Behaviour does not have implementation module name defined, please see #{ name } in behaviour XML files", RuntimeError
-
-          methods_hash = {}
-
-          # create hash of methods
-          node.xpath( 'methods/method' ).each{ | method |
-
-            # retrieve method description & example and store to methods hash
-            methods_hash[ method.attribute( "name" ).to_s.to_sym ] = {
-              :description => method.at_xpath( 'description/text()' ).to_s, 
-              :example     => method.at_xpath( 'example/text()' ).to_s
-            }
-
-          }
-
-          # create and store beahaviour hash
-          @@behaviours << {
-
-            :name => name,
-            :requires => root_attributes[ "plugin" ].to_s.split(";"),
-            :object_type => object_type.split(";"),
-            :input_type => input_type.split(";"),
-            #:sut_type => sut_type.split(";"),
-            :version => version.split(";"),
-            :env => env.split(";"),
-
-            :module => { 
-              :file => module_file, 
-              :name => module_name 
-            },
-
-            :methods => methods_hash
-
-          }
-
-
-        }
-
-      }
-
-=begin
-
-      # parse retrieve behaviour definitions
-      document.root.xpath( "/behaviours/behaviour" ).each{ | node |
-
-        # retrieve behaviour attributes & module node
-        attributes = node.attributes
-
-        name = attributes[ "name" ].to_s
-        object_type = attributes[ "object_type" ].to_s
-        input_type = attributes[ "input_type" ].to_s
-        sut_type = attributes[ "sut_type" ].to_s
-        version = attributes[ "version" ].to_s
-
-        env = ( attributes[ "env" ] || '*' ).to_s 
-
-        module_node = node.xpath( 'module' ).first
+      # TODO: document me
+      def apply_behaviour( rule )
         
-        # verify that all required attributes and nodes are found in behaviour xml node
-        name.not_empty("Behaviour element does not have name (name) attribute defined, please see behaviour XML files", RuntimeError)
+        # verify that rule is given as hash
+        rule.check_type Hash, 'wrong argument type $1 for TDriver::BehaviourFactory#apply_behaviour rule argument (expected $2)'
+
+        # empty collected indexes variable
+        collected_indexes = [] 
         
-        object_type.not_empty("Behaviour element does not have target object type (object_type) attribute defined, please see #{ name } in behaviour XML files", RuntimeError)
+        # retrieve object from hash
+        _object = rule[ :object ]
 
-        input_type.not_empty("Behaviour element does not have target object input type (input_type) attribute defined, please see #{ name } in behaviour XML files", RuntimeError)
+        # generate cache key, drop :object value from hash
+        cache_key = rule.reject{ | key, value | key == :object }.hash
 
-        sut_type.not_empty("Behaviour element does not have target object sut type (sut_type) attribute defined, please see #{ name } in behaviour XML files", RuntimeError)
-
-        version.not_empty("Behaviour element does not have target object SUT version (version) attribute defined, please see #{ name } in behaviour XML files", RuntimeError)
-
-        module_node.not_nil("Behaviour does not have implementation module element defined, please see #{ name } in behaviour XML files", RuntimeError)
+        # retrieve behaviour from cache if found
+        if @behaviours_cache.has_key?( cache_key )
         
-        # retrieve module name & implementation filename
-        module_attributes = module_node.attributes
-        module_file = module_attributes[ "file" ].to_s # optional
-        module_name = module_attributes[ "name" ].to_s 
+          behaviours = @behaviours_cache[ cache_key ]
         
-        #Kernel::raise RuntimeError.new( "Behaviour implementation module name not defined for #{ name } in XML") if module_name.empty?
-        module_name.not_empty("Behaviour does not have implementation module name defined, please see #{ name } in behaviour XML files", RuntimeError)
-
-        methods_hash = {}
-
-        # create hash of methods
-        node.xpath( 'methods/method' ).each{ | method |
-
-          # retrieve method description & example and store to methods hash
-          methods_hash[ method.attribute( "name" ).to_s.to_sym ] = {
-            :description => method.at_xpath( 'description/text()' ).to_s, 
-            :example     => method.at_xpath( 'example/text()' ).to_s
-          }
-
-        }
-
-        # create and store beahaviour hash
-        @@behaviours << {
-
-          :name => name,
-          :requires => root_attributes[ "plugin" ].to_s.split(";"),
-          :object_type => object_type.split(";"),
-          :input_type => input_type.split(";"),
-         #:sut_type => sut_type.split(";"),
-          :version => version.split(";"),
-          :env => env.split(";"),
-
-          :module => { 
-            :file => module_file, 
-            :name => module_name 
-          },
-
-          :methods => methods_hash
-
-        }
-
-      }
-      
-=end
-
-    }
-
-  end
-
-=begin
-  def get_object_behaviours( rules )
-
-    # calculate hash for behaviour rules / hash value will be used to identify similar objects
-    behaviour_hash = Hash[ rules.select{ | key, value | key != :object  } ].hash
-
-    if @@behaviours_cache.has_key?( behaviour_hash )
-
-      # retrieve behaviour module indexes from cache
-      @@behaviours_cache[ behaviour_hash ]
-
-    else
-
-      rules.default = [ '*' ]
-
-      extended_modules = []
-
-      @@behaviours.each_with_index{ | behaviour, index |
-
-        if ( ( rules[ :name ] == behaviour[ :name ] ) || 
-
-          ( rules[ :name ] == [ '*' ] && 
-
-          #         ( !( rules[ :sut_type ] & behaviour[ :sut_type ] ).empty? ) && 
-          ( !( rules[ :object_type ] & behaviour[ :object_type ] ).empty? ) &&
-          ( !( rules[ :input_type ] & behaviour[ :input_type ] ).empty? ) &&
-          ( !( rules[ :env ] & behaviour[ :env ] ).empty? ) &&
-          ( !( rules[ :version ] & behaviour[ :version ] ).empty? ) ) )
-
-          # retrieve list of extended modules
-          extended_modules << index
-
-        end
-
-      }
-
-      # store behaviour module indexes to cache
-      @@behaviours_cache[ behaviour_hash ] = extended_modules
-
-    end
-
-  end
-=end
-
-  def get_object_behaviours( rule )
-
-    # calculate hash for behaviour rule / hash value will be used to identify similar objects
-    @@behaviours_cache.fetch( rule.delete_keys( :object ).hash ){ | behaviour_hash |
-
-      rule.default = [ '*' ]
-
-      @@behaviours_cache[ behaviour_hash ] = @@behaviours.each_with_index.collect{ | behaviour, index |
-
-        case rule[ :name ]
-
-          when behaviour[ :name ]
-
-            index
-
-          when [ '*' ]
-
-            index if ( 
-              !( rule[ :object_type ] & behaviour[ :object_type ] ).empty? && 
-              !( rule[ :input_type ] & behaviour[ :input_type ] ).empty? &&
-              !( rule[ :env ] & behaviour[ :env ] ).empty? && 
-              !( rule[ :version ] & behaviour[ :version ] ).empty? 
-            )
-
         else
 
-          nil
+          # collect behaviours that meets given rules
+          behaviours = collect_behaviours( rule )
+
+          # store behaviour collection to cache for future reuse
+          @behaviours_cache[ cache_key ] = behaviours
 
         end
 
-      }.compact
+        # iterate through each collected behaviour 
+        behaviours.each do | behaviour |
 
-    }
+          begin
+        
+            # retrieve module from hash
+            _module = behaviour[ :module ]
 
-  end
+            unless _module.kind_of?( Module )
 
-  def get_behaviour_from_cache( target, sut_type, object_type, sut_version, input_type )
+              # retrieve behaviour module
+              _module = MobyUtil::KernelHelper.get_constant( _module.to_s ) 
 
-    if @_behaviour_cache.has_key?( object_type )
+              # store pointer to module (implementation) back to hash
+              behaviour[ :module ] = _module
 
-      # apply modules to target object
-      @_behaviour_cache[ object_type ].each{ | module_name | target.instance_eval( "self.extend(#{ module_name })" ) }
+            end
 
-      # return true
-      true
+            # extend target object with behaviour module
+            _object.extend( _module )
 
-    else
-    
-      # return false
-      false
+            # store behaviour indexes
+            collected_indexes << behaviour[ :index ]
+
+          rescue NameError
+
+            raise NameError, "Implementation for #{ behaviour[ :name ] } behaviour does not exist. (#{ _module })"
+          
+          rescue
+          
+            raise RuntimeError, "Error while applying #{ behaviour[ :name ] } (#{ _module }) behaviour to target object due to #{ $!.message } (#{ $!.class })"
+          
+          end
+        
+        end # behaviours.each
+
+        # retrieve objects behaviour index array if already set
+        collected_indexes = _object.instance_variable_get( :@object_behaviours ) | collected_indexes if _object.instance_variable_defined?( :@object_behaviours )
+
+        # add behaviour information to test object
+        _object.instance_variable_set( :@object_behaviours, collected_indexes )
       
+      end
+
+      # TODO: document me
+      def collect_behaviours( rule )
+
+        # retrieve enabled plugins from PluginService
+        enabled_plugins = TDriver::PluginService.enabled_plugins 
+
+        # default value for rule if not defined
+        rule.default = [ '*' ]
+
+        # store as local variable for less AST lookups
+        _index        = rule.fetch( :index ){ [] }
+        _object_type  = rule[ :object_type  ]
+        _input_type   = rule[ :input_type   ]
+        _env          = rule[ :env          ]
+        _version      = rule[ :version      ]
+
+        @behaviours.select do | behaviour |
+
+          # skip if required plugin is not registered or enabled; compare requires array and enabled_plugins array
+          next unless ( behaviour[ :requires ] - enabled_plugins ).empty?
+
+          # match other rules if no exact index given          
+          if _index.empty?
+
+            case rule[ :name ]
+            
+              when behaviour[ :name ]
+              
+                # exact match with name
+                true
+              
+              when ['*']
+
+                # compare rules and behaviour attributes
+                !( _object_type & behaviour[ :object_type ] ).empty? && 
+                !( _input_type  & behaviour[ :input_type  ] ).empty? &&
+                !( _env         & behaviour[ :env         ] ).empty? && 
+                !( _version     & behaviour[ :version     ] ).empty? 
+
+            else
+              
+              false
+
+            end
+
+          else
+
+            # index given
+            true if Array( _index ).include?( behaviour[ :index ] )
+
+          end
+
+        end # behaviours.select
+      
+      end
+ 
+      # remove me when migration ready
+      def apply_behaviour!( *args )
+
+        warn_caller '$1:$2 warning: deprecated method apply_behaviour!; please use TDriver::BehaviourFactory.apply_behaviour instead'
+
+        apply_behaviour( *args )
+
+      end
+
+      # TODO: document me
+      def to_xml( rule )
+
+        MobyUtil::XML.build{ | xml |
+
+          # root element
+          xml.behaviours{
+
+            # iterate each behaviour that meets the rule
+            collect_behaviours( rule ).each{ | behaviour | 
+
+              # behaviour element
+              xml.behaviour( :name => behaviour[ :name ], :object_type => behaviour[ :object_type ].sort.join(";") ){
+
+                # behaviour methods element
+                xml.object_methods{
+
+                  behaviour[ :methods ].each_pair{ | key, value |
+
+                    xml.object_method( :name => key.to_s ){
+
+                      xml.description value[ :description ]
+                      xml.example     value[ :example     ]
+
+                    } # object_method
+
+                  } # methods.each_pair
+
+                } # object_methods
+
+              }  # behaviour
+
+            } # behaviours.each
+
+          } # root
+
+        }.to_xml
+
+      end
+
+      # TODO: document me
+      def reset_cache
+
+        # reset behaviour cache
+        @behaviours_cache = {}
+
+      end
+
+    private
+      
+      # private methods and variables
+      def initialize_class
+
+        # behaviours container
+        @behaviours = []
+        
+        # behaviour cache; re-collecting behaviours is not required for similar target objects
+        @behaviours_cache = {}
+            
+      end
+
+      # load and parse behaviours files
+      def load_behaviours( path )
+
+        # behaviour xml files path
+        Dir.glob( File.join( path, '*.xml' ) ){ | filename |
+ 
+          begin
+      
+            # read file contents
+            content = MobyUtil::FileHelper.get_file( filename )  
+          
+            # skip when empty file
+            next if content.empty?
+  
+            # parse behaviour xml and process each behaviours element
+            MobyUtil::XML.parse_string( content ).root.xpath( '/behaviours' ).each do | behaviours |
+
+              # retrieve root attributes
+              root_attributes = behaviours.attributes
+
+              # process each behaviour element
+              behaviours.xpath( './behaviour' ).each do | behaviour |
+
+                # retrieve behaviour attributes - set default values if not found from element
+                attributes = behaviour.attributes.default_values(
+                  'name'        => '', 
+                  'object_type' => '', 
+                  'input_type'  => '', 
+                  'sut_type'    => '', 
+                  'version'     => '',
+                  'env'         => '*'
+                )
+
+                # verify that behaviour attributes are not empty
+                attributes.each_pair do | key, value |                  
+
+                  value.not_empty "behaviour element attribute #{ key.inspect } is not defined or empty", RuntimeError
+
+                end 
+
+                # retrieve implementation/module name
+                module_name = behaviour.at_xpath( 'module/@name' ).to_s
+
+                # verify that module name is defined
+                module_name.not_empty "behaviour #{ attributes[ "name" ].inspect } does not have module name defined or is empty", RuntimeError
+
+                # store behaviour 
+                @behaviours << {  
+
+                  :index       => @behaviours.count,
+    
+                  :name        => attributes[ 'name'        ],
+                  :object_type => attributes[ 'object_type' ].split(';'),
+                  :input_type  => attributes[ 'input_type'  ].split(';'),
+                  :version     => attributes[ 'version'     ].split(';'),
+                  :env         => attributes[ 'env'         ].split(';'),
+
+                  :requires    => root_attributes[ 'plugin' ].to_s.split(';'),
+
+                  :module      => module_name,
+                  :file        => behaviour.at_xpath( 'module/text()' ).to_s, # optional 
+                  
+                  :methods     => Hash[ 
+                    # collect method details from behaviour 
+                    behaviour.xpath( 'methods/method' ).collect{ | method |                
+                      [ 
+                        method.attribute( 'name' ),
+                        {
+                          :description => method.at_xpath( 'description/text()' ).to_s,
+                          :example     => method.at_xpath( 'example/text()'     ).to_s
+                        }
+                      ]                  
+                    }
+                  ]
+                
+                }
+
+              end # behaviour.each
+
+            end # behaviours.each
+
+          rescue MobyUtil::FileNotFoundError
+
+            raise
+
+          rescue MobyUtil::XML::ParseError
+          
+            raise MobyUtil::XML::ParseError, "Error while parsing behaviours file #{ behaviours[ :filename ] } due to #{ $!.message }"
+
+          rescue
+
+            raise RuntimeError, "Error while processing behaviours file #{ filename } due to #{ $!.message }"
+
+          end
+        
+        } # Dir.glob
+      
+      end # behaviours
+   
+    end # self
+   
+    # initialize behaviour factory
+    initialize_class
+
+    # enable hooking for performance measurement & debug logging
+    TDriver::Hooking.hook_methods( self ) if defined?( TDriver::Hooking )
+
+  end # BehaviourFactory
+  
+end # TDriver
+
+# backwards compatibility; e.g. if visualizer is too old
+module MobyBase
+
+  # TODO: document me
+  class BehaviourFactory
+
+    class << self
+
+      def instance
+
+        warn_caller "$1:$2 warning: deprecated class MobyBase::BehaviourFactory; please use TDriver::BehaviourFactory instead"
+        
+        TDriver::BehaviourFactory
+
+      end
+
     end
 
-  end
-
-  # enable hooking for performance measurement & debug logging
-  TDriver::Hooking.hook_methods( self ) if defined?( TDriver::Hooking )
-
-  end # BehaviourGenerator
+  end # BehaviourFactory
 
 end # MobyBase

@@ -57,6 +57,13 @@
     <parameter name="socket_read_timeout" value="25" />
     <parameter name="socket_write_timeout" value="25" />
 
+    <!-- default value for send_service_request message deflation rules -->
+    <parameter name="io_deflate_service_requests" value="true" />
+    <parameter name="io_deflate_minimum_size_in_bytes" value="1024" />
+
+    <!-- compression levels: -1 (DEFAULT), 0 (NO_COMPRESSION), 1 (BEST_SPEED), 9 (BEST_COMPRESSION) -->
+    <parameter name="io_deflate_compression_level" value="9" />
+
     <!-- application start, stop etc. related parameters -->
     <parameter name="application_start_arguments" value="" /> <!-- start, e.g. value="-style, testability" -->
     <parameter name="application_close_kill" value="true" /> <!-- stop -->

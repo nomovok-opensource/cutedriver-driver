@@ -47,7 +47,7 @@ module TDriverVerify
 
       rescue Exception
 
-        raise exception.class, "Exception was raised while executing on_error_verify_block. Reason: #{ $!.message.to_s }"
+        raise $!.class, "Exception was raised while executing on_error_verify_block. Reason: #{ $!.message.to_s }"
 
       end
 

@@ -17,6 +17,7 @@
 ## 
 ############################################################################
 
+=begin
 module MobyUtil
 
 	class DynamicAttributeFilter
@@ -187,3 +188,4 @@ module MobyUtil
 	end # DynamicAttributeFilter
   
 end # MobyUtil
+=end

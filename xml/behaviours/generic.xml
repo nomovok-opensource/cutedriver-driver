@@ -1,4 +1,23 @@
+
 <behaviours>
+
+    <behaviour name="GenericObjectAbstraction" object_type="*;application;sut" sut_type="*" input_type="*" version="*">
+        <module name="MobyBehaviour::GenericObjectAbstraction" />
+        <methods>
+            <method name="application?">
+                <description>Determines if the current object is type of application</description>
+                <example>application?</example>
+            </method>
+            <method name="sut?">
+                <description>Determines if the current object is type of SUT</description>
+                <example>sut?</example>
+            </method>
+            <method name="test_object?">
+                <description>Determines if the current object is type of test object</description>
+                <example>test_object?</example>
+            </method>
+        </methods>
+    </behaviour>
 
 	<behaviour name="GenericTestObject" object_type="*;application" sut_type="*" input_type="*" version="*">
 
@@ -35,10 +54,12 @@
 				<example>attribute("type")</example>
 			</method>
 
+<!-->
 			<method name="application?">
 				<description>Returns a boolean representing that is test object type of application</description>
 				<example>application?</example>
 			</method>
+-->
 
 			<method name="attributes">
 				<description>Returns a attributes of test object</description>

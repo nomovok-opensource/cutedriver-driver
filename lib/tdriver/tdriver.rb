@@ -86,7 +86,7 @@ module TDriver
     # ArgumentError:: Not connected to device 'id' if not connected at all / device already disconnected
     # ArgumentError:: Sut id not given
     # === example
-    #  @sut = TDriver.reboot_sut(:Id =>'sut_qt') # for Qt, should be connected already   
+    #  @sut = TDriver.reboot_sut(:Id => 'sut_qt') # for Qt, should be connected already   
     def reboot_sut( sut_attributes = {} )
 
       MobyBase::SUTFactory.instance.reboot_sut( sut_attributes )
@@ -189,6 +189,9 @@ module TDriver
 
       # set xml cache buffer size 
       MobyUtil::XML.buffer_size = $parameters[ :xml_cache_buffer_size, 10 ].to_i
+
+      # load behaviours
+      TDriver::BehaviourFactory.init( :path => File.join( config_dir, 'behaviours' ) )
 
       # initialization done, everything is ready
       $TDRIVER_INITIALIZED = true

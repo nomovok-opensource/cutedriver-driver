@@ -17,30 +17,13 @@
 ## 
 ############################################################################
 
-# behaviour abstract class
-#require File.expand_path( File.join( File.dirname( __FILE__ ), 'abstract.rb' ) )
+[ 
 
-# factory class
-#require File.expand_path( File.join( File.dirname( __FILE__ ), 'factory.rb' ) )
-
-[
-  # behaviour abstract class
-  'abstract.rb',
-
-  # behaviour factory class
-  'factory.rb'
+  # dynamic attribute filter module
+  'attribute_filter.rb'
 
 ].each{ | filename |
 
-  require File.expand_path( 
-    File.join( File.dirname( __FILE__ ), filename ) 
-  )
+  require File.expand_path( File.join( File.dirname( __FILE__ ), filename ) )
 
 }
-
-# load generic behaviours
-MobyUtil::FileHelper.load_modules( 
-  File.expand_path( 
-    File.join( File.dirname( __FILE__ ), 'behaviours' ) 
-  )
-)

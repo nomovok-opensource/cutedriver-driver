@@ -42,12 +42,12 @@ module TDriver
 
       sut = options[ :sut ]
 
-      MobyBase::BehaviourFactory.instance.apply_behaviour!( 
+      TDriver::BehaviourFactory.apply_behaviour( 
         :object       => self,
-        :object_type  => [ 'AgentCommandService' ],
-        :env          => [ '*', *sut.environment.to_s.split(";") ],
-        :input_type   => [ '*', *sut.input.to_s.split(";") ],
-        :version      => [ '*', *sut.ui_version.to_s.split(";") ]
+        :object_type  => [ 'AgentCommandService'                  ],
+        :env          => [ '*', *sut.environment.to_s.split(";")  ],
+        :input_type   => [ '*', *sut.input.to_s.split(";")        ],
+        :version      => [ '*', *sut.ui_version.to_s.split(";")   ]
       )
     
       # store given options
