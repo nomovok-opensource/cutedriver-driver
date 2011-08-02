@@ -35,7 +35,7 @@ module MobyUtil
 
         def first
 
-          cache( :first, :vaue ){ node_object( @xml.first ) }
+          cache( :first, :value ){ node_object( @xml.first ) }
 
         end
 
@@ -47,13 +47,26 @@ module MobyUtil
 
         def each( &block )
 
-          @xml.each{ | node | 
+          #@xml.each{ | node | 
+          #  yield( cache( :each, node ){ node_object( node ) } ) 
+          #}
 
-            yield( cache( :each, node ){ node_object( node ) } ) 
+          # approx. 3,5% faster
+          cache( :each, :cached_nodes ){ 
 
-          }
+            @xml.collect{ | node | 
 
-          self
+              cache( :each, node ){ node_object( node ) }
+
+            }
+
+          }.each{ | node | 
+
+            yield( node ) 
+
+          } 
+
+         self
 
         end
 
@@ -99,9 +112,27 @@ module MobyUtil
 
         end
 
+        def inject( result, &block )
+
+          cache( :each, :cached_nodes ){ 
+
+            @xml.collect{ | node | 
+
+              cache( :each, node ){ node_object( node ) }
+
+            }
+
+          }.__send__( :inject, result, &block )
+
+          #n = node_object( @xml )
+
+          #n.__send__( :inject, result, &block )
+
+        end
+
         def sort( &block )
 
-          nodeset_object( _sort( &block ) ) 
+          node_object( _sort( &block ) ) 
 
         end
 
@@ -161,7 +192,22 @@ module MobyUtil
 
         def _collect( &block )
 
-          @xml.collect{ | node | yield( cache( :each, node ){ node_object( node ) } ) }
+          #@xml.collect{ | node | yield( cache( :each, node ){ node_object( node ) } ) }
+
+          # approx. 3.5% faster
+          cache( :each, :cached_nodes ){ 
+
+            @xml.collect{ | node | 
+
+              cache( :each, node ){ node_object( node ) }
+
+            }
+
+          }.collect{ | node | 
+
+            yield( node )
+
+          }
 
         end
 
