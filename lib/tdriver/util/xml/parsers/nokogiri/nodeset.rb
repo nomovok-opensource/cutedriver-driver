@@ -100,7 +100,7 @@ module MobyUtil
 
         def compact
 
-          cache( :compact, :value ){ nodeset_object( @xml.compact ) }
+          cache( :compact, :value ){ node_object( @xml.compact ) }
 
         end
 
