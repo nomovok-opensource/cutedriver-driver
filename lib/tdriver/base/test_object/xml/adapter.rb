@@ -373,11 +373,13 @@ module TDriver
       # TODO: document me
       def self.test_object_element_attributes( source_data )
 
-        Hash[
-          source_data.attributes.collect{ | key, value | 
-            [ key.to_s, value.to_s ]
-          }
-        ]
+        #Hash[
+        #  source_data.attributes.collect{ | key, value | 
+        #    [ key.to_s, value.to_s ]
+        #  }
+        #]
+
+        source_data.attributes
 
       end
 
@@ -476,7 +478,7 @@ module TDriver
         inclusive_filter.collect!{ | key | key.to_s.downcase } unless inclusive_filter.empty?
 
         # return hash of test object attributes
-        object_attributes=Hash.new
+        object_attributes = {}
 
           # iterate each attribute and collect name and value
           source_data.xpath( 'attr' ).collect{ | value |
@@ -561,14 +563,17 @@ module TDriver
 
       # TODO: document me
       def self.state_object_xml( source_data, id )
-      
+
         # collect each object from source xml
-        objects = source_data.xpath( 'tasInfo/obj' ).collect{ | element | element.to_s }.join
-      
+        #objects = source_data.xpath( 'tasInfo/obj' ).collect{ | element | element.to_s }.join
+
         # return xml root element
-        MobyUtil::XML.parse_string( 
-          "<sut name='sut' type='sut' id='#{ id }'>#{ objects }</sut>"
-        ).root
+        #MobyUtil::XML.parse_string( 
+        #  "<sut name='sut' type='sut' id='#{ id }'>#{ objects }</sut>"
+        #).root
+
+        # return xml root element
+        MobyUtil::XML.parse_string( "<sut name='sut' type='sut' id='#{ id }'>#{ source_data.xpath('tasInfo/obj').inject(""){ | result, element | result << element.to_s; } }</sut>" ).root
       
       end
 
