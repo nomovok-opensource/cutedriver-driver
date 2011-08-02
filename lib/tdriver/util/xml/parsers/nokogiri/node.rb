@@ -80,10 +80,15 @@ module MobyUtil
         def attributes
 
           cache( :attributes, :value ){
-            # return hash of attributes
-            Hash[ @xml.attribute_nodes.collect{ | node | 
-              [ node.node_name, node.value.to_s ] }
-            ]
+            
+            # return hash of attributes            
+            #Hash[ @xml.attribute_nodes.collect{ | node | 
+            #  [ node.node_name, node.value.to_s ] }
+            #]
+
+            # approx. 20% faster
+            @xml.attribute_nodes.inject({}){ | result, node | result[ node.node_name ] = node.value; result }
+
           }
 
         end
