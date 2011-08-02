@@ -30,7 +30,7 @@ module MobyUtil
         # TODO: document me
         def []( value )
 
-          cache( __method__, value ){ @xml[ value ] }
+          cache( :[], value ){ @xml[ value ] }
 
         end
 
@@ -46,7 +46,7 @@ module MobyUtil
         # TODO: document me
         def ==( object )
 
-          cache( __method__, object.object_id ){ @xml.content == object.xml.content }
+          cache( :==, object.object_id ){ @xml.content == object.xml.content }
           
         end
 
@@ -56,7 +56,7 @@ module MobyUtil
         # TODO: document me
         def <=>( object )
 
-          cache( __method__, object.object_id ){ @xml <=> object.xml }
+          cache( :<=>, object.object_id ){ @xml <=> object.xml }
 
         end
 
@@ -96,7 +96,7 @@ module MobyUtil
         # TODO: document me
         def blank?
 
-          cache( :is_blank, :value ){ @xml.blank? }
+          cache( :blank?, :value ){ @xml.blank? }
 
         end
 

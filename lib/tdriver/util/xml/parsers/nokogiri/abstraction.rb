@@ -79,13 +79,6 @@ module MobyUtil
         include Cache
 
         # TODO: Documentation
-        def empty?
-
-          cache( :is_nil, :value ){ @xml.nil? }
-
-        end
-
-        # TODO: Documentation
         def name
 
           cache( :name, :value ){ @xml.name }
@@ -95,9 +88,11 @@ module MobyUtil
         # TODO: Documentation
         def nil?
 
-          cache( :is_nil, :value ){ @xml.nil? }
+          cache( :nil?, :value ){ @xml.nil? }
 
         end
+
+        alias :empty? :nil?
 
         # TODO: Documentation
         def size

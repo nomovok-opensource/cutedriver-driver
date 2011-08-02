@@ -144,7 +144,7 @@ module MobyUtil
 
         def empty?
 
-          cache( :is_empty, :value ){ @xml.empty? }
+          cache( :empty?, :value ){ @xml.empty? }
 
         end
         
