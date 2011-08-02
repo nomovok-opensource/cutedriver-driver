@@ -44,10 +44,6 @@ module MobyUtil
         # TODO: document me
         def cache( key, value )
 
-#          yield
-
-# JKo: disable xml caching for now, need more investigation why tests starts to fail
-#=begin
           if @options[ :cache_enabled ] == true
           
             @cache[ key ].fetch( value ){
@@ -61,7 +57,6 @@ module MobyUtil
             yield
               
           end
-#=end
                 
         end
       
