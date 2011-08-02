@@ -124,10 +124,6 @@ module MobyUtil
 
           }.__send__( :inject, result, &block )
 
-          #n = node_object( @xml )
-
-          #n.__send__( :inject, result, &block )
-
         end
 
         def sort( &block )
