@@ -49,15 +49,6 @@ class Object
     self
 
   end
-
-  # TODO: document me
-  def ensure_block_given( message = 'no block given', exception = ArgumentError )
-  
-    raise exception, message, caller unless block_given?
-    
-    self
-  
-  end
   
   # define method to class instance
   def meta_def( method_name, &block )
