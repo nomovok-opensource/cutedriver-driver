@@ -51,7 +51,7 @@ class Object
   end
 
   # TODO: document me
-  def no_block_given( message = 'no block given', exception = ArgumentError )
+  def ensure_block_given( message = 'no block given', exception = ArgumentError )
   
     raise exception, message, caller unless block_given?
     
