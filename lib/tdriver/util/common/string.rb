@@ -34,7 +34,14 @@ class String
 
   def not_empty( message = "String must not be empty", exception = ArgumentError )
 
-    raise exception, message, caller if empty? 
+    if empty?
+  
+      # replace macros
+      message.gsub!( '$1', self.inspect )
+  
+      raise exception, message, caller 
+
+    end
 
     self
 
