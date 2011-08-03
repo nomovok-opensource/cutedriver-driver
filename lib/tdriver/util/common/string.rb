@@ -37,7 +37,7 @@ class String
     if empty?
   
       # replace macros
-      message.gsub!( '$1', self.inspect )
+      #message.gsub!( '$1', self.inspect )
   
       raise exception, message, caller 
 
