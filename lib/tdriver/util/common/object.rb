@@ -27,19 +27,22 @@ class Object
   
   end
 
+  # TODO: document me
   def true?
 
     false
   
   end
   
+  # TODO: document me
   def false?
   
     false
   
   end
 
-  def not_blank( message = "Object must not be blank", exception = ArgumentError )
+  # TODO: document me
+  def not_blank( message = "object must not be blank", exception = ArgumentError )
 
     raise exception, message, caller if blank? 
 
@@ -47,6 +50,15 @@ class Object
 
   end
 
+  # TODO: document me
+  def no_block_given( message = 'no block given', exception = ArgumentError )
+  
+    raise exception, message, caller unless block_given?
+    
+    self
+  
+  end
+  
   # define method to class instance
   def meta_def( method_name, &block )
   
