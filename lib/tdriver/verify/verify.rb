@@ -581,7 +581,7 @@ module TDriverVerify
   
   end
 
-  # Verifies that the block given to this method evaluates to the expected value. Verification is synchronized with all connected suts.
+  # Verifies that result of given block equals to expected value. Verification is synchronized with all connected suts.
   # If this method is called for a sut, synchronization is only done with that sut.
   #
   # === params
@@ -710,6 +710,274 @@ module TDriverVerify
     end
 
     $logger.behaviour "PASS;Verification #{ message }at #{ verify_caller } was successful#{ timeout.nil? ? '' : ' using timeout ' + timeout.to_s }.;#{ self.kind_of?( MobyBase::SUT ) ? self.id.to_s + ';sut' : ';' };{};verify_equal;"
+
+    nil
+  
+  end
+
+  # Verifies that result of the given block is less than expected value. Verification is synchronized with all connected suts.
+  # If this method is called for a sut, synchronization is only done with that sut.
+  #
+  # === params
+  # expected:: Expected result value of the block
+  # timeout:: (optional) Integer defining the amount of seconds during which the verification must pass.
+  # message:: (optional) A String that is displayed as additional information if the verification fails.
+  # === returns
+  # nil
+  # === raises
+  # ArgumentError:: message was not a String or timeout an integer, or no block was given.
+  # VerificationError:: The verification failed.
+  # RuntimeError:: An unexpected error was encountered during verification.
+  def verify_less( expected_value, timeout = nil, message = nil, &block )
+  
+    begin
+
+      # determine name of caller method
+      verify_caller = caller( 1 ).first.to_s
+
+      # store orignal logging state
+      logging_enabled = $logger.enabled
+
+      # disable behaviour logging
+      $logger.enabled = false
+
+      # ensure that code block was given
+      raise ArgumentError, "No block was given." unless block_given?
+
+      # ensure that timeout is either nil or type of integer
+      timeout.check_type [ NilClass, Fixnum ], 'wrong argument type $1 for timeout (expected $2)'
+
+      # ensure that message is either nil or type of string
+      message.check_type [ NilClass, String ], 'wrong argument type $1 for message (expected $2)'
+
+      # convert timeout to integer, nil will be zero
+      timeout = get_timeout( timeout )
+
+      # calculate the time when timeout exceeds
+      timeout_end_time = Time.now + timeout
+
+      # convert message to string, nil will be empty string
+      message = message.to_s
+
+      # add double quotation and trailing whitespace if not empty string
+      message = "#{ message.inspect } " if message.length > 0
+
+      # store original timeout value
+      original_timeout_value = MobyBase::TestObjectFactory.instance.timeout
+
+      # set the testobject timeout to 0 for the duration of the verify call
+      MobyBase::TestObjectFactory.instance.timeout = 0
+
+      # result container
+      result = nil
+
+      loop do
+      
+        begin
+        
+          counter = ref_counter
+
+          # execute code block
+          result = yield
+
+          # raise exception if result of yield is less than expected value 
+          raise MobyBase::VerificationError unless result < expected_value
+
+          # break loop if no exceptions thrown
+          break
+
+        rescue 
+
+          raise if $!.kind_of?( MobyBase::ContinuousVerificationError )
+
+          # refresh and retry unless timeout exceeded
+          raise $! if Time.new > timeout_end_time
+          
+          # retry interval
+          sleep TIMEOUT_CYCLE_SECONDS
+
+          # refresh suts
+          refresh_suts if counter == ref_counter
+        
+        end # begin
+      
+      end # do loop
+        
+    rescue
+
+      # restore logger state
+      $logger.enabled = logging_enabled
+
+      # execute on verification error code block
+      execute_on_error_verify_block unless @@on_error_verify_block.nil?
+
+      # process the exception
+      if $!.kind_of?( MobyBase::ContinuousVerificationError )
+      
+        raise
+    
+      elsif $!.kind_of?( MobyBase::VerificationError )
+      
+        error_message = "Verification #{ message }at #{ verify_caller } failed: #{ MobyUtil::KernelHelper.find_source( verify_caller ) }"
+        error_message << "The block did not return #{ expected_value }. It returned: #{ result.inspect }"
+        
+      else
+      
+        error_message = "Verification #{ message }at #{ verify_caller } failed as an exception was thrown when the verification block was executed"
+        error_message << "#{ MobyUtil::KernelHelper.find_source( verify_caller ) }\nDetails: \n#{ $!.inspect }"
+      
+      end
+
+      $logger.behaviour "FAIL;Verification #{ message }failed: #{ $!.to_s }.\n #{ timeout.nil? ? '' : ' using timeout ' + timeout.to_s }.;#{ self.kind_of?( MobyBase::SUT ) ? self.id.to_s + ';sut' : ';' };{};verify_less;"
+
+      # raise the exception
+      raise MobyBase::VerificationError, error_message
+       
+    ensure
+
+      # restore original test object factory timeout value 
+      MobyBase::TestObjectFactory.instance.timeout = original_timeout_value
+
+      # restore logger state
+      $logger.enabled = logging_enabled
+    
+    end
+
+    $logger.behaviour "PASS;Verification #{ message }at #{ verify_caller } was successful#{ timeout.nil? ? '' : ' using timeout ' + timeout.to_s }.;#{ self.kind_of?( MobyBase::SUT ) ? self.id.to_s + ';sut' : ';' };{};verify_less;"
+
+    nil
+  
+  end
+
+  # Verifies that result of the given block is greater than expected value. Verification is synchronized with all connected suts.
+  # If this method is called for a sut, synchronization is only done with that sut.
+  #
+  # === params
+  # expected:: Expected result value of the block
+  # timeout:: (optional) Integer defining the amount of seconds during which the verification must pass.
+  # message:: (optional) A String that is displayed as additional information if the verification fails.
+  # === returns
+  # nil
+  # === raises
+  # ArgumentError:: message was not a String or timeout an integer, or no block was given.
+  # VerificationError:: The verification failed.
+  # RuntimeError:: An unexpected error was encountered during verification.
+  def verify_greater( expected_value, timeout = nil, message = nil, &block )
+  
+    begin
+
+      # determine name of caller method
+      verify_caller = caller( 1 ).first.to_s
+
+      # store orignal logging state
+      logging_enabled = $logger.enabled
+
+      # disable behaviour logging
+      $logger.enabled = false
+
+      # ensure that code block was given
+      raise ArgumentError, "No block was given." unless block_given?
+
+      # ensure that timeout is either nil or type of integer
+      timeout.check_type [ NilClass, Fixnum ], 'wrong argument type $1 for timeout (expected $2)'
+
+      # ensure that message is either nil or type of string
+      message.check_type [ NilClass, String ], 'wrong argument type $1 for message (expected $2)'
+
+      # convert timeout to integer, nil will be zero
+      timeout = get_timeout( timeout )
+
+      # calculate the time when timeout exceeds
+      timeout_end_time = Time.now + timeout
+
+      # convert message to string, nil will be empty string
+      message = message.to_s
+
+      # add double quotation and trailing whitespace if not empty string
+      message = "#{ message.inspect } " if message.length > 0
+
+      # store original timeout value
+      original_timeout_value = MobyBase::TestObjectFactory.instance.timeout
+
+      # set the testobject timeout to 0 for the duration of the verify call
+      MobyBase::TestObjectFactory.instance.timeout = 0
+
+      # result container
+      result = nil
+
+      loop do
+      
+        begin
+        
+          counter = ref_counter
+
+          # execute code block
+          result = yield
+
+          # raise exception if result of yield is greater than expected value 
+          raise MobyBase::VerificationError unless result > expected_value
+
+          # break loop if no exceptions thrown
+          break
+
+        rescue 
+
+          raise if $!.kind_of?( MobyBase::ContinuousVerificationError )
+
+          # refresh and retry unless timeout exceeded
+          raise $! if Time.new > timeout_end_time
+          
+          # retry interval
+          sleep TIMEOUT_CYCLE_SECONDS
+
+          # refresh suts
+          refresh_suts if counter == ref_counter
+        
+        end # begin
+      
+      end # do loop
+        
+    rescue
+
+      # restore logger state
+      $logger.enabled = logging_enabled
+
+      # execute on verification error code block
+      execute_on_error_verify_block unless @@on_error_verify_block.nil?
+
+      # process the exception
+      if $!.kind_of?( MobyBase::ContinuousVerificationError )
+      
+        raise
+    
+      elsif $!.kind_of?( MobyBase::VerificationError )
+      
+        error_message = "Verification #{ message }at #{ verify_caller } failed: #{ MobyUtil::KernelHelper.find_source( verify_caller ) }"
+        error_message << "The block did not return #{ expected_value }. It returned: #{ result.inspect }"
+        
+      else
+      
+        error_message = "Verification #{ message }at #{ verify_caller } failed as an exception was thrown when the verification block was executed"
+        error_message << "#{ MobyUtil::KernelHelper.find_source( verify_caller ) }\nDetails: \n#{ $!.inspect }"
+      
+      end
+
+      $logger.behaviour "FAIL;Verification #{ message }failed: #{ $!.to_s }.\n #{ timeout.nil? ? '' : ' using timeout ' + timeout.to_s }.;#{ self.kind_of?( MobyBase::SUT ) ? self.id.to_s + ';sut' : ';' };{};verify_greater;"
+
+      # raise the exception
+      raise MobyBase::VerificationError, error_message
+       
+    ensure
+
+      # restore original test object factory timeout value 
+      MobyBase::TestObjectFactory.instance.timeout = original_timeout_value
+
+      # restore logger state
+      $logger.enabled = logging_enabled
+    
+    end
+
+    $logger.behaviour "PASS;Verification #{ message }at #{ verify_caller } was successful#{ timeout.nil? ? '' : ' using timeout ' + timeout.to_s }.;#{ self.kind_of?( MobyBase::SUT ) ? self.id.to_s + ';sut' : ';' };{};verify_greater;"
 
     nil
   
