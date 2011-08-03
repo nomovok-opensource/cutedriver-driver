@@ -1115,7 +1115,7 @@ module TDriverVerify
       elsif $!.kind_of?( MobyBase::VerificationError )
       
         error_message = "Verification #{ message }at #{ verify_caller } failed: #{ MobyUtil::KernelHelper.find_source( verify_caller ) }"
-        error_message << "The block did not return #{ expected_value.inspect } pattern. It returned: #{ result.inspect }"
+        error_message << "The return value of block did not match with #{ expected_value.inspect } pattern. Block returned: #{ result.inspect }"
         
       else
       
