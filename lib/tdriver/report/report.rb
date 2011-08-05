@@ -58,4 +58,4 @@ unless $parameters[ :custom_error_recovery_module, nil ].nil?
 
 end
 
-include TDriverReportAPI
+#include TDriverReportAPI

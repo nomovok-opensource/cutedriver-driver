@@ -49,6 +49,54 @@ class Numeric
   end
 
   # TODO: document me
+  def not_negative( message = 'Given value ($1) must not be negative', exception = ArgumentError )
+
+    if negative?
+
+      # replace macros
+      message.gsub!( '$1', self.inspect )
+
+      raise exception, message, caller
+
+    end
+  
+    self
+    
+  end
+
+  # TODO: document me
+  def not_zero( message = 'Given value must not be zero', exception = ArgumentError )
+
+    if zero?
+
+      # replace macros
+      message.gsub!( '$1', self.inspect )
+
+      raise exception, message, caller
+
+    end
+      
+    self
+  
+  end
+
+  # TODO: document me
+  def not_positive( message = 'Given value ($1) must not be positive', exception = ArgumentError )
+
+    if positive?
+
+      # replace macros
+      message.gsub!( '$1', self.inspect )
+
+      raise exception, message, caller
+
+    end
+  
+    self
+  
+  end
+
+  # TODO: document me
   def check_range( range, message = "value $1 is out of range ($2)"  )
 
     # check that given argument is type of Range

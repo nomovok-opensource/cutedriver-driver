@@ -196,6 +196,66 @@ static VALUE native_extension( VALUE self ) {
 
 }
 
+/*
+// determines that native extension is in use
+static VALUE conv( VALUE self, VALUE string ) { 
+  
+  VALUE arr = rb_ary_new();
+  
+  const char* data = RSTRING_PTR( string );
+  
+  int len = RSTRING_LEN( string );
+  
+  int c = 0;
+
+  while( len-- ){
+
+    c = *data++;
+
+    char result[] = { c };
+
+    switch( c ){
+
+      case 38:
+
+        rb_ary_push( arr, rb_str_new2( "&amp;" ) );
+        break;
+
+      case 60:
+
+        rb_ary_push( arr, rb_str_new2( "&lt;" ) );
+        break;
+
+      case 62:
+
+        rb_ary_push( arr, rb_str_new2( "&gt;" ) );
+        break;
+
+      case 34:
+
+        rb_ary_push( arr, rb_str_new2( "&quot;" ) );
+        break;
+
+      case 39:
+
+        rb_ary_push( arr, rb_str_new2( "&apos;" ) );
+        break;
+
+    default:
+
+      //rb_ary_push( arr, INT2FIX(c) );
+      rb_ary_push( arr, rb_str_new( result, 1 ) );
+      break;
+
+    }
+
+  }  
+
+  return rb_funcall2( arr, rb_intern("join"), 0, NULL );
+
+}
+*/
+
 void Init_native_extensions() {
 
   // main tdriver module
@@ -211,6 +271,12 @@ void Init_native_extensions() {
 
   // determines that native extension is in use
 	rb_define_singleton_method( cChecksum, "native_extension", native_extension, 0 );
+
+/*
+  // determines that native extension is in use
+	rb_define_singleton_method( cChecksum, "conv", conv, 1 );
+
+*/
 
   // deprecated - for backwards compatibility
 	VALUE mNativeExtensions = rb_define_module_under( mTDriver, "NativeExtensions" );
