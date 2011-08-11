@@ -69,6 +69,15 @@ module TDriver
 
     end
 
+    # TODO: document me
+    def self.reset
+
+      @attributes_string = ""
+
+      @attributes = []
+
+    end
+
     class << self
 
       private
