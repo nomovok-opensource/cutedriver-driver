@@ -172,12 +172,15 @@ module MobyBase
 
         # sort matches if enabled
         if directives[ :__xy_sorting ] == true
-                  
+ 
+          # temporary store sut xml_data
+          _sut_xml = sut.xml_data
+
           # sort elements
-          test_object_adapter.sort_elements( 
-            matches, 
-            test_object_adapter.application_layout_direction( sut )
-          )
+          test_object_adapter.sort_elements( matches, test_object_adapter.application_layout_direction( sut ) )
+
+          # restore original sut xml data (containing above identified object) due to applicaiton_layout_direction may perform ui state queries; currently sut stores always the result of last ui state query
+          sut.xml_data = _sut_xml
 
         end
 
