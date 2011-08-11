@@ -103,7 +103,34 @@ module MobyBase
         :__retriable_allowed_exceptions => [ MobyBase::TestObjectNotFoundError, MobyBase::MultipleTestObjectsIdentifiedError ]
                  
       )
-       
+
+      # if sorting enabled; retrieve application layout direction first
+      if directives[ :__xy_sorting ] == true
+
+        parent_application = directives[ :__parent_application ] || rules[ :parent_application ]
+
+        unless parent_application.nil?
+
+          begin
+
+            application_layout_direction = parent_application.attribute( 'layoutDirection' ).to_s
+
+            raise if application_layout_direction.empty?
+
+          rescue
+
+            application_layout_direction = 'LeftToRight'
+
+          end
+
+        else
+
+          raise RuntimeError, 'parent application not given, unable to retrieve layoutDirection'
+
+        end
+
+      end
+
       # identify objects until desired matches found or timeout exceeds
       MobyUtil::Retryable.until( 
 
@@ -172,15 +199,9 @@ module MobyBase
 
         # sort matches if enabled
         if directives[ :__xy_sorting ] == true
- 
-          # temporary store sut xml_data
-          _sut_xml = sut.xml_data
 
           # sort elements
-          test_object_adapter.sort_elements( matches, test_object_adapter.application_layout_direction( sut ) )
-
-          # restore original sut xml data (containing above identified object) due to applicaiton_layout_direction may perform ui state queries; currently sut stores always the result of last ui state query
-          sut.xml_data = _sut_xml
+          test_object_adapter.sort_elements( matches, application_layout_direction )
 
         end
 
