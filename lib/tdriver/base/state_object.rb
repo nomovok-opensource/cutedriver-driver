@@ -114,7 +114,8 @@ module MobyBase
 
         else
 
-          @test_object_adapter = TDriver::TestObjectAdapter
+          # Load the new xml only, so old is not supported
+          @test_object_adapter = TDriver::OptimizedXML::TestObjectAdapter
 
         end
 
