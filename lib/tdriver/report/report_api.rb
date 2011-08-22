@@ -20,6 +20,13 @@
 
 module TDriverReportAPI
 
+  # This method returns all the current executed test by status
+  #
+  # === params
+  # status_type: tests status
+  # === returns
+  # Array
+  # === raises
   def tdriver_get_current_by_status( status_type )
     Kernel::raise TypeError.new("Argument to method cannot be nil.") if status_type.nil?
     ret = []
@@ -29,6 +36,13 @@ module TDriverReportAPI
     return ret
   end
 
+  # This method returns all the tests
+  #
+  # === params
+  # status_type: tests status
+  # === returns
+  # Array
+  # === raises
   def tdriver_get_status(status_type)
     Kernel::raise TypeError.new("Argument to method cannot be nil.") if status_type.nil?
     ret = []
@@ -38,15 +52,35 @@ module TDriverReportAPI
     return ret
   end
 
+  # This method returns all the sequential fails
+  #
+  # === params
+  # nil
+  # === returns
+  # String
+  # === raises
   def tdriver_get_sequential_fails    
     return $tdriver_reporter.get_sequential_fails if $tdriver_reporter
   end
   
-  
+  # This method updates the sequential fail status
+  #
+  # === params
+  # status: fail status
+  # === returns
+  # nil
+  # === raises
   def tdriver_update_sequential_fails( status )
      $tdriver_reporter.update_sequential_fails( status ) if $tdriver_reporter
   end
-  
+
+  # This method logs data to the test case
+  #
+  # === params
+  # data: the data to be logged
+  # === returns
+  # nil
+  # === raises
   def tdriver_log_data(data)
     Kernel::raise TypeError.new("Argument to method cannot be nil.") if data.nil?
     if $tdriver_reporter!=nil
@@ -54,18 +88,40 @@ module TDriverReportAPI
     end
   end
 
+  # This method captures sut state to test case
+  #
+  # === params
+  # capture_screen_shot: include screenshot to the capture
+  # === returns
+  # nil
+  # === raises
   def tdriver_capture_state(capture_screen_shot=true)
     if $tdriver_reporter
       $new_test_case.capture_dump(capture_screen_shot) if $new_test_case
     end
   end
 
+  # This method captures sut state to test case with comments
+  #
+  # === params
+  # arguments: optional aguments
+  # === returns
+  # nil
+  # === raises
   def tdriver_capture_screen(arguments=Hash.new)
     if $tdriver_reporter
       $new_test_case.capture_dump(true,arguments) if $new_test_case
     end
   end
 
+  # This method logs data to the total run table
+  #
+  # === params
+  # column_name: name of the column
+  # value: value for the entry
+  # === returns
+  # nil
+  # === raises
   def tdriver_log_data_in_total_run_table(column_name,value)
     Kernel::raise TypeError.new("Argument to method cannot be nil.") if column_name.nil? || value.nil?
     if $tdriver_reporter!=nil
@@ -73,6 +129,13 @@ module TDriverReportAPI
     end
   end
 
+  # This method logs data test case details
+  #
+  # === params
+  # message: message to be logged in to details(Supports html for formatting the entry)
+  # === returns
+  # nil
+  # === raises
   def tdriver_report_log(message)
   	Kernel::raise TypeError.new("Argument message was not a String.") unless message.nil? or message.kind_of?(String)
     if $tdriver_reporter
@@ -80,12 +143,27 @@ module TDriverReportAPI
     end
   end
 
+  # This method changes the test case result
+  #
+  # === params
+  # status: new test case status
+  # === returns
+  # nil
+  # === raises
   def tdriver_report_set_test_case_status(status)
   	Kernel::raise TypeError.new("Argument status was not a String.") unless status.nil? or status.kind_of?(String)
     if $tdriver_reporter!=nil
       $tdriver_reporter.set_test_case_user_defined_status(status)
     end
   end
+
+  # This method returns how many tests has been executed
+  #
+  # === params
+  # nil
+  # === returns
+  # Integer
+  # === raises
   def tdriver_report_total_tests_run()
     total=0
     if $tdriver_reporter!=nil
@@ -93,6 +171,14 @@ module TDriverReportAPI
     end
     return total.to_i
   end
+
+  # This method returns how many tests has passed
+  #
+  # === params
+  # nil
+  # === returns
+  # Integer
+  # === raises
   def tdriver_report_total_passed_tests()
     total=0
     if $tdriver_reporter!=nil
@@ -100,6 +186,14 @@ module TDriverReportAPI
     end
     return total.to_i
   end
+
+  # This method returns how many tests has failed
+  #
+  # === params
+  # nil
+  # === returns
+  # Integer
+  # === raises
   def tdriver_report_total_failed_tests()
     total=0
     if $tdriver_reporter!=nil
@@ -107,6 +201,14 @@ module TDriverReportAPI
     end
     return total.to_i
   end
+
+  # This method returns how many tests were not run
+  #
+  # === params
+  # nil
+  # === returns
+  # Integer
+  # === raises
   def tdriver_report_total_not_run_tests()
     total=0
     if $tdriver_reporter!=nil
@@ -114,6 +216,14 @@ module TDriverReportAPI
     end
     return total.to_i
   end
+
+  # This method returns current report folder
+  #
+  # === params
+  # nil
+  # === returns
+  # String
+  # === raises
   def tdriver_report_folder()
     folder=nil
     if $tdriver_reporter!=nil
@@ -121,6 +231,14 @@ module TDriverReportAPI
     end
     return folder.to_s
   end
+
+  # This method returns test case start time
+  #
+  # === params
+  # nil
+  # === returns
+  # String
+  # === raises
   def tdriver_report_start_time()
     start_time=nil
     if $tdriver_reporter!=nil
@@ -128,6 +246,14 @@ module TDriverReportAPI
     end
     return start_time.to_s
   end
+
+  # This method current execution time
+  #
+  # === params
+  # nil
+  # === returns
+  # String
+  # === raises
   def tdriver_report_run_time()
     run_time=nil
     if $tdriver_reporter!=nil
@@ -135,6 +261,14 @@ module TDriverReportAPI
     end
     return run_time.to_s
   end
+
+  # This method returns the amount of crash files
+  #
+  # === params
+  # nil
+  # === returns
+  # Integer
+  # === raises
   def tdriver_report_total_crash_files()
     crash_files=0
     if $tdriver_reporter!=nil
@@ -142,6 +276,14 @@ module TDriverReportAPI
     end
     return crash_files.to_i
   end
+
+  # This method returns the amount of device resets
+  #
+  # === params
+  # nil
+  # === returns
+  # Integer
+  # === raises
   def tdriver_report_total_device_resets()
     device_resets=0
     if $tdriver_reporter!=nil
@@ -149,6 +291,14 @@ module TDriverReportAPI
     end
     return device_resets.to_i
   end
+
+  # This method can combine previous results to the current execution
+  #
+  # === params
+  # nil
+  # === returns
+  # Integer
+  # === raises
   def tdriver_report_combine_reports(reports)
     if $tdriver_reporter!=nil
       $tdriver_reporter.combine_results(reports)
@@ -160,81 +310,24 @@ module TDriverReportAPI
     end
   end
 
-  #old api methods
-
-  def matti_log_data(data)
-    file, line = caller.first.split(":")
-    $stderr.puts "%s:%s warning: method deprecated" % [ file, line]
-    tdriver_log_data(data)
+  # This method returns the amount of device resets
+  #
+  # === params
+  # nil
+  # === returns
+  # Integer
+  # === raises
+  def tdriver_report_current_test_case_dir()
+    test_case_path=''
+    if $new_test_case!=nil
+      test_case_path=$new_test_case.test_case_folder
+    end
+    return test_case_path.to_s
   end
-  def matti_report_log(message)
-    file, line = caller.first.split(":")
-    $stderr.puts "%s:%s warning: method deprecated" % [ file, line]
-  	tdriver_report_log(message)
-  end
-  def matti_report_set_test_case_status(status)
-    file, line = caller.first.split(":")
-    $stderr.puts "%s:%s warning: method deprecated" % [ file, line]
-  	tdriver_report_set_test_case_status(status)
-  end
-  def matti_report_total_tests_run()
-    file, line = caller.first.split(":")
-    $stderr.puts "%s:%s warning: method deprecated" % [ file, line]
-    tdriver_report_total_tests_run()
-  end
-  def matti_report_total_passed_tests()
-    file, line = caller.first.split(":")
-    $stderr.puts "%s:%s warning: method deprecated" % [ file, line]
-    tdriver_report_total_passed_tests()
-  end
-  def matti_report_total_failed_tests()
-    file, line = caller.first.split(":")
-    $stderr.puts "%s:%s warning: method deprecated" % [ file, line]
-    tdriver_report_total_failed_tests()
-  end
-  def matti_report_total_not_run_tests()
-    file, line = caller.first.split(":")
-    $stderr.puts "%s:%s warning: method deprecated" % [ file, line]
-    tdriver_report_total_not_run_tests()
-  end
-  def matti_report_folder()
-    file, line = caller.first.split(":")
-    $stderr.puts "%s:%s warning: method deprecated" % [ file, line]
-    tdriver_report_folder()
-  end
-  def matti_report_start_time()
-    file, line = caller.first.split(":")
-    $stderr.puts "%s:%s warning: method deprecated" % [ file, line]
-    tdriver_report_start_time()
-  end
-  def matti_report_run_time()
-    file, line = caller.first.split(":")
-    $stderr.puts "%s:%s warning: method deprecated" % [ file, line]
-    tdriver_report_run_time()
-  end
-  def matti_report_total_crash_files()
-    file, line = caller.first.split(":")
-    $stderr.puts "%s:%s warning: method deprecated" % [ file, line]
-    tdriver_report_total_crash_files()
-  end
-  def matti_report_total_device_resets()
-    file, line = caller.first.split(":")
-    $stderr.puts "%s:%s warning: method deprecated" % [ file, line]
-    tdriver_report_total_device_resets()
-  end
-  def matti_report_combine_reports(reports)
-    file, line = caller.first.split(":")
-    $stderr.puts "%s:%s warning: method deprecated" % [ file, line]
-    tdriver_report_combine_reports(reports)
-  end
-
+  
 
 end #TDriverReportAPI
 
-module MattiReportAPI
 
-  include TDriverReportAPI
-
-end
 
 
