@@ -600,15 +600,25 @@ module TDriverReportCreator
           end
 
           begin
-            failed_xml_state=sut_attributes[:sut].xml_data() if sut_attributes[:is_connected]
-            File.open(dump_folder+'/'+time_stamp+'_'+sut_id.to_s+'_state.xml', 'w') { |file| file.write(failed_xml_state) }
-            state_html='<a href="state_xml/'<<
-              time_stamp+'_'+sut_id.to_s+'_state.xml'<<
-              '">'+time_stamp+'_'+sut_id.to_s+'_state.xml'+'</a>'
-            self.set_test_case_execution_log(state_html.to_s)
+            if sut_attributes[:is_connected]
+              original_filter=sut_attributes[:sut].parameter[ :filter_type]
+              original_find=sut_attributes[:sut].parameter[ :use_find_object]
+              sut_attributes[:sut].parameter[ :filter_type] = 'none'
+              sut_attributes[:sut].parameter[ :use_find_object] = 'false'
+              sut_attributes[:sut].refresh
+              failed_xml_state=sut_attributes[:sut].xml_data()
+              File.open(dump_folder+'/'+time_stamp+'_'+sut_id.to_s+'_state.xml', 'w') { |file| file.write(failed_xml_state) }
+              state_html='<a href="state_xml/'<<
+                time_stamp+'_'+sut_id.to_s+'_state.xml'<<
+                '">'+time_stamp+'_'+sut_id.to_s+'_state.xml'+'</a>'
+              self.set_test_case_execution_log(state_html.to_s)
+            end
           rescue Exception=>e
             @failed_dump_error="Unable to capture state xml #{sut_id}: " + e.message
             self.set_test_case_execution_log(@failed_dump_error.to_s)
+          ensure
+            sut_attributes[:sut].parameter[ :filter_type]=original_filter
+            sut_attributes[:sut].parameter[ :use_find_object]=original_find
           end
   			end
       rescue Exception => e
