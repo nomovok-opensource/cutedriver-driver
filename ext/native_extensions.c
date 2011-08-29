@@ -22,6 +22,7 @@
 #include "ruby.h"
 
 static const CCITT_16[ 256 ] = {
+
   0x0000, 0x1021, 0x2042, 0x3063, 0x4084, 0x50A5, 0x60C6, 0x70E7,
   0x8108, 0x9129, 0xA14A, 0xB16B, 0xC18C, 0xD1AD, 0xE1CE, 0xF1EF,
   0x1231, 0x0210, 0x3273, 0x2252, 0x52B5, 0x4294, 0x72F7, 0x62D6,
@@ -54,6 +55,7 @@ static const CCITT_16[ 256 ] = {
   0x7C26, 0x6C07, 0x5C64, 0x4C45, 0x3CA2, 0x2C83, 0x1CE0, 0x0CC1,
   0xEF1F, 0xFF3E, 0xCF5D, 0xDF7C, 0xAF9B, 0xBFBA, 0x8FD9, 0x9FF8,
   0x6E17, 0x7E36, 0x4E55, 0x5E74, 0x2E93, 0x3EB2, 0x0ED1, 0x1EF0
+
 };
 
 
@@ -96,7 +98,21 @@ static VALUE crc16_ibm( VALUE self, VALUE string ) {
 */
 
 static VALUE crc16( int argc, VALUE* argv, VALUE self ) { 
-  //klass VALUE self, VALUE string, VALUE unused_crc ) {
+
+/*
+
+  # CRC-16-CCITT    
+  def crc16( buf, crc = 0 )
+
+    # calculate the checksum
+    buf.each_byte{ | x | crc = ( ( crc << 8 ) ^ @CCITT_16[ ( crc >> 8 ) ^ x ] ) & 0xffff }
+
+    # result
+    crc
+
+  end # crc16
+
+*/
 
   // variables for arguments
   VALUE string, initial_crc;
@@ -104,29 +120,26 @@ static VALUE crc16( int argc, VALUE* argv, VALUE self ) {
   // retrieve arguments
   rb_scan_args(argc, argv, "11", &string, &initial_crc);
 
-  int crc; // = 0xffff;
+  // verify argument type
+  Check_Type( string, T_STRING );
+
+  // initialize crc 
+  unsigned int crc = 0; 
   
-  if (NIL_P(initial_crc)){
-  
-    crc = 0; 
-  
-  } else {
+  if (!NIL_P(initial_crc)){
 
     // verify initial crc value
     Check_Type( initial_crc, T_FIXNUM );
   
-    crc = NUM2INT( initial_crc );
+    crc = FIX2INT( initial_crc );
   
   }
-  
-  // verify argument type
-  Check_Type( string, T_STRING );
 
-  const char* data = RSTRING_PTR( string );
+  const unsigned char* data = RSTRING_PTR( string );
   
-  int len = RSTRING_LEN( string );
+  unsigned int len = RSTRING_LEN( string );
   
-  int c = 0;
+  unsigned char c = 0;
 
   while( len-- ){
 
@@ -142,7 +155,26 @@ static VALUE crc16( int argc, VALUE* argv, VALUE self ) {
 }
 
 static VALUE crc16_ibm( int argc, VALUE* argv, VALUE self ) { 
-  //klass VALUE self, VALUE string, VALUE unused_crc ) {
+
+/*
+
+  # IBM-CRC-16: fallback when native extensions are not supported (e.g. jruby)
+  def crc16_ibm( buf, crc = 0xffff )
+
+    buf.each_byte do | c |
+
+      crc = ( ( crc >> 4 ) & 0x0fff ) ^ @IBM_16[ ( ( crc ^ c ) & 15 ) ]
+
+      crc = ( ( crc >> 4 ) & 0x0fff ) ^ @IBM_16[ ( ( crc ^ ( c >> 4 ) ) & 15 ) ]
+
+    end
+
+    # result
+    ~crc & 0xffff
+
+  end # crc16_ibm
+
+*/
 
   // variables for arguments
   VALUE string, initial_crc;
@@ -150,29 +182,25 @@ static VALUE crc16_ibm( int argc, VALUE* argv, VALUE self ) {
   // retrieve arguments
   rb_scan_args(argc, argv, "11", &string, &initial_crc);
 
-  int crc; // = 0xffff;
+  unsigned int crc = 0xffff; 
   
-  if (NIL_P(initial_crc)){
-  
-    crc = 0xffff; 
-  
-  } else {
+  if (!NIL_P(initial_crc)){
 
     // verify initial crc value
     Check_Type( initial_crc, T_FIXNUM );
   
-    crc = NUM2INT( initial_crc );
+    crc = FIX2INT( initial_crc );
   
   }
   
   // verify argument type
   Check_Type( string, T_STRING );
 
-  const char* data = RSTRING_PTR( string );
+  const unsigned char* data = RSTRING_PTR( string );
   
-  int len = RSTRING_LEN( string );
+  unsigned int len = RSTRING_LEN( string );
   
-  int c = 0;
+  unsigned char c = 0;
 
   while( len-- ){
 
