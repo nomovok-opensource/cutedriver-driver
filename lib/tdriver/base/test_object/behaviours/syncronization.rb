@@ -65,7 +65,7 @@ module MobyBehaviour
 		#
 		# == returns
 		# MobyBase::TestObject
-		#  description: Returns self
+		#  description: Returns receiver object of this method, not the found object 
 		#  example: - 
 		#
 		# == exceptions
@@ -111,11 +111,12 @@ module MobyBehaviour
           :identification_directives => dynamic_attributes.default_values(
             :__timeout => timeout,
             :__retry_interval => retry_interval,
-            :__refresh_arguments => self.kind_of?( MobyBase::SUT ) ? attributes : { :id => self.get_application_id }
+            :__refresh_arguments => self.kind_of?( MobyBase::SUT ) ? attributes : { :id => self.get_application_id },
+            :__parent_application => self.sut? == true ? nil : @parent_application 
           ),
           :parent => self        
         )
-
+        
 			rescue MobyBase::TestObjectNotFoundError
 
 				# the child object was not found in the specified timeout

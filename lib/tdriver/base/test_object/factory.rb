@@ -76,9 +76,9 @@ module MobyBase
       # search parameters for find_objects feature    
       search_parameters = make_object_search_params( rules[ :parent ], rules[ :object_attributes_hash ] )
       
-      # default rules      
+      # default rules
       directives.default_values(
-      
+            
         # get timeout from rules hash or TestObjectFactory
         :__timeout => @timeout,
 
@@ -109,28 +109,53 @@ module MobyBase
 
         parent_application = directives[ :__parent_application ] || rules[ :parent_application ]
 
-        unless parent_application.nil?
+        # application could be retrieved also like this...
+        # rules[ :parent ].instance_variable_get( :@parent_application )
 
-          begin
+        # when e.g. wait_child is called to SUT, TDriver is unable to determine layout direction used for sorting/indexing
+        if rules[ :parent ].sut?
 
-            application_layout_direction = parent_application.attribute( 'layoutDirection' ).to_s
+          application_layout_direction = directives[ :__layout_direction ]
+        
+          raise RuntimeError, 'layout direction is not available for indexing/xy_sorting; please use e.g. :__layout_direction => "LeftToRight"' if application_layout_direction.blank?
+                
+        else
+        
+          # retrieve layout direction from application object if available
+          unless parent_application.nil?
 
-            raise if application_layout_direction.empty?
+            begin
 
-          rescue
+              application_layout_direction = ""
 
-            application_layout_direction = 'LeftToRight'
+              if directives[ :__layout_direction ].blank?
+              
+                application_layout_direction = parent_application.attribute( 'layoutDirection' ).to_s 
+              
+              end
+
+              raise if application_layout_direction.empty?
+
+            rescue
+
+              application_layout_direction = directives[ :__layout_direction ]
+
+              # parent application not defined/available, use default value
+              application_layout_direction = 'LeftToRight' if application_layout_direction.blank?
+
+            end
+
+          else
+
+            raise RuntimeError, 'parent application not given; unable to retrieve layoutDirection attribute'
 
           end
 
-        else
-
-          raise RuntimeError, 'parent application not given, unable to retrieve layoutDirection'
-
         end
 
-      end
 
+      end
+      
       # identify objects until desired matches found or timeout exceeds
       MobyUtil::Retryable.until( 
 
@@ -159,7 +184,7 @@ module MobyBase
          directives[ :__find_all_children ] 
 
         )
-        
+                  
         # Temporary prevent users misleading :Text with :text (as they are different)
         if ( rules[ :object_attributes_hash ].has_key?(:Text) )
 
