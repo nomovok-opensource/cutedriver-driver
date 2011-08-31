@@ -17,29 +17,95 @@
 ## 
 ############################################################################
 
-module MobyBase
+module TDriver
 
-  # class to represent TestObjectFactory.
-  #
-  # when a SUT asks for factory to create test objects, it shall give reference to the SUT so that 
-  # factory can make a call back for SUT object dump (in xml)
-  class TestObjectFactory
+  module TestObjectFactory
+  
+    # private methods and variables
+    class << self
 
-    include Singleton
+    private
 
-    attr_reader :timeout, :test_object_adapter
+      # TODO: document me
+      def initialize_class
 
-    # TODO: Document me (TestObjectFactory::initialize)
-    def initialize( options = {} )
+        reset
+
+      end
+
+      # TODO: document me
+      def get_object_params( creation_attributes )
+
+        if creation_attributes[ :type ] != 'application'
+          
+          object_search_params = creation_attributes.clone
+
+          # see below lines how to do following easier
+          #object_search_params[ :className  ] = object_search_params.delete( :type ) if creation_attributes.has_key?( :type )
+          #object_search_params[ :objectName ] = object_search_params.delete( :name ) if creation_attributes.has_key?( :name )
+
+          object_search_params.rename_key!( :type, :className ){} 
+          object_search_params.rename_key!( :name, :objectName ){}
+
+          object_search_params
+
+        else
+        
+          {}
+        
+        end    
+      
+      end
+
+      # TODO: document me
+      def get_parent_params( test_object )
+
+        unless [ 'application', 'sut' ].include?( test_object.type ) 
+
+          search_params = []
+        
+          search_params.concat( get_parent_params( test_object.parent ) ) if test_object.parent
+          search_params.concat( [ :className => test_object.type, :tasId => test_object.id ] ) #if test_object
+          
+          search_params
+          
+        else
+        
+          []
+        
+        end
+
+      end
+
+      # TODO: document me
+      def list_matching_test_objects_as_list( test_object_adapter, matches )
+
+        test_object_adapter.list_test_objects_as_string( matches ).each_with_index.collect{ | object, object_index | 
+
+          "%3s) %s" % [ object_index + 1, object ] 
+
+        }.join( "\n" )
+
+      end
+
+    end # self 
+
+    # TODO: document me
+    def self.reset
 
       # get timeout from parameters, use default value if parameter not found
       @timeout = $parameters[ :application_synchronization_timeout, "20" ].to_f
 
       # get timeout retry interval from parameters, use default value if parameter not found
       @_retry_interval = $parameters[ :application_synchronization_retry_interval, "1" ].to_f
+    
+    end
 
-      #@test_object_adapter = TDriver::TestObjectAdapter
-
+    # function to get timeout for TestObjectFactory
+    def self.timeout
+    
+      @timeout
+      
     end
 
     # Function to set timeout for TestObjectFactory
@@ -50,7 +116,7 @@ module MobyBase
     # new_timeout:: Fixnum which defines the new timeout
     # == raises
     # ArgumentError:: if parameter is not kind of Fixnum
-    def timeout=( value )
+    def self.timeout=( value )
 
       value.check_type( Numeric, "Wrong argument type $1 for timeout value (expected $2)" )
 
@@ -59,7 +125,7 @@ module MobyBase
     end
 
     # TODO: document me
-    def identify_object( rules )
+    def self.identify_object( rules )
   
       # retrieve test object identification directives; e.g. :__index, :__xy_sorting etc 
       directives = rules[ :identification_directives ]
@@ -248,7 +314,7 @@ module MobyBase
     end
 
     # TODO: document me
-    def get_test_objects( rules )
+    def self.get_test_objects( rules )
 
       # retrieve sut object
       sut = rules[ :parent ].instance_variable_get( :@sut )
@@ -423,7 +489,7 @@ module MobyBase
     end
 
     # TODO: document me
-    def make_test_object( rules )
+    def self.make_test_object( rules )
 
       # get parent object from hash
       parent = rules[ :parent ]
@@ -557,7 +623,7 @@ module MobyBase
     end
 
     # create test object search parameters for find_objects service
-    def make_object_search_params( test_object, creation_attributes )
+    def self.make_object_search_params( test_object, creation_attributes )
 
       result = get_parent_params( test_object ).push( get_object_params( creation_attributes ) )
 
@@ -567,70 +633,9 @@ module MobyBase
 
     end
 
-  private 
+    def self.set_timeout( new_timeout )
 
-    # TODO: document me
-    def get_object_params( creation_attributes )
-
-      if creation_attributes[ :type ] != 'application'
-        
-        object_search_params = creation_attributes.clone
-
-        # see below lines how to do following easier
-        #object_search_params[ :className  ] = object_search_params.delete( :type ) if creation_attributes.has_key?( :type )
-        #object_search_params[ :objectName ] = object_search_params.delete( :name ) if creation_attributes.has_key?( :name )
-
-        object_search_params.rename_key!( :type, :className ){} 
-        object_search_params.rename_key!( :name, :objectName ){}
-
-        object_search_params
-
-      else
-      
-        {}
-      
-      end    
-    
-    end
-
-    # TODO: document me
-    def get_parent_params( test_object )
-
-      unless [ 'application', 'sut' ].include?( test_object.type ) 
-
-        search_params = []
-      
-        search_params.concat( get_parent_params( test_object.parent ) ) if test_object.parent
-        search_params.concat( [ :className => test_object.type, :tasId => test_object.id ] ) #if test_object
-        
-        search_params
-        
-      else
-      
-        []
-      
-      end
-
-    end
-
-    # TODO: document me
-    def list_matching_test_objects_as_list( test_object_adapter, matches )
-
-      test_object_adapter.list_test_objects_as_string( matches ).each_with_index.collect{ | object, object_index | 
-
-        "%3s) %s" % [ object_index + 1, object ] 
-
-      }.join( "\n" )
-
-      #list_matching_test_objects( matches ).each_with_index.collect{ | object, object_index | "%3s) %s" % [ object_index + 1, object ] }.join( "\n" )
-
-    end
-
-  public # deprecated methods
-
-    def set_timeout( new_timeout )
-
-      warn "warning: deprecated method TestObjectFactory#set_timeout( value ); please use TestObjectFactory#timeout=( value ) instead"
+      warn "warning: deprecated method TDriver::TestObjectFactory#set_timeout( value ); please use TDriver::TestObjectFactory#timeout=( value ) instead"
 
       self.timeout = new_timeout
 
@@ -640,17 +645,38 @@ module MobyBase
     #
     # === returns
     # Numeric:: Timeout
-    def get_timeout
+    def self.get_timeout
 
-      warn "warning: deprecated method TestObjectFactory#get_timeout; please use TestObjectFactory#timeout instead"
+      warn "warning: deprecated method TDriver::TestObjectFactory#get_timeout; please use TDriver::TestObjectFactory#timeout instead"
 
       @timeout
 
     end
 
-    # enable hoo./base/test_object/factory.rb:king for performance measurement & debug logging
+    # enable hooking for performance measurement & debug logging
     TDriver::Hooking.hook_methods( self ) if defined?( TDriver::Hooking )
 
+    # initialize plugin service 
+    initialize_class
+  
+    
   end # TestObjectFactory
 
+end # TDriver
+
+# for backwards compatibility
+module MobyBase
+
+  class TestObjectFactory
+
+    def self.instance
+    
+      warn_caller '$1:$2 deprecated class MobyBase::TestObjectFactory, please use static class TDriver::TestObjectFactory instead'
+    
+      TDriver::TestObjectFactory
+    
+    end
+
+  end # SUTFactory
+  
 end # MobyBase
