@@ -108,10 +108,10 @@ module TDriverVerify
       message = "#{ message.inspect } " if message.length > 0
 
       # store original timeout value
-      original_timeout_value = MobyBase::TestObjectFactory.instance.timeout
+      original_timeout_value = TDriver::TestObjectFactory.timeout
 
       # set the testobject timeout to 0 for the duration of the verify call
-      MobyBase::TestObjectFactory.instance.timeout = 0
+      TDriver::TestObjectFactory.timeout = 0
 
       loop do
       
@@ -170,7 +170,7 @@ module TDriverVerify
     ensure
 
       # restore original test object factory timeout value 
-      MobyBase::TestObjectFactory.instance.timeout = original_timeout_value
+      TDriver::TestObjectFactory.timeout = original_timeout_value
 
       # restore logger state
       $logger.enabled = logging_enabled
@@ -232,10 +232,10 @@ module TDriverVerify
       message = "#{ message.inspect } " if message.length > 0
 
       # store original timeout value
-      original_timeout_value = MobyBase::TestObjectFactory.instance.timeout
+      original_timeout_value = TDriver::TestObjectFactory.timeout
 
       # set the testobject timeout to 0 for the duration of the verify call
-      MobyBase::TestObjectFactory.instance.timeout = 0
+      TDriver::TestObjectFactory.timeout = 0
 
       # result container
       result = nil
@@ -302,7 +302,7 @@ module TDriverVerify
     ensure
 
       # restore original test object factory timeout value 
-      MobyBase::TestObjectFactory.instance.timeout = original_timeout_value
+      TDriver::TestObjectFactory.timeout = original_timeout_value
 
       # restore logger state
       $logger.enabled = logging_enabled
@@ -368,10 +368,10 @@ module TDriverVerify
       message = "#{ message.inspect } " if message.length > 0
 
       # store original timeout value
-      original_timeout_value = MobyBase::TestObjectFactory.instance.timeout
+      original_timeout_value = TDriver::TestObjectFactory.timeout
 
       # set the testobject timeout to 0 for the duration of the verify call
-      MobyBase::TestObjectFactory.instance.timeout = 0
+      TDriver::TestObjectFactory.timeout = 0
 
       # result container
       result = nil
@@ -441,7 +441,7 @@ module TDriverVerify
     ensure
 
       # restore original test object factory timeout value 
-      MobyBase::TestObjectFactory.instance.timeout = original_timeout_value
+      TDriver::TestObjectFactory.timeout = original_timeout_value
 
       # restore logger state
       $logger.enabled = logging_enabled
@@ -507,10 +507,10 @@ module TDriverVerify
       message = "#{ message.inspect } " if message.length > 0
 
       # store original timeout value
-      original_timeout_value = MobyBase::TestObjectFactory.instance.timeout
+      original_timeout_value = TDriver::TestObjectFactory.timeout
 
       # set the testobject timeout to 0 for the duration of the verify call
-      MobyBase::TestObjectFactory.instance.timeout = 0
+      TDriver::TestObjectFactory.timeout = 0
 
       # result container
       result = nil
@@ -580,7 +580,7 @@ module TDriverVerify
     ensure
 
       # restore original test object factory timeout value 
-      MobyBase::TestObjectFactory.instance.timeout = original_timeout_value
+      TDriver::TestObjectFactory.timeout = original_timeout_value
 
       # restore logger state
       $logger.enabled = logging_enabled
@@ -644,10 +644,10 @@ module TDriverVerify
       message = "#{ message.inspect } " if message.length > 0
 
       # store original timeout value
-      original_timeout_value = MobyBase::TestObjectFactory.instance.timeout
+      original_timeout_value = TDriver::TestObjectFactory.timeout
 
       # set the testobject timeout to 0 for the duration of the verify call
-      MobyBase::TestObjectFactory.instance.timeout = 0
+      TDriver::TestObjectFactory.timeout = 0
 
       # result container
       result = nil
@@ -717,7 +717,7 @@ module TDriverVerify
     ensure
 
       # restore original test object factory timeout value 
-      MobyBase::TestObjectFactory.instance.timeout = original_timeout_value
+      TDriver::TestObjectFactory.timeout = original_timeout_value
 
       # restore logger state
       $logger.enabled = logging_enabled
@@ -781,10 +781,10 @@ module TDriverVerify
       message = "#{ message.inspect } " if message.length > 0
 
       # store original timeout value
-      original_timeout_value = MobyBase::TestObjectFactory.instance.timeout
+      original_timeout_value = TDriver::TestObjectFactory.timeout
 
       # set the testobject timeout to 0 for the duration of the verify call
-      MobyBase::TestObjectFactory.instance.timeout = 0
+      TDriver::TestObjectFactory.timeout = 0
 
       # result container
       result = nil
@@ -854,7 +854,7 @@ module TDriverVerify
     ensure
 
       # restore original test object factory timeout value 
-      MobyBase::TestObjectFactory.instance.timeout = original_timeout_value
+      TDriver::TestObjectFactory.timeout = original_timeout_value
 
       # restore logger state
       $logger.enabled = logging_enabled
@@ -918,10 +918,10 @@ module TDriverVerify
       message = "#{ message.inspect } " if message.length > 0
 
       # store original timeout value
-      original_timeout_value = MobyBase::TestObjectFactory.instance.timeout
+      original_timeout_value = TDriver::TestObjectFactory.timeout
 
       # set the testobject timeout to 0 for the duration of the verify call
-      MobyBase::TestObjectFactory.instance.timeout = 0
+      TDriver::TestObjectFactory.timeout = 0
 
       # result container
       result = nil
@@ -991,7 +991,7 @@ module TDriverVerify
     ensure
 
       # restore original test object factory timeout value 
-      MobyBase::TestObjectFactory.instance.timeout = original_timeout_value
+      TDriver::TestObjectFactory.timeout = original_timeout_value
 
       # restore logger state
       $logger.enabled = logging_enabled
@@ -1023,7 +1023,7 @@ module TDriverVerify
     begin
 
       # store original timeout value
-      original_timeout_value = MobyBase::TestObjectFactory.instance.timeout
+      original_timeout_value = TDriver::TestObjectFactory.timeout
     
       # determine name of caller method
       verify_caller = caller( 1 ).first.to_s
@@ -1062,7 +1062,7 @@ module TDriverVerify
       message = "#{ message.inspect } " if message.length > 0
 
       # set the testobject timeout to 0 for the duration of the verify call
-      MobyBase::TestObjectFactory.instance.timeout = 0
+      TDriver::TestObjectFactory.timeout = 0
 
       # result container
       result = nil
@@ -1132,7 +1132,7 @@ module TDriverVerify
     ensure
 
       # restore original test object factory timeout value 
-      MobyBase::TestObjectFactory.instance.timeout = original_timeout_value
+      TDriver::TestObjectFactory.timeout = original_timeout_value
 
       # restore logger state
       $logger.enabled = logging_enabled
