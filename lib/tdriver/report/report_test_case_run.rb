@@ -571,7 +571,7 @@ module TDriverReportCreator
         if File::directory?(dump_folder)==false
           FileUtils.mkdir_p dump_folder
         end
-        MobyBase::SUTFactory.instance.connected_suts.each do |sut_id, sut_attributes|
+        TDriver::SUTFactory.connected_suts.each do |sut_id, sut_attributes|
 
           t = Time.now
           time_stamp=t.strftime( "%Y%m%d%H%M%S" )

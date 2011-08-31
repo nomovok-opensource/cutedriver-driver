@@ -302,7 +302,7 @@ module TDriverReportCreator
 
     if $parameters[ :report_monitor_memory, 'false']=='true'
       begin
-        MobyBase::SUTFactory.instance.connected_suts.each do |sut_id, sut_attributes|
+        TDriver::SUTFactory.connected_suts.each do |sut_id, sut_attributes|
           $new_test_case.set_tc_memory_amount_total($tdriver_reporter.get_sut_total_memory(sut_id,sut_attributes))
           $new_test_case.set_tc_memory_amount_start($tdriver_reporter.get_sut_used_memory(sut_id,sut_attributes))
         end
@@ -337,7 +337,7 @@ module TDriverReportCreator
       MobyUtil::Logger.instance.enabled=logging_enabled
     end
     update_test_case_user_data()
-    starting_test_case(test_case, MobyBase::SUTFactory.instance.connected_suts) if $parameters[ :custom_error_recovery_module, nil ]!=nil
+    starting_test_case(test_case, TDriver::SUTFactory.connected_suts) if $parameters[ :custom_error_recovery_module, nil ]!=nil
   end
   #This method updates the current test case execution log
   #
@@ -364,7 +364,7 @@ module TDriverReportCreator
         begin
           start_memory=$new_test_case.tc_memory_amount_start()
           if start_memory=='-'
-            MobyBase::SUTFactory.instance.connected_suts.each do |sut_id, sut_attributes|
+            TDriver::SUTFactory.connected_suts.each do |sut_id, sut_attributes|
               memory=$tdriver_reporter.get_sut_used_memory(sut_id,sut_attributes)
               $new_test_case.set_tc_memory_amount_start(memory)
             end
@@ -408,7 +408,7 @@ module TDriverReportCreator
       if $new_test_case.video_recording?
         $new_test_case.copy_video_capture()
       end
-      error_in_test_case(MobyBase::SUTFactory.instance.connected_suts) if $parameters[ :custom_error_recovery_module, nil ]!=nil
+      error_in_test_case(TDriver::SUTFactory.connected_suts) if $parameters[ :custom_error_recovery_module, nil ]!=nil
       begin
         
           error_in_connection_detected
@@ -431,7 +431,7 @@ module TDriverReportCreator
   # === raises
   def update_test_case_memory_usage()
     begin
-      MobyBase::SUTFactory.instance.connected_suts.each do |sut_id, sut_attributes|
+      TDriver::SUTFactory.connected_suts.each do |sut_id, sut_attributes|
         if sut_attributes[:is_connected]
           memory=$tdriver_reporter.get_sut_used_memory(sut_id,sut_attributes)
           $tdriver_reporter.get_sut_total_dump_count(sut_id,sut_attributes)
@@ -466,7 +466,7 @@ module TDriverReportCreator
   end
 
   def calculate_execution_footprint_data_for_test_case
-    MobyBase::SUTFactory.instance.connected_suts.each do |sut_id, sut_attributes|
+    TDriver::SUTFactory.connected_suts.each do |sut_id, sut_attributes|
       if sut_attributes[:is_connected]
         $tdriver_reporter.get_sut_total_dump_count(sut_id,sut_attributes)
         $tdriver_reporter.get_sut_total_sent_data(sut_id,sut_attributes)
@@ -606,7 +606,7 @@ module TDriverReportCreator
       execution_log=nil
 
     end
-    ending_test_case(status, MobyBase::SUTFactory.instance.connected_suts) if $parameters[ :custom_error_recovery_module, nil ]!=nil
+    ending_test_case(status, TDriver::SUTFactory.connected_suts) if $parameters[ :custom_error_recovery_module, nil ]!=nil
   end
   def add_report_group(value)
     $tdriver_reporter.set_generic_reporting_groups(value)

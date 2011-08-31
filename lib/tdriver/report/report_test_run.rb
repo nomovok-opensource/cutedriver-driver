@@ -17,7 +17,6 @@
 ##
 ############################################################################
 
-
 module TDriverReportCreator
 
   #Test run class for new test run
@@ -593,7 +592,7 @@ module TDriverReportCreator
           FileUtils.copy('/etc/tdriver/tdriver_parameters.xml',@report_folder+'/environment/tdriver_parameters.xml') if File.file?('/etc/tdriver/tdriver_parameters.xml')
         end
         if $parameters[ :report_monitor_memory, 'false']=='true'
-          MobyBase::SUTFactory.instance.connected_suts.each do |sut_id, sut_attributes|
+          TDriver::SUTFactory.connected_suts.each do |sut_id, sut_attributes|
             if sut_attributes[:is_connected]
               @memory_amount_start=get_sut_used_memory(sut_id, sut_attributes) if @memory_amount_start==nil || @memory_amount_start=='-'
               @memory_amount_end=get_sut_used_memory(sut_id, sut_attributes)
@@ -605,7 +604,7 @@ module TDriverReportCreator
           end
         end
         if $parameters[ :report_collect_environment_data_from_sut, 'true']=='true'
-          MobyBase::SUTFactory.instance.connected_suts.each do |sut_id, sut_attributes|
+          TDriver::SUTFactory.connected_suts.each do |sut_id, sut_attributes|
             begin
               if sut_attributes[:is_connected]
                 sw_version=get_sut_sw_version(sut_id, sut_attributes)
@@ -1213,7 +1212,7 @@ module TDriverReportCreator
     # === raises
     def disconnect_connected_devices()
       if $parameters[ :report_disconnect_connected_devices, false ] == 'true'
-        MobyBase::SUTFactory.instance.connected_suts.each do |sut_id, sut_attributes|
+        TDriver::SUTFactory.connected_suts.each do |sut_id, sut_attributes|
           sut_attributes[:sut].disconnect() if sut_attributes[:is_connected]
         end
       end

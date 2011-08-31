@@ -52,12 +52,12 @@ module TDriver
     # ArgumentError:: Sut id not given
     # MobyUtil::ParameterFileNotFoundError:: if paramter file (tdriver_parameters.xml in TDriver home directory) is not found
     # === returns
-    # Object:: Object that SutFactory returns 
+    # Object:: Object that SUTFactory returns 
     # === example
     #  @sut = TDriver.connect_sut(:Id =>'sut_qt') # for qt, id in configuration file sut_qt
     def connect_sut( sut_attributes = {} )
 
-      MobyBase::SUTFactory.instance.make( sut_attributes )
+      TDriver::SUTFactory.make( sut_attributes )
 
     end
 
@@ -74,7 +74,7 @@ module TDriver
     #  @sut = TDriver.disconnect_sut(:Id =>'sut_qt') # for qt, should be connected already
     def disconnect_sut( sut_attributes = {} )
 
-      MobyBase::SUTFactory.instance.disconnect_sut( sut_attributes )
+      TDriver::SUTFactory.disconnect_sut( sut_attributes )
 
     end
 
@@ -89,7 +89,7 @@ module TDriver
     #  @sut = TDriver.reboot_sut(:Id => 'sut_qt') # for Qt, should be connected already   
     def reboot_sut( sut_attributes = {} )
 
-      MobyBase::SUTFactory.instance.reboot_sut( sut_attributes )
+      TDriver::SUTFactory.reboot_sut( sut_attributes )
 
     end
 

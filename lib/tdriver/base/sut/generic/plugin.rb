@@ -71,14 +71,8 @@ module MobyPlugin
 
 			end
 
-			# returns SUT object - this method will be called from MobyBase::SUTFactory
+			# returns SUT object - this method will be called from TDriver::SUTFactory
 			def self.make_sut( sut_id )
-
-#				MobyBase::SUT.new( 
-#					MobyBase::SutController.new( "", MobyController::SutAdapter.new() ), 
-#					MobyBase::TestObjectFactory.instance,
-#					sut_id
-#				)
 
 				MobyBase::SUT.new( 
 					MobyBase::SutController.new( "", MobyController::SutAdapter.new() ), 

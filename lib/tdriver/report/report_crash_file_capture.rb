@@ -17,9 +17,6 @@
 ## 
 ############################################################################
 
-
-
-
 class TDriverReportCrashFileCapture
   include TDriverReportFileCapture
   def initialize
@@ -48,7 +45,7 @@ class TDriverReportCrashFileCapture
 
   def clean_crash_files_from_sut()
     if @monitor_crash_files == 'true'
-      MobyBase::SUTFactory.instance.connected_suts.each do |sut_id, sut_attributes|
+      TDriver::SUTFactory.connected_suts.each do |sut_id, sut_attributes|
         if sut_attributes[:is_connected]
           @crash_file_suts.each do |monitored_sut|
             if monitored_sut == sut_id.to_s
@@ -65,7 +62,7 @@ class TDriverReportCrashFileCapture
   end
 
   def confirm_crash_notes
-    MobyBase::SUTFactory.instance.connected_suts.each do |sut_id, sut_attributes|
+    TDriver::SUTFactory.connected_suts.each do |sut_id, sut_attributes|
         if sut_attributes[:is_connected]
           @crash_file_suts.each do |monitored_sut|
             if monitored_sut == sut_id.to_s
@@ -127,7 +124,7 @@ class TDriverReportCrashFileCapture
   def check_if_crash_files_exist()
     sut_crash_files=Array.new
     if @monitor_crash_files == 'true'
-      MobyBase::SUTFactory.instance.connected_suts.each do |sut_id, sut_attributes|
+      TDriver::SUTFactory.connected_suts.each do |sut_id, sut_attributes|
         if sut_attributes[:is_connected]
           @crash_file_suts.each do |monitored_sut|
             if monitored_sut == sut_id.to_s
@@ -144,7 +141,7 @@ class TDriverReportCrashFileCapture
 
   def download_crash_files(download_folder)
    if @monitor_crash_files == 'true'
-      MobyBase::SUTFactory.instance.connected_suts.each do |sut_id, sut_attributes|
+      TDriver::SUTFactory.connected_suts.each do |sut_id, sut_attributes|
         if sut_attributes[:is_connected]
           @crash_file_suts.each do |monitored_sut|
             if monitored_sut == sut_id.to_s

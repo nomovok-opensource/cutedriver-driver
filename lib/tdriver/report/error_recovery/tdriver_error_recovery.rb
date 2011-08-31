@@ -100,7 +100,7 @@ module TDriverErrorRecovery
   # === raises
   def reconnect_devices()
 
-      MobyBase::SUTFactory.instance.connected_suts.each do |sut_id, sut_attributes|
+      TDriver::SUTFactory.connected_suts.each do |sut_id, sut_attributes|
         suts=@recovery_settings.get_monitored_sut
         suts.each do |monitored_sut|
           if sut_id.to_s==monitored_sut.to_s
@@ -142,7 +142,7 @@ module TDriverErrorRecovery
   # === raises
   def ping_devices_and_reconnect()
     resetted=false
-    MobyBase::SUTFactory.instance.connected_suts.each do |sut_id, sut_attributes|
+    TDriver::SUTFactory.connected_suts.each do |sut_id, sut_attributes|
         suts=@recovery_settings.get_monitored_sut
         suts.each do |monitored_sut|
           if sut_id.to_s==monitored_sut.to_s

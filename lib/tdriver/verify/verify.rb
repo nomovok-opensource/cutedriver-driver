@@ -1263,7 +1263,7 @@ module TDriverVerify
     if self.kind_of? MobyBase::SUT
       counter = self.dump_count
     else
-      MobyBase::SUTFactory.instance.connected_suts.each do |sut_id, sut_attributes|
+      TDriver::SUTFactory.connected_suts.each do |sut_id, sut_attributes|
         counter += sut_attributes[:sut].dump_count
       end
     end
@@ -1284,7 +1284,7 @@ module TDriverVerify
         end
       else
         #refresh all connected suts
-        MobyBase::SUTFactory.instance.connected_suts.each do |sut_id, sut_attributes|
+        TDriver::SUTFactory.connected_suts.each do |sut_id, sut_attributes|
           begin
             appid = sut_attributes[:sut].get_application_id
           rescue

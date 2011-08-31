@@ -123,7 +123,7 @@ module MobyBase
 
         retries += 1
 
-        if MobyBase::SUTFactory.instance.connected_suts.include?( @sut_adapter.sut_id.to_sym )
+        if TDriver::SUTFactory.connected_suts.include?( @sut_adapter.sut_id.to_sym )
 
           @sut_adapter.disconnect
 

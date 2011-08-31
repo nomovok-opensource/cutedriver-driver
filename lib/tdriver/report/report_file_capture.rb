@@ -47,7 +47,7 @@ module TDriverReportFileCapture
   def clean_files_from_sut()
 
     if @monitor_files == 'true' && @clean_files == 'true'
-      MobyBase::SUTFactory.instance.connected_suts.each do |sut_id, sut_attributes|
+      TDriver::SUTFactory.connected_suts.each do |sut_id, sut_attributes|
         if sut_attributes[:is_connected]
           @file_suts.each do |monitored_sut|
             if monitored_sut == sut_id.to_s
@@ -107,7 +107,7 @@ module TDriverReportFileCapture
   def check_if_files_exist()
     sut_files=Array.new
     if @monitor_files == 'true'
-      MobyBase::SUTFactory.instance.connected_suts.each do |sut_id, sut_attributes|
+      TDriver::SUTFactory.connected_suts.each do |sut_id, sut_attributes|
         if sut_attributes[:is_connected]
           @file_suts.each do |monitored_sut|
             if monitored_sut == sut_id.to_s
@@ -124,7 +124,7 @@ module TDriverReportFileCapture
 
   def download_files(download_folder)
     if @monitor_files == 'true'
-      MobyBase::SUTFactory.instance.connected_suts.each do |sut_id, sut_attributes|
+      TDriver::SUTFactory.connected_suts.each do |sut_id, sut_attributes|
         if sut_attributes[:is_connected]
           @file_suts.each do |monitored_sut|
             if monitored_sut == sut_id.to_s
