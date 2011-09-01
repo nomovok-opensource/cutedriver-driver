@@ -65,27 +65,27 @@ module MobyBehaviour
     #  description: switchbox_sleep_after_powerup_in_reboot could not be converted to integer
     def reset
       str_sleep_time_before_powerup = parameter(:switchbox_sleep_before_powerup_in_reboot)
-      Kernel::raise BehaviourError.new("reboot", "switchbox_sleep_before_powerup_in_reboot not defined for sut in tdriver_parameters.xml") if str_sleep_time_before_powerup == nil
+      raise BehaviourError.new("reboot", "switchbox_sleep_before_powerup_in_reboot not defined for sut in tdriver_parameters.xml") if str_sleep_time_before_powerup == nil
 
       str_sleep_time_after_powerup = parameter(:switchbox_sleep_after_powerup_in_reboot)
-      Kernel::raise BehaviourError.new("reboot", "switchbox_sleep_after_powerup_in_reboot not defined for sut in tdriver_parameters.xml") if str_sleep_time_after_powerup == nil
+      raise BehaviourError.new("reboot", "switchbox_sleep_after_powerup_in_reboot not defined for sut in tdriver_parameters.xml") if str_sleep_time_after_powerup == nil
 
       str_commands_after_powerup = parameter(:switchbox_commands_after_powerup_in_reboot)
 
       begin
         sleep_time_before_powerup = str_sleep_time_before_powerup.to_i
-        Kernel::raise BehaviourError.new("reboot", "switchbox_sleep_before_powerup_in_reboot need to be non-negative integer smaller than 50 seconds") if sleep_time_before_powerup < 0 or sleep_time_before_powerup > 50
+        raise BehaviourError.new("reboot", "switchbox_sleep_before_powerup_in_reboot need to be non-negative integer smaller than 50 seconds") if sleep_time_before_powerup < 0 or sleep_time_before_powerup > 50
 
       rescue
-        Kernel::raise BehaviourError.new("reboot", "switchbox_sleep_in_reboot could not be converted to integer")
+        raise BehaviourError.new("reboot", "switchbox_sleep_in_reboot could not be converted to integer")
       end
 
       begin
         sleep_time_after_powerup = str_sleep_time_after_powerup.to_i
-        Kernel::raise BehaviourError.new("reboot", "switchbox_sleep_after_powerup_in_reboot need to be non-negative integer smaller than 500 seconds") if sleep_time_after_powerup < 0 or sleep_time_after_powerup > 500
+        raise BehaviourError.new("reboot", "switchbox_sleep_after_powerup_in_reboot need to be non-negative integer smaller than 500 seconds") if sleep_time_after_powerup < 0 or sleep_time_after_powerup > 500
 
       rescue
-        Kernel::raise BehaviourError.new("reboot", "switchbox_sleep_after_powerup_in_reboot could not be converted to integer")
+        raise BehaviourError.new("reboot", "switchbox_sleep_after_powerup_in_reboot could not be converted to integer")
       end
       
       power_down
@@ -126,12 +126,12 @@ module MobyBehaviour
 
       switchbox_sequence_timeout = parameter(:switchbox_timeout_between_command_sequence)
 
-      Kernel::raise BehaviourError.new("power_down", "switchbox_timeout_between_command_sequence not defined for sut in tdriver_parameters.xml") if switchbox_sequence_timeout == nil
+      raise BehaviourError.new("power_down", "switchbox_timeout_between_command_sequence not defined for sut in tdriver_parameters.xml") if switchbox_sequence_timeout == nil
 
-      Kernel::raise BehaviourError.new("power_down", "switchbox_powerdown_command not defined for sut in tdriver_parameters.xml") if str_command == nil
+      raise BehaviourError.new("power_down", "switchbox_powerdown_command not defined for sut in tdriver_parameters.xml") if str_command == nil
 
       str_result = parameter(:switchbox_powerdown_command_success_string)
-      Kernel::raise BehaviourError.new("power_down", "switchbox_powerdown_command_success string not defined for sut in tdriver_parameters.xml") if str_result == nil
+      raise BehaviourError.new("power_down", "switchbox_powerdown_command_success string not defined for sut in tdriver_parameters.xml") if str_result == nil
 
       #generate the sequence
       str_command_arr = str_command.split('|')
@@ -142,7 +142,7 @@ module MobyBehaviour
         std_out = system(foobox_command)
         $logger.behaviour "PASS;Powerdown command #{foobox_command} executed"
         sleep switchbox_sequence_timeout.to_i
-        Kernel::raise BehaviourError.new("power_down", "Failed to power down") unless std_out.to_s.downcase.include?(str_result.to_s.downcase)
+        raise BehaviourError.new("power_down", "Failed to power down") unless std_out.to_s.downcase.include?(str_result.to_s.downcase)
       end
       @switch_box_power_status = false
     end
@@ -162,13 +162,13 @@ module MobyBehaviour
 
       switchbox_sequence_timeout = parameter(:switchbox_timeout_between_command_sequence)
 
-      Kernel::raise BehaviourError.new("power_down", "switchbox_timeout_between_command_sequence not defined for sut in tdriver_parameters.xml") if switchbox_sequence_timeout == nil
+      raise BehaviourError.new("power_down", "switchbox_timeout_between_command_sequence not defined for sut in tdriver_parameters.xml") if switchbox_sequence_timeout == nil
 
       str_command = parameter(:switchbox_powerup_command_sequence)
-      Kernel::raise BehaviourError.new("power_up", "switchbox_powerup_command not defined for sut in tdriver_parameters.xml") if str_command == nil
+      raise BehaviourError.new("power_up", "switchbox_powerup_command not defined for sut in tdriver_parameters.xml") if str_command == nil
 
       str_result = parameter(:switchbox_powerup_command_success_string)
-      Kernel::raise BehaviourError.new("power_up", "switchbox_powerup_command_success string not defined for sut in tdriver_parameters.xml") if str_result == nil
+      raise BehaviourError.new("power_up", "switchbox_powerup_command_success string not defined for sut in tdriver_parameters.xml") if str_result == nil
 
       #generate the sequence
       str_command_arr = str_command.split('|')
@@ -179,7 +179,7 @@ module MobyBehaviour
         std_out = system(foobox_command)
         $logger.behaviour "PASS;Ppowerup command #{foobox_command} executed"
         sleep switchbox_sequence_timeout.to_i
-        Kernel::raise BehaviourError.new("power_up", "Failed to power up") unless std_out.to_s.downcase.include?(str_result.to_s.downcase)
+        raise BehaviourError.new("power_up", "Failed to power up") unless std_out.to_s.downcase.include?(str_result.to_s.downcase)
       end
 
       @switch_box_power_status = true

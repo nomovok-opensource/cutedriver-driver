@@ -509,7 +509,7 @@ module TDriverReportCreator
         write_page_end(@test_case_folder+'/index.html')
 
       rescue Exception => e
-        Kernel::raise e
+        raise e
       end
       return nil
     end
@@ -674,7 +674,7 @@ module TDriverReportCreator
           FileUtils.mkdir_p @test_case_folder
         end
       rescue Exception => e
-        Kernel::raise e
+        raise e
       end
       return nil
     end
@@ -701,7 +701,7 @@ module TDriverReportCreator
           @test_case_folder=new_test_case_folder
         end
       rescue Exception => e
-        Kernel::raise e
+        raise e
       end
       return nil
     end

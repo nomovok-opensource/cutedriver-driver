@@ -158,7 +158,7 @@ module TDriver
 
             @@inside_verify = false
 
-            Kernel::raise e
+            raise e
           
           end
 

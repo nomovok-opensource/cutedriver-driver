@@ -301,9 +301,9 @@ module MobyUtil
 		#
 		def self.translation( logical_name, language, table_name, file_name = nil , plurality = nil, lengthvariant = nil )
 		
-			Kernel::raise LogicalNameNotFoundError.new( "Logical name cannot be nil" ) if logical_name == nil
-			Kernel::raise LanguageNotFoundError.new( "Language cannot be nil" ) if language == nil
-			Kernel::raise TableNotFoundError.new( "Table name cannot be nil" ) if table_name == nil
+			raise LogicalNameNotFoundError.new( "Logical name cannot be nil" ) if logical_name == nil
+			raise LanguageNotFoundError.new( "Language cannot be nil" ) if language == nil
+			raise TableNotFoundError.new( "Table name cannot be nil" ) if table_name == nil
 			
 			# Avoid system column names for language columns and user only downcase
 			language = language.to_s.downcase
@@ -329,13 +329,13 @@ module MobyUtil
 				# Returns a uniform set of results as an array of rows, rows beeing an array of values ( Array<Array<String>> )
 				result = MobyUtil::DBAccess.query( db_connection, query_string )
 			rescue
-				# if column referring to language is not found then Kernel::raise error for language not found
-				Kernel::raise LanguageNotFoundError.new( "No language '#{ language }' found" ) unless $!.message.index( "Unknown column" ) == nil
-				Kernel::raise SqlError.new( $!.message )
+				# if column referring to language is not found then raise error for language not found
+				raise LanguageNotFoundError.new( "No language '#{ language }' found" ) unless $!.message.index( "Unknown column" ) == nil
+				raise SqlError.new( $!.message )
 			end
 
 			# Return only the first column of the row or and array of the values of the first column if multiple rows have been found
-			Kernel::raise LogicalNameNotFoundError.new( "No translation found for logical name '#{ logical_name }' in language '#{ language }' with given plurality and lengthvariant." ) if ( result.empty?)
+			raise LogicalNameNotFoundError.new( "No translation found for logical name '#{ logical_name }' in language '#{ language }' with given plurality and lengthvariant." ) if ( result.empty?)
 			if result.length > 1
 				# Result is an Array of rows (Array<String>)! We want the first column of each row.
 				result_array = Array.new
@@ -389,8 +389,8 @@ module MobyUtil
 		#  description: When its not possible to parse the file provided
 		#
 		def self.upload_translation_file( file, table_name, db_connection = nil, column_names_map = {}, record_sql = false)	
-			Kernel::raise ArgumentError.new("") if file.nil? or file.empty?
-			Kernel::raise ArgumentError.new("") if table_name.nil? or table_name.empty?
+			raise ArgumentError.new("") if file.nil? or file.empty?
+			raise ArgumentError.new("") if table_name.nil? or table_name.empty?
 
 			# Get a connection to the DB
 			if db_connection.nil? or !db_connection.kind_of? MobyUtil::DBConnection
@@ -405,13 +405,13 @@ module MobyUtil
       if file.match(/.*\.ts/) or file.match(/.*\.qm/)
         # Check File and convert to TS File if needed
         tsFile = MobyUtil::Localisation.convert_to_ts( file )
-        Kernel::raise Exception.new("Failed to convert #{file} to .ts") if tsFile == nil	
+        raise Exception.new("Failed to convert #{file} to .ts") if tsFile == nil	
         # Collect data for INSERT query from TS File
         language, data = MobyUtil::Localisation.parse_ts_file( tsFile, column_names_map )
-        Kernel::raise Exception.new("Error while parsing #{file}.") if language == nil or data == ""
+        raise Exception.new("Error while parsing #{file}.") if language == nil or data == ""
 			elsif file.match(/.*\.loc/)
         language, data = MobyUtil::Localisation.parse_loc_file( file, column_names_map )
-        Kernel::raise Exception.new("Error while parsing #{file}. The file might have no translations.") if language.nil? or language.empty? or data.nil? or data.empty?
+        raise Exception.new("Error while parsing #{file}. The file might have no translations.") if language.nil? or language.empty? or data.nil? or data.empty?
       end
       # Upload language data to DB for current language file
 			MobyUtil::Localisation.upload_data( language, data, table_name, db_connection, record_sql )

@@ -60,7 +60,7 @@ module MobyUtil
         end
 
         # raise exception with correct exception backtrace
-        Kernel::raise $!
+        raise $!
 
       end
       
@@ -102,7 +102,7 @@ module MobyUtil
         end
 
         # raise exception with correct exception backtrace
-        Kernel::raise $!
+        raise $!
 
       end
 

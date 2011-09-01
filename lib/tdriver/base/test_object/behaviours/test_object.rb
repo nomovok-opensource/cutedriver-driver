@@ -52,6 +52,17 @@ module MobyBehaviour
     attr_accessor :creation_attributes
 
 =begin
+    # == description
+    # Returns the actual test object that was used as the parent when this object instance was created
+    #
+    # == returns
+    # TestObject
+    #   description: test object that was used as parent when this object was created. Can also be of type SUT if sut was the parent (ie. application objects) 
+    #   example: -
+    attr_reader :parent
+=end
+
+=begin
     # == nodoc
     # == description
     # attr_reader
@@ -189,7 +200,7 @@ module MobyBehaviour
 
     # == description
     # Returns the parent test object for the current object in question, according to the UI object hierarchy. For getting the test object that was actually used 
-    # as the parent when the test object instance was created, see parent_object.
+    # as the parent when the test object instance was created, see [link="#GenericTestObject:parent"]parent[/link] method.
     # == returns
     # TestObject
     #   description: test object that is parent of this test object, self if no parent (ie. application objects)
@@ -779,7 +790,7 @@ module MobyBehaviour
 
         )
 
-        Kernel::raise exception
+        raise exception
 
       ensure
 
@@ -839,7 +850,7 @@ module MobyBehaviour
 
       rescue MobyBase::TestObjectNotFoundError
 
-        Kernel::raise MobyBase::TestObjectNotVisibleError
+        raise MobyBase::TestObjectNotVisibleError
 
       end
 
@@ -957,12 +968,12 @@ module MobyBehaviour
 
   public
 
-    # This method is deprecated, please use [link="#GenericTestObject:parent"]TestObject#parent[/link] instead.
     # == deprecated
     # 0.8.x
     #
     # == description
     # This method is deprecated, please use TestObject#parent
+    # This method is deprecated, please use [link="#GenericTestObject:parent"]TestObject#parent[/link] instead.
     #
     def parent_object
 
@@ -980,12 +991,11 @@ module MobyBehaviour
 
     end
 
-    # This method is deprecated, please use [link="#GenericTestObject:state_object"]TestObject#state_object[/link] instead.
     # == deprecated
     # 1.1.1
     #
     # == description
-    # This method is deprecated, please use TestObject#state_object
+    # This method is deprecated, please use [link="#GenericTestObject:state_object"]TestObject#state_object[/link] instead.
     #
     def state
 

@@ -405,7 +405,7 @@ module TDriver
 
         else
 
-          Kernel::raise ArgumentError.new("Invalid sorting rule, valid rules are :name, :times_called, :total_time, :total_time_no_subs, :percentage or :average_time")
+          raise ArgumentError.new("Invalid sorting rule, valid rules are :name, :times_called, :total_time, :total_time_no_subs, :percentage or :average_time")
 
         end
 
@@ -421,7 +421,7 @@ module TDriver
 
       else
 
-        Kernel::raise ArgumentError.new("Invalid sort order rule, valid rules are :ascending, :descending")  
+        raise ArgumentError.new("Invalid sort order rule, valid rules are :ascending, :descending")  
 
       end
 

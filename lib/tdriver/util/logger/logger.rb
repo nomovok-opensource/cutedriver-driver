@@ -146,7 +146,7 @@ module MobyUtil
 
       rescue
 
-        Kernel::raise ArgumentError, "Logger #{ logger_name.inspect } not found"
+        raise ArgumentError, "Logger #{ logger_name.inspect } not found"
 
       end
 
@@ -179,7 +179,7 @@ module MobyUtil
       if @logger_engine_loaded
 
         # Allow only FileOutputter instances
-        Kernel::raise ArgumentError, 'Outputter pattern not valid, %M required by minimum' if !/\%M/.match( pattern ) 
+        raise ArgumentError, 'Outputter pattern not valid, %M required by minimum' if !/\%M/.match( pattern ) 
 
         # create pattern for outputter
         outputter_instance.formatter = Log4r::PatternFormatter.new :pattern => pattern
@@ -260,7 +260,7 @@ module MobyUtil
     def enable_raise_hooking
 
       # hook Kernel.raise
-      def Kernel::raise( *exception )
+      def raise( *exception )
 
         begin
 
@@ -355,13 +355,13 @@ module MobyUtil
       return nil if logging_level.nil?
 
       # raise exception if wrong format for logging level
-      Kernel::raise RuntimeError, "Wrong logging level format '#{ logging_level }' defined in TDriver parameter/template XML (expected numeric string)" unless logging_level.numeric?
+      raise RuntimeError, "Wrong logging level format '#{ logging_level }' defined in TDriver parameter/template XML (expected numeric string)" unless logging_level.numeric?
 
       # convert to integer
       logging_level = logging_level.to_i
 
       # raise exception if unsupported logging level
-      Kernel::raise RuntimeError, "Unsupported logging level '#{ logging_level }' defined in TDriver parameter/template XML (expected 0..5)" unless ( 0..5 ).include?( logging_level )
+      raise RuntimeError, "Unsupported logging level '#{ logging_level }' defined in TDriver parameter/template XML (expected 0..5)" unless ( 0..5 ).include?( logging_level )
 
       @include_behaviour_info = $parameters[ :logging_include_behaviour_info, 'false' ].to_s.to_boolean
 

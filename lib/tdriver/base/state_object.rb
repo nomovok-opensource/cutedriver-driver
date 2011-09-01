@@ -177,7 +177,7 @@ module MobyBase
         end
 
         # raise exception
-        Kernel::raise MobyBase::TestObjectNotFoundError.new(
+        raise MobyBase::TestObjectNotFoundError.new(
           "The state object (#{ object_attributes.join(", ") }) has no child object with type or behaviour method with name #{ method_id.to_s.inspect }#{ search_attributes_string }" 
         )
 

@@ -132,7 +132,7 @@ module MobyUtil
 
       rescue 
 
-        Kernel::raise NameError.new( "Invalid constant %s" % constant_name )
+        raise NameError.new( "Invalid constant %s" % constant_name )
 
       end
 
@@ -222,7 +222,7 @@ module MobyUtil
           lines = source.readlines
           
           # raise exception if line number is larger than total number of lines
-          Kernel::raise RuntimeError.new(
+          raise RuntimeError.new(
           
             "Unable to fetch line %s from source file %s due to it is out of range (total lines: %s)" %  [ start_line, filename, lines.size ]
             

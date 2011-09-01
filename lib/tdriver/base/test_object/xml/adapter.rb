@@ -355,7 +355,7 @@ module TDriver
           else
 
             # raise exception if layout direction it not supported 
-            Kernel::raise ArgumentError, "Unsupported layout direction #{ layout_direction.inspect }"
+            raise ArgumentError, "Unsupported layout direction #{ layout_direction.inspect }"
 
           end
 
@@ -402,7 +402,7 @@ module TDriver
             if default.empty?
           
               # raise exception if no such attribute found
-              Kernel::raise MobyBase::AttributeNotFoundError, "Could not find test object element attribute #{ attribute_name.inspect }"
+              raise MobyBase::AttributeNotFoundError, "Could not find test object element attribute #{ attribute_name.inspect }"
 
             else
             
@@ -447,7 +447,7 @@ module TDriver
             if default.empty?
             
               # raise exception if no such attribute found
-              Kernel::raise MobyBase::AttributeNotFoundError, "Could not find attribute #{ attribute_name.inspect }" # for test object of type #{ type.to_s }"
+              raise MobyBase::AttributeNotFoundError, "Could not find attribute #{ attribute_name.inspect }" # for test object of type #{ type.to_s }"
 
             else
             
@@ -462,7 +462,7 @@ module TDriver
         
           # attribute(s) found
           # Need to disable this for now 
-          # Kernel::raise MobyBase::MultipleAttributesFoundError.new( "Multiple attributes found with name '%s'" % name ) if nodeset.count > 1
+          # raise MobyBase::MultipleAttributesFoundError.new( "Multiple attributes found with name '%s'" % name ) if nodeset.count > 1
 
           # return found attribute
           nodeset.first.content
@@ -622,7 +622,7 @@ module TDriver
         nodeset = test_object.instance_variable_get( :@sut ).xml_data.xpath( test_object.instance_variable_get( :@x_path ) )
 
         # raise exception if no test objects found 
-			  Kernel::raise MobyBase::TestObjectNotFoundError if nodeset.empty?
+			  raise MobyBase::TestObjectNotFoundError if nodeset.empty?
 			
         # return first test object from the nodeset
 			  nodeset.first

@@ -29,7 +29,7 @@ module MobyUtil
     #TODO detect app start for later versions...
     def self.start_rec( app )
 
-      #Kernel::raise ArgumentError.new("Application must be defined.") unless app
+      #raise ArgumentError.new("Application must be defined.") unless app
       app.check_type( MobyBase::TestObject, "Wrong argument type $1 for application object (expected $2)" )
 
       app.start_recording
@@ -40,13 +40,13 @@ module MobyUtil
     def self.print_script( sut, app, object_identificators = ['text','icontext','label'] )
 
       # verify that sut type is type of MobyBase::SUT
-      #Kernel::raise ArgumentError.new("Sut must be defined.") unless sut
+      #raise ArgumentError.new("Sut must be defined.") unless sut
       sut.check_type( MobyBase::SUT, "Wrong argument type $1 for SUT (expected $2)" )
 
-      #Kernel::raise ArgumentError.new("Application must be defined.") unless app
+      #raise ArgumentError.new("Application must be defined.") unless app
       app.check_type( MobyBase::TestObject, "Wrong argument type $1 for application object (expected $2)" )
 
-      #Kernel::raise ArgumentError.new("Object identificators must be set, use defaults if not sure what the use.") unless object_identificators
+      #raise ArgumentError.new("Object identificators must be set, use defaults if not sure what the use.") unless object_identificators
       object_identificators.check_type( Array, "Wrong argument type $1 for object identificators (expected $2)" )
       
       xml_source = app.print_recordings

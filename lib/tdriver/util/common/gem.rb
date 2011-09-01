@@ -91,7 +91,7 @@ module MobyUtil
     # TODO: document
     def self.install( *parameters, &block )
 
-      Kernel::raise ArgumentError.new( "Target folder must be specified as first argument" ) if parameters.empty?
+      raise ArgumentError.new( "Target folder must be specified as first argument" ) if parameters.empty?
 
       yield( *parameters )
 

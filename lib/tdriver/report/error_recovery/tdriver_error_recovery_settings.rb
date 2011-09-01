@@ -48,25 +48,25 @@ class TDriverErrorRecoverySettings
   # === raises
   def read_settings()
     @error_recovery_enabled= $parameters[ :error_recovery_enabled ]
-    Kernel::raise MobyBase::BehaviourError.new("error recovery", "error recovery enabled parameter not defined in tdriver_parameters.xml") if @error_recovery_enabled == nil
+    raise MobyBase::BehaviourError.new("error recovery", "error recovery enabled parameter not defined in tdriver_parameters.xml") if @error_recovery_enabled == nil
 
     @ats4_error_recovery_enabled= $parameters[ :ats4_error_recovery_enabled ]
-    Kernel::raise MobyBase::BehaviourError.new("error recovery", "ats4 error recovery enabled parameter not defined in tdriver_parameters.xml") if @ats4_error_recovery_enabled == nil
+    raise MobyBase::BehaviourError.new("error recovery", "ats4 error recovery enabled parameter not defined in tdriver_parameters.xml") if @ats4_error_recovery_enabled == nil
 
     @wait_time_for_ats4_error_recovery= $parameters[ :wait_time_for_ats4_error_recovery ]
-    Kernel::raise MobyBase::BehaviourError.new("error recovery", "ats4 error recovery wait time parameter not defined in tdriver_parameters.xml") if @wait_time_for_ats4_error_recovery == nil
+    raise MobyBase::BehaviourError.new("error recovery", "ats4 error recovery wait time parameter not defined in tdriver_parameters.xml") if @wait_time_for_ats4_error_recovery == nil
 
     @ping_connection= $parameters[ :ping_connection ]
-    Kernel::raise MobyBase::BehaviourError.new("error recovery", "ping connection parameter not defined in tdriver_parameters.xml") if @ping_connection == nil
+    raise MobyBase::BehaviourError.new("error recovery", "ping connection parameter not defined in tdriver_parameters.xml") if @ping_connection == nil
 
     @reconnect_device= $parameters[ :reconnect_device ]
-    Kernel::raise MobyBase::BehaviourError.new("error recovery", "reconnect device patameter not defined in tdriver_parameters.xml") if @reconnect_device == nil
+    raise MobyBase::BehaviourError.new("error recovery", "reconnect device patameter not defined in tdriver_parameters.xml") if @reconnect_device == nil
 
     @reconnect_attempts= $parameters[ :reconnect_attempts ]
-    Kernel::raise MobyBase::BehaviourError.new("error recovery", "reconnect attempts patameter not defined in tdriver_parameters.xml") if @reconnect_attempts == nil
+    raise MobyBase::BehaviourError.new("error recovery", "reconnect attempts patameter not defined in tdriver_parameters.xml") if @reconnect_attempts == nil
 
     str_parameter= $parameters[ :error_recovery_monitored_sut_ids ]
-    Kernel::raise MobyBase::BehaviourError.new("error recovery", "error_recovery_monitored_sut_ids patameter not defined in tdriver_parameters.xml") if str_parameter == nil
+    raise MobyBase::BehaviourError.new("error recovery", "error_recovery_monitored_sut_ids patameter not defined in tdriver_parameters.xml") if str_parameter == nil
     @monitored_suts=str_parameter.split('|')
 
 

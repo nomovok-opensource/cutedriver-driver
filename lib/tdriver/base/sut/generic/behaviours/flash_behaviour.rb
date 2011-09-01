@@ -198,14 +198,14 @@ module MobyBehaviour
         
       if flash_files==nil
         flash_files=parameter(:flash_images)
-        Kernel::raise MobyBase::BehaviourError.new("flash_images", "flash_images not defined for sut in tdriver_parameters.xml") if flash_files == nil
+        raise MobyBase::BehaviourError.new("flash_images", "flash_images not defined for sut in tdriver_parameters.xml") if flash_files == nil
       end
 
       str_flash_command=parameter(:flash_command)
-      Kernel::raise MobyBase::BehaviourError.new("flash_images", "flash_command not defined for sut in tdriver_parameters.xml") if str_flash_command == nil
+      raise MobyBase::BehaviourError.new("flash_images", "flash_command not defined for sut in tdriver_parameters.xml") if str_flash_command == nil
 
       str_optional_parameters=parameter(:optional_parameters_after_flashing,'')
-      Kernel::raise MobyBase::BehaviourError.new("flash_images", "optional_parameters_after_flashing not defined for sut in tdriver_parameters.xml") if str_optional_parameters == nil
+      raise MobyBase::BehaviourError.new("flash_images", "optional_parameters_after_flashing not defined for sut in tdriver_parameters.xml") if str_optional_parameters == nil
 
       #build flash command
       flash_command="#{str_flash_command} #{flash_files} #{str_optional_parameters}"
@@ -213,7 +213,7 @@ module MobyBehaviour
       #start flashing
       result = start_flashing( flash_command )
       
-      Kernel::raise MobyBase::BehaviourError.new("flash_images", "Flashing failed") if result.to_s == 'false'
+      raise MobyBase::BehaviourError.new("flash_images", "Flashing failed") if result.to_s == 'false'
       sleep parameter[:sleep_time_after_flash_command].to_i
     end
 
@@ -250,7 +250,7 @@ module MobyBehaviour
     def start_flashing(flash_command)
 
       flash_attempts=parameter(:flash_attempts)
-      Kernel::raise MobyBase::BehaviourError.new("start_flashing", "flash_attempts not defined for sut in tdriver_parameters.xml") if flash_attempts == nil
+      raise MobyBase::BehaviourError.new("start_flashing", "flash_attempts not defined for sut in tdriver_parameters.xml") if flash_attempts == nil
 
       current_flash_attempt=0
       flash_result='false'

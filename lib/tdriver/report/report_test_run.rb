@@ -512,7 +512,7 @@ module TDriverReportCreator
           
         end
       rescue Exception => e
-        Kernel::raise e, "Unable to create report folder: #{@report_folder}", caller
+        raise e, "Unable to create report folder: #{@report_folder}", caller
       end
       return nil
     end
@@ -561,7 +561,7 @@ module TDriverReportCreator
           write_page_end(@report_folder+'/index.html')
         end
       rescue Exception => e
-        Kernel::raise e, "Unable to update summary page", e.backtrace
+        raise e, "Unable to update summary page", e.backtrace
       end
       return nil
     end
@@ -635,7 +635,7 @@ module TDriverReportCreator
         write_page_end(@report_folder+'/environment/index.html')
         $new_junit_xml_results.test_suite_properties(RUBY_PLATFORM,sw_version,variant,product,language,loc,@memory_amount_total,@memory_amount_start,@memory_amount_end)
       rescue Exception => e
-        Kernel::raise e, "Unable to update environment page", caller
+        raise e, "Unable to update environment page", caller
       end
       return nil
     end
@@ -652,7 +652,7 @@ module TDriverReportCreator
         write_tdriver_log_body(@report_folder+'/cases/tdriver_log_index.html',@test_run_behaviour_log)
         write_page_end(@report_folder+'/cases/tdriver_log_index.html')
       rescue Exception => e
-        Kernel::raise e
+        raise e
       end
       return nil
     end
@@ -1334,7 +1334,7 @@ module TDriverReportCreator
         @all_cases_arr=nil
         update_test_case_summary_pages_for_crashes_and_reboots(rewrite)
       rescue Exception => e
-        Kernel::raise e, "Unable to update test case summary pages", caller
+        raise e, "Unable to update test case summary pages", caller
       end
       return nil
     end
@@ -1345,7 +1345,7 @@ module TDriverReportCreator
         update_test_case_summary_page('crash',rewrite,'Crash')
         update_test_case_summary_page('reboot',rewrite,'Reboot')
       rescue Exception => e
-        Kernel::raise e, "Unable to update test case summary pages for crashes and reboots", caller
+        raise e, "Unable to update test case summary pages for crashes and reboots", caller
       end
       return nil
     end
