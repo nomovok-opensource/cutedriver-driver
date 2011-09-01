@@ -286,20 +286,6 @@ module MobyUtil
 
         ARGV.delete('--debug_exceptions')
 
-        # for debugging to see every occured exception
-        def Kernel.raise( *args )
-          #begin
-          # raise and catch exception  
-          super( *args )
-          #rescue
-          # remove wrapper call from backtrace 
-          # $!.backtrace.shift
-          #puts "%s: %s\nBacktrace: \n%s\n\n" % [ $!.class, $!.message, $!.backtrace.collect{ | line | "  %s" % line }.join("\n") ]
-          # raise exception again
-          # super $!          
-          #end
-        end
-
         # hook Object(Kernel)#raise
         ::Object.class_exec{ 
 
@@ -323,11 +309,7 @@ module MobyUtil
                 
                 end
                 
-                puts "[debug] %s: %s\n[debug] Backtrace: \n[debug] %s\n\n" % [ 
-                  $!.class, 
-                  $!.message, 
-                  $!.backtrace.collect{ | line | "  ... from %s" % line }.join("\n[debug] ") 
-                ]
+                puts "[debug] #{ $!.class }: #{ $!.message }\n[debug] Backtrace: \n[debug] #{ $!.backtrace.collect{ | line | "  ... from #{ line }" }.join("\n[debug] ") }\n\n"
                 
                 # raise exception again
                 original_raise $!
@@ -559,7 +541,7 @@ module MobyUtil
 
           else
 
-            exit_status = ['error', '', "Execution terminated with exception: %s: %s" % [ caller.first, $!.message.split("\n") ], '' ]
+            exit_status = ['error', '', "Execution terminated with exception: #{ caller.first.to_s }: #{ $!.message.split("\n") }", '' ]
 
           end
 

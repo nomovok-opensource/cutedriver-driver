@@ -169,7 +169,7 @@ module TDriver
     # === returns
     # return:: SUT object
     # raise:: 
-    # ArgumentError:: SUT ID '%s' not found from tdriver_parameters.xml
+    # ArgumentError:: <name> not defined in TDriver parameters XML
     def self.make( sut_attributes )
 
       sut_id = retrieve_sut_id_from_hash( sut_attributes )

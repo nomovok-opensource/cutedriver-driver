@@ -132,7 +132,7 @@ module MobyUtil
 
       rescue 
 
-        raise NameError.new( "Invalid constant %s" % constant_name )
+        raise NameError, "invalid constant #{ constant_name }"
 
       end
 
@@ -195,7 +195,7 @@ module MobyUtil
           # TODO: document me      
           ( call_stack.size - 2 ).times do | index |
           
-            file_path << "%s:" % call_stack[ index ]
+            file_path << "#{ call_stack[ index ].to_s }:"
             
           end
           
@@ -224,7 +224,7 @@ module MobyUtil
           # raise exception if line number is larger than total number of lines
           raise RuntimeError.new(
           
-            "Unable to fetch line %s from source file %s due to it is out of range (total lines: %s)" %  [ start_line, filename, lines.size ]
+            "Unable to fetch line #{ start_line.to_s } from source file #{ filename } due to it is out of range (total lines: #{ lines.size })"
             
           ) if start_line > lines.size
 

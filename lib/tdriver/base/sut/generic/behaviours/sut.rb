@@ -253,7 +253,7 @@ module MobyBehaviour
     #
     # == exception
     # TypeError
-    #  description: Wrong argument type %s for XML (expected MobyUtil::XML::Element, String or NilClass)
+    #  description: Wrong argument type <class> for XML (expected MobyUtil::XML::Element, String or NilClass)
     def xml_data=( xml )
 
       xml.check_type( [ MobyUtil::XML::Element, String, NilClass ], "Wrong argument type $1 for XML (expected $2)" )
@@ -552,7 +552,7 @@ module MobyBehaviour
     #
     # == exceptions
     # TypeError
-    #  description: Wrong argument type %s for attributes (expected Hash)
+    #  description: Wrong argument type <class> for attributes (expected Hash)
     #
     def application( attributes = {} )
 
@@ -614,13 +614,13 @@ module MobyBehaviour
     #
     # == exceptions
     # TypeError
-    #   description: Wrong argument type %s (expected Hash)
+    #   description: Wrong argument type <class> (expected Hash)
     #
     # ArgumentError
     #   description: Output filename (:filename) not defined in argument hash
     #
     # ArgumentError
-    #  description: Wrong argument type %s for output filename (expected String)
+    #  description: Wrong argument type <class> for output filename (expected String)
     #
     # ArgumentError
     #   description: Output filename must not be empty string
@@ -707,7 +707,7 @@ module MobyBehaviour
     #
     # == exceptions
     # TypeError
-    #  description: Wrong argument type %s for run method (expected Hash)
+    #  description: Wrong argument type <class> for run method (expected Hash)
     #
     # ArgumentError
     #  description: Required key :uid or :name not found from argument hash

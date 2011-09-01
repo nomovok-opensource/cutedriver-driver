@@ -83,8 +83,9 @@ module TDriver
               if @@rcv_raise_errors == 'true' || @@reporter_attached == 'false'
 
                 raise MobyBase::ContinuousVerificationError.new(
-                  "Verification failed as an exception was thrown when the verification block was executed. %s\nDetails: %s\nNested exception:\n%s" % [ verify.source, ( verify.message || "none" ), e.inspect ]
+                  "Verification failed as an exception was thrown when the verification block was executed. #{ verify.source }\nDetails: #{ ( verify.message || "none" ) }\nNested exception:\n#{ e.inspect }"
                 )
+                
               elsif @@reporter_attached == 'true' && @@rcv_raise_errors == 'false'
 
                 TDriverReportAPI::tdriver_report_set_test_case_status('failed') if @@rcv_fail_test_case == 'true'
@@ -99,7 +100,7 @@ module TDriver
                   
                 end
 
-                TDriverReportAPI::tdriver_report_log("Verification failed as an exception was thrown when the verification block was executed. %s\nDetails: %s\nNested exception:\n%s" % [ verify.source, ( verify.message || "none" ), e.inspect ])
+                TDriverReportAPI::tdriver_report_log("Verification failed as an exception was thrown when the verification block was executed. #{ verify.source }\nDetails: #{ ( verify.message || "none" ) }\nNested exception:\n#{ e.inspect }")
 
                 TDriverReportAPI::tdriver_report_log("<hr />")
                 
@@ -115,9 +116,7 @@ module TDriver
               if @@rcv_raise_errors == 'true' || @@reporter_attached == 'false'
               
                 raise MobyBase::ContinuousVerificationError.new(
-                  "Verification failed. %s\nDetails: %s\nThe block did not return %s. It returned: %s" % [ 
-                    verify.source, ( verify.message || "none" ), verify.expected.inspect, result.inspect 
-                  ]
+                  "Verification failed. #{ verify.source }\nDetails: #{ ( verify.message || "none" ) }\nThe block did not return #{ verify.expected.inspect }. It returned: #{ result.inspect }"
                 )
                 
               elsif @@reporter_attached == 'true' && @@rcv_raise_errors == 'false'
@@ -135,9 +134,7 @@ module TDriver
                 end
                 
                 TDriverReportAPI::tdriver_report_log(
-                  "Verification failed. %s\nDetails: %s\nThe block did not return %s. It returned: %s " % [ 
-                    verify.source, ( verify.message || "none" ), verify.expected.inspect, result.inspect
-                  ]
+                  "Verification failed. #{ verify.source }\nDetails: #{ ( verify.message || "none" ) }\nThe block did not return #{ verify.expected.inspect }. It returned: #{ result.inspect } "
                 )
                 
                 TDriverReportAPI::tdriver_report_log("<hr />")

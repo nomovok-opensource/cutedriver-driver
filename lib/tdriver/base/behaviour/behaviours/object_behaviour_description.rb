@@ -145,10 +145,10 @@ module MobyBehaviour
     #
     # == exceptions
     # TypeError
-    #  description: Wrong argument type %s for method name (expected Symbol or String)
+    #  description: Wrong argument type <class> for method name (expected Symbol or String)
     #
     # ArgumentError
-    #  description: Test object type of %s does not have method %s
+    #  description: Test object type of <type> does not have method <name>
     #
 		def describe_method( method_name, print = true, return_result = false )
 			

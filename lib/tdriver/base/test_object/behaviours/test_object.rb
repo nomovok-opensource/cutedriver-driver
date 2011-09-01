@@ -430,7 +430,7 @@ module MobyBehaviour
     #
     # == exceptions
     # TypeError
-    #  description: Wrong argument type %s for attributes (expected Hash)
+    #  description: Wrong argument type <class> for attributes (expected Hash)
     #
     # MultipleTestObjectsIdentifiedError
     #  description:  raised if multiple objects found that match the given attributes
@@ -778,17 +778,7 @@ module MobyBehaviour
 
         end
 
-        $logger.behaviour(
-
-          "%s;%s;%s;%s;%s" % [ 
-            "FAIL", 
-            description, 
-            identity, 
-            dynamic_attributes[ :__multiple_objects ] ? "children" : "child", 
-            attributes.inspect 
-          ]
-
-        )
+        $logger.behaviour "FAIL;#{ description };#{ identity };#{ dynamic_attributes[ :__multiple_objects ] ? "children" : "child" };#{ attributes.inspect }"
 
         raise exception
 

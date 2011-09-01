@@ -270,7 +270,7 @@ module MobyUtil
     # == return
     # Document:: XML document object
     # == raises
-    # IOError:: File '%s' not found    
+    # IOError:: File <name> not found    
     def self.parse_file( filename )    
   
       # raise exception if file not found

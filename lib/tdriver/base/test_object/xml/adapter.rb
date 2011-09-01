@@ -462,7 +462,7 @@ module TDriver
         
           # attribute(s) found
           # Need to disable this for now 
-          # raise MobyBase::MultipleAttributesFoundError.new( "Multiple attributes found with name '%s'" % name ) if nodeset.count > 1
+          # raise MobyBase::MultipleAttributesFoundError.new( "Multiple attributes found with name '#{ name }'" ) if nodeset.count > 1
 
           # return found attribute
           nodeset.first.content

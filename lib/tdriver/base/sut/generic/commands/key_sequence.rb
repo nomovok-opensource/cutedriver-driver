@@ -53,8 +53,8 @@ module MobyCommand
 		# == returns
 		# self
 		# == raises
-		# TypeError:: Wrong argument type %s for times count (expected Fixnum)
-		# ArgumentError:: Positive value expected for times count (got %i)
+		# TypeError:: Wrong argument type <class> for times count (expected Fixnum)
+		# ArgumentError:: Positive value expected for times count (got <value>)
 		# IndexError:: Unable to multiply last given key due to key sequence is empty
 		def times!( count = 1 )
 

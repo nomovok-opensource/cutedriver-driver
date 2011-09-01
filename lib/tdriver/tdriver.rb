@@ -46,9 +46,9 @@ module TDriver
     # hash:: Defines SUT type, identification attributes etc. 
     #   :id:: Valid id that can be matched in tdriver_parameters.xml
     # === raises
-    # ArgumentError:: Wrong argument Type '%s' (Expected Hash)
+    # ArgumentError:: Wrong argument type <class> (expected Hash)
     # ArgumentError:: SUT type not defined
-    # ArgumentError:: SUT type '%s' not supported
+    # ArgumentError:: SUT type <name> not supported
     # ArgumentError:: Sut id not given
     # MobyUtil::ParameterFileNotFoundError:: if paramter file (tdriver_parameters.xml in TDriver home directory) is not found
     # === returns

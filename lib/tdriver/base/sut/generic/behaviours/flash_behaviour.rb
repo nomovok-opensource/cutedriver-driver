@@ -126,7 +126,7 @@ module MobyBehaviour
 
       begin
         if parameter(:flaxi_flash_attempts)
-          $stderr.puts "%s:%s warning: parameter :flaxi_flash_attempts deprecated use :flash_attempts instead" % [ file, line]
+          $stderr.puts "#{ file.to_s }:#{ line.to_s } warning: parameter :flaxi_flash_attempts deprecated use :flash_attempts instead" 
           parameter[:flash_attempts]=parameter(:flaxi_flash_attempts)
         end
       rescue
@@ -134,7 +134,7 @@ module MobyBehaviour
 
       begin
         if parameter(:flaxi_commands_before_flash)
-          $stderr.puts "%s:%s warning: parameter :flaxi_commands_before_flash deprecated use :commands_before_flash instead" % [ file, line]
+          $stderr.puts "#{ file.to_s }:#{ line.to_s } warning: parameter :flaxi_commands_before_flash deprecated use :commands_before_flash instead" 
           parameter[:commands_before_flash]=parameter(:flaxi_commands_before_flash)
         end
       rescue
@@ -142,7 +142,7 @@ module MobyBehaviour
 
       begin
         if parameter(:flaxi_flash_command)
-          $stderr.puts "%s:%s warning: parameter :flaxi_flash_command deprecated use :flash_command instead" % [ file, line]
+          $stderr.puts "#{ file.to_s }:#{ line.to_s } warning: parameter :flaxi_flash_command deprecated use :flash_command instead" 
           parameter[:flash_command]=parameter(:flaxi_flash_command)
         end
       rescue
@@ -150,7 +150,7 @@ module MobyBehaviour
 
       begin
         if parameter(:flaxi_optional_parameters_after_flashing)
-          $stderr.puts "%s:%s warning: parameter :flaxi_optional_parameters_after_flashing deprecated use :optional_parameters_after_flashing instead" % [ file, line]
+          $stderr.puts "#{ file.to_s }:#{ line.to_s } warning: parameter :flaxi_optional_parameters_after_flashing deprecated use :optional_parameters_after_flashing instead" 
           parameter[:optional_parameters_after_flashing]=parameter(:flaxi_optional_parameters_after_flashing)
         end
       rescue
@@ -158,7 +158,7 @@ module MobyBehaviour
 
       begin
         if parameter(:flaxi_flash_images)
-          $stderr.puts "%s:%s warning: parameter :flaxi_flash_images deprecated use :flash_images instead" % [ file, line]
+          $stderr.puts "#{ file.to_s }:#{ line.to_s } warning: parameter :flaxi_flash_images deprecated use :flash_images instead" 
           parameter[:flash_images]=parameter(:flaxi_flash_images)
         end
       rescue
@@ -166,7 +166,7 @@ module MobyBehaviour
 
       begin
         if parameter(:flaxi_sleep_time_after_flash_command)
-          $stderr.puts "%s:%s warning: parameter :flaxi_sleep_time_after_flash_command deprecated use :sleep_time_after_flash_command instead" % [ file, line]
+          $stderr.puts "#{ file.to_s }:#{ line.to_s } warning: parameter :flaxi_sleep_time_after_flash_command deprecated use :sleep_time_after_flash_command instead" 
           parameter[:sleep_time_after_flash_command]=parameter(:flaxi_sleep_time_after_flash_command)
         end
       rescue
@@ -174,7 +174,7 @@ module MobyBehaviour
 
       begin
         if parameter(:flaxi_command_after_flash)
-          $stderr.puts "%s:%s warning: parameter :flaxi_command_after_flash deprecated use :command_after_flash instead" % [ file, line]
+          $stderr.puts "#{ file.to_s }:#{ line.to_s } warning: parameter :flaxi_command_after_flash deprecated use :command_after_flash instead" 
           parameter[:command_after_flash]=parameter(:flaxi_command_after_flash)
         end
       rescue
@@ -182,7 +182,7 @@ module MobyBehaviour
 
       begin
         if parameter(:flaxi_commands_after_failed_flash)
-          $stderr.puts "%s:%s warning: parameter :flaxi_commands_after_failed_flash deprecated use :commands_after_failed_flash instead" % [ file, line]
+          $stderr.puts "#{ file.to_s }:#{ line.to_s } warning: parameter :flaxi_commands_after_failed_flash deprecated use :commands_after_failed_flash instead" 
           parameter[:commands_after_failed_flash]=parameter(:flaxi_commands_after_failed_flash)
         end
       rescue
@@ -190,7 +190,7 @@ module MobyBehaviour
 
       begin
         if parameter(:flaxi_flash_command_success_string)
-          $stderr.puts "%s:%s warning: parameter :flaxi_flash_command_success_string deprecated use :flash_command_success_string instead" % [ file, line]
+          $stderr.puts "#{ file.to_s }:#{ line.to_s } warning: parameter :flaxi_flash_command_success_string deprecated use :flash_command_success_string instead" 
           parameter[:flash_command_success_string]=parameter(:flaxi_flash_command_success_string)
         end
       rescue

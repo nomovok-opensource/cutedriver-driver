@@ -70,13 +70,13 @@ module MobyBehaviour
 		#
 		# == exceptions
 		# TypeError
-		#  description: Wrong argument type %s for attributes (expected Hash)
+		#  description: Wrong argument type <class> for attributes (expected Hash)
 		#
 		# TypeError
-		#  description: Wrong argument type %s for attribute :type (expected String)
+		#  description: Wrong argument type <class> for attribute :type (expected String)
 		#
 		# TypeError
-		#  description: Wrong argument type %s for timeout (expected Integer, Fixnum or Float)
+		#  description: Wrong argument type <class> for timeout (expected Integer, Fixnum or Float)
 		#
 		# ArgumentError
 		#  description: Argument retry_interval was not a valid. Expected: Integer, Fixnum or Float

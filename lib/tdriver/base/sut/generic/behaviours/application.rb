@@ -86,13 +86,13 @@ module MobyBehaviour
     #  description: If no application test object is found after close or if this application is still in the foreground after the close.
     #
     # TypeError
-    #  description: Wrong argument type %s for options_hash (expected a Hash, TrueClass or FalseClass)
+    #  description: Wrong argument type <class> for options_hash (expected a Hash, TrueClass or FalseClass)
     #
     # TypeError
-    #  description: Wrong argument type %s for :force_kill (expected NilClass, TrueClass or FalseClass)
+    #  description: Wrong argument type <class> for :force_kill (expected NilClass, TrueClass or FalseClass)
     #
     # TypeError
-    #  description: Wrong argument type %s for :check_process (expected TrueClass or FalseClass)
+    #  description: Wrong argument type <class> for :check_process (expected TrueClass or FalseClass)
     #
     def close( options_hash = {} )
 
@@ -343,9 +343,6 @@ module MobyBehaviour
     # === example
     #  puts @sut.application.closable #prints foreground application closable status to console (at the moment always true)
     def closable?
-
-      #file, line = caller.first.split(":")
-      #$stderr.puts "%s:%s warning: TestObject#closable? is deprecated" % [ file, line ]
 
       true
 
