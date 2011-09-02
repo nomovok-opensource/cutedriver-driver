@@ -334,8 +334,8 @@ module TDriver
             raise
 
           rescue MobyUtil::XML::ParseError
-          
-            raise MobyUtil::XML::ParseError, "Error while parsing behaviours file #{ behaviours[ :filename ] } due to #{ $!.message }"
+
+            raise MobyUtil::XML::ParseError, "Error while parsing behaviours file #{ filename } due to #{ $!.message }"
 
           rescue
 
