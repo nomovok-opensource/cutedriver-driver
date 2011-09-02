@@ -175,7 +175,7 @@ module MobyBase
 
       rescue MobyBase::TestObjectNotFoundError
       
-        Kernel::raise MobyBase::TestObjectNotFoundError.new( 
+        raise MobyBase::TestObjectNotFoundError.new( 
 
           "The test object (id: #{ @id.inspect }, type: #{ @type.inspect }, name: #{ @name.inspect }) does not exist on #{ @sut.id.inspect } anymore" 
         

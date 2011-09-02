@@ -50,7 +50,7 @@ module MobyUtil
         private
         
         def method_missing( method, *args, &block )
-          Kernel::raise RuntimeError.new("Method '#{ method.to_s }' is not supported by #{ self.class.to_s } (#{ @parser.to_s })" )
+          raise RuntimeError.new("Method '#{ method.to_s }' is not supported by #{ self.class.to_s } (#{ @parser.to_s })" )
         end
         
         # method to create MobyUtil::XML::Element object

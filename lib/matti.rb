@@ -17,11 +17,6 @@
 ## 
 ############################################################################
 
-=begin
-file, line = ( caller.first || "%s:%s" % [ __FILE__, __LINE__ ] ).split(":")
-$stderr.puts "%s:%s warning: require 'matti' deprecated, use require 'tdriver' instead also 'MATTI' is deprecated, use 'TDriver' instead " % [ file, line]
-=end
-
 $stderr.puts "%s:%s warning: require 'matti' deprecated, use require 'tdriver' instead. Please note that class 'MATTI' is also deprecated, use 'TDriver' instead " % ( caller.first || "%s:%s" % [ __FILE__, __LINE__ ] ).split(":")[ 0..1 ]
 
 # load matti resources and framework

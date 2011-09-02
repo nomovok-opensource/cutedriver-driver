@@ -28,7 +28,7 @@ module MobyBase
     # sut_adapter:: MobyController::SutAdapter descendant, e.g. MobyController::QT::SutAdapter
     # == raises
     # TypeError:: Wrong argument type $1 for SUT controller (expected $2)
-    # NameError:: No SUT controller found for %s (%s)
+    # NameError:: No SUT controller found for <type> (<class>)
     def initialize( sut_controllers, sut_adapter )
 
       sut_controllers.check_type String, 'Wrong argument type $1 for SUT controller (expected $2)'

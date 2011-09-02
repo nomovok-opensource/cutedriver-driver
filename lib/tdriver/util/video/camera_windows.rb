@@ -99,7 +99,7 @@ module MobyUtil
       
       if @_control_id == 0
 
-        Kernel::raise RuntimeError.new( "Failed to start video recording.\nFile: " + @_video_file + "\nFPS: " + @_rec_options[ :fps ].to_s + "\nWidth: " + @_rec_options[ :width ].to_s + "\nHeight: " + @_rec_options[ :height ].to_s )
+        raise RuntimeError.new( "Failed to start video recording.\nFile: " + @_video_file + "\nFPS: " + @_rec_options[ :fps ].to_s + "\nWidth: " + @_rec_options[ :width ].to_s + "\nHeight: " + @_rec_options[ :height ].to_s )
 
       end
 

@@ -126,7 +126,6 @@ module MobyUtil
     def self.boolean?( string )
 
       # raise exception if argument type other than String
-      #Kernel::raise ArgumentError.new("Invalid argument format %s (Expected: %s)" % [ string.class, "String" ]) unless string.kind_of?( String )
       string.check_type( String, "Wrong argument type $1 (Expected $2)" )
 
       /^(true|false)$/i.match( string ).kind_of?( MatchData )
@@ -142,7 +141,7 @@ module MobyUtil
 
       # raise exception if argument type other than String
 
-      Kernel::raise ArgumentError.new("Invalid argument format %s (Expected: %s)" % [ string.class, "String" ]) unless string.kind_of?( String )
+      string.check_type String, 'Wrong argument type $1 (expected: $2)'
 
       /^[0-9]+$/.match( string ).kind_of?( MatchData )
 
@@ -161,7 +160,7 @@ module MobyUtil
 
       else
 
-        Kernel::raise ArgumentError.new("Invalid value '%s' for boolean (Expected: %s)" % [ string, "'true', 'false'" ] )
+        raise ArgumentError.new("Invalid value #{ string.inspect } for boolean (expected: \"true\" or \"false\")" )
 
       end      
 

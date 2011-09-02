@@ -64,7 +64,7 @@ module MobyBehaviour
     #
     # == exceptions
     # TypeError
-    #  description: Wrong argument type %s for test object type (expected String)
+    #  description: Wrong argument type <class> for test object type (expected String)
     #
     # ArgumentError
     #  description: The test object type argument must not be empty
@@ -73,7 +73,7 @@ module MobyBehaviour
     #  description: Test object attributes hash argument must not be empty
     #
     # TypeError
-    #  description: Wrong argument type %s for test object attributes (expected Hash)
+    #  description: Wrong argument type <class> for test object attributes (expected Hash)
     def test_object_exists?( *attributes )
 
       begin
@@ -198,22 +198,7 @@ module MobyBehaviour
         $logger.enabled = ( attributes[ :__logging ] == 'true' ? true : false )
 
         # behaviour logging
-        $logger.behaviour(
-        
-          "%s;%s;%s;test_object_exists?;" % [
-          
-            # status
-            ( result == true ? 'PASS' : 'FAIL' ),
-            
-            # description
-            description,
-            
-            # sut id 
-            ( self.kind_of?( MobyBase::SUT ) ? self.id.to_s : '' )
-          
-          ]
-        
-        )
+        $logger.behaviour "#{ ( result == true ? 'PASS' : 'FAIL' ) };#{ description };#{ ( self.sut? ? self.id.to_s : '' ) };test_object_exists?;" 
         
         # raise exception if neccessery
         raise result if result.kind_of?( Exception )

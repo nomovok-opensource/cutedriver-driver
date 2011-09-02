@@ -25,18 +25,19 @@ module MobyUtil
     ## plugin configuration, constructor and deconstructor methods
     def self.plugin_name
 
-      Kernel::raise PluginError.new( "Plugin name not defined in implementation (%s)" % [ self.name ] ) 
+      raise PluginError, "Plugin name not defined in implementation (#{ self.name })"
+
     end
 
     def self.plugin_type
 
-      Kernel::raise PluginError.new( "Plugin type not defined in implementation (%s)" % [ self.name ] ) 
+      raise PluginError, "Plugin type not defined in implementation (#{ self.name })"
 
     end
 
     def self.plugin_required_tdriver_version
 
-      Kernel::raise PluginError.new( "Required TDriver version not defined in plugin implementation (%s)" % [ self.name ] ) 
+      raise PluginError, "Required TDriver version not defined in plugin implementation (#{ self.name })" 
 
     end
 

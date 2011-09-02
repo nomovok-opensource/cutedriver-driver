@@ -26,7 +26,7 @@ class MATTI
 
 		file, line = caller.first.split(":")
 
-		$stderr.puts "%s:%s warning: deprecated class %s, use %s#%s instead" % [ file, line, self.name, "TDriver", method_id.to_s ]
+		$stderr.puts "#{ file }:#{ line } warning: deprecated class #{ self.name }, use TDriver##{ method_id.to_s } instead"
 
 		TDriver.respond_to?( method_id ) ? TDriver.method( method_id ).call( *args ) : super
 

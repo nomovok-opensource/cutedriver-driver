@@ -247,12 +247,12 @@ module MobyUtil
           end
 
           # raise exception
-          Kernel::raise MobyUtil::XML::ParseError, "#{ $!.message.gsub("\n", '') } (#{ $!.class }). #{ dump_location }"
+          raise MobyUtil::XML::ParseError, "#{ $!.message.gsub("\n", '') } (#{ $!.class }). #{ dump_location }"
 
         else
         
           # raise exception
-          Kernel::raise MobyUtil::XML::ParseError, "#{ $!.message.gsub("\n", '') } (#{ $!.class })"
+          raise MobyUtil::XML::ParseError, "#{ $!.message.gsub("\n", '') } (#{ $!.class })"
         
         end
 
@@ -270,11 +270,11 @@ module MobyUtil
     # == return
     # Document:: XML document object
     # == raises
-    # IOError:: File '%s' not found    
+    # IOError:: File <name> not found    
     def self.parse_file( filename )    
   
       # raise exception if file not found
-      Kernel::raise IOError, "File #{ filename.inspect } not found" unless File.exist?( filename )
+      raise IOError, "File #{ filename.inspect } not found" unless File.exist?( filename )
 
       # parse file content
       parse_string( 
@@ -315,7 +315,7 @@ module MobyUtil
 
       rescue
 
-        Kernel::raise MobyUtil::XML::BuilderError, "#{ $!.message } (#{ $!.class })"
+        raise MobyUtil::XML::BuilderError, "#{ $!.message } (#{ $!.class })"
 
       end
       

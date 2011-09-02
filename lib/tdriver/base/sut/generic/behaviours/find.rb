@@ -63,7 +63,7 @@ module MobyBehaviour
     #
     # == exceptions
     # TypeError
-    #  description: Wrong argument type %s for attributes (expected Hash)
+    #  description: Wrong argument type <class> for attributes (expected Hash)
     # 
     # ArgumentError
     #  description: Attributes hash must not be empty

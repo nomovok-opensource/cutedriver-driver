@@ -61,7 +61,7 @@ module MobyUtil
 		#
 		def self.retrieve( user_data_lname, language, table_name = nil )
 			
-			Kernel::raise UserDataNotFoundError.new( "User data logical name can't be empty" ) if user_data_lname == nil
+			raise UserDataNotFoundError.new( "User data logical name can't be empty" ) if user_data_lname == nil
 
 			# Get Localization parameters for DB Connection
 			db_type =  $parameters[ :user_data_db_type, nil ].to_s.downcase
@@ -78,13 +78,13 @@ module MobyUtil
 			begin
 				result = MobyUtil::DBAccess.query( db_connection, query_string )
 			rescue
-				# if column referring to language is not found then Kernel::raise error for language not found
-				Kernel::raise UserDataColumnNotFoundError.new( "User data language column '#{ language }' was not found" ) unless $!.message.index( "Unknown column" ) == nil
-				Kernel::raise SqlError.new( $!.message )
+				# if column referring to language is not found then raise error for language not found
+				raise UserDataColumnNotFoundError.new( "User data language column '#{ language }' was not found" ) unless $!.message.index( "Unknown column" ) == nil
+				raise SqlError.new( $!.message )
 			end
 
 			# Return only the first column of the row or and array of the values of the first column if multiple rows have been found
-			Kernel::raise UserDataNotFoundError.new( "No user data for '#{ user_data_lname }' found for language '#{ language }'" ) if ( result.empty?)
+			raise UserDataNotFoundError.new( "No user data for '#{ user_data_lname }' found for language '#{ language }'" ) if ( result.empty?)
 			if result.length > 1
 				result_array = Array.new # array of rows! We want the first column of the first row
 				result.each do |row|

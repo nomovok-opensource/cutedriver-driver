@@ -28,7 +28,7 @@ module TDriverReportAPI
   # Array
   # === raises
   def tdriver_get_current_by_status( status_type )
-    Kernel::raise TypeError.new("Argument to method cannot be nil.") if status_type.nil?
+    raise TypeError.new("Argument to method cannot be nil.") if status_type.nil?
     ret = []
     if $tdriver_reporter!=nil
       ret = $tdriver_reporter.parse_results_for_current_test(status_type)
@@ -44,7 +44,7 @@ module TDriverReportAPI
   # Array
   # === raises
   def tdriver_get_status(status_type)
-    Kernel::raise TypeError.new("Argument to method cannot be nil.") if status_type.nil?
+    raise TypeError.new("Argument to method cannot be nil.") if status_type.nil?
     ret = []
     if $tdriver_reporter!=nil
       ret = $tdriver_reporter.read_result_storage(status_type)
@@ -82,7 +82,7 @@ module TDriverReportAPI
   # nil
   # === raises
   def tdriver_log_data(data)
-    Kernel::raise TypeError.new("Argument to method cannot be nil.") if data.nil?
+    raise TypeError.new("Argument to method cannot be nil.") if data.nil?
     if $tdriver_reporter!=nil
       $tdriver_reporter.set_user_data(data)
     end
@@ -123,7 +123,7 @@ module TDriverReportAPI
   # nil
   # === raises
   def tdriver_log_data_in_total_run_table(column_name,value)
-    Kernel::raise TypeError.new("Argument to method cannot be nil.") if column_name.nil? || value.nil?
+    raise TypeError.new("Argument to method cannot be nil.") if column_name.nil? || value.nil?
     if $tdriver_reporter!=nil
       $tdriver_reporter.set_user_table_data(column_name,value)
     end
@@ -137,7 +137,7 @@ module TDriverReportAPI
   # nil
   # === raises
   def tdriver_report_log(message)
-  	Kernel::raise TypeError.new("Argument message was not a String.") unless message.nil? or message.kind_of?(String)
+  	raise TypeError.new("Argument message was not a String.") unless message.nil? or message.kind_of?(String)
     if $tdriver_reporter
       $new_test_case.set_test_case_execution_log(message) if $new_test_case
     end
@@ -151,7 +151,7 @@ module TDriverReportAPI
   # nil
   # === raises
   def tdriver_report_set_test_case_status(status)
-  	Kernel::raise TypeError.new("Argument status was not a String.") unless status.nil? or status.kind_of?(String)
+  	raise TypeError.new("Argument status was not a String.") unless status.nil? or status.kind_of?(String)
     if $tdriver_reporter!=nil
       $tdriver_reporter.set_test_case_user_defined_status(status)
     end

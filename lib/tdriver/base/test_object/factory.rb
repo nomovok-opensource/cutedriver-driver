@@ -82,7 +82,7 @@ module TDriver
 
         test_object_adapter.list_test_objects_as_string( matches ).each_with_index.collect{ | object, object_index | 
 
-          "%3s) %s" % [ object_index + 1, object ] 
+          "#{ ( object_index + 1 ).to_s.rjust( 3, '0' ) }) #{ object.to_s }"
 
         }.join( "\n" )
 

@@ -91,7 +91,7 @@ module TDriverErrorRecovery
         current_reconnect_attempt+=1
       end
     end
-    Kernel::raise MobyBase::BehaviourError.new("Error Recovery", "Error recovery failed after #{attempt_reconnects} recovery attempts") if b_error_recovery_succesful==false
+    raise MobyBase::BehaviourError.new("Error Recovery", "Error recovery failed after #{attempt_reconnects} recovery attempts") if b_error_recovery_succesful==false
   end
 
   # Reconnects the devices without ping

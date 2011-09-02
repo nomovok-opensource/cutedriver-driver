@@ -29,7 +29,9 @@ module MobyUtil
 
         if block_given?
 
-          $stderr.puts "%s:%s warning: deprecated method %s#new, use %s instead" % [ caller.first.split( ":" )[ 0 .. 1 ], self.class, "MobyUtil::XML#build" ].flatten
+          file, line = caller.first.split( ":" )
+
+          $stderr.puts "#{ file }:#{ line } warning: deprecated method #{ self.class }#new, use MobyUtil::XML#build instead"
 
           # extend builder behaviour of current parser
           self.extend( ( MobyUtil::XML.current_parser )::Builder )

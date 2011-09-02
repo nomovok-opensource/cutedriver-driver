@@ -49,7 +49,7 @@ module MobyBase
 			end
 
 			error = error_type.new( message )
-			Kernel::raise error
+			raise error
 		end
 
 		# enable hooking for performance measurement & debug logging

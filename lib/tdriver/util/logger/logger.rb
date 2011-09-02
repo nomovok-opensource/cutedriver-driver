@@ -146,7 +146,7 @@ module MobyUtil
 
       rescue
 
-        Kernel::raise ArgumentError, "Logger #{ logger_name.inspect } not found"
+        raise ArgumentError, "Logger #{ logger_name.inspect } not found"
 
       end
 
@@ -179,7 +179,7 @@ module MobyUtil
       if @logger_engine_loaded
 
         # Allow only FileOutputter instances
-        Kernel::raise ArgumentError, 'Outputter pattern not valid, %M required by minimum' if !/\%M/.match( pattern ) 
+        raise ArgumentError, 'Outputter pattern not valid, %M required by minimum' if !/\%M/.match( pattern ) 
 
         # create pattern for outputter
         outputter_instance.formatter = Log4r::PatternFormatter.new :pattern => pattern
@@ -260,7 +260,7 @@ module MobyUtil
     def enable_raise_hooking
 
       # hook Kernel.raise
-      def Kernel::raise( *exception )
+      def raise( *exception )
 
         begin
 
@@ -286,20 +286,6 @@ module MobyUtil
 
         ARGV.delete('--debug_exceptions')
 
-        # for debugging to see every occured exception
-        def Kernel.raise( *args )
-          #begin
-          # raise and catch exception  
-          super( *args )
-          #rescue
-          # remove wrapper call from backtrace 
-          # $!.backtrace.shift
-          #puts "%s: %s\nBacktrace: \n%s\n\n" % [ $!.class, $!.message, $!.backtrace.collect{ | line | "  %s" % line }.join("\n") ]
-          # raise exception again
-          # super $!          
-          #end
-        end
-
         # hook Object(Kernel)#raise
         ::Object.class_exec{ 
 
@@ -323,11 +309,7 @@ module MobyUtil
                 
                 end
                 
-                puts "[debug] %s: %s\n[debug] Backtrace: \n[debug] %s\n\n" % [ 
-                  $!.class, 
-                  $!.message, 
-                  $!.backtrace.collect{ | line | "  ... from %s" % line }.join("\n[debug] ") 
-                ]
+                puts "[debug] #{ $!.class }: #{ $!.message }\n[debug] Backtrace: \n[debug] #{ $!.backtrace.collect{ | line | "  ... from #{ line }" }.join("\n[debug] ") }\n\n"
                 
                 # raise exception again
                 original_raise $!
@@ -355,13 +337,13 @@ module MobyUtil
       return nil if logging_level.nil?
 
       # raise exception if wrong format for logging level
-      Kernel::raise RuntimeError, "Wrong logging level format '#{ logging_level }' defined in TDriver parameter/template XML (expected numeric string)" unless logging_level.numeric?
+      raise RuntimeError, "Wrong logging level format '#{ logging_level }' defined in TDriver parameter/template XML (expected numeric string)" unless logging_level.numeric?
 
       # convert to integer
       logging_level = logging_level.to_i
 
       # raise exception if unsupported logging level
-      Kernel::raise RuntimeError, "Unsupported logging level '#{ logging_level }' defined in TDriver parameter/template XML (expected 0..5)" unless ( 0..5 ).include?( logging_level )
+      raise RuntimeError, "Unsupported logging level '#{ logging_level }' defined in TDriver parameter/template XML (expected 0..5)" unless ( 0..5 ).include?( logging_level )
 
       @include_behaviour_info = $parameters[ :logging_include_behaviour_info, 'false' ].to_s.to_boolean
 
@@ -559,7 +541,7 @@ module MobyUtil
 
           else
 
-            exit_status = ['error', '', "Execution terminated with exception: %s: %s" % [ caller.first, $!.message.split("\n") ], '' ]
+            exit_status = ['error', '', "Execution terminated with exception: #{ caller.first.to_s }: #{ $!.message.split("\n") }", '' ]
 
           end
 

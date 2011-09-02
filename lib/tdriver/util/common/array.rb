@@ -23,8 +23,8 @@ module MobyUtil
 
     def self.rindex_regexp( array, pattern )
 
-      Kernel::raise TypeError.new("Unexpected variable type '%s' for array (Expected: %s)" % [ array.class, 'Array'] ) unless array.kind_of?( Array )
-      Kernel::raise TypeError.new("Unexpected variable type '%s' for regular expression pattern (Expected: %s)" % [ pattern.class, 'Regexp'] ) unless pattern.kind_of?( Regexp )  
+      array.check_type Array, 'wrong argument type $1 for array (expected $2)'
+      pattern.check_type Regexp, 'wrong argument type $1 for regular expression pattern (expected $2)'
 
       # return nil if no matches found, otherwise return index of value
       return nil if ( array.reverse.each_index{ | index | return @rindex if array[ ( @rindex = ( ( array.size-1 ) - index ) ) ] =~ pattern; } )

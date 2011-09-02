@@ -65,7 +65,7 @@ module MobyUtil
 
         require_files = Dir.glob( MobyUtil::FileHelper.fix_path( path ) )
 
-        Kernel::raise RuntimeError, "File not found #{ path }" if !File.directory?( path ) && !File.file?( path ) && require_files.empty?
+        raise RuntimeError, "File not found #{ path }" if !File.directory?( path ) && !File.file?( path ) && require_files.empty?
 
         # load each module found from given folder
         require_files.each { | module_name | 
@@ -86,7 +86,6 @@ module MobyUtil
     # String:: String presentation of fixed path
     def self.fix_path( path )      
 
-      #Kernel::raise ArgumentError.new( "Invalid argument format %s (Expected: %s)" % [ path.class, "String" ] ) unless path.kind_of?( String )      
       path.check_type( String, "Wrong argument type $1 for file path (expected $2)" )
 
       # replace back-/slashes to File::SEPARATOR
@@ -115,14 +114,13 @@ module MobyUtil
     # === returns
     # String:: String containing expanded file path
     # === raises
-    # ArgumentError:: Unexpected argument type '%s' for path (Expected: %s)
+    # TypeError:: Wrong argument type <class> for file path (expected <class>)
     # ArgumentError:: Given path is empty
     def self.is_relative_path?( path )  
 
-      #Kernel::raise ArgumentError.new("Unexpected argument type '%s' for path (Expected: %s)" % [ path.class, 'String' ] ) unless path.kind_of?( String )
       path.check_type( String, "Wrong argument type $1 for file path (expected $2)" )
 
-      #Kernel::raise ArgumentError.new("Given path is empty") if path.empty?
+      #raise ArgumentError.new("Given path is empty") if path.empty?
       path.not_empty( "Filepath must not be empty string" )
 
       dirname =  File.dirname( path )
@@ -175,22 +173,22 @@ module MobyUtil
       #file_path.check_type( String, "wrong argument type $1 for get_file method (expected $2)")
 
       # raise exception if file name is empty or nil
-      Kernel::raise EmptyFilenameError, "File name is empty or not defined" if file_path.nil? || file_path.to_s.empty?
+      raise EmptyFilenameError, "File name is empty or not defined" if file_path.nil? || file_path.to_s.empty?
 
       # raise exception if file name is file_path variable format other than string
-      Kernel::raise UnexpectedVariableTypeError.new( "Invalid filename format %s (Expected: %s)" % [ file_path.class, "String"] )  if !file_path.kind_of?( String )
+      raise UnexpectedVariableTypeError.new( "Invalid filename format #{ file_path.class } (expected: String)")  if !file_path.kind_of?( String )
 
       file_path = MobyUtil::FileHelper.expand_path( file_path )
 
       # raise exception if file not found
-      Kernel::raise FileNotFoundError.new( "File not found: #{ file_path }" ) unless File.exist?( file_path )
+      raise FileNotFoundError.new( "File not found: #{ file_path }" ) unless File.exist?( file_path )
 
       begin
         # read all content of file
         file_content = IO.read( file_path )
       rescue => ex
         # raise exception if error occured during reading the file
-        Kernel::raise IOError.new("Error occured while reading file #{ file_path }\nDescription: #{ ex.message }")
+        raise IOError.new("Error occured while reading file #{ file_path }\nDescription: #{ ex.message }")
       end
 
       # return file content
@@ -229,7 +227,7 @@ module MobyUtil
 
       rescue => exception
 
-        Kernel::raise IOError.new("Error occured while creating folder #{ current_path } (#{ exception.message })")
+        raise IOError.new("Error occured while creating folder #{ current_path } (#{ exception.message })")
 
       end
 
@@ -288,7 +286,7 @@ module MobyUtil
         # create destination folder if it doesn't exist and create_folders flag is enabled
         MobyUtil::FileHelper.mkdir_path( destination_folder ) if create_folders
 
-        Kernel::raise RuntimeError.new( "Unable to copy %s to %s due to source file does not exist" % [ source, destination ] ) unless File.exist?( source )
+        raise RuntimeError.new( "Unable to copy #{ source } to #{ destination } due to source file does not exist" ) unless File.exist?( source )
 
         ::FileUtils.copy( 
 

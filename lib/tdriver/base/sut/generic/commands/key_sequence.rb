@@ -53,21 +53,21 @@ module MobyCommand
 		# == returns
 		# self
 		# == raises
-		# TypeError:: Wrong argument type %s for times count (expected Fixnum)
-		# ArgumentError:: Positive value expected for times count (got %i)
+		# TypeError:: Wrong argument type <class> for times count (expected Fixnum)
+		# ArgumentError:: Positive value expected for times count (got <value>)
 		# IndexError:: Unable to multiply last given key due to key sequence is empty
 		def times!( count = 1 )
 
       # verify count argument type
-			#Kernel::raise ArgumentError.new("Fixnum expected as argument") if count.class != Fixnum
+			#raise ArgumentError.new("Fixnum expected as argument") if count.class != Fixnum
       count.check_type( Fixnum, "Wrong argument type $1 for times count (expected $2)" )
 
       # verify that count is positive number
-			Kernel::raise ArgumentError.new( "Positive value expected for times count (got #{ count })" ) if count.negative?
+			raise ArgumentError.new( "Positive value expected for times count (got #{ count })" ) if count.negative?
 
       # verify that @sequence is not empty
-			#Kernel::raise IndexError.new( "Not allowed when empty key sequence" ) if @sequence.size == 0
-			Kernel::raise IndexError.new( "Unable to multiply last given key due to key sequence is empty" ) if @sequence.empty?
+			#raise IndexError.new( "Not allowed when empty key sequence" ) if @sequence.size == 0
+			raise IndexError.new( "Unable to multiply last given key due to key sequence is empty" ) if @sequence.empty?
 
 			count.times do | iteration |
 			

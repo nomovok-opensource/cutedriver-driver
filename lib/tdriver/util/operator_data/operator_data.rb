@@ -58,7 +58,7 @@ module MobyUtil
 		#
 		def self.retrieve( operator_data_lname, operator, table_name )
 			
-		    Kernel::raise OperatorDataNotFoundError.new( "Search string parameter cannot be nil" ) if operator_data_lname == nil
+		    raise OperatorDataNotFoundError.new( "Search string parameter cannot be nil" ) if operator_data_lname == nil
 
 			# Get Localization parameters for DB Connection
 			db_type =  $parameters[ :operator_data_db_type, nil ].to_s.downcase
@@ -75,13 +75,13 @@ module MobyUtil
 			begin
 				result = MobyUtil::DBAccess.query( db_connection, query_string )
 			rescue
-			    # if data column to be searched is not found then Kernel::raise error for search column not found
-			    Kernel::raise OperatorDataColumnNotFoundError.new( "Search column 'Value' not found in database" ) unless $!.message.index( "Unknown column" ) == nil
-			    Kernel::raise SqlError.new( $!.message )
+			    # if data column to be searched is not found then raise error for search column not found
+			    raise OperatorDataColumnNotFoundError.new( "Search column 'Value' not found in database" ) unless $!.message.index( "Unknown column" ) == nil
+			    raise SqlError.new( $!.message )
 		    end
 
 			# Return always the first column of the row
-			Kernel::raise OperatorDataNotFoundError.new("No matches found for search string '#{ operator_data_lname }' in search column 'LogicalName' for opreator #{ operator }" ) if ( result.empty?)
+			raise OperatorDataNotFoundError.new("No matches found for search string '#{ operator_data_lname }' in search column 'LogicalName' for opreator #{ operator }" ) if ( result.empty?)
 			# Result is an Array of rows (Array<String>)! We want the first column of the first row.
 			return result[0][0]
 			
