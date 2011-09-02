@@ -1055,7 +1055,7 @@ module MobyUtil
   
     class << self
 
-      undef :inspect
+      undef :inspect if respond_to?( :inspect )
             
       def new
       
@@ -1090,7 +1090,7 @@ module MobyUtil
   
     class << self
 
-      undef :inspect
+      undef :inspect if respond_to?( :inspect )
 
       def new
       
