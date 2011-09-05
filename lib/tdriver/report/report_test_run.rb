@@ -635,7 +635,9 @@ module TDriverReportCreator
         write_page_end(@report_folder+'/environment/index.html')
         $new_junit_xml_results.test_suite_properties(RUBY_PLATFORM,sw_version,variant,product,language,loc,@memory_amount_total,@memory_amount_start,@memory_amount_end)
       rescue Exception => e
-        raise e, "Unable to update environment page", caller
+        p e.message
+        p e.backtrace
+        raise e, "Unable to update environment page"
       end
       return nil
     end

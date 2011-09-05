@@ -489,15 +489,15 @@ display: block;
     end
   end
 
-  def copy_code_file_to_test_case_report(file,folder,linen)
+  def copy_code_file_to_test_case_report(file,folder,linen,time_stamp)
     begin
       FileUtils.mkdir_p(folder.to_s+'/stack_files') if File::directory?(folder.to_s+'/stack_files')==false
       if File.directory?("#{Dir.pwd}/#{@report_folder}/#{folder}")
-        write_stack_file_to_html(file,"#{Dir.pwd}/#{@report_folder}/#{folder}/stack_files/#{File.basename(file)}.html",linen)
-        FileUtils.copy(file,"#{Dir.pwd}/#{@report_folder}/#{folder}/stack_files/#{File.basename(file)}")
+        write_stack_file_to_html(file,"#{Dir.pwd}/#{@report_folder}/#{folder}/stack_files/stk_#{time_stamp}.html",linen)
+        FileUtils.copy(file,"#{Dir.pwd}/#{@report_folder}/#{folder}/stack_files/stk_#{time_stamp}.rb")
       else
-        write_stack_file_to_html(file,"#{folder}/stack_files/#{File.basename(file)}.html",linen)
-        FileUtils.copy(file,"#{folder}/stack_files/#{File.basename(file)}")
+        write_stack_file_to_html(file,"#{folder}/stack_files/stk_#{time_stamp}.html",linen)
+        FileUtils.copy(file,"#{folder}/stack_files/stk_#{time_stamp}.rb")
       end
 
     rescue Exception => e
@@ -508,6 +508,9 @@ display: block;
 
   def reporter_link_to_code(log_line,folder=nil)
     begin
+      t = Time.now
+      time_stamp=t.strftime( "%Y%m%d%H%M%S" )
+
       log_line.gsub(/([\w \*\/\w\/\.-]+)\:(\d+)/) do |match|
         line=match[/\:(\d+)/]
         f=match[/([\w \*\/\w\/\.-]+)/]
@@ -515,9 +518,9 @@ display: block;
         file = file if File.exist?(file)
         file = "#{Dir.pwd}/#{file}" if File.exist?("#{Dir.pwd}/#{file}")
         if File.exist?(file) && match.include?('testability-driver')==false
-          copy_code_file_to_test_case_report(file,folder,line.gsub(':','').strip)
-          link_to_stack='<a style="color: #FF0000" href="stack_files/'<<
-            File.basename(file.to_s)+'.html#'+line.to_s.gsub(':','')<<
+          copy_code_file_to_test_case_report(file,folder,line.gsub(':','').strip,time_stamp)
+          link_to_stack='<a style="color: #FF0000" href="stack_files/stk_'<<
+            time_stamp+'.html#'+line.to_s.gsub(':','')<<
             '">'+match+'</a>'
           log_line=log_line.gsub(match,link_to_stack)
         end
