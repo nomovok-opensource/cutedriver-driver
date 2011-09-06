@@ -73,7 +73,7 @@ module MobyBehaviour
 
       else
 
-        TDriver::BehaviourFactory.collect_behaviours( :index => @object_behaviours ).collect{ | behaviour | behaviour[ :name ] }.uniq.compact.sort
+        TDriver::BehaviourFactory.collect_behaviours( :index => @object_behaviours ).collect{ | behaviour | behaviour[ :name ] }.uniq.compact
 
       end
 
@@ -101,7 +101,7 @@ module MobyBehaviour
 
         ) 
 
-      }.uniq.compact.sort
+      }.uniq.compact
 
 		end
 
