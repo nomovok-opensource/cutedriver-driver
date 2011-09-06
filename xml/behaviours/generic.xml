@@ -1,5 +1,4 @@
-
-<behaviours>
+<behaviours plugin="testability-driver-generic-sut-plugin">
 
     <behaviour name="GenericObjectAbstraction" object_type="*;application;sut" sut_type="*" input_type="*" version="*">
         <module name="MobyBehaviour::GenericObjectAbstraction" />

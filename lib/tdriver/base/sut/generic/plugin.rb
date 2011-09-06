@@ -30,7 +30,8 @@ module MobyPlugin
 			def self.plugin_name
 
 				# return plugin name as string
-				"tdriver-generic-sut-plugin"
+				"testability-driver-generic-sut-plugin"
+				
 			end
 
 			def self.plugin_type
