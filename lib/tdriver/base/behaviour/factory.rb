@@ -132,12 +132,63 @@ module TDriver
         rule.default = [ '*' ]
 
         # store as local variable for less AST lookups
-        _index        = rule.fetch( :index ){ [] }
+        _index        = rule.fetch( :index, [] )
         _object_type  = rule[ :object_type  ]
         _input_type   = rule[ :input_type   ]
         _env          = rule[ :env          ]
         _version      = rule[ :version      ]
 
+        _name         = rule[ :name ]
+        _any          = [ '*' ]
+
+        # collect behaviours
+        enabled_plugins.inject([]){ | result, plugin |
+
+          @behaviours_per_plugin.fetch( plugin, [] ).each do | behaviour |
+
+            # match other rules if no exact index given          
+            if _index.empty?
+
+              case _name
+              
+                when behaviour[ :name ]
+                
+                  # exact match with name
+                  result << behaviour
+                
+                when _any
+
+                  # compare rules and behaviour attributes
+                  if !( _object_type & behaviour[ :object_type ] ).empty? && 
+                    !( _input_type  & behaviour[ :input_type  ] ).empty? &&
+                    !( _env         & behaviour[ :env         ] ).empty? && 
+                    !( _version     & behaviour[ :version     ] ).empty? 
+
+                    result << behaviour 
+
+                  end
+
+              else
+                
+                false
+
+              end
+
+            else
+
+              # index given
+              result << behaviour if Array( _index ).include?( behaviour[ :index ] )
+
+            end
+            
+          end
+        
+          result
+        
+        }
+
+=begin    
+        
         @behaviours.select do | behaviour |
 
           # skip if required plugin is not registered or enabled; compare requires array and enabled_plugins array
@@ -146,14 +197,14 @@ module TDriver
           # match other rules if no exact index given          
           if _index.empty?
 
-            case rule[ :name ]
+            case _name
             
               when behaviour[ :name ]
               
                 # exact match with name
                 true
               
-              when ['*']
+              when _any
 
                 # compare rules and behaviour attributes
                 !( _object_type & behaviour[ :object_type ] ).empty? && 
@@ -175,6 +226,7 @@ module TDriver
           end
 
         end # behaviours.select
+=end
       
       end
  
@@ -243,9 +295,28 @@ module TDriver
         # behaviours container
         @behaviours = []
         
+        @behaviours_per_plugin = {}
+                
         # behaviour cache; re-collecting behaviours is not required for similar target objects
         @behaviours_cache = {}
             
+      end
+
+      # TODO: document me
+      def store( behaviour_data )
+
+        behaviour_data[ :requires ].each{ | plugin |
+        
+          # retrieve array of plugin specific behaviours
+          behaviours_array = @behaviours_per_plugin[ plugin ] || []
+
+          # apply empty array unless already exist          
+          @behaviours_per_plugin[ plugin ] = behaviours_array if behaviours_array.empty?
+          
+          behaviours_array << behaviour_data
+        
+        }
+      
       end
 
       # load and parse behaviours files
@@ -295,7 +366,7 @@ module TDriver
                 module_name.not_empty "behaviour #{ attributes[ "name" ].inspect } does not have module name defined or is empty", RuntimeError
 
                 # store behaviour 
-                @behaviours << {  
+                behaviour_data = {  
 
                   :index       => @behaviours.count,
     
@@ -325,6 +396,10 @@ module TDriver
                 
                 }
 
+                store behaviour_data
+
+                @behaviours << behaviour_data
+
               end # behaviour.each
 
             end # behaviours.each
@@ -346,7 +421,7 @@ module TDriver
         } # Dir.glob
       
       end # behaviours
-   
+      
     end # self
    
     # initialize behaviour factory
