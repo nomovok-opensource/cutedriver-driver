@@ -42,6 +42,8 @@ module TDriver
         # list of enabled plugins
         @enabled_plugins = []
 
+        @plugin_order = []
+
       end
 
       # TODO: document me
@@ -72,6 +74,18 @@ module TDriver
 
         end
 
+      end
+
+      def update_enabled_plugins_list
+      
+        @enabled_plugins = @plugin_order.inject([]){ | result, name | 
+                  
+          result << name if @registered_plugins.fetch( name, {} )[ :enabled ].true?
+                
+          result
+        
+        }
+      
       end
 
     end # self
@@ -127,7 +141,9 @@ module TDriver
         @registered_plugins[ plugin_name ][ :enabled ] = true
 
         # add name to enabled plugins list
-        @enabled_plugins << plugin_name unless @enabled_plugins.include?( plugin_name )
+        #@enabled_plugins << plugin_name unless @enabled_plugins.include?( plugin_name )
+
+        update_enabled_plugins_list
 
       rescue 
 
@@ -146,7 +162,9 @@ module TDriver
         @registered_plugins[ plugin_name ][ :enabled ] = false
 
         # remove name from enabled plugins list
-        @enabled_plugins.delete( plugin_name )
+        #@enabled_plugins.delete( plugin_name )
+
+        update_enabled_plugins_list
 
       rescue 
 
@@ -184,13 +202,17 @@ module TDriver
         # set plugin to enabled state
         :enabled => true 
 
-      } 
+      }
+      
+      @plugin_order << plugin_name
 
       # register plugin
       plugin_module.register_plugin
 
       # add name to enabled plugins list
-      @enabled_plugins << plugin_name unless @enabled_plugins.include?( plugin_name )
+      #@enabled_plugins << plugin_name unless @enabled_plugins.include?( plugin_name )
+
+      update_enabled_plugins_list
 
     end
 
@@ -207,6 +229,11 @@ module TDriver
 
         # remove from the plugins hash
         @enabled_plugins.delete( plugin_name )
+
+        update_enabled_plugins_list
+
+        # remove from plugins list (registration order)
+        @plugin_order.delete( plugin_name )
 
       rescue
 
