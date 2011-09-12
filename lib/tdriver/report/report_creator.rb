@@ -62,7 +62,7 @@ module TDriverReportCreator
         puts 'Generating total run table...'
         $tdriver_reporter.update_test_case_summary_pages('all')
         puts 'Total run table generated...'
-        if $tdriver_reporter.report_exclude_passed_cases=='false'          
+        if $tdriver_reporter.report_exclude_passed_cases=='false'
           puts 'Generating passed cases table...'
           $tdriver_reporter.update_test_case_summary_pages('passed')
           puts 'Passed table generated...'
@@ -93,7 +93,7 @@ module TDriverReportCreator
         puts 'Report generated to:'
         puts $tdriver_reporter.report_folder()
         clean_video_files
-        ending_test_set_run if $parameters[ :custom_error_recovery_module, nil ]!=nil        
+        ending_test_set_run if $parameters[ :custom_error_recovery_module, nil ]!=nil
         if $tdriver_reporter.total_failed.to_i > 0
           Kernel.exit(1)
         elsif $tdriver_reporter.total_run.to_i == 0
@@ -115,10 +115,6 @@ module TDriverReportCreator
   # nil
   # === raises
   def error_in_connection_detected
-    if start_error_recovery()==true
-      $tdriver_reporter.set_total_device_resets(1)
-      $new_test_case.set_test_case_reboots(1) if $new_test_case!=nil
-    end
     error_in_connection if $parameters[ :custom_error_recovery_module, nil ]!=nil
   end
   #This method returns the group where the test case belongs
@@ -276,11 +272,11 @@ module TDriverReportCreator
     $new_test_case.read_crash_monitor_settings()
 
     $new_test_case.read_file_monitor_settings()
-    
+
     $new_test_case.clean_crash_files_from_sut() if $test_case_run_index==1 && $parameters[ :report_crash_file_monitor_crash_file_cleanup, false ]=='true'
 
     amount_of_crash_files=$new_test_case.check_if_crash_files_exist()
-    
+
     if amount_of_crash_files.to_i > 0
       $new_test_case.capture_crash_files()
       $new_test_case.clean_crash_files_from_sut()
@@ -410,9 +406,9 @@ module TDriverReportCreator
       end
       error_in_test_case(TDriver::SUTFactory.connected_suts) if $parameters[ :custom_error_recovery_module, nil ]!=nil
       begin
-        
+
           error_in_connection_detected
-      
+
       rescue Exception => e
         update_test_case("Error recovery failed Exception: #{e.message} Backtrace: #{e.backtrace}")
         end_test_case($new_test_case.test_case_name,'failed')
@@ -598,10 +594,10 @@ module TDriverReportCreator
       $new_test_case.clean_files_from_sut()
 
       update_run($new_test_case.test_case_name.to_s,status,$new_test_case.test_case_reboots,$new_test_case.test_case_crash_files,execution_log)
-      
+
       $new_junit_xml_results.add_test_result(status, $new_test_case.test_case_start_time, $new_test_case.test_case_end_time)
-      tdriver_update_sequential_fails( status ) if $parameters[ :runner_sequence_skip, "false" ] == "true"   
-      
+      tdriver_update_sequential_fails( status ) if $parameters[ :runner_sequence_skip, "false" ] == "true"
+
       $new_test_case=nil
       execution_log=nil
 
