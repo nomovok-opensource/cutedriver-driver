@@ -48,6 +48,44 @@ module TDriver
       
       end
 
+      def remove_behaviours( object )
+
+        object.check_type [ MobyBase::TestObject, MobyBase::SUT ], 'wrong argument type $1 for target object (expected $2)'
+      
+        # add behaviour information to test object
+        behaviour_index = object.instance_variable_get( :@object_behaviours )
+        
+        collect_behaviours( :index => behaviour_index ).collect{ | behaviour | 
+        
+          _module = behaviour[ :module ]
+
+          instance_methods = [ 
+            _module.instance_methods( false ), 
+            _module.private_instance_methods( false ),
+            _module.protected_instance_methods( false )  
+          ].inject([]){ | result, methods | 
+          
+            result.concat( methods )
+          
+          }
+         
+          # remove behaviour instance methods from target object       
+          instance_methods.each do | method_name | 
+          
+            object.instance_eval( "undef :#{ method_name.to_s }") # if respond_to?(:#{ method_name.to_s })" ) 
+                    
+          end
+          
+          behaviour_index.delete( behaviour[ :index ] )
+        
+        }
+
+        behaviour_index = object.instance_variable_set( :@object_behaviours, behaviour_index )
+
+        object
+      
+      end
+
       # TODO: document me
       def apply_behaviour( rule )
         
