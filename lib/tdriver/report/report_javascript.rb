@@ -20,7 +20,7 @@
 
 module TDriverReportJavascript
 
-  def get_expand_collapse_java_script()
+  def self.get_expand_collapse_java_script
     java_script='<script type="text/javascript">'<<
       '/* Only set closed if JS-enabled */'<<
       "document.getElementsByTagName('html')[0].className = 'isJS';"<<
@@ -45,8 +45,8 @@ module TDriverReportJavascript
     java_script
   end
   
-  def get_table_sorting_java_script()
-    java_script="
+  def self.get_table_sorting_java_script
+  java_script="
   function TSorter(){
     var table = Object;
     var trs = Array;

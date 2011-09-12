@@ -17,7 +17,6 @@
 ##
 ############################################################################
 
-include TDriverReportJavascript
 module TDriverReportWriter
 
   def write_style_sheet(page)
@@ -686,7 +685,7 @@ display: block;
       '<html xmlns="http://www.w3.org/1999/xhtml">'<<
       '<head><meta http-equiv="Content-Type" content="text/html; charset=utf-8"><META HTTP-EQUIV="CACHE-CONTROL" CONTENT="NO-CACHE"><META HTTP-EQUIV="PRAGMA" CONTENT="NO-CACHE">'<<
       stylesheet<<
-      get_expand_collapse_java_script()<<
+      get_java_script<<
       '<title>'+title+'</title>'<<
       '</head><body>'
     File.open(page, 'w') do |f2|
@@ -1498,7 +1497,7 @@ display: block;
     page_ready
   end
   def get_java_script()
-    get_expand_collapse_java_script()
+    TDriverReportJavascript.get_expand_collapse_java_script()
   end
 
   def scan_rdoc_file_for_method(file,method_name)   
