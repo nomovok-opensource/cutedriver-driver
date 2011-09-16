@@ -507,10 +507,10 @@ display: block;
 
   def reporter_link_to_code(log_line,folder=nil)
     begin
-      t = Time.now
-      time_stamp=t.strftime( "%Y%m%d%H%M%S" )
-
+      stackno=0
       log_line.gsub(/([\w \*\/\w\/\.-]+)\:(\d+)/) do |match|
+        t = Time.now
+        time_stamp="#{t.strftime( "%Y%m%d%H%M%S" )}#{stackno}"
         line=match[/\:(\d+)/]
         f=match[/([\w \*\/\w\/\.-]+)/]
         file="#{File.dirname(f.strip)}/#{File.basename(f.strip)}"
@@ -523,6 +523,7 @@ display: block;
             '">'+match+'</a>'
           log_line=log_line.gsub(match,link_to_stack)
         end
+        stackno+=1
       end
     rescue Exception => e
       puts e.message

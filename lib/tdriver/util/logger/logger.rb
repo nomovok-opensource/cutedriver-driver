@@ -1,20 +1,20 @@
 ############################################################################
-## 
-## Copyright (C) 2010 Nokia Corporation and/or its subsidiary(-ies). 
-## All rights reserved. 
-## Contact: Nokia Corporation (testabilitydriver@nokia.com) 
-## 
-## This file is part of Testability Driver. 
-## 
-## If you have questions regarding the use of this file, please contact 
-## Nokia at testabilitydriver@nokia.com . 
-## 
-## This library is free software; you can redistribute it and/or 
-## modify it under the terms of the GNU Lesser General Public 
-## License version 2.1 as published by the Free Software Foundation 
-## and appearing in the file LICENSE.LGPL included in the packaging 
-## of this file. 
-## 
+##
+## Copyright (C) 2010 Nokia Corporation and/or its subsidiary(-ies).
+## All rights reserved.
+## Contact: Nokia Corporation (testabilitydriver@nokia.com)
+##
+## This file is part of Testability Driver.
+##
+## If you have questions regarding the use of this file, please contact
+## Nokia at testabilitydriver@nokia.com .
+##
+## This library is free software; you can redistribute it and/or
+## modify it under the terms of the GNU Lesser General Public
+## License version 2.1 as published by the Free Software Foundation
+## and appearing in the file LICENSE.LGPL included in the packaging
+## of this file.
+##
 ############################################################################
 
 module MobyUtil
@@ -179,7 +179,7 @@ module MobyUtil
       if @logger_engine_loaded
 
         # Allow only FileOutputter instances
-        raise ArgumentError, 'Outputter pattern not valid, %M required by minimum' if !/\%M/.match( pattern ) 
+        raise ArgumentError, 'Outputter pattern not valid, %M required by minimum' if !/\%M/.match( pattern )
 
         # create pattern for outputter
         outputter_instance.formatter = Log4r::PatternFormatter.new :pattern => pattern
@@ -203,10 +203,26 @@ module MobyUtil
 
         Log4r::Logger.global
 
-      else 
+      else
 
         nil
 
+      end
+
+    end
+
+    # TODO: add documentation
+    def log_to_report_details(script_call)
+
+      script_call.each do |call|
+        if call.include?('testability-driver')==false and call.include?('ruby')==false and call.include?('.rb')==true
+          if call!=@previous_call
+            if $tdriver_reporter
+              $new_test_case.capture_dump(true,:text=> call) if $new_test_case
+            end
+          end
+          @previous_call=call
+        end
       end
 
     end
@@ -219,7 +235,7 @@ module MobyUtil
         # convert to lowercase string
         level = level.to_s.downcase
 
-        include_behaviour_info = @include_behaviour_info 
+        include_behaviour_info = @include_behaviour_info
 
         # debug log entries and logging by using TDriver.logging.info or MobyUtil::Logging.instance.info etc
         if caller.first =~ /method_missing/
@@ -253,6 +269,7 @@ module MobyUtil
 
         }
 
+        log_to_report_details(caller) if $parameters[:report_script_steps_to_details, nil ]=='true'
       end
 
     end
@@ -287,7 +304,7 @@ module MobyUtil
         ARGV.delete('--debug_exceptions')
 
         # hook Object(Kernel)#raise
-        ::Object.class_exec{ 
+        ::Object.class_exec{
 
           ::Kernel.module_exec{
 
@@ -297,27 +314,27 @@ module MobyUtil
 
               begin
 
-                # raise and catch exception  
+                # raise and catch exception
                 original_raise( *args )
 
               rescue
 
                 # remove wrapper calls from backtrace
                 while $!.backtrace.first =~ /(logger\.rb).*(raise)/
-                
+
                   $!.backtrace.shift
-                
+
                 end
-                
+
                 puts "[debug] #{ $!.class }: #{ $!.message }\n[debug] Backtrace: \n[debug] #{ $!.backtrace.collect{ | line | "  ... from #{ line }" }.join("\n[debug] ") }\n\n"
-                
+
                 # raise exception again
                 original_raise $!
 
-              end            
+              end
 
             end
-            
+
           }
         }
 
@@ -354,7 +371,7 @@ module MobyUtil
 
           if $parameters[ :logging_xml_parse_error_dump_path, nil ].nil?
 
-            warn("warning: Configuration parameter :logging_xml_parse_error_dump_path missing, disabling the feature...") 
+            warn("warning: Configuration parameter :logging_xml_parse_error_dump_path missing, disabling the feature...")
 
             # disable feature
             raise ArgumentError
@@ -401,11 +418,11 @@ module MobyUtil
 
       else
 
-        warn("warning: Configuration parameter :logging_xml_parse_error_dump missing, disabling the feature...") 
+        warn("warning: Configuration parameter :logging_xml_parse_error_dump missing, disabling the feature...")
         $parameters[ :logging_xml_parse_error_dump ] = 'false'
 
       end
-      
+
       unless logging_level.zero?
 
         # logger output path
@@ -421,7 +438,7 @@ module MobyUtil
 
         @logger_engine_loaded = true
 
-        # disable logging if exception is raised during 
+        # disable logging if exception is raised during
         begin
 
           # create outputter folder if not exist
@@ -441,27 +458,27 @@ module MobyUtil
           end
 
           # check if outputter is enabled
-          if $parameters[ :logging_outputter_enabled, false ].true? 
+          if $parameters[ :logging_outputter_enabled, false ].true?
 
             # create new outputter instance type of FileOutputter
             outputter = create_outputter(
 
               # outputter type
-              Log4r::FileOutputter, 
+              Log4r::FileOutputter,
 
               # outputter name
               "TDriver_LOG",
 
-              # outputter filename 
-              :filename => File.join( outputter_path, filename ), 
+              # outputter filename
+              :filename => File.join( outputter_path, filename ),
 
               # append to or truncate file
-              :trunc => $parameters[ :logging_outputter_append, false ].false?, 
+              :trunc => $parameters[ :logging_outputter_append, false ].false?,
 
               # logging level
               :level => logging_level
 
-            ) 
+            )
 
             # set outputter log event write pattern
             set_outputter_pattern( outputter, $parameters[ :logging_outputter_pattern, '%d [%c] [%l] %M' ] )
@@ -470,14 +487,14 @@ module MobyUtil
             add_outputter( @logger_instance, outputter )
 
           end
-		  
+
           # Add stdout outputter if set on configuration parameters
           if $parameters[ :logging_stdout_outputter_enabled, false ].true?
             stdout_outputter = create_outputter(
               Log4r::StdoutOutputter, # outputter type
               "TDriver_LOG_stdout",	# outputter name
               :level => logging_level # logging level
-            ) 
+            )
             set_outputter_pattern( stdout_outputter, $parameters[ :logging_outputter_pattern, '%d [%c] [%l] %M' ] )
 
             add_outputter( @logger_instance, stdout_outputter )
@@ -507,7 +524,7 @@ module MobyUtil
           # pass logger instance to hooking module
           TDriver::Hooking.logger_instance = MobyUtil::Logger.instance
 
-        end  
+        end
 
         # enable logging
         @enabled_stack = [ true ]
@@ -563,7 +580,7 @@ module MobyUtil
     end
 
   end # Logger
-  
+
 end # MobyUtil
 
 # set global variable pointing to parameter class
