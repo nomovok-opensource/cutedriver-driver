@@ -212,16 +212,15 @@ module MobyUtil
     end
 
     # TODO: add documentation
+    # TODO: add documentation
     def log_to_report_details(script_call)
 
       script_call.each do |call|
         if call.include?('testability-driver')==false and call.include?('ruby')==false and call.include?('.rb')==true
-          if call!=@previous_call
             if $tdriver_reporter
               $new_test_case.capture_dump(true,:text=> call) if $new_test_case
             end
-          end
-          @previous_call=call
+          break
         end
       end
 
