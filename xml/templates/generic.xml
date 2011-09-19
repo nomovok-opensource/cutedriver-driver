@@ -186,7 +186,7 @@
     <parameter name="behaviour_logging" value="true" />
     <parameter name="realtime_status_page_update" value="false" />
     <parameter name="report_exclude_passed_cases" value="false" />
-    <parameter name="report_script_steps_to_details" value="true" />
+    <parameter name="report_script_steps_to_details" value="false" />
 
     <parameter name="report_passed_statuses" value="passed" /> <!-- Different statuses can be separated with | -->
     <parameter name="report_failed_statuses" value="failed" /> <!-- Different statuses can be separated with | -->
