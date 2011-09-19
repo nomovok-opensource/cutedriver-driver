@@ -17,24 +17,31 @@
 ## 
 ############################################################################
 
-# behaviour abstraction class, factory and all other related modules etc
-require File.expand_path( File.join( File.dirname( __FILE__ ), 'behaviour/loader' ) )
+[ 
 
-# command_data abstraction class etc.
-require File.expand_path( File.join( File.dirname( __FILE__ ), 'command_data/loader' ) )
+  # behaviour abstraction class, factory and all other related modules etc
+  'behaviour/loader.rb',
 
-# command_data controller abstraction class etc.
-require File.expand_path( File.join( File.dirname( __FILE__ ), 'controller/loader' ) )
+  # command_data abstraction class etc.
+  'command_data/loader.rb',
 
-# sut abstract class, generic sut etc
-require File.expand_path( File.join( File.dirname( __FILE__ ), 'sut/loader' ) )
+  # command_data controller abstraction class etc.
+  'controller/loader.rb',
 
-# error classes
-require File.expand_path( File.join( File.dirname( __FILE__ ), 'errors' ) )
+  # sut abstract class, generic sut etc
+  'sut/loader.rb',
 
-# test object abstraction, factory, identificator behaviours and all other related modules
-require File.expand_path( File.join( File.dirname( __FILE__ ), 'test_object/loader' ) )
+  # error classes
+  'errors.rb',
 
-# state object
-require File.expand_path( File.join( File.dirname( __FILE__ ), 'state_object' ) )
+  # test object abstraction, factory, identificator behaviours and all other related modules
+  'test_object/loader.rb',
 
+  # state object
+  'state_object.rb' 
+
+].each{ | filename |
+
+  require File.expand_path( File.join( File.dirname( __FILE__ ), filename ) )
+
+}
