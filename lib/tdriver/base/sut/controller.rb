@@ -84,20 +84,25 @@ module MobyBase
 
       command_data.check_type MobyCommand::CommandData, 'Wrong argument type $1 for command_data (expected $2)'
 
+      _command_class_suffix = command_data.class.name.gsub(/^MobyCommand::/, '') 
+
+      _execution_order_count = @execution_order.count
+
       # retrieve controller for command; iterate through each sut controller      
       @execution_order.each_with_index do | controller, index |
       
         begin 
 
           # extend command_data with combinination of corresponding sut specific controller  
-          command_data.extend eval("#{ @sut_controllers[ controller ] }::#{ command_data.class.name.gsub(/^MobyCommand::/, '') }")
+          command_data.extend eval( "#{ @sut_controllers[ controller ] }::#{ _command_class_suffix }" )
           
+          # controller found
           break
         
         rescue NameError
                 
           # raise exception only if none controller found
-          if ( index + 1 ) == @execution_order.count
+          if ( index + 1 ) == _execution_order_count
 
             raise MobyBase::ControllerNotFoundError, "No controller found for command data object #{ command_data.inspect }"
 
@@ -117,6 +122,7 @@ module MobyBase
         # execute the command
         command_data.execute
 
+      # retry in case of IO/connection error
       rescue Errno::EPIPE, IOError
 
         raise if retries == 1
