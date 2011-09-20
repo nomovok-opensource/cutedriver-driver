@@ -17,9 +17,13 @@
 ## 
 ############################################################################
 
+[ 
 
+  # command_data abstract class
+  'command_data.rb'
 
+].each{ | filename |
 
-# command_data abstract class
-require File.expand_path( File.join( File.dirname( __FILE__ ), 'command_data' ) )
+  require File.expand_path( File.join( File.dirname( __FILE__ ), filename ) )
 
+}
