@@ -69,10 +69,8 @@ module MobyUtil
       # Create first instance of this class if it doesn't exist
       self.instance
       
-      #raise ArgumentError.new("Invalid connection object provided.") if dbc.nil? or !dbc.kind_of? MobyUtil::DBConnection
       dbc.check_type( MobyUtil::DBConnection, "Wrong argument type $1 for database connection object (expected $2)" )      
       
-      #raise ArgumentError.new("The query qtring must be provided as a non empty string.") if query_string.nil? or query_string.class != String or query_string.empty?
       query_string.check_type( String, "Wrong variable type $1 for database query string (expected $2)")
       query_string.not_empty( "Database query string must not be empty string" )
 
@@ -84,28 +82,22 @@ module MobyUtil
       
       # Check creation parameters
 
-      #raise DbTypeNotDefinedError.new( "Database type need to be either 'mysql' or 'sqlite'!" ) if db_type == nil
       db_type.check_type( String, "Wrong argument type $1 for database type (expected $2)" )
 
-      #raise DbTypeNotSupportedError.new( "Database type '#{db_type}' not supported! Type need to be either 'mysql' or 'sqlite'!" ) unless  db_type == DB_TYPE_MYSQL or  db_type == DB_TYPE_SQLITE
       db_type.validate( [ DB_TYPE_MYSQL, DB_TYPE_SQLITE ], "Unsupported database type $1 (expected $2)" )
 
       if ( db_type == DB_TYPE_MYSQL )
 
-        # raise ArgumentError.new("Host must be provided as a non empty string.") if host.nil? or host.class != String or host.empty?
         host.check_type( String, "Wrong variable type $1 for host (expected $2)" )
         host.not_empty( "Host must not be empty string" )
 
-        #raise ArgumentError.new("Username must be provided as a non empty string.") if username.nil? or username.class != String or username.empty?
         username.check_type( String, "Wrong variable type $1 for username (expected $2)" )
         username.not_empty( "Username must not be empty string" )
 
-        #raise ArgumentError.new("Password must be provided as a string.") if password.nil? or password.class != String
         password.check_type( String, "Wrong variable type $1 for password (expected $2)")
 
       end
 
-      #raise ArgumentError.new("The database name must be provided as a non empty string.") if database_name.nil? or database_name.class != String or database_name.empty?
       database_name.check_type( String, "Wrong variable type $1 for database name (expected $2)" )
       database_name.not_empty( "Database name must not be empty string" )
             
@@ -172,7 +164,6 @@ module MobyUtil
     #
     def self.affected_rows(dbc)
 
-      #raise ArgumentError.new("Invalid connection object provided.") if dbc.nil? or !dbc.kind_of? MobyUtil::DBConnection
       dbc.check_type( MobyUtil::DBConnection, "Wrong argument type $1 for database connection object (expected $2)" )
       
       # Check for exsting connection for that host and create it if needed
@@ -209,7 +200,7 @@ module MobyUtil
         dbh.query 'SET NAMES utf8' if db_type == DB_TYPE_MYSQL # set the utf8 encoding
         dbh = SQLite3::Database.new( database_name ) if db_type == DB_TYPE_SQLITE        
       rescue
-        raise SqlConnectError.new( $!.message )
+        raise SqlConnectError, $!.message
       end
       
       return dbh

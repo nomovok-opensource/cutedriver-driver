@@ -21,43 +21,6 @@ module MobyCommand
 
   class Application < MobyCommand::CommandData
   
-=begin
-    attr_reader( 
-    
-      :command_type,
-      :application_name,
-      :application_uid,
-      :sut,
-      :application_arguments,
-      :events_to_listen,
-      :signals_to_listen,
-      :working_directory,
-      :flags,
-      :start_command,
-
-      :refresh_arguments,
-      :attribute_csv_string
-
-      
-      :_arguments,
-      :_environment,
-      :_working_directory,
-      :_events_to_listen,
-      :_start_command,
-      :_application_uid,
-      :_application_name,
-      :_command,
-      :_application_name,
-      :_application_uid,
-      :_flags,
-      :_attribute_csv_string,
-      :_signals_to_listen,
-      :_sut,
-      :_refresh_args
-    
-    )
-=end
-
     attr_reader :command_arguments
   
     # TODO: document me
@@ -85,22 +48,6 @@ module MobyCommand
       @_refresh_args = nil
       @_attribute_csv_string = nil
       @_checksum = nil
-
-=begin      
-      # store values from arguments 
-      self.name( arguments[ :application_name ] )
-      self.uid( arguments[ :application_uid ] )
-      self.sut( arguments[ :sut ] )
-      self.arguments( arguments[ :arguments ] )
-      self.events_to_listen( arguments[ :events_to_listen ] )
-      self.signals_to_listen( arguments[ :signals_to_listen ] )
-      self.environment( arguments[ :environment ] )
-      self.working_directory( arguments[ :working_directory ] )
-      self.flags( arguments[ :flags ] )
-      self.start_command( arguments[ :start_command ] )
-      self.refresh_args( arguments[ :refresh_arguments ] )
-      self.attribute_filter( arguments[ :attribute_filter ] )
-=end
       
       # store values from arguments - call setter method only when required      
       arguments.each_pair{ | key, value |
@@ -195,7 +142,7 @@ module MobyCommand
     # ArgumentError:: When sut is not nil or a SUT
     def sut( sut )
 
-      raise ArgumentError.new( "The given sut must be nil or a SUT." ) unless sut == nil || sut.kind_of?( MobyBase::SUT )
+      sut.check_type [ MobyBase::SUT, NilClass ], 'wrong argument type $1 for SUT (expected $2)'
       @_sut = sut
       self
 
@@ -208,59 +155,59 @@ module MobyCommand
     # Application:: This CommandData object
     # == raises
     # ArgumentError:: When app_name is not nil or a String
-    def name( app_name )    
+    def name( name )    
 
-      raise ArgumentError.new( "The given application name must be nil or a String." ) unless app_name == nil || app_name.kind_of?( String )        
-      @_application_name = app_name    
+      name.check_type [ String, NilClass ], 'wrong argument type $1 for application name (expected $2)'
+      @_application_name = name    
       self
 
     end
 
     def arguments( arguments )
 
-      raise ArgumentError.new( "The given application arguments must be nil or a String." ) unless arguments == nil || arguments.kind_of?( String )   
+      arguments.check_type [ String, NilClass ], 'wrong argument type $1 for application arguments (expected $2)'
       @_arguments = arguments
 
     end
 
     def flags( flags ) 
 
-      raise ArgumentError.new( "The given application flags must be nil or a Hash." ) unless flags == nil || flags.kind_of?( Hash )   
+      flags.check_type [ Hash, NilClass ], 'wrong argument type $1 for application flags (expected $2)'
       @_flags = flags
 
     end
 
-    def environment( environment )
+    def environment( env )
 
-      raise ArgumentError.new( "The given application environment must be nil or a String." ) unless environment == nil || environment.kind_of?( String )   
-      @_environment = environment
+      env.check_type [ String, NilClass ], 'wrong argument type $1 for application environment (expected $2)'
+      @_environment = env
 
     end
 
-    def working_directory( working_directory )
+    def working_directory( dir )
     
-      raise ArgumentError.new( "The given application working directory must be nil or a String." ) unless working_directory == nil || working_directory.kind_of?( String )
-      @_working_directory = working_directory
+      dir.check_type [ String, NilClass ], 'wrong argument type $1 for application working directory (expected $2)'
+      @_working_directory = dir
       
     end
 
     def events_to_listen( events )
 
-      raise ArgumentError.new( "The events to listen must be nil or a String." ) unless events == nil || events.kind_of?( String )   
+      events.check_type [ String, NilClass ], 'wrong argument type $1 for events to be listened (expected $2)'   
       @_events_to_listen = events
 
     end
 
     def signals_to_listen( signals )
 
-      raise ArgumentError.new( "The signals to listen must be nil or a String." ) unless signals == nil || signals.kind_of?( String )   
+      signals.check_type [ String, NilClass ], 'wrong argument type $1 for signals to be listened (expected $2)'
       @_signals_to_listen = signals
 
     end
     
     def start_command( start_command )
 
-      raise ArgumentError.new( "The start_command must be nil or a String." ) unless start_command == nil || start_command.kind_of?( String )   
+      start_command.check_type [ String, NilClass ], 'wrong argument type $1 for application start command (expected $2)'
       @_start_command = start_command
 
     end
@@ -272,9 +219,10 @@ module MobyCommand
     # Application:: This CommandData object
     # == raises
     # ArgumentError:: When app_name is not nil or a String
-    def uid( app_uid )       
+    def uid( app_uid )
 
-      raise ArgumentError.new( "The given application uid must be nil, a String or an Integer." ) unless app_uid == nil || app_uid.kind_of?( String ) || app_uid.kind_of?( Fixnum )
+      app_uid.check_type [ Fixnum, String, NilClass ], 'wrong argument type $1 for application UID (expected $2)'
+
       @_application_uid = app_uid
       @_application_uid = @_application_uid.to_i unless @_application_uid == nil    
       self    
@@ -321,214 +269,6 @@ module MobyCommand
     TDriver::Hooking.hook_methods( self ) if defined?( TDriver::Hooking )
   
   end
-
-=begin
-
-  class Application < MobyCommand::CommandData
-
-    #Application command types 
-    #Launch application = :Run 
-    #Close application = :Close 
-    #List of running applications = :List
-    #Current state of the UI = :State
-    #Kill = :Kill
-    #Kill All = :KillAll
-    #
-    # Constructs a new Application CommandData object
-    # == params
-    # command_type:: (optional) Symbol, defines the command to perform on the application
-    # app_name:: (optional) String, name of application to perform this command on
-    # app_uid::
-    # sut:: (optional) SUT, creator of the command. Can be used to access parameters when creating messages.
-    # arguments:: (optional) Arguments given to the application on start up. Comma separated list if more the one.
-    # environment:: (optional) Environment given to the application on start up. Comma separated list if more the one.
-    # working_directory:: (optional) Working directory for the application (not used on Symbian)
-    # == returns
-    # Application:: New CommandData object
-    # == raises
-    # ArgumentError:: When the supplied command_type is invalid.
-    def initialize( command_type = nil, app_name = nil, app_uid = nil, sut = nil, arguments = nil, environment = nil, working_directory = nil, events_to_listen = nil, signals_to_listen = nil, flags = nil, start_command = nil)
-      # Set status value to nil (not executed)
-
-      self.command( command_type )
-      self.name( app_name )
-      self.uid( app_uid )    
-      self.sut( sut )
-      self.arguments( arguments )
-      self.events_to_listen( events_to_listen )
-      self.signals_to_listen( signals_to_listen )
-      self.environment( environment )
-      self.working_directory( working_directory )
-      self.flags( flags )
-      self.start_command( start_command )
-      self.refresh_args
-
-      @_attribute_csv_string = nil
-
-      self
-
-    end
-
-    # Store the args for possible future use
-    def refresh_args(refresh_args={})
-      @_refresh_args = refresh_args
-    end
-    
-    def get_refresh_args
-      @_refresh_args
-    end
-
-
-    # Defines the type of command this Application CommandData object represents
-    # == params
-    # command_type:: Symbol, defines the command to perform on the application
-    # == returns
-    # Application:: This CommandData object
-    # == raises
-    # ArgumentError:: When the supplied command_type is invalid.
-    def command( command_type )        
-
-      @_command = command_type
-      self    
-
-    end  
-
-    # Defines the used SUT to be able to access parameters when creating messages
-    # == params
-    # sut:: SUT, creator of the command.
-    # == returns
-    # Application:: This CommandData object
-    # == raises
-    # ArgumentError:: When sut is not nil or a SUT
-    def sut( sut )
-
-      raise ArgumentError.new( "The given sut must be nil or a SUT." ) unless sut == nil || sut.kind_of?( MobyBase::SUT )
-      @_sut = sut
-      self
-
-    end
-
-    # Defines the name of the application this Application CommandData object is associated with
-    # == params
-    # app_name:: String, name of application to perform this command on
-    # == returns
-    # Application:: This CommandData object
-    # == raises
-    # ArgumentError:: When app_name is not nil or a String
-    def name( app_name )    
-
-      raise ArgumentError.new( "The given application name must be nil or a String." ) unless app_name == nil || app_name.kind_of?( String )        
-      @_application_name = app_name    
-      self
-
-    end
-
-    def arguments( arguments )
-
-      raise ArgumentError.new( "The given application arguments must be nil or a String." ) unless arguments == nil || arguments.kind_of?( String )   
-      @_arguments = arguments
-
-    end
-
-    def flags( flags ) 
-
-      raise ArgumentError.new( "The given application flags must be nil or a Hash." ) unless flags == nil || flags.kind_of?( Hash )   
-      @_flags = flags
-
-    end
-
-    def environment( environment )
-
-      raise ArgumentError.new( "The given application environment must be nil or a String." ) unless environment == nil || environment.kind_of?( String )   
-      @_environment = environment
-
-    end
-
-    def working_directory( working_directory )
-    
-      raise ArgumentError.new( "The given application working directory must be nil or a String." ) unless working_directory == nil || working_directory.kind_of?( String )
-      @_working_directory = working_directory
-      
-    end
-
-    def events_to_listen( events )
-
-      raise ArgumentError.new( "The events to listen must be nil or a String." ) unless events == nil || events.kind_of?( String )   
-      @_events_to_listen = events
-
-    end
-
-    def signals_to_listen( signals )
-
-      raise ArgumentError.new( "The signals to listen must be nil or a String." ) unless signals == nil || signals.kind_of?( String )   
-      @_signals_to_listen = signals
-
-    end
-    
-    def start_command( start_command )
-
-      raise ArgumentError.new( "The start_command must be nil or a String." ) unless start_command == nil || start_command.kind_of?( String )   
-      @_start_command = start_command
-
-    end
-
-    # Defines the uid of the application this Application CommandData object is associated with
-    # == params
-    # app_uid:: FixNum, uid of application to perform this command on
-    # == returns
-    # Application:: This CommandData object
-    # == raises
-    # ArgumentError:: When app_name is not nil or a String
-    def uid( app_uid )       
-
-      raise ArgumentError.new( "The given application uid must be nil, a String or an Integer." ) unless app_uid == nil || app_uid.kind_of?( String ) || app_uid.kind_of?( Fixnum )
-      @_application_uid = app_uid
-      @_application_uid = @_application_uid.to_i unless @_application_uid == nil    
-      self    
-
-    end
-
-    def get_command
-
-      @_command
-
-    end
-
-    def get_application
-
-      @_application_name
-
-    end
-
-    def get_uid
-
-      @_application_uid
-
-    end
-
-    def get_flags
-
-      @_flags
-
-    end
-
-    def attribute_filter(attribute_string)
-
-      @_attribute_csv_string = attribute_string
-
-    end
-
-    def get_attribute_filter
-
-      @_attribute_csv_string
-
-    end
-
-    # enable hooking for performance measurement & debug logging
-    TDriver::Hooking.hook_methods( self ) if defined?( TDriver::Hooking )
-
-  end # Application
-=end
 
 end # MobyCommand
 
