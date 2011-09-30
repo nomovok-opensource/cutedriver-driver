@@ -102,7 +102,7 @@ module MobyBehaviour
 =end
 
     # == description
-    # Return all test object attributes
+    # Return all test object attributes. Please see [link="#GenericTestObject:[]"][][/link] method for optional approach.
     # == returns
     # Hash
     #  description: Test object attributes
@@ -160,12 +160,12 @@ module MobyBehaviour
     end
 
     # == description
-    # Function returns a attribute of test object 
+    # Function returns a attribute of test object. Please see [link="#GenericTestObject:[]"][][/link] method for optional approach.
     #
     # == arguments
     # name
     #  String
-    #   description: String definig the name of the attribute to get
+    #   description: String defining the name of the attribute to get
     #   example: "name"
     #
     # == returns
@@ -199,23 +199,37 @@ module MobyBehaviour
     end
 
     # == description
-    # Alias for [link="#GenericTestObject:attribute"]attribute[/link] method.
+    # Wrapper method to returns one or all test object attributes. This method calls [link="#GenericTestObject:attribute"]attribute[/link] or [link="#GenericTestObject:attributes"]attributes[/link] depending on the given argument.
     #
     # == arguments
     # name
     #  String
-    #   description: String definig the name of the attribute to get
-    #   example: "name"
+    #   description: Attribute name
+    #   example: "attribute_name"
+    #  NilClass
+    #   description: Return all attributes
+    #   example: nil
     #
     # == returns
     # String
-    #   description: Value of the attribute as a string
+    #   description: Value of the attribute
     #   example: "value"
     #
-    # == exceptions
-    def []( name )
-  
-      attribute( name )
+    # Hash
+    #   description: Hash of all attributes
+    #   example: {:x=>"0", :y=>"0"}
+    #
+    def []( name = nil )
+
+      if name.nil?
+
+        attributes
+
+      else
+
+        attribute( name )
+
+      end  
 
     end
 
