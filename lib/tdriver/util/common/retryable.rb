@@ -42,12 +42,44 @@ module MobyUtil
 
       attempt = 1
 
+
+      # number of block arguments
+      _block_arity = block.arity 
+
+      if _block_arity > 1
+
+        _block_arity = 2
+
+      elsif _block_arity < 1
+
+        _block_arity = 0
+
+      end
+
+      # last exception
+      _exception = nil
+
+      # default
+      _arguments = []
+
       begin
 
+        case _block_arity
+
+          when 1
+          arguments = [ attempt ]
+
+          when 2
+          arguments = [ attempt, _exception ]
+
+        end
+
         # yield given block and pass attempt number as parameter
-        yield( attempt )
+        yield( *arguments )
 
       rescue *options[ :exception ]
+
+        _exception = $!
 
         if ( attempt < options[ :tries ] ) && ![ *options[ :unless ] ].include?( $!.class )
 
@@ -84,12 +116,43 @@ module MobyUtil
       # attempt number
       attempt = 0
 
+      # number of block arguments
+      _block_arity = block.arity 
+
+      if _block_arity > 1
+
+        _block_arity = 2
+
+      elsif _block_arity < 1
+
+        _block_arity = 0
+
+      end
+
+      # last exception
+      _exception = nil
+
+      # default
+      _arguments = []
+
       begin
 
+        case _block_arity
+
+          when 1
+          arguments = [ attempt ]
+
+          when 2
+          arguments = [ attempt, _exception ]
+
+        end
+
         # execute block
-        yield( attempt )
+        yield( *arguments )
 
       rescue *options[ :exception ]
+
+        _exception = $!
 
         if (Time.now - start_time) <= options[ :timeout ] && ![ *options[ :unless ] ].include?( $!.class )
 
