@@ -199,6 +199,27 @@ module MobyBehaviour
     end
 
     # == description
+    # Alias for [link="#GenericTestObject:attribute"]attribute[/link] method.
+    #
+    # == arguments
+    # name
+    #  String
+    #   description: String definig the name of the attribute to get
+    #   example: "name"
+    #
+    # == returns
+    # String
+    #   description: Value of the attribute as a string
+    #   example: "value"
+    #
+    # == exceptions
+    def []( name )
+  
+      attribute( name )
+
+    end
+
+    # == description
     # Returns the parent test object for the current object in question, according to the UI object hierarchy. For getting the test object that was actually used 
     # as the parent when the test object instance was created, see [link="#GenericTestObject:parent"]parent[/link] method.
     # == returns
@@ -221,7 +242,7 @@ module MobyBehaviour
       # retrieve parent element attributes
       parent_attributes = @test_object_adapter.test_object_element_attributes( parent_element )
 
-      if self.get_application_id && parent_attributes[ 'type' ] != 'application'
+      if get_application_id && parent_attributes[ 'type' ] != 'application'
 
         parent = @sut.child( 
 
