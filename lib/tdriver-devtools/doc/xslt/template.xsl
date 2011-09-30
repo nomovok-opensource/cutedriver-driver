@@ -490,7 +490,32 @@
     <!-- method: call example using parameters -->
     <xsl:if test="@type='method'">
     
-      <xsl:text>object.</xsl:text><xsl:value-of select="@name" />
+<!-- contains($type/@name,' ') -->
+
+<!--
+
+    <xsl:choose>
+      <xsl:when test="string-length($tmp_full_tag)=0">
+        <xsl:value-of select="substring-after(substring-before($text, ']'), '[')" />
+      </xsl:when>
+      <xsl:otherwise>
+        <xsl:value-of select="$tmp_full_tag" />
+      </xsl:otherwise>
+    </xsl:choose>
+
+
+-->
+
+    <!-- determine whether add dot between the object and method; e.g. object.method or object[]-->
+
+    <xsl:choose>
+      <xsl:when test="contains(@name, '[')">
+        <xsl:text>object</xsl:text>
+      </xsl:when>
+      <xsl:otherwise>
+        <xsl:text>object.</xsl:text><xsl:value-of select="@name" />
+      </xsl:otherwise>
+    </xsl:choose>
 
       <xsl:choose>
 
@@ -506,7 +531,17 @@
 
           <!-- do not show parenthesis if first argument is type of block -->
           <xsl:if test="arguments/argument[1]/@type!='block'">
-            <xsl:text>( </xsl:text>
+
+            <xsl:choose>
+              <xsl:when test="contains(@name, '[')">
+                <xsl:text>[ </xsl:text>
+              </xsl:when>
+              <xsl:otherwise>
+                <xsl:text>( </xsl:text>
+              </xsl:otherwise>
+            </xsl:choose>
+
+            <!--<xsl:text>( </xsl:text>-->
 
               <!-- collect arguments for example -->
               <xsl:for-each select="arguments/argument">
@@ -551,7 +586,18 @@
                 </xsl:if>
                 
               </xsl:for-each>
-            <xsl:text> ) </xsl:text>
+            <!--<xsl:text> ) </xsl:text>-->
+
+            <xsl:choose>
+              <xsl:when test="contains(@name, ']')">
+                <xsl:text> ] </xsl:text>
+              </xsl:when>
+              <xsl:otherwise>
+                <xsl:text> ) </xsl:text>
+              </xsl:otherwise>
+            </xsl:choose>
+
+
           </xsl:if>
           
           <!-- collect arguments for example -->
@@ -1636,42 +1682,78 @@
 
 </xsl:template>
 
+<!-- template#process_tags -->
 <xsl:template name="process_tags">
 
   <xsl:param name="text"/>
 
   <xsl:variable name="remainingContent" select="$text"/>
 
-  <!-- content before start tag -->
+  <!-- content before tag start character -->
   <xsl:variable name="content_before_tag" select="substring-before($text, '[')"/>
 
   <!-- content after start tag -->
-  <xsl:variable name="content_after_tag" select="substring-after(substring-after($text, '['), ']')"/>
+  <!-- content after start tag: content[/example_tag]continues-->
+  <!--<xsl:variable name="content_after_tag" select="substring-after(substring-after($text, '['), ']')"/>
+-->
 
-  <!-- start tag -->
-  <xsl:variable name="full_tag" select="substring-after(substring-before($text, ']'), '[')"/>
+  <!-- start tag: [example_tag="abcdef"] -->
+  <xsl:variable name="content_after_tag">
+    <xsl:variable name="tmp_content_after_tag" select="substring-after(substring-after($text, '['), '&quot;]')"/>
+    <xsl:choose>
+      <xsl:when test="string-length($tmp_content_after_tag)=0">
+        <xsl:value-of select="substring-after(substring-after($text, '['), ']')" />
+      </xsl:when>
+      <xsl:otherwise>
+        <xsl:value-of select="$tmp_content_after_tag" />
+      </xsl:otherwise>
+    </xsl:choose>
+  </xsl:variable>
 
-  <xsl:variable name="tag" select="str:split(substring-after(substring-before($text, ']'), '['), '=')[1]"/>
 
-  <!-- content between tag -->
-  <xsl:variable name="tag_content" select="substring-before($content_after_tag, concat('[/', $tag, ']'))"/>
+  <!-- start tag: [example_tag="abcdef"] -->
+<!--  <xsl:variable name="tmp_full_tag" select="substring-after(substring-before($text, '&quot;]'), '[')"/>
+-->
 
-  <xsl:variable name="content_after_start_tag" select="substring-after($text, concat('[',$tag,']'))"/>
-
-  <xsl:variable name="content_after_end_tag" select="substring-after($content_after_tag, concat('[/', $tag, ']'))"/>
+  <!-- check if full tag contains string value -->
 
 <!--
-  <br /><b>tag: </b><xsl:value-of select="$tag" />
 
-  <br /><b>tag_2: </b><xsl:value-of select="str:split($tag, '=')[1]" />
+    
+        <xsl:if test="string-length($tag_content)=0">
 
-  <br /><b>before: </b><xsl:value-of select="$content_before_tag" />
-  <br /><b>after: </b><xsl:value-of select="$content_after_tag" />
-  <br /><b>content: </b><xsl:value-of select="$tag_content" />
-  <br /><b>content_after_end_tag: </b><xsl:value-of select="$content_after_end_tag" />
+          <xsl:call-template name="process_tags">              
+            <xsl:with-param name="text" select="$content_after_start_tag" />
+          </xsl:call-template>
+        
+        </xsl:if>
 
-  <br /><br />
-  -->
+-->
+
+  <xsl:variable name="full_tag">
+    <!-- start tag: [example_tag="abcdef"] -->
+    <xsl:variable name="tmp_full_tag" select="substring-after(substring-before($text, '&quot;]'), '[')"/>
+    <xsl:choose>
+      <xsl:when test="string-length($tmp_full_tag)=0">
+        <xsl:value-of select="substring-after(substring-before($text, ']'), '[')" />
+      </xsl:when>
+      <xsl:otherwise>
+        <xsl:value-of select="$tmp_full_tag" />
+      </xsl:otherwise>
+    </xsl:choose>
+  </xsl:variable>
+
+  <!-- tag: example_tag -->
+  <xsl:variable name="tag" select="str:split(substring-after(substring-before($text, ']'), '['), '=')[1]"/>
+
+  <!-- content between tags: content-->
+  <xsl:variable name="tag_content" select="substring-before($content_after_tag, concat('[/', $tag, ']'))"/>
+
+  <!-- content after start tag: content[/example_tag]continues -->
+  <xsl:variable name="content_after_start_tag" select="substring-after($text, concat('[',$tag,']'))"/>
+
+  <!-- content after end tag: continues-->
+  <xsl:variable name="content_after_end_tag" select="substring-after($content_after_tag, concat('[/', $tag, ']'))"/>
 
   <!-- show leading text before tag... -->
   <xsl:value-of select="$content_before_tag" />
