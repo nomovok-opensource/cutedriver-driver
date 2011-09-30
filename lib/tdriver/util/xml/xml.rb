@@ -27,7 +27,7 @@ module MobyUtil
     
       def initialize_class
 
-      
+        @parser = nil
       
         # empty xml cache hash
         @document_cache = { :cache => [], :objects => {} }
@@ -49,7 +49,7 @@ module MobyUtil
     # == raises
     def self.current_parser
 
-      @@parser if defined?( @@parser )
+      @parser
 
     end
 
@@ -85,10 +85,10 @@ module MobyUtil
     # nil
     # Document:: XML document object
     # == raises
-    def self.current_parser=( value )
+    def self.current_parser=( parser )
 
       # set current parser
-      @@parser = value
+      @parser = parser
 
       # apply parser implementation to abstraction modules
       [ 
@@ -107,12 +107,12 @@ module MobyUtil
           begin      
 
             # include parser behaviour
-            include @@parser.const_get( _module ) 
+            include parser.const_get( _module ) 
 
           rescue NameError
 
             # raise proper exception if behaviour module not found
-            raise NotImplementedError, "Required behaviour module #{ @@parser.name }::#{ _module } not found"
+            raise NotImplementedError, "Required behaviour module #{ parser.name }::#{ _module } not found"
 
           end
         
@@ -121,7 +121,7 @@ module MobyUtil
       end
 
       # return current parser as result
-      value
+      parser
 
     end
 
