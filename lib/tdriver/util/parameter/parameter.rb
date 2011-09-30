@@ -25,7 +25,7 @@ module TDriver
 
       def new
       
-        warn_caller "$1:$2 warning: #{ self.to_s } is static class; unable initialize new instance of it"
+        warn_caller "$1:$2 warning: #{ to_s } is static class; unable initialize new instance of it"
       
         nil
       
@@ -200,7 +200,7 @@ module TDriver
 
       def new
       
-        warn_caller "$1:$2 warning: #{ self.to_s } is static class; unable initialize new instance of it"
+        warn_caller "$1:$2 warning: #{ to_s } is static class; unable initialize new instance of it"
       
         nil
       
@@ -1041,7 +1041,7 @@ module MobyUtil
             
       def new
       
-        warn_caller "$1:$2 warning: #{ self.to_s } is deprecated; use TDriver::ParameterHash instead"
+        warn_caller "$1:$2 warning: #{ to_s } is deprecated; use TDriver::ParameterHash instead"
       
         TDriver::ParameterHash.new
       
@@ -1059,7 +1059,7 @@ module MobyUtil
             
       def new
       
-        warn_caller "$1:$2 warning: #{ self.to_s } is static class; unable initialize new instance of it"
+        warn_caller "$1:$2 warning: #{ to_s } is static class; unable initialize new instance of it"
       
         nil
       
@@ -1094,7 +1094,7 @@ module MobyUtil
 
       def new
       
-        warn_caller "$1:$2 warning: #{ self.to_s } is static class; unable initialize new instance of it"
+        warn_caller "$1:$2 warning: #{ to_s } is static class; unable initialize new instance of it"
       
         nil
       

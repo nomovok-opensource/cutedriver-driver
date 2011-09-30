@@ -111,10 +111,10 @@ module MobyBehaviour
           :identification_directives => dynamic_attributes.default_values(
             :__timeout => timeout,
             :__retry_interval => retry_interval,
-            :__refresh_arguments => self.kind_of?( MobyBase::SUT ) ? attributes : { :id => self.get_application_id },
-            :__parent_application => self.sut? == true ? nil : @parent_application 
+            :__refresh_arguments => kind_of?( MobyBase::SUT ) ? attributes : { :id => get_application_id },
+            :__parent_application => sut? == true ? nil : @parent_application 
           ),
-          :parent => self        
+          :parent => self
         )
         
 			rescue MobyBase::TestObjectNotFoundError

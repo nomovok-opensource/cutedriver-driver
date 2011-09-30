@@ -185,7 +185,7 @@ module MobyBehaviour
     def freeze
 
 =begin
-      if sut_parameters[ :use_find_object, 'false' ] == 'true' && self.respond_to?( 'find_object' )
+      if sut_parameters[ :use_find_object, 'false' ] == 'true' && respond_to?( 'find_object' )
 
         warn("warning: SUT##{ __method__ } is not supported when use_find_objects optimization is enabled")
 
@@ -213,7 +213,7 @@ module MobyBehaviour
     def unfreeze
 
 =begin
-      if sut_parameters[ :use_find_object, 'false' ] == 'true' && self.respond_to?( 'find_object' )
+      if sut_parameters[ :use_find_object, 'false' ] == 'true' && respond_to?( 'find_object' )
 
         warn("warning: SUT##{ __method__ } is not supported when use_find_objects optimization is enabled")
 
@@ -387,41 +387,54 @@ module MobyBehaviour
     #  description: If the implementation is missing for the method
     def setup
 
-      if self.parameter[ :sut_setup, nil ] || self.parameter[ :setup, nil ]
+      if sut_parameters[ :sut_setup, nil ] || sut_parameters[ :setup, nil ]
 
-        if self.parameter[ :sut_setup, nil ]
-          require MobyUtil::FileHelper.expand_path(self.parameter[ :sut_setup ])
+        if sut_parameters[ :sut_setup, nil ]
+
+          require MobyUtil::FileHelper.expand_path( sut_parameters[ :sut_setup ] )
 
           $logger.behaviour "PASS;sut.setup method found"
 
-          self.setup
+          setup
 
           $logger.behaviour "PASS;sut.setup executed"
+
         end
 
-        if self.parameter[ :setup, nil ]
+        if sut_parameters[ :setup, nil ]
+
           $logger.behaviour "PASS;sut.setup parameters found"
-          methods=self.parameter[ :setup ]
-          methods.each do |method|
-            m=method[0].to_s
-            args=method[1]
+
+          methods = sut_parameters[ :setup ]
+
+          methods.each do | method |
+
+            m = method[0].to_s
+
+            args = method[1]
+
             if args.to_s == ""
+
               eval("self.#{m}")
+
             else
+
               eval("self.#{m}(:#{args.to_sym})")
+
             end
+
           end
+
           $logger.behaviour "PASS;sut.setup parameter methods executed"
+
         end
 
       else
-        $logger.behaviour "FAIL;No methods or parameters found for sut.setup"
 
+        $logger.behaviour "FAIL;No methods or parameters found for sut.setup"
         raise MobyBase::BehaviourError.new("Setup", "Failed to load sut.setup method check the :sut_setup parameter")
         
       end
-
-
 
     end
 
@@ -437,34 +450,50 @@ module MobyBehaviour
     #  description: If the implementation is missing for the method
     def teardown
 
-      if self.parameter[ :sut_teardown, nil ] || self.parameter[ :teardown, nil ]
+      if sut_parameters[ :sut_teardown, nil ] || sut_parameters[ :teardown, nil ]
 
-        if self.parameter[ :sut_teardown, nil ]
-          require MobyUtil::FileHelper.expand_path(self.parameter[ :sut_teardown ])
+        if sut_parameters[ :sut_teardown, nil ]
+
+          require MobyUtil::FileHelper.expand_path(sut_parameters[ :sut_teardown ])
 
           $logger.behaviour "PASS;sut.teardown method found"
 
-          self.teardown
+          teardown
 
           $logger.behaviour "PASS;sut.teardown executed"
+
         end
 
-        if self.parameter[ :teardown, nil ]
+        if sut_parameters[ :teardown, nil ]
+
           $logger.behaviour "PASS;sut.teardown parameters found"
-          methods=self.parameter[ :teardown ]
-          methods.each do |method|
-            m=method[0].to_s
-            args=method[1]
+
+          methods = sut_parameters[ :teardown ]
+
+          methods.each do | method |
+
+            m = method[0].to_s
+
+            args = method[1]
+
             if args.to_s == ""
+
               eval("self.#{m}")
+
             else
+
               eval("self.#{m}(:#{args.to_sym})")
+
             end
+
           end
+
           $logger.behaviour "PASS;sut.teardown parameter methods executed"
+
         end
 
       else
+
         $logger.behaviour "FAIL;No method or parameters found for sut.teardown"
 
         raise MobyBase::BehaviourError.new("Teardown", "Failed to load sut.teardown method check the :sut_teardown parameter")
@@ -511,7 +540,7 @@ module MobyBehaviour
       if source_data.nil?
 
         # refresh if xml data is empty
-        self.refresh if @xml_data.empty?
+        refresh if @xml_data.empty?
 
         raise RuntimeError, "Can not create state object of SUT with id #{ @id.inspect }, no XML content or SUT not initialized properly." if @xml_data.empty?
 
@@ -760,7 +789,7 @@ module MobyBehaviour
 
           app_list = MobyBase::StateObject.new( 
 
-            :source_data => self.list_apps,
+            :source_data => list_apps,
             :parent => nil,
             :test_object_adapter => @test_object_adapter
 
@@ -773,7 +802,7 @@ module MobyBehaviour
           app_info = find_app(app_list, {:id => target[ :uid ]}) if target[ :uid ] != nil
           app_info = find_app(app_list, {:name => target[ :name ]}) unless app_info
 
-          app = self.application(:id => app_info.id) if app_info
+          app = application(:id => app_info.id) if app_info
 
           if target[:restart_if_running] && app
 
@@ -800,7 +829,7 @@ module MobyBehaviour
 
         if ( target[ :start_command ] != nil )
 
-          raise MobyBase::BehaviourError.new("Run", "Failed to load execute_shell_method") unless self.respond_to?("execute_shell_command")
+          raise MobyBase::BehaviourError.new("Run", "Failed to load execute_shell_method") unless respond_to?("execute_shell_command")
 
           execute_shell_command( target[ :start_command ], :detached => "true" )
 
@@ -884,7 +913,7 @@ module MobyBehaviour
             # verify that application is launched and application test object is found from xml
             expected_attributes.delete( :name )
 
-            self.wait_child(
+            wait_child(
 
               # attributes to identify application object
               expected_attributes,
@@ -1178,10 +1207,10 @@ module MobyBehaviour
         if ( sut_parameters[ :read_lang_from_app ]=='true')
 
           #read localeName app
-          language=self.application.attribute("localeName")
+          language = application.attribute("localeName")
 
           #determine the language from the locale
-          language=language.split('_')[0].to_s if (language!=nil && !language.empty?)
+          language = language.split('_')[0].to_s if (language!=nil && !language.empty?)
 
         else
 
@@ -1512,7 +1541,7 @@ module MobyBehaviour
       unless @frozen
 
         # determine should FindObjects service be used
-        use_find_objects =  sut_parameters[ :use_find_object, 'false' ] == 'true' and self.respond_to?( 'find_object' ) == true
+        use_find_objects =  sut_parameters[ :use_find_object, 'false' ] == 'true' and respond_to?( 'find_object' ) == true
 
         # duplicate refresh arguments hash
         refresh_arguments = refresh_args.clone

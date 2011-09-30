@@ -198,7 +198,7 @@ module MobyBehaviour
         $logger.enabled = ( attributes[ :__logging ] == 'true' ? true : false )
 
         # behaviour logging
-        $logger.behaviour "#{ ( result == true ? 'PASS' : 'FAIL' ) };#{ description };#{ ( self.sut? ? self.id.to_s : '' ) };test_object_exists?;" 
+        $logger.behaviour "#{ ( result == true ? 'PASS' : 'FAIL' ) };#{ description };#{ ( sut? ? id.to_s : '' ) };test_object_exists?;" 
         
         # raise exception if neccessery
         raise result if result.kind_of?( Exception )

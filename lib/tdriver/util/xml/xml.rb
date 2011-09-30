@@ -26,6 +26,8 @@ module MobyUtil
     private
     
       def initialize_class
+
+      
       
         # empty xml cache hash
         @document_cache = { :cache => [], :objects => {} }
@@ -33,8 +35,8 @@ module MobyUtil
         # default xml cache buffer size
         @document_cache_buffer_size = 10
 
-        # set used parser module
-        self.current_parser = MobyUtil::XML::Nokogiri        
+        # configure parser module to be used
+        __send__(:current_parser=, MobyUtil::XML::Nokogiri)
       
       end
     
@@ -47,7 +49,7 @@ module MobyUtil
     # == raises
     def self.current_parser
 
-      @@parser
+      @@parser if defined?( @@parser )
 
     end
 
@@ -85,8 +87,6 @@ module MobyUtil
     # == raises
     def self.current_parser=( value )
 
-      #raise RuntimeError, "Parser can be set only once per session" unless defined?( @@parser )
-
       # set current parser
       @@parser = value
 
@@ -113,7 +113,7 @@ module MobyUtil
 
             # raise proper exception if behaviour module not found
             raise NotImplementedError, "Required behaviour module #{ @@parser.name }::#{ _module } not found"
-            
+
           end
         
         }

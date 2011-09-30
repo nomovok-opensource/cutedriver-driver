@@ -204,7 +204,7 @@ class Hash
   # TODO: document me
   def to_attributes
   
-    self.collect{ | key, value |
+    collect{ | key, value |
 
       "#{ key.to_s }=\"#{ value.to_s.encode_to_xml }\"" 
   
@@ -215,7 +215,7 @@ class Hash
   # TODO: document me
   def recursive_merge( other )
   
-    self.merge( other ){ | key, old_value, new_value |
+    merge( other ){ | key, old_value, new_value |
 
       new_value
 
@@ -243,7 +243,7 @@ class Hash
   # TODO: document me
   def recursive_merge!( other )
   
-    self.replace( 
+    replace( 
     
       recursive_merge( other )
       

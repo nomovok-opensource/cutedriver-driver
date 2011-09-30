@@ -54,7 +54,7 @@ class Numeric
     if negative?
 
       # replace macros
-      message.gsub!( '$1', self.inspect )
+      message.gsub!( '$1', inspect )
 
       raise exception, message, caller
 
@@ -70,7 +70,7 @@ class Numeric
     if zero?
 
       # replace macros
-      message.gsub!( '$1', self.inspect )
+      message.gsub!( '$1', inspect )
 
       raise exception, message, caller
 
@@ -86,7 +86,7 @@ class Numeric
     if positive?
 
       # replace macros
-      message.gsub!( '$1', self.inspect )
+      message.gsub!( '$1', inspect )
 
       raise exception, message, caller
 
@@ -106,7 +106,7 @@ class Numeric
     raise TypeError, 'wrong argument type #{ message.class } for exception message (expected String)' unless message.kind_of?( String )
 
     # replace macros
-    message.gsub!( '$1', self.inspect )
+    message.gsub!( '$1', inspect )
     
     message.gsub!( '$2', range.inspect )
 
@@ -122,7 +122,7 @@ class Numeric
   def limit( minimum_value, maximum_value )
 
     # limit current value
-    self.min( minimum_value ).max( maximum_value )
+    min( minimum_value ).max( maximum_value )
 
   end
 

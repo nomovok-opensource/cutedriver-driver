@@ -86,7 +86,7 @@ module MobyBase
     # TODO: document me
     def inspect
 
-      "#<#{ self.class }:0x#{ ( "%x" % ( self.object_id.to_i << 1 ) )[ 3 .. -1 ] } @id=#{ @id.inspect } @input=\"#{ @input }\" @type=\"#{ @type }\" @ui_type=\"#{ @ui_type }\" @ui_version=\"#{ @ui_version }\">"
+      "#<#{ self.class }:0x#{ ( "%x" % ( object_id.to_i << 1 ) )[ 3 .. -1 ] } @id=#{ @id.inspect } @input=\"#{ @input }\" @type=\"#{ @type }\" @ui_type=\"#{ @ui_type }\" @ui_version=\"#{ @ui_version }\">"
 
     end
 
