@@ -102,7 +102,7 @@ module MobyBehaviour
 =end
 
     # == description
-    # Return all test object attributes. Please see [link="#GenericTestObject:[]"][][/link] method for optional approach.
+    # Return all test object attributes. Please see [link="#GenericTestObject:[]"][][/link] method for alternative approach.
     # == returns
     # Hash
     #  description: Test object attributes
@@ -160,7 +160,7 @@ module MobyBehaviour
     end
 
     # == description
-    # Function returns a attribute of test object. Please see [link="#GenericTestObject:[]"][][/link] method for optional approach.
+    # Function returns a attribute of test object. Please see [link="#GenericTestObject:[]"][][/link] method for alternative approach.
     #
     # == arguments
     # name
