@@ -1439,7 +1439,7 @@ EXAMPLE
       # generate arguments xml
       arguments = ( feature.last[:arguments] || {} ).collect{ | arg |
 
-    p arg
+      #p arg
                 
         # generate argument types template
         arg.collect{ | argument |
@@ -1881,7 +1881,7 @@ EXAMPLE
               
               warn("Warning! One of the behaviour modules is already using name '#{ module_header[:behaviour] }', saving as #{ xml_file_name }")
 
-              sleep 1
+              #sleep 1
           
             end
 
@@ -1898,7 +1898,7 @@ EXAMPLE
               xml_file_name = ( @module_path[1..-1].join("") ) + '.xml'
 
               warn("Warning: #{ @module_path.join("::") } does not have behaviour (module) description defined, saving as %s " % xml_file_name )
-              sleep 2
+              #sleep 2
 
               if @created_files.has_key?( xml_file_name )
 
@@ -1906,7 +1906,7 @@ EXAMPLE
 
                 xml_file_name = ( @module_path[1..-1].join("") ) + '_duplicate_name.xml'
 
-                sleep 1
+                #sleep 1
             
               end
               
