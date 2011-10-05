@@ -261,4 +261,31 @@
 
   </template>
 
+  <template name="switchbox">
+    <!-- switchbox control commands default is for windows environments using foobox -->
+    <parameter name="switchbox_timeout_between_command_sequence" value="5" /> <!-- timeout in seconds between the switchbox commands -->
+    <parameter name="switchbox_powerdown_command_sequence" value="foobox USB0|foobox -VBAT1" /> <!-- if the device is connected to other than port 1 then change accordingly -->
+    <parameter name="switchbox_powerdown_command_success_string" value="" /> <!-- If no error then no string is displayed -->
+    <parameter name="switchbox_powerup_command_sequence" value="foobox +VBAT1|foobox USB1" /> <!-- if the device is connected to other than port 1 then change accordingly -->
+    <parameter name="switchbox_powerup_command_success_string" value="" /> <!-- If no error then no string is displayed -->
+    <parameter name="switchbox_sleep_before_powerup_in_reboot" value="5" /> <!-- need to wait for a couple of seconds before powerup after powerdown -->
+    <parameter name="switchbox_sleep_after_powerup_in_reboot" value="60" /> <!-- need to wait for the device to come up after poweup -->
+    <parameter name="switchbox_commands_after_powerup_in_reboot" value="" /> <!-- commands you want to be executed when polling for a device during powerup -->
+  </template>
+  
+  <template name="flash">
+    <!-- flash control commands default is for windows environments using  -->
+    <parameter name="flash_attempts" value="1" /> <!-- how many times  will attempt to flash the device -->
+    <parameter name="timeout_between_command_sequence" value="25" /> <!-- timeout in seconds between the switchbox and  commands before and after flash -->
+    <parameter name="switchbox_commands_before_flash" value="" /> <!-- commands you want to be executed before flash, commands are sparated with | -->
+    <parameter name="commands_before_flash" value="" /> <!-- flash commands for  before flash, commands are sparated with | -->
+    <parameter name="flash_command" value="" /> <!-- intial flash command for  -->
+    <parameter name="optional_parameters_after_flashing" value="/nm" /> <!-- optional flash parameters -->
+    <parameter name="flash_images" value="/tmp/image.bin /tmp/image2.bin" /> <!-- images to flash  -->
+    <parameter name="switchbox_commands_after_failed_flash" value="" /> <!-- commands for switchbox after failed flash, commands are sparated with |  -->
+<parameter name="commands_after_failed_flash" value="" /> <!-- commands for  after failed flash, commands are sparated with |  -->
+    <parameter name="command_after_flash" value="" /> <!-- flash command for  after flash, commands are sparated with |  -->
+    <parameter name="switchbox_commands_after_flash" value="" /> <!-- commands you want to be executed after flash, commands are sparated with |  -->
+  </template>
+
 </templates>
