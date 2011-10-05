@@ -913,6 +913,24 @@ module TDriver
       end
 
       # TODO: document me
+      def has_template?( name )
+      
+        @templates.has_key?( name.to_s )
+      
+      end
+      
+      # TODO: document me
+      def apply_template( name )
+        
+        @parameters.recursive_merge!( 
+          @templates.fetch( name.to_s ){           
+            raise MobyUtil::TemplateNotFoundError, "Template #{ name.inspect } not found"
+          }
+        )
+
+      end
+
+      # TODO: document me
       def has_key?( key )
       
         @parameters.has_key?( key )
@@ -925,14 +943,7 @@ module TDriver
         @parameters.has_value?( key )
       
       end
-
-      # TODO: document me
-      def has_template?( name )
       
-        @templates.has_key?( name.to_s )
-      
-      end
-
       # TODO: document me
       def keys
       
