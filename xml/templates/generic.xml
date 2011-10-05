@@ -283,7 +283,7 @@
     <parameter name="optional_parameters_after_flashing" value="/nm" /> <!-- optional flash parameters -->
     <parameter name="flash_images" value="/tmp/image.bin /tmp/image2.bin" /> <!-- images to flash  -->
     <parameter name="switchbox_commands_after_failed_flash" value="" /> <!-- commands for switchbox after failed flash, commands are sparated with |  -->
-<parameter name="commands_after_failed_flash" value="" /> <!-- commands for  after failed flash, commands are sparated with |  -->
+    <parameter name="commands_after_failed_flash" value="" /> <!-- commands for  after failed flash, commands are sparated with |  -->
     <parameter name="command_after_flash" value="" /> <!-- flash command for  after flash, commands are sparated with |  -->
     <parameter name="switchbox_commands_after_flash" value="" /> <!-- commands you want to be executed after flash, commands are sparated with |  -->
   </template>
