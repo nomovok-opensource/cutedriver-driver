@@ -569,10 +569,13 @@ module MobyBehaviour
     # Returns the current foreground application or one which matches with given attributes rules.
     #
     # == arguments
-    # attributes
+    # target
     #  Hash
     #   description: Hash defining required expected attributes of the application
-    #   example: { :name => 'testapp' }
+    #   example: { :name => "testapp" }
+    #  String
+    #   description: Name of application
+    #   example: "testapp"
     #
     # == returns
     # MobyBase::TestObject
@@ -583,20 +586,24 @@ module MobyBehaviour
     # TypeError
     #  description: Wrong argument type <class> for attributes (expected Hash)
     #
-    def application( attributes = {} )
+    def application( target = {} )
 
       begin
 
-        attributes.check_type( Hash, 'Wrong argument type $1 for attributes (expected $2)' )
+        # raise exception if argument type other than hash
+        target.check_type( [ String, Hash ], "Wrong argument type $1 for application identification rules (expected $2)" )
 
-        attributes[ :type ] = 'application'
+        # if target application is given as string, interpret it as application name
+        target = { :name => target.to_s } if target.kind_of?( String )
 
-        attributes[ :__parent_application ] = nil
+        target[ :type ] = 'application'
 
-        @current_application_id = nil if attributes[ :id ].nil?
+        target[ :__parent_application ] = nil
+
+        @current_application_id = nil if target[ :id ].nil?
 
         # create test object and return it as result
-        test_object = child( attributes )
+        test_object = child( target )
 
         # store parent application to test object
         test_object.instance_variable_set( :@parent_application, test_object )
@@ -606,7 +613,7 @@ module MobyBehaviour
       rescue
 
         $logger.behaviour(
-          "FAIL;Failed to find application.;#{ id.to_s };sut;{};application;#{ attributes.kind_of?( Hash ) ? attributes.inspect : attributes.class.to_s }"
+          "FAIL;Failed to find application.;#{ id.to_s };sut;{};application;#{ target.kind_of?( Hash ) ? target.inspect : target.class.to_s }"
         )
 
         # raise same exception
@@ -614,7 +621,7 @@ module MobyBehaviour
 
       ensure
 
-        $logger.behaviour "PASS;Application found.;#{ id.to_s };sut;{};application;#{ attributes.inspect }" if $!.nil?
+        $logger.behaviour "PASS;Application found.;#{ id.to_s };sut;{};application;#{ target.inspect }" if $!.nil?
 
       end
 
