@@ -72,13 +72,13 @@ def run(iteration)
 		#puts events
 		doc = Nokogiri::XML.parse(events)
 		first_time_stamp = nil
-		node_set = doc.xpath('//object[@name = "QtApplicationEvents"]/objects/object')
+		node_set = doc.xpath('//obj[@name = "QtApplicationEvents"]/obj')
 		timer_counter = 0
 		index = 0
 		target_object = nil
 		while(index < node_set.size)
 				node = node_set.at(index)
-				time_str = node.xpath("#{node.path}/attributes/attribute[@name = \"timeStamp\"]/value").first.text
+				time_str = node.xpath("#{node.path}/attr[@name = \"timeStamp\"]").first.text
 				time_stamp = Time.local(toi(time_str[0..3]), toi(time_str[4..5]), toi(time_str[6..7]), toi(time_str[8..9]), toi(time_str[10..11]), toi(time_str[12..13]), toi(time_str[14..16])*1000)
 				if (first_time_stamp == nil)
 						first_time_stamp = time_stamp
@@ -92,7 +92,7 @@ def run(iteration)
 						delta_time = delta_time + delta_time_milliseconds
 
 						strOut << (delta_time).to_s << "\t" << event_name
-						target_object = node.xpath("#{node.path}/objects/object").first
+						target_object = node.xpath("#{node.path}/obj").first
 						if(target_object)
 								target_object_name = target_object.attribute("name").text
 								target_object_type = target_object.attribute("type").text
@@ -114,16 +114,16 @@ def run(iteration)
 	if !@settings[:signals].empty?
 		signals = app.fixture('signal', 'get_signal')
 		app.fixture('signal', 'remove_signals')
-		#puts signals 
+		#puts signals    
 		doc = Nokogiri::XML.parse(signals)
 		first_time_stamp = nil
-		node_set = doc.xpath('//tasInfo[@name = "QtSignals"]/object')
+		node_set = doc.xpath('//tasInfo[@name = "QtSignals"]/obj')
 		timer_counter = 0
 		index = 0
 		target_object = nil
 		while(index < node_set.size)
 				node = node_set.at(index)
-				time_str = node.xpath("#{node.path}/attributes/attribute[@name = \"timeStamp\"]/value").first.text
+				time_str = node.xpath("#{node.path}/attr[@name = \"timeStamp\"]").first.text
 				time_stamp = Time.local(toi(time_str[0..3]), toi(time_str[4..5]), toi(time_str[6..7]), toi(time_str[8..9]), toi(time_str[10..11]), toi(time_str[12..13]), toi(time_str[14..16])*1000)
 				if (first_time_stamp == nil)
 						first_time_stamp = time_stamp

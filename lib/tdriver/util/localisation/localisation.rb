@@ -231,9 +231,10 @@ module MobyUtil
       # "Luo" => ["", "227"], 
       # "Sukuma" => ["", "228"], 
       # "Aceh" => ["", "229"], 
-      #"English_India" => ["", "230"],           # In e32long.h, Pearl script, but not in Nokia Language Codes Standard
+      "English_India" => ["en_in", "230"],           # In e32long.h, Pearl script, but not in Nokia Language Codes Standard
       "Malay Apac" => ["MA", "326"],            # In e32long.h, Pearl script, but not in Nokia Language Codes Standard
-      # "Indonesian Apac" =>["", "327"],
+      "Indonesian Apac" =>["id_ap", "327"],
+      "English Bangladesh" =>["en_ba", "328"],
       # "Bengali IN" => ["bn_IN", ""],
       # "Bosnian" => ["bs", ""],
     }
