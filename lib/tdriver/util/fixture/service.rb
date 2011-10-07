@@ -101,6 +101,57 @@ module TDriver
 
   end # FixturePluginService
 
+  module FixtureSetupFunctions
+  
+    def []( name )
+    
+      name.check_type [ String, Symbol ], 'wrong argument type $1 for fixture name (expected $2)'
+
+      @target.parameter[ :fixtures ].fetch( name.to_sym ){ | name | 
+
+        raise MobyBase::BehaviourError.new( "Fixture", "Failed to execute fixture due to #{ name.to_s.inspect } not found for #{ @target.sut.id.inspect }" )
+      
+      }
+          
+    end
+  
+    def []=( name, plugin )
+    
+      name.check_type [ String, Symbol ], 'wrong argument type $1 for fixture name (expected $2)'
+    
+      plugin.check_type [ String ], 'wrong argument type $1 for fixture pluin name (expected $2)'
+    
+      name = name.to_sym
+      
+      plugin = plugin.to_s
+    
+      # create fixtures configuration hash unless already exists
+      @target.parameter[ :fixtures ] = {} unless @target.parameter.has_key?( :fixtures )
+    
+      if @target.parameter[ :fixtures ].has_key?( name )
+        
+        # retrieve existing fixture configuration
+        fixture_hash = @target.parameter[ :fixtures ][ name ]
+      
+      else
+
+        # fixture was not found from hash, add sut environment to hash
+        fixture_hash = { :env => @target.instance_variable_get(:@environment) }
+              
+      end
+      
+      # store plugin name to hash
+      fixture_hash[ :plugin ] = plugin
+    
+      # store fixture settings to fixtures configuration hash
+      @target.parameter[ :fixtures ][ name ] = fixture_hash
+
+      self
+    
+    end
+  
+  end
+
   class FixtureService
 
     # remove all public methods
@@ -128,6 +179,9 @@ module TDriver
       # store caller backtrace
       @caller = caller
 
+      # extend with fixture setup functions if self is kind of sut 
+      extend FixtureSetupFunctions if @target.sut?
+      
       self
 
     end      
