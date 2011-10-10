@@ -109,7 +109,7 @@ module TDriver
     
       test_object_hash = test_object.hash
     
-      raise ArgumentError, "Test object (#{ value.hash }) not found from cache" unless @objects.has_key?( test_object_hash )
+      raise ArgumentError, "Test object (#{ test_object_hash }) not found from cache" unless @objects.has_key?( test_object_hash )
     
       @objects.delete( test_object_hash )
     
