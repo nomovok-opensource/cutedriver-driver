@@ -266,7 +266,7 @@ module MobyBehaviour
 
       elsif xml.kind_of?( String )
 
-        @xml_data = MobyUtil::XML.parse_string( xml ).root
+        @xml_data = MobyUtil::XML.parse_string( xml )
         @frozen = true
         @forced_xml = true
 
@@ -1599,7 +1599,7 @@ module MobyBehaviour
             xml_data, from_cache = MobyUtil::XML.parse_string( new_xml_data, new_checksum )
 
             # store new xml data object
-            @xml_data = xml_data.root
+            @xml_data = xml_data
 
             # store xml checksum to be compared while next ui dump request; do not reparse xml if checksum values are equal
             @xml_data_checksum = new_checksum
