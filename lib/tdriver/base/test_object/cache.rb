@@ -108,7 +108,7 @@ module TDriver
 
     # TODO: document me  
     def remove_object( test_object )
-    
+        
       test_object_hash = test_object.hash
     
       @objects.delete( test_object_hash )

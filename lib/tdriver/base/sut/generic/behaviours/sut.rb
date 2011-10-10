@@ -96,8 +96,6 @@ module MobyBehaviour
       @last_xml_data = nil
       @frozen = false
 
-      @use_find_objects = nil
-
       # initialize cache for sut children
       @child_object_cache = TDriver::TestObjectCache.new
 
@@ -187,7 +185,7 @@ module MobyBehaviour
     def freeze
 
 =begin
-      if sut_parameters[ :use_find_object, 'false' ] == 'true' && respond_to?( 'find_object' )
+      if use_find_objects
 
         warn("warning: SUT##{ __method__ } is not supported when use_find_objects optimization is enabled")
 
@@ -215,7 +213,7 @@ module MobyBehaviour
     def unfreeze
 
 =begin
-      if sut_parameters[ :use_find_object, 'false' ] == 'true' && respond_to?( 'find_object' )
+      if use_find_objects
 
         warn("warning: SUT##{ __method__ } is not supported when use_find_objects optimization is enabled")
 
@@ -1540,9 +1538,7 @@ module MobyBehaviour
     
       value.check_type [ TrueClass, FalseClass ], 'wrong argument type $1 for use_find_objects (expected $2)'
       
-      sut_parameters[:use_find_object] = value
-      
-      #@use_find_objects = value
+      sut_parameters[ :use_find_object ] = value
     
     end
 
@@ -1551,21 +1547,7 @@ module MobyBehaviour
     # == returns
     def use_find_objects
         
-      sut_parameters[:use_find_object, false].true? && respond_to?('find_object').true?
-
-=begin        
-      begin
-      
-        @use_find_objects = ( sut_parameters[ :use_find_object, false ].true? && respond_to?( 'find_object' ).true? ) if @use_find_objects.nil?
-              
-      rescue
-      
-        @use_find_objects = false
-      
-      end
-
-      @use_find_objects
-=end
+      sut_parameters[ :use_find_object, false ].true? && respond_to?( 'find_object' ).true?
     
     end
 
@@ -1588,9 +1570,6 @@ module MobyBehaviour
       current_time = Time.now
 
       unless @frozen
-
-        # determine should FindObjects service be used
-        #use_find_objects =  sut_parameters[ :use_find_object, 'false' ] == 'true' and respond_to?( 'find_object' ) == true
 
         # duplicate refresh arguments hash
         refresh_arguments = refresh_args.clone

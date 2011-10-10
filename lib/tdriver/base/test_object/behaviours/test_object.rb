@@ -323,7 +323,7 @@ module MobyBehaviour
       )
 
       # update childs if required, returns true or false
-      update( xml_data )
+      update( xml_data ) unless @sut.use_find_objects
 
       nil
 
@@ -621,7 +621,7 @@ module MobyBehaviour
             #test_object.update( _xml_data ) 
             test_object.send( :update, _xml_data ) 
             
-          }
+          } unless @sut.use_find_objects
         
         #end
                 
@@ -640,9 +640,9 @@ module MobyBehaviour
       # disable optimizer for this call since it will not work
       @_enable_optimizer = false
 
-      if sut_parameters[ :use_find_object, 'false' ] == 'true' and @sut.respond_to?( 'find_object' )
+      if @sut.use_find_objects == true
 
-        sut_parameters[ :use_find_object ] = 'false'
+        @sut.use_find_objects = false
 
         @_enable_optimizer = true
 
@@ -655,7 +655,7 @@ module MobyBehaviour
     # TODO: document me
     def enable_optimizer
 
-      sut_parameters[ :use_find_object ] = 'true' if @_enable_optimizer
+      @sut.use_find_objects = true if @_enable_optimizer
 
       @_enable_optimizer = false
 
@@ -839,25 +839,27 @@ module MobyBehaviour
     # ?
     def deactivate
 
-      return if !@_active
+      if @_active
 
-      @_active = false
+        @_active = false
 
-      # iterate through all test objects child test objects
-      @child_object_cache.each_object{ | test_object |
-      
-        # deactivate test object
-        #test_object.deactivate
- 
-        test_object.instance_exec{ deactivate }
-              
-      }
+        # iterate through all test objects child test objects
+        @child_object_cache.each_object{ | test_object |
+        
+          # deactivate test object 
+          test_object.__send__( :deactivate )
+          
+        }
+        
+        # remove test objects from cache
+        @child_object_cache.remove_objects  
+        
+        # remove from parent objects children objects cache
+        @parent.instance_variable_get( :@child_object_cache ).remove_object( self )
 
-      # remove test objects from children objects cache
-      @child_object_cache.remove_objects
+        nil
 
-      # remove from parent objects children objects cache
-      @parent.instance_variable_get( :@child_object_cache ).remove_object( self )
+      end
 
     end
 
