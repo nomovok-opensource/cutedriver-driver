@@ -21,11 +21,12 @@ module TDriver
 
   class TestObjectAdapter
 
-    include TDriver::Abstraction::TestObjectAdapter
-
     # private methods and variables
     class << self
-    
+
+      # include abstraction module    
+      include TDriver::Abstraction::TestObjectAdapter
+      
       private
 
         # TODO: document me

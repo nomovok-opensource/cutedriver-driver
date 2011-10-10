@@ -260,11 +260,15 @@ module MobyBehaviour
 
       if xml.kind_of?( MobyUtil::XML::Element )
 
+        @test_object_adapter = @test_object_adapter.identify_test_object_adapter_from_data( xml )
+
         @xml_data = xml
         @frozen = true
         @forced_xml = true
 
       elsif xml.kind_of?( String )
+
+        @test_object_adapter = @test_object_adapter.identify_test_object_adapter_from_data( xml )
 
         @xml_data = MobyUtil::XML.parse_string( xml )
         @frozen = true
