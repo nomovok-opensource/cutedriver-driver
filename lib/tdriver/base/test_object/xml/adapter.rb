@@ -23,6 +23,8 @@ module TDriver
 
     class TestObjectAdapter
 
+      include TDriver::Abstraction::TestObjectAdapter
+
       # private methods and variables
       class << self
       
