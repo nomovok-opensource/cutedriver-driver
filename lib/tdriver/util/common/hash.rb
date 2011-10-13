@@ -149,7 +149,7 @@ class Hash
 
   end
 
-  # store key and avalue to hash if not already defined
+  # store key and value to hash if not already defined
   def default_value( key, value )
 
     self[ key ] = value unless has_key?( key )
