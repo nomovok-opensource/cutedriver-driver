@@ -63,7 +63,7 @@ class Hash
 
   end
 
-  # verify that receiver object contains all of given keys. Raises exception is key not found.
+  # verify that receiver object contains given key. Raises exception is key not found.
   def require_key( key, message = 'required key $1 not found from hash' )
   
     # store caller backtrace before calling fetch
