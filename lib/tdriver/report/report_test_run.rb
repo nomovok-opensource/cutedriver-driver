@@ -949,7 +949,7 @@ module TDriverReportCreator
 
 
           xml_data.root.add_child(test)
-          File.open(file, 'w') {|f| f.write(xml_data.to_xml) }
+          File.open(file, 'wb') {|f| f.write(xml_data) }
           test=nil
           xml_data=nil
         else
