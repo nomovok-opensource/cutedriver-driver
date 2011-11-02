@@ -53,10 +53,9 @@
     <!-- default device input type (e.g. key, touch) -->
     <parameter name="input_type" value="key" />
 
-    <!-- default tcp/ip socket read/write/connect timeouts -->
+    <!-- default tcp/ip socket read/write timeouts -->
     <parameter name="socket_read_timeout" value="25" />
     <parameter name="socket_write_timeout" value="25" />
-    <parameter name="socket_connect_timeout" value="25" />
 
     <!-- default value for send_service_request message deflation rules -->
     <parameter name="io_deflate_service_requests" value="true" />
