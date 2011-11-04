@@ -40,6 +40,7 @@ module TDriverReportCreator
       :test_run_behaviour_log,
       :test_run_user_log,
       :test_case_user_data,
+      :test_case_user_xml_data,
       :test_case_user_data_columns,
       :test_case_user_chronological_table_data,
       :attached_test_reports,
@@ -81,6 +82,7 @@ module TDriverReportCreator
       @test_case_user_data=Array.new
       @test_case_user_data_columns = Array.new
       @test_case_user_chronological_table_data = Hash.new
+      @test_case_user_xml_data = Hash.new
       @attached_test_reports = Array.new
       @report_pages_ready=Array.new
       @memory_amount_start='-'
@@ -183,6 +185,21 @@ module TDriverReportCreator
         @test_case_user_chronological_table_data[column_name.to_s]=value.to_s
       end
     end
+    
+    #This method adds user xml data
+    #
+    # === params
+    # column_name: the column name in xml
+    # value: the data
+    # === returns
+    # nil
+    # === raises
+    def set_user_xml_data(column_name,value)
+      if (!column_name.empty? && column_name!=nil)
+        @test_case_user_xml_data[column_name.to_s]=value.to_s
+      end
+    end
+    
     #This method sets the test run behaviour log
     #
     # === params
@@ -850,6 +867,7 @@ module TDriverReportCreator
         total_received=0,
         user_data_rows=nil,
         user_data_columns=nil)
+      
       while $result_storage_in_use==true
         sleep 1
       end
@@ -947,6 +965,17 @@ module TDriverReportCreator
             test<<test_data
           end
 
+          if @test_case_user_xml_data!=nil
+            test_data = Nokogiri::XML::Node.new("non_display_data",test)
+            #create the table rows
+            @test_case_user_xml_data.each_key do |key|              
+                data_value=Nokogiri::XML::Node.new("data",test_data)
+                data_value.set_attribute("id",key.to_s)
+                data_value.content = @test_case_user_xml_data[key].to_s
+                test_data << data_value              
+            end
+            test<<test_data
+          end
 
           xml_data.root.add_child(test)
           File.open(file, 'wb') {|f| f.write(xml_data) }
@@ -1005,6 +1034,23 @@ module TDriverReportCreator
                   }
 
                 end
+                
+                
+                if @test_case_user_xml_data!=nil
+
+                  xml.non_display_data{
+                    #create the table rows
+                    @test_case_user_xml_data.each_key do |key|
+                      
+                        xml.data("id"=>key.to_s){
+                          xml.text @test_case_user_xml_data[key].to_s
+                        }
+           
+                    end
+                  }
+
+                end
+                
               }
             }
           end
