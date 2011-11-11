@@ -700,7 +700,7 @@ module TDriverVerify
       elsif $!.kind_of?( MobyBase::VerificationError )
       
         error_message = "Verification #{ message }at #{ verify_caller } failed: #{ MobyUtil::KernelHelper.find_source( verify_caller ) }"
-        error_message << "The block did not return #{ expected_value }. It returned: #{ result.inspect }"
+        error_message << "The value was not equal to #{ expected_value }. It returned: #{ result.inspect }"
         
       else
       
@@ -837,7 +837,7 @@ module TDriverVerify
       elsif $!.kind_of?( MobyBase::VerificationError )
       
         error_message = "Verification #{ message }at #{ verify_caller } failed: #{ MobyUtil::KernelHelper.find_source( verify_caller ) }"
-        error_message << "The block did not return #{ expected_value }. It returned: #{ result.inspect }"
+        error_message << "The value was not less than #{ expected_value }. It returned: #{ result.inspect }"
         
       else
       
@@ -974,7 +974,7 @@ module TDriverVerify
       elsif $!.kind_of?( MobyBase::VerificationError )
       
         error_message = "Verification #{ message }at #{ verify_caller } failed: #{ MobyUtil::KernelHelper.find_source( verify_caller ) }"
-        error_message << "The block did not return #{ expected_value }. It returned: #{ result.inspect }"
+        error_message << "The value vas not greater than #{ expected_value }. It returned: #{ result.inspect }"
         
       else
       

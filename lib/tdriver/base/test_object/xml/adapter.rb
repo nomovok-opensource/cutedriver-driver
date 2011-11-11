@@ -48,10 +48,19 @@ module TDriver
                 if @partial_match_allowed.include?( [ object_type, key ] )
                   
                   # regexp support is needed also here
+                  if value.kind_of?( Regexp )
+       
+                    prefix_value = "regexp_compare(#{ prefix_key },'#{ value.source }',#{ value.options })"
+                    attribute_value = "regexp_compare(.,'#{ value.source }',#{ value.options })"
+
+                    prefix_key = ""
                   
-                  prefix_value = "[contains(.,#{ value })]"
-                  attribute_value = "contains(.,#{ value })"
-                
+                  else
+
+                    prefix_value = "[contains(.,#{ value })]"
+                    attribute_value = "contains(.,#{ value })"
+
+                  end
                 else
 
                   if value.kind_of?( Regexp )
