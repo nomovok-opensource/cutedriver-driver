@@ -452,6 +452,10 @@ module MobyBehaviour
     # [code]a = to.child( :type => 'Button', :text => '1' )
     # b = to.child( :type => 'Button', :text => '1' )
     # a.eql?( b ) # => true[/code]
+    # \n
+    # [b]NOTE:[/b] If the parameter 'use_find_object' in tdriver_parameters.xml is true (default), objects with visibleOnScreen value 'false' might be 
+    # optimized out and not appear in the results.
+    # \n
     # == arguments
     # attributes
     #  Hash

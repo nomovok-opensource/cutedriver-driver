@@ -290,12 +290,15 @@ module MobyBehaviour
     # TODO: merge TestObject#child and SUT#child
     # == description
     # Creates a child test object from this SUT. SUT object will be associated as child test objects parent.\n
-    #
+    # \n
     # [b]NOTE:[/b] Subsequent calls to TestObject#child( rule ) always returns reference to same Testobject:\n
     # [code]a = sut.child( :type => 'Button', :text => '1' )
     # b = sut.child( :type => 'Button', :text => '1' )
     # a.eql?( b ) # => true[/code]
-    #
+    # \n
+    # [b]NOTE:[/b] If the parameter 'use_find_object' in tdriver_parameters.xml is true (default), objects with visibleOnScreen value 'false' might be 
+    # optimized out and not appear in the results.
+    # \n
     # == arguments
     # attributes
     #  Hash
