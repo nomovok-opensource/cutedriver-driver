@@ -501,7 +501,10 @@ module MobyBehaviour
     end
     
     # == description
-    # Function similar to child, but returns an array of children test objects that meet the given criteria
+    # Function similar to child, but returns an array of children test objects that meet the given criteria. 
+    # \n\n
+    # [b]NOTE:[/b] If the parameter 'use_find_object' in tdriver_parameters.xml is true (default), objects with visibleOnScreen value 'false' might be 
+    # optimized out and not appear in the results.
     #
     # == arguments
     # attributes
