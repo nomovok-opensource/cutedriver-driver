@@ -1546,7 +1546,8 @@ module MobyBehaviour
                   :application_uid => refresh_args[ :id ],
                   :sut => self,
                   :refresh_arguments => refresh_args,
-                  :checksum => xml_data_checksum
+                  :checksum => xml_data_checksum,
+                  :flags => {:useViewCrop=>sut_parameters[ :use_view_crop, 'false' ]}
                 }
               )
             
