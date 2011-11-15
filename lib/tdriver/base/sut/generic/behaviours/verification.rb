@@ -46,6 +46,7 @@ module MobyBehaviour
 
     # == description
     # Checks if a child test object matching the given criteria can be found, under this application object or test object.
+    # NOTE: This won't work with the visibleOnScreen attribute unless you disable the sut parameter use_find_object.
     #
     # == arguments
     # *attributes
