@@ -75,7 +75,7 @@ module TDriverReportDataPresentation
 		filename = "graph.png" if filename.nil?
 		title = "Application Start Performance" if title.nil?
 		create_graph_image(data, filename, title)
-		html = "\n<img class='graph' src='#{filename}' style='width:#{ width.nil? ? 'auto' : width.to_s + 'px' }'/>\n"
+		html = "\n<img class='graph' src='#{File.basename(filename)}' style='width:#{ width.nil? ? 'auto' : width.to_s + 'px' }'/>\n"
 	end	
 	
 	## This method will create an html table tag with the data provided

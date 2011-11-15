@@ -34,7 +34,7 @@ module MobyUtil
           $stderr.puts "#{ file }:#{ line } warning: deprecated method #{ self.class }#new, use MobyUtil::XML#build instead"
 
           # extend builder behaviour of current parser
-          self.extend( ( MobyUtil::XML.current_parser )::Builder )
+          extend( ( ::MobyUtil::XML.current_parser )::Builder )
 
           # create builder object
           build( &block )

@@ -33,7 +33,7 @@ module MobyCommand
 			#TODO: Review comment (OR): @sequence -> @_sequence?
 			@sequence = [] # Array.new( 0 )
 			#@_sut = sut
-			self.append!( key_symbol, type_symbol ) unless key_symbol.nil?
+			append!( key_symbol, type_symbol ) unless key_symbol.nil?
 		end
 
 		# Function to append a keypress with type to KeySequence.sequence array

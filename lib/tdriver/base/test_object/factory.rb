@@ -633,11 +633,13 @@ module TDriver
 
     end
 
-    def self.set_timeout( new_timeout )
+    def self.set_timeout( value )
 
       warn "warning: deprecated method TDriver::TestObjectFactory#set_timeout( value ); please use TDriver::TestObjectFactory#timeout=( value ) instead"
 
-      self.timeout = new_timeout
+      value.check_type( Numeric, "Wrong argument type $1 for timeout value (expected $2)" )
+
+      @timeout = value
 
     end
 

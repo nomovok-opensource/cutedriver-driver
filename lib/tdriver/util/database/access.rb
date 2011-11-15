@@ -109,7 +109,14 @@ module MobyUtil
       
       if db_type == DB_TYPE_MYSQL
 
-        query_result = @@_connections[ host + db_type + database_name ].dbh.query( query_string ) # identical?
+        begin
+          query_result = @@_connections[ host + db_type + database_name ].dbh.query( query_string ) # identical?
+        rescue
+          #Possible timeout in query attempt to recreate the connection and redo the query
+          dbc.dbh = connect_db( db_type, host, username, password, database_name )
+          @@_connections[ host + db_type + database_name ] = dbc
+          query_result = @@_connections[ host + db_type + database_name ].dbh.query( query_string ) # identical?
+        end
 
       elsif dbc.db_type == DB_TYPE_SQLITE
 

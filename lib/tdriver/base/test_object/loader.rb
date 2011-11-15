@@ -17,26 +17,35 @@
 ## 
 ############################################################################
 
-# load test object abstract class
-require File.expand_path( File.join( File.dirname( __FILE__ ), 'abstract' ) )
+[ 
 
-# load test object identificator
-#require File.expand_path( File.join( File.dirname( __FILE__ ), 'identificator' ) )
+  # load test object abstract class
+  'abstract',
 
-# load test object factory
-require File.expand_path( File.join( File.dirname( __FILE__ ), 'factory' ) )
+  # load test object factory
+  'factory',
 
-# load test object cache
-require File.expand_path( File.join( File.dirname( __FILE__ ), 'cache' ) )
+  # load test object cache
+  'cache',
 
-# load test object adapter
-require File.expand_path( File.join( File.dirname( __FILE__ ), 'adapter' ) )
+  # load test object adapter abstraction
+  'xml/abstraction',
 
-# load test object adapter
-require File.expand_path( File.join( File.dirname( __FILE__ ), 'xml/adapter' ) )
+  # load test object adapter
+  'xml/adapter',
 
-# load verify ui module
-require File.expand_path( File.join( File.dirname( __FILE__ ), 'verification' ) )
+  # load test object adapter
+  'adapter',
+
+  # load verify ui module
+  'verification'
+
+].each{ | filename |
+
+  require File.expand_path( File.join( File.dirname( __FILE__ ), filename ) )
+
+}
 
 # load test object behaviours
 MobyUtil::FileHelper.load_modules( File.expand_path( File.join( File.dirname( __FILE__ ), 'behaviours' ) ) )
+

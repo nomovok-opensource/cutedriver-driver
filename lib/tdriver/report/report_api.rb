@@ -129,6 +129,21 @@ module TDriverReportAPI
     end
   end
 
+  # This method logs data to the all_cases.xml
+  #
+  # === params
+  # column_name: name of the column
+  # value: value for the entry
+  # === returns
+  # nil
+  # === raises
+  def tdriver_log_data_in_xml(column_name,value)
+    raise TypeError.new("Argument to method cannot be nil.") if column_name.nil? || value.nil?
+    if $tdriver_reporter!=nil
+      $tdriver_reporter.set_user_xml_data(column_name,value)
+    end
+  end
+  
   # This method logs data test case details
   #
   # === params

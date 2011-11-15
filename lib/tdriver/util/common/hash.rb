@@ -63,7 +63,7 @@ class Hash
 
   end
 
-  # verify that receiver object contains all of given keys. Raises exception is key not found.
+  # verify that receiver object contains given key. Raises exception is key not found.
   def require_key( key, message = 'required key $1 not found from hash' )
   
     # store caller backtrace before calling fetch
@@ -149,7 +149,7 @@ class Hash
 
   end
 
-  # store key and avalue to hash if not already defined
+  # store key and value to hash if not already defined
   def default_value( key, value )
 
     self[ key ] = value unless has_key?( key )
@@ -204,7 +204,7 @@ class Hash
   # TODO: document me
   def to_attributes
   
-    self.collect{ | key, value |
+    collect{ | key, value |
 
       "#{ key.to_s }=\"#{ value.to_s.encode_to_xml }\"" 
   
@@ -215,7 +215,7 @@ class Hash
   # TODO: document me
   def recursive_merge( other )
   
-    self.merge( other ){ | key, old_value, new_value |
+    merge( other ){ | key, old_value, new_value |
 
       new_value
 
@@ -243,7 +243,7 @@ class Hash
   # TODO: document me
   def recursive_merge!( other )
   
-    self.replace( 
+    replace( 
     
       recursive_merge( other )
       

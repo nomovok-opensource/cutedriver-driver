@@ -102,7 +102,7 @@ module MobyBehaviour
 =end
 
     # == description
-    # Return all test object attributes
+    # Return all test object attributes. Please see [link="#GenericTestObject:[]"][][/link] method for alternative approach.
     # == returns
     # Hash
     #  description: Test object attributes
@@ -160,12 +160,12 @@ module MobyBehaviour
     end
 
     # == description
-    # Function returns a attribute of test object 
+    # Function returns a attribute of test object. Please see [link="#GenericTestObject:[]"][][/link] method for alternative approach.
     #
     # == arguments
     # name
     #  String
-    #   description: String definig the name of the attribute to get
+    #   description: String defining the name of the attribute to get
     #   example: "name"
     #
     # == returns
@@ -199,6 +199,41 @@ module MobyBehaviour
     end
 
     # == description
+    # Wrapper method to returns one or all test object attributes. This method calls [link="#GenericTestObject:attribute"]attribute[/link] or [link="#GenericTestObject:attributes"]attributes[/link] depending on the given argument.
+    #
+    # == arguments
+    # name
+    #  String
+    #   description: Attribute name
+    #   example: "attribute_name"
+    #  NilClass
+    #   description: Return all attributes
+    #   example: nil
+    #
+    # == returns
+    # String
+    #   description: Value of the attribute
+    #   example: "value"
+    #
+    # Hash
+    #   description: Hash of all attributes
+    #   example: {:x=>"0", :y=>"0"}
+    #
+    def []( name = nil )
+
+      if name.nil?
+
+        attributes
+
+      else
+
+        attribute( name )
+
+      end  
+
+    end
+
+    # == description
     # Returns the parent test object for the current object in question, according to the UI object hierarchy. For getting the test object that was actually used 
     # as the parent when the test object instance was created, see [link="#GenericTestObject:parent"]parent[/link] method.
     # == returns
@@ -221,7 +256,7 @@ module MobyBehaviour
       # retrieve parent element attributes
       parent_attributes = @test_object_adapter.test_object_element_attributes( parent_element )
 
-      if self.get_application_id && parent_attributes[ 'type' ] != 'application'
+      if get_application_id && parent_attributes[ 'type' ] != 'application'
 
         parent = @sut.child( 
 
@@ -288,7 +323,7 @@ module MobyBehaviour
       )
 
       # update childs if required, returns true or false
-      update( xml_data )
+      update( xml_data ) unless @sut.use_find_objects
 
       nil
 
@@ -417,6 +452,10 @@ module MobyBehaviour
     # [code]a = to.child( :type => 'Button', :text => '1' )
     # b = to.child( :type => 'Button', :text => '1' )
     # a.eql?( b ) # => true[/code]
+    # \n
+    # [b]NOTE:[/b] If the parameter 'use_find_object' in tdriver_parameters.xml is true (default), objects with visibleOnScreen value 'false' might be 
+    # optimized out and not appear in the results.
+    # \n
     # == arguments
     # attributes
     #  Hash
@@ -466,7 +505,10 @@ module MobyBehaviour
     end
     
     # == description
-    # Function similar to child, but returns an array of children test objects that meet the given criteria
+    # Function similar to child, but returns an array of children test objects that meet the given criteria. 
+    # \n\n
+    # [b]NOTE:[/b] If the parameter 'use_find_object' in tdriver_parameters.xml is true (default), objects with visibleOnScreen value 'false' might be 
+    # optimized out and not appear in the results.
     #
     # == arguments
     # attributes
@@ -586,7 +628,7 @@ module MobyBehaviour
             #test_object.update( _xml_data ) 
             test_object.send( :update, _xml_data ) 
             
-          }
+          } unless @sut.use_find_objects
         
         #end
                 
@@ -605,9 +647,9 @@ module MobyBehaviour
       # disable optimizer for this call since it will not work
       @_enable_optimizer = false
 
-      if sut_parameters[ :use_find_object, 'false' ] == 'true' and @sut.respond_to?( 'find_object' )
+      if @sut.use_find_objects == true
 
-        sut_parameters[ :use_find_object ] = 'false'
+        @sut.use_find_objects = false
 
         @_enable_optimizer = true
 
@@ -620,7 +662,7 @@ module MobyBehaviour
     # TODO: document me
     def enable_optimizer
 
-      sut_parameters[ :use_find_object ] = 'true' if @_enable_optimizer
+      @sut.use_find_objects = true if @_enable_optimizer
 
       @_enable_optimizer = false
 
@@ -804,25 +846,27 @@ module MobyBehaviour
     # ?
     def deactivate
 
-      return if !@_active
+      if @_active
 
-      @_active = false
+        @_active = false
 
-      # iterate through all test objects child test objects
-      @child_object_cache.each_object{ | test_object |
-      
-        # deactivate test object
-        #test_object.deactivate
- 
-        test_object.instance_exec{ deactivate }
-              
-      }
+        # iterate through all test objects child test objects
+        @child_object_cache.each_object{ | test_object |
+        
+          # deactivate test object 
+          test_object.__send__( :deactivate )
+          
+        }
+        
+        # remove test objects from cache
+        @child_object_cache.remove_objects  
+        
+        # remove from parent objects children objects cache
+        @parent.instance_variable_get( :@child_object_cache ).remove_object( self )
 
-      # remove test objects from children objects cache
-      @child_object_cache.remove_objects
+        nil
 
-      # remove from parent objects children objects cache
-      @parent.instance_variable_get( :@child_object_cache ).remove_object( self )
+      end
 
     end
 

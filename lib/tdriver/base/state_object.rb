@@ -307,7 +307,7 @@ module MobyBase
     # TODO: document me
     def inspect
 
-      "#<#{ self.class }:0x#{ ( "%x" % ( self.object_id.to_i << 1 ) )[ 3 .. -1 ] } @id=#{ @id.inspect } @type=\"#{ @type }\" @name=\"#{ @name }\">"
+      "#<#{ self.class }:0x#{ ( "%x" % ( object_id.to_i << 1 ) )[ 3 .. -1 ] } @id=#{ @id.inspect } @type=\"#{ @type }\" @name=\"#{ @name }\">"
 
     end
 

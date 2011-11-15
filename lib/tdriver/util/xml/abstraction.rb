@@ -47,49 +47,49 @@ module MobyUtil
       # TODO: document me
       def comment?
 
-        self.kind_of?( MobyUtil::XML::Comment )
+        kind_of?( MobyUtil::XML::Comment )
 
       end
 
       # TODO: document me
       def text?
 
-        self.kind_of?( MobyUtil::XML::Text )
+        kind_of?( MobyUtil::XML::Text )
 
       end
 
       # TODO: document me
       def attribute?
 
-        self.kind_of?( MobyUtil::XML::Attribute )
+        kind_of?( MobyUtil::XML::Attribute )
 
       end
 
       # TODO: document me
       def nodeset?
 
-        self.kind_of?( MobyUtil::XML::Nodeset )
+        kind_of?( MobyUtil::XML::Nodeset )
 
       end
 
       # TODO: document me
       def element?
 
-        self.kind_of?( MobyUtil::XML::Element )
+        kind_of?( MobyUtil::XML::Element )
 
       end
 
       # TODO: document me
       def document?
 
-        self.kind_of?( MobyUtil::XML::Document )
+        kind_of?( MobyUtil::XML::Document )
 
       end
 
       # TODO: document me
       def nil?
 
-        self.kind_of?( MobyUtil::XML::NilNode )
+        kind_of?( MobyUtil::XML::NilNode )
 
       end
 
@@ -103,7 +103,7 @@ module MobyUtil
       # print only object type and id hex
       def inspect
       
-        "#<#{ self.class }:0x#{ ( "%x" % ( self.object_id.to_i << 1 ) )[ 3 .. -1 ] }>"
+        "#<#{ self.class }:0x#{ ( "%x" % ( object_id.to_i << 1 ) )[ 3 .. -1 ] }>"
             
       end
 

@@ -22,13 +22,13 @@ class String
 
   def true?
 
-    /^true$/i.match( self.to_s ) != nil
+    /^true$/i.match( to_s ) != nil
   
   end
   
   def false?
   
-    /^false$/i.match( self.to_s ) != nil
+    /^false$/i.match( to_s ) != nil
   
   end
 
@@ -37,7 +37,7 @@ class String
     if empty?
   
       # replace macros
-      #message.gsub!( '$1', self.inspect )
+      #message.gsub!( '$1', inspect )
   
       raise exception, message, caller 
 
@@ -83,7 +83,7 @@ class String
   # TrueClass/FalseClass 
   def to_boolean( *default )
 
-    if /^(true|false)$/i.match( self.to_s )
+    if /^(true|false)$/i.match( to_s )
     
       $1.downcase == 'true'
       

@@ -236,7 +236,7 @@ module MobyBehaviour
 
 			result_hash = {
 
-				:object => { :type => self.type, :sut => self.kind_of?( MobyBase::SUT ) ? self.id : self.sut.id },
+				:object => { :type => @type, :sut => kind_of?( MobyBase::SUT ) ? id : sut.id },
 				:methods => object_methods,						
 				:behaviours => behaviours 
 			}

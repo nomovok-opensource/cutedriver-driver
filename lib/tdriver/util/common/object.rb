@@ -74,7 +74,7 @@ class Object
 
       raise TypeError, "invalid argument type #{ type } for check_type. Did you mean #{ type.class }?", caller unless type.kind_of?( Class )
 
-      if self.kind_of?( type )
+      if kind_of?( type )
 
         found = true 
 
@@ -91,7 +91,7 @@ class Object
     unless found
 
       # convert macros
-      [ self.class, verbose_type_list.join, self.inspect ].each_with_index{ | param, index | message.gsub!( "$#{ index + 1 }", param.to_s ) }
+      [ self.class, verbose_type_list.join, inspect ].each_with_index{ | param, index | message.gsub!( "$#{ index + 1 }", param.to_s ) }
 
       # raise the exception
       raise TypeError, message, caller
@@ -144,7 +144,7 @@ class Object
     unless found
 
       # convert macros
-      [ self.class, verbose_values_list.join, self.inspect ].each_with_index{ | param, index | message.gsub!( "$#{ index + 1 }", param.to_s ) }
+      [ self.class, verbose_values_list.join, inspect ].each_with_index{ | param, index | message.gsub!( "$#{ index + 1 }", param.to_s ) }
 
       # raise the exception
       raise ArgumentError, message, caller

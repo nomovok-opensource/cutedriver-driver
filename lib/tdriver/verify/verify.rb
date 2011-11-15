@@ -162,7 +162,7 @@ module TDriverVerify
       
       end
 
-      $logger.behaviour "FAIL;Verification #{ message }failed: #{ $!.to_s }.\n #{ timeout.nil? ? '' : ' using timeout ' + timeout.to_s }.;#{ self.kind_of?( MobyBase::SUT ) ? self.id.to_s + ';sut' : ';' };{};verify;"
+      $logger.behaviour "FAIL;Verification #{ message }failed: #{ $!.to_s }.\n #{ timeout.nil? ? '' : ' using timeout ' + timeout.to_s }.;#{ kind_of?( MobyBase::SUT ) ? id.to_s + ';sut' : ';' };{};verify;"
 
       # raise the exception
       raise MobyBase::VerificationError, error_message
@@ -177,7 +177,7 @@ module TDriverVerify
     
     end
 
-    $logger.behaviour "PASS;Verification #{ message }at #{ verify_caller } was successful#{ timeout.nil? ? '' : ' using timeout ' + timeout.to_s }.;#{ self.kind_of?( MobyBase::SUT ) ? self.id.to_s + ';sut' : ';' };{};verify;"
+    $logger.behaviour "PASS;Verification #{ message }at #{ verify_caller } was successful#{ timeout.nil? ? '' : ' using timeout ' + timeout.to_s }.;#{ kind_of?( MobyBase::SUT ) ? id.to_s + ';sut' : ';' };{};verify;"
 
     nil
   
@@ -294,7 +294,7 @@ module TDriverVerify
       
       end
 
-      $logger.behaviour "FAIL;Verification #{ message }failed: #{ $!.to_s }.\n #{ timeout.nil? ? '' : ' using timeout ' + timeout.to_s }.;#{ self.kind_of?( MobyBase::SUT ) ? self.id.to_s + ';sut' : ';' };{};verify_not;"
+      $logger.behaviour "FAIL;Verification #{ message }failed: #{ $!.to_s }.\n #{ timeout.nil? ? '' : ' using timeout ' + timeout.to_s }.;#{ kind_of?( MobyBase::SUT ) ? id.to_s + ';sut' : ';' };{};verify_not;"
 
       # raise the exception
       raise MobyBase::VerificationError, error_message
@@ -309,7 +309,7 @@ module TDriverVerify
     
     end
 
-    $logger.behaviour "PASS;Verification #{ message }at #{ verify_caller } was successful#{ timeout.nil? ? '' : ' using timeout ' + timeout.to_s }.;#{ self.kind_of?( MobyBase::SUT ) ? self.id.to_s + ';sut' : ';' };{};verify_not;"
+    $logger.behaviour "PASS;Verification #{ message }at #{ verify_caller } was successful#{ timeout.nil? ? '' : ' using timeout ' + timeout.to_s }.;#{ kind_of?( MobyBase::SUT ) ? id.to_s + ';sut' : ';' };{};verify_not;"
 
     nil
   
@@ -433,7 +433,7 @@ module TDriverVerify
       
       end
 
-      $logger.behaviour "FAIL;Verification #{ message }failed: #{ $!.to_s }.\n #{ timeout.nil? ? '' : ' using timeout ' + timeout.to_s }.;#{ self.kind_of?( MobyBase::SUT ) ? self.id.to_s + ';sut' : ';' };{};verify_true;"
+      $logger.behaviour "FAIL;Verification #{ message }failed: #{ $!.to_s }.\n #{ timeout.nil? ? '' : ' using timeout ' + timeout.to_s }.;#{ kind_of?( MobyBase::SUT ) ? id.to_s + ';sut' : ';' };{};verify_true;"
 
       # raise the exception
       raise MobyBase::VerificationError, error_message
@@ -448,7 +448,7 @@ module TDriverVerify
     
     end
 
-    $logger.behaviour "PASS;Verification #{ message }at #{ verify_caller } was successful#{ timeout.nil? ? '' : ' using timeout ' + timeout.to_s }.;#{ self.kind_of?( MobyBase::SUT ) ? self.id.to_s + ';sut' : ';' };{};verify_true;"
+    $logger.behaviour "PASS;Verification #{ message }at #{ verify_caller } was successful#{ timeout.nil? ? '' : ' using timeout ' + timeout.to_s }.;#{ kind_of?( MobyBase::SUT ) ? id.to_s + ';sut' : ';' };{};verify_true;"
 
     nil
   
@@ -572,7 +572,7 @@ module TDriverVerify
       
       end
 
-      $logger.behaviour "FAIL;Verification #{ message }failed: #{ $!.to_s }.\n #{ timeout.nil? ? '' : ' using timeout ' + timeout.to_s }.;#{ self.kind_of?( MobyBase::SUT ) ? self.id.to_s + ';sut' : ';' };{};verify_false;"
+      $logger.behaviour "FAIL;Verification #{ message }failed: #{ $!.to_s }.\n #{ timeout.nil? ? '' : ' using timeout ' + timeout.to_s }.;#{ kind_of?( MobyBase::SUT ) ? id.to_s + ';sut' : ';' };{};verify_false;"
 
       # raise the exception
       raise MobyBase::VerificationError, error_message
@@ -587,7 +587,7 @@ module TDriverVerify
     
     end
 
-    $logger.behaviour "PASS;Verification #{ message }at #{ verify_caller } was successful#{ timeout.nil? ? '' : ' using timeout ' + timeout.to_s }.;#{ self.kind_of?( MobyBase::SUT ) ? self.id.to_s + ';sut' : ';' };{};verify_false;"
+    $logger.behaviour "PASS;Verification #{ message }at #{ verify_caller } was successful#{ timeout.nil? ? '' : ' using timeout ' + timeout.to_s }.;#{ kind_of?( MobyBase::SUT ) ? id.to_s + ';sut' : ';' };{};verify_false;"
 
     nil
   
@@ -700,7 +700,7 @@ module TDriverVerify
       elsif $!.kind_of?( MobyBase::VerificationError )
       
         error_message = "Verification #{ message }at #{ verify_caller } failed: #{ MobyUtil::KernelHelper.find_source( verify_caller ) }"
-        error_message << "The block did not return #{ expected_value }. It returned: #{ result.inspect }"
+        error_message << "The value was not equal to #{ expected_value }. It returned: #{ result.inspect }"
         
       else
       
@@ -709,7 +709,7 @@ module TDriverVerify
       
       end
 
-      $logger.behaviour "FAIL;Verification #{ message }failed: #{ $!.to_s }.\n #{ timeout.nil? ? '' : ' using timeout ' + timeout.to_s }.;#{ self.kind_of?( MobyBase::SUT ) ? self.id.to_s + ';sut' : ';' };{};verify_equal;"
+      $logger.behaviour "FAIL;Verification #{ message }failed: #{ $!.to_s }.\n #{ timeout.nil? ? '' : ' using timeout ' + timeout.to_s }.;#{ kind_of?( MobyBase::SUT ) ? id.to_s + ';sut' : ';' };{};verify_equal;"
 
       # raise the exception
       raise MobyBase::VerificationError, error_message
@@ -724,7 +724,7 @@ module TDriverVerify
     
     end
 
-    $logger.behaviour "PASS;Verification #{ message }at #{ verify_caller } was successful#{ timeout.nil? ? '' : ' using timeout ' + timeout.to_s }.;#{ self.kind_of?( MobyBase::SUT ) ? self.id.to_s + ';sut' : ';' };{};verify_equal;"
+    $logger.behaviour "PASS;Verification #{ message }at #{ verify_caller } was successful#{ timeout.nil? ? '' : ' using timeout ' + timeout.to_s }.;#{ kind_of?( MobyBase::SUT ) ? id.to_s + ';sut' : ';' };{};verify_equal;"
 
     nil
   
@@ -837,7 +837,7 @@ module TDriverVerify
       elsif $!.kind_of?( MobyBase::VerificationError )
       
         error_message = "Verification #{ message }at #{ verify_caller } failed: #{ MobyUtil::KernelHelper.find_source( verify_caller ) }"
-        error_message << "The block did not return #{ expected_value }. It returned: #{ result.inspect }"
+        error_message << "The value was not less than #{ expected_value }. It returned: #{ result.inspect }"
         
       else
       
@@ -846,7 +846,7 @@ module TDriverVerify
       
       end
 
-      $logger.behaviour "FAIL;Verification #{ message }failed: #{ $!.to_s }.\n #{ timeout.nil? ? '' : ' using timeout ' + timeout.to_s }.;#{ self.kind_of?( MobyBase::SUT ) ? self.id.to_s + ';sut' : ';' };{};verify_less;"
+      $logger.behaviour "FAIL;Verification #{ message }failed: #{ $!.to_s }.\n #{ timeout.nil? ? '' : ' using timeout ' + timeout.to_s }.;#{ kind_of?( MobyBase::SUT ) ? id.to_s + ';sut' : ';' };{};verify_less;"
 
       # raise the exception
       raise MobyBase::VerificationError, error_message
@@ -861,7 +861,7 @@ module TDriverVerify
     
     end
 
-    $logger.behaviour "PASS;Verification #{ message }at #{ verify_caller } was successful#{ timeout.nil? ? '' : ' using timeout ' + timeout.to_s }.;#{ self.kind_of?( MobyBase::SUT ) ? self.id.to_s + ';sut' : ';' };{};verify_less;"
+    $logger.behaviour "PASS;Verification #{ message }at #{ verify_caller } was successful#{ timeout.nil? ? '' : ' using timeout ' + timeout.to_s }.;#{ kind_of?( MobyBase::SUT ) ? id.to_s + ';sut' : ';' };{};verify_less;"
 
     nil
   
@@ -974,7 +974,7 @@ module TDriverVerify
       elsif $!.kind_of?( MobyBase::VerificationError )
       
         error_message = "Verification #{ message }at #{ verify_caller } failed: #{ MobyUtil::KernelHelper.find_source( verify_caller ) }"
-        error_message << "The block did not return #{ expected_value }. It returned: #{ result.inspect }"
+        error_message << "The value vas not greater than #{ expected_value }. It returned: #{ result.inspect }"
         
       else
       
@@ -983,7 +983,7 @@ module TDriverVerify
       
       end
 
-      $logger.behaviour "FAIL;Verification #{ message }failed: #{ $!.to_s }.\n #{ timeout.nil? ? '' : ' using timeout ' + timeout.to_s }.;#{ self.kind_of?( MobyBase::SUT ) ? self.id.to_s + ';sut' : ';' };{};verify_greater;"
+      $logger.behaviour "FAIL;Verification #{ message }failed: #{ $!.to_s }.\n #{ timeout.nil? ? '' : ' using timeout ' + timeout.to_s }.;#{ kind_of?( MobyBase::SUT ) ? id.to_s + ';sut' : ';' };{};verify_greater;"
 
       # raise the exception
       raise MobyBase::VerificationError, error_message
@@ -998,7 +998,7 @@ module TDriverVerify
     
     end
 
-    $logger.behaviour "PASS;Verification #{ message }at #{ verify_caller } was successful#{ timeout.nil? ? '' : ' using timeout ' + timeout.to_s }.;#{ self.kind_of?( MobyBase::SUT ) ? self.id.to_s + ';sut' : ';' };{};verify_greater;"
+    $logger.behaviour "PASS;Verification #{ message }at #{ verify_caller } was successful#{ timeout.nil? ? '' : ' using timeout ' + timeout.to_s }.;#{ kind_of?( MobyBase::SUT ) ? id.to_s + ';sut' : ';' };{};verify_greater;"
 
     nil
   
@@ -1124,7 +1124,7 @@ module TDriverVerify
       
       end
 
-      $logger.behaviour "FAIL;Verification #{ message }failed: #{ $!.to_s }.\n #{ timeout.nil? ? '' : ' using timeout ' + timeout.to_s }.;#{ self.kind_of?( MobyBase::SUT ) ? self.id.to_s + ';sut' : ';' };{};verify_regexp;"
+      $logger.behaviour "FAIL;Verification #{ message }failed: #{ $!.to_s }.\n #{ timeout.nil? ? '' : ' using timeout ' + timeout.to_s }.;#{ kind_of?( MobyBase::SUT ) ? id.to_s + ';sut' : ';' };{};verify_regexp;"
 
       # raise the exception
       raise MobyBase::VerificationError, error_message
@@ -1139,7 +1139,7 @@ module TDriverVerify
     
     end
 
-    $logger.behaviour "PASS;Verification #{ message }at #{ verify_caller } was successful#{ timeout.nil? ? '' : ' using timeout ' + timeout.to_s }.;#{ self.kind_of?( MobyBase::SUT ) ? self.id.to_s + ';sut' : ';' };{};verify_regexp;"
+    $logger.behaviour "PASS;Verification #{ message }at #{ verify_caller } was successful#{ timeout.nil? ? '' : ' using timeout ' + timeout.to_s }.;#{ kind_of?( MobyBase::SUT ) ? id.to_s + ';sut' : ';' };{};verify_regexp;"
 
     nil
   
@@ -1188,7 +1188,7 @@ module TDriverVerify
       # wait for the signal
       begin
 
-        self.wait_for_signal( timeout, signal_name, &block )
+        wait_for_signal( timeout, signal_name, &block )
 
       rescue
 
@@ -1205,7 +1205,7 @@ module TDriverVerify
 
       $logger.enabled = logging_enabled
 
-      $logger.behaviour "FAIL;Verification #{ message }failed: #{ $!.to_s } using timeout '#{ timeout }.;#{ self.kind_of?(MobyBase::SUT) ? self.id.to_s + ';sut' : ';' };{};verify_signal;#{ signal_name }"
+      $logger.behaviour "FAIL;Verification #{ message }failed: #{ $!.to_s } using timeout '#{ timeout }.;#{ kind_of?(MobyBase::SUT) ? id.to_s + ';sut' : ';' };{};verify_signal;#{ signal_name }"
 
       raise
 
@@ -1215,7 +1215,7 @@ module TDriverVerify
       
     end
 
-    $logger.behaviour "PASS;Verification #{ message }at #{ verify_caller } was successful#{ timeout.nil? ? '' : ' using timeout ' + timeout.to_s }.;#{ self.kind_of?( MobyBase::SUT ) ? self.id.to_s + ';sut' : ';' };{};verify_signal;#{ signal_name }"
+    $logger.behaviour "PASS;Verification #{ message }at #{ verify_caller } was successful#{ timeout.nil? ? '' : ' using timeout ' + timeout.to_s }.;#{ kind_of?( MobyBase::SUT ) ? id.to_s + ';sut' : ';' };{};verify_signal;#{ signal_name }"
     
     nil
 
@@ -1223,11 +1223,12 @@ module TDriverVerify
 
   private
 
+  # TODO: remove me?
   def get_end_time( timeout )
 
-    if self.kind_of?( MobyBase::SUT )
+    if kind_of?( MobyBase::SUT )
 
-      Time.now + ( timeout.nil? ? $parameters[ self.sut ][ :synchronization_timeout, '10' ].to_i : timeout.to_i )
+      Time.now + ( timeout.nil? ? $parameters[ sut ][ :synchronization_timeout, '10' ].to_i : timeout.to_i )
 
     else
 
@@ -1238,20 +1239,16 @@ module TDriverVerify
   end
 
   def get_timeout( timeout )
-  
-    #if timeout.nil?
-  
-      if self.kind_of?( MobyBase::SUT )
 
-        timeout = $parameters[ self.sut ][ :synchronization_timeout, '10' ].to_i if timeout.nil?
+    if kind_of?( MobyBase::SUT )
 
-      else
+      timeout = $parameters[ sut ][ :synchronization_timeout, '10' ] if timeout.nil?
 
-        timeout = $parameters[ :synchronization_timeout, '10' ].to_i if timeout.nil?
+    else
 
-      end
+      timeout = $parameters[ :synchronization_timeout, '10' ] if timeout.nil?
 
-    #end
+    end
     
     timeout.to_i
       
@@ -1260,8 +1257,8 @@ module TDriverVerify
   # Current count of combined sut refresh calls to all suts
   def ref_counter
     counter = 0
-    if self.kind_of? MobyBase::SUT
-      counter = self.dump_count
+    if kind_of?( MobyBase::SUT )
+      counter = dump_count
     else
       TDriver::SUTFactory.connected_suts.each do |sut_id, sut_attributes|
         counter += sut_attributes[:sut].dump_count
@@ -1271,16 +1268,16 @@ module TDriverVerify
   end
 
   def verify_refresh(b_use_id=true)
-    if self.kind_of? MobyBase::SUT
+    if kind_of?( MobyBase::SUT )
         begin
-          appid = self.get_application_id
+          appid = get_application_id
         rescue
           appid='-1'
         end
         if appid != "-1" && b_use_id
-          self.refresh({:id => appid})
+          refresh({:id => appid})
         else
-          self.refresh
+          refresh
         end
       else
         #refresh all connected suts

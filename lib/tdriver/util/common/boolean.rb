@@ -17,35 +17,32 @@
 ## 
 ############################################################################
 
-# extend Ruby TrueClass and FalseClass class functionality
+# extend Ruby TrueClass class functionality
 class TrueClass
 
+  # TODO: document me
   def true?
-
-    /^true$/i.match( self.to_s ) != nil
-  
+    true
   end
-  
+
+  # TODO: document me  
   def false?
-  
     false
-  
   end
 
 end
 
+# extend Ruby FalseClass class functionality
 class FalseClass
 
-  def true?
-  
+  # TODO: document me
+  def true? 
     false
-  
   end
   
+  # TODO: document me
   def false?
-  
-    /^false$/i.match( self.to_s ) != nil
-  
+    true    
   end
 
 end

@@ -25,7 +25,7 @@ module TDriver
 
       def new
       
-        warn_caller "$1:$2 warning: #{ self.to_s } is static class; unable initialize new instance of it"
+        warn_caller "$1:$2 warning: #{ to_s } is static class; unable initialize new instance of it"
       
         nil
       
@@ -130,7 +130,7 @@ module TDriver
 
         if default.empty?
 
-          raise MobyUtil::ParameterNotFoundError, "Parameter #{ key } not found" unless block_given?
+          raise MobyUtil::ParameterNotFoundError, "Parameter #{ key.inspect } not found" unless block_given?
 
           # yield with key if block given
           yield key
@@ -159,6 +159,19 @@ module TDriver
 
       super key, convert_hash( value ) # value.kind_of?( Hash ) ? convert_hash( value ) : value
 
+    end
+    
+    # TODO: document me
+    def apply_template( name )
+        
+      recursive_merge!( 
+        TDriver::Parameter.templates.fetch( name.to_s ){ 
+        
+          raise MobyUtil::TemplateNotFoundError, "Template #{ name.inspect } not found"
+        
+        }
+      )
+    
     end
     
     # for backwards compatibility
@@ -200,7 +213,7 @@ module TDriver
 
       def new
       
-        warn_caller "$1:$2 warning: #{ self.to_s } is static class; unable initialize new instance of it"
+        warn_caller "$1:$2 warning: #{ to_s } is static class; unable initialize new instance of it"
       
         nil
       
@@ -900,6 +913,24 @@ module TDriver
       end
 
       # TODO: document me
+      def has_template?( name )
+      
+        @templates.has_key?( name.to_s )
+      
+      end
+      
+      # TODO: document me
+      def apply_template( name )
+        
+        @parameters.recursive_merge!( 
+          @templates.fetch( name.to_s ){           
+            raise MobyUtil::TemplateNotFoundError, "Template #{ name.inspect } not found"
+          }
+        )
+
+      end
+
+      # TODO: document me
       def has_key?( key )
       
         @parameters.has_key?( key )
@@ -912,7 +943,7 @@ module TDriver
         @parameters.has_value?( key )
       
       end
-
+      
       # TODO: document me
       def keys
       
@@ -1041,7 +1072,7 @@ module MobyUtil
             
       def new
       
-        warn_caller "$1:$2 warning: #{ self.to_s } is deprecated; use TDriver::ParameterHash instead"
+        warn_caller "$1:$2 warning: #{ to_s } is deprecated; use TDriver::ParameterHash instead"
       
         TDriver::ParameterHash.new
       
@@ -1059,7 +1090,7 @@ module MobyUtil
             
       def new
       
-        warn_caller "$1:$2 warning: #{ self.to_s } is static class; unable initialize new instance of it"
+        warn_caller "$1:$2 warning: #{ to_s } is static class; unable initialize new instance of it"
       
         nil
       
@@ -1094,7 +1125,7 @@ module MobyUtil
 
       def new
       
-        warn_caller "$1:$2 warning: #{ self.to_s } is static class; unable initialize new instance of it"
+        warn_caller "$1:$2 warning: #{ to_s } is static class; unable initialize new instance of it"
       
         nil
       

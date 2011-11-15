@@ -97,11 +97,11 @@ module MobyBehaviour
       power_up
       sleep sleep_time_after_powerup
 
-      MobyUtil::Retryable.until( :timeout => 60, :retry_timeout => 5 ) {
+      MobyUtil::Retryable.until( :timeout => 60, :interval => 5 ) {
         system(str_commands_after_powerup) if str_commands_after_powerup != nil
         if $parameters[ :ats4_error_recovery_enabled, false ]!='true'
           $logger.behaviour "PASS;TDriver attempting reconnect"
-          self.connect(self.id)
+          connect( id )
           $logger.behaviour "PASS;TDriver connected"
         else
           $logger.behaviour "PASS;ATS4 handling reconnection"

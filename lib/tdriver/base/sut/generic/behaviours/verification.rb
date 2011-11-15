@@ -46,6 +46,7 @@ module MobyBehaviour
 
     # == description
     # Checks if a child test object matching the given criteria can be found, under this application object or test object.
+    # NOTE: This won't work with the visibleOnScreen attribute unless you disable the sut parameter use_find_object.
     #
     # == arguments
     # *attributes
@@ -198,7 +199,7 @@ module MobyBehaviour
         $logger.enabled = ( attributes[ :__logging ] == 'true' ? true : false )
 
         # behaviour logging
-        $logger.behaviour "#{ ( result == true ? 'PASS' : 'FAIL' ) };#{ description };#{ ( self.sut? ? self.id.to_s : '' ) };test_object_exists?;" 
+        $logger.behaviour "#{ ( result == true ? 'PASS' : 'FAIL' ) };#{ description };#{ ( sut? ? id.to_s : '' ) };test_object_exists?;" 
         
         # raise exception if neccessery
         raise result if result.kind_of?( Exception )
