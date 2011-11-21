@@ -479,7 +479,8 @@ module MobyUtil
 		# 
 		# == throws
 		# 
-		def self.parse_ts_file(file, column_names_map = {} )
+	    
+    def self.parse_ts_file(file, column_names_map = {} )
 			# Read TS file
 			open_file = File.new( file )
 			doc = Nokogiri.XML( open_file )
@@ -512,7 +513,8 @@ module MobyUtil
 					# Parse Numerus(LengthVar), or Numerus or LengthVar or translation direclty
 					if ! node.xpath('.//translation/numerusform').empty?
 						# puts ">>> Numerusform"
-            plurality = 1
+            priority = 1
+            plurality = ''
 						node.xpath('.//translation/numerusform').each do |numerus|
 							nodePlurality = numerus.xpath('@plurality').inner_text()
               nodePlurality = plurality.to_s if nodePlurality.empty?
@@ -521,15 +523,15 @@ module MobyUtil
                 priority = 1
 								numerus.xpath('.//lengthvariant').each do |lenghtvar|
 									nodeLengthVar = lenghtvar.xpath('@priority').inner_text()
-                  nodeLengthVar = priority.to_s if nodeLengthVar.empty?
+                  nodeLengthVar = priority.to_s if nodeLengthVar.empty?                  
 									nodeTranslation = lenghtvar.inner_text()
 									data << [ fname, nodeId, nodeTranslation, nodePlurality, nodeLengthVar ]
                   priority += 1
 								end
 							else
 								nodeTranslation = numerus.inner_text()
-								data << [ fname, nodeId, nodeTranslation, nodePlurality, nodeLengthVar ]
-                plurality += 1
+								data << [ fname, nodeId, nodeTranslation, nodePlurality, nodeLengthVar = '1' ]
+                priority += 1
 							end
 						end			
 					elsif ! node.xpath('.//translation/lengthvariant').empty?
@@ -537,7 +539,7 @@ module MobyUtil
 						priority = 1
 						node.xpath('.//translation/lengthvariant').each do |lenghtvar|
 							nodeLengthVar = lenghtvar.xpath('@priority').inner_text()
-							nodeLengthVar = priority.to_s if nodeLengthVar.empty?
+							nodeLengthVar = priority.to_s if nodeLengthVar.empty?             
 							nodeTranslation = lenghtvar.inner_text()
 							data << [ fname, nodeId, nodeTranslation, nodePlurality, nodeLengthVar ]
 							priority += 1					
@@ -554,7 +556,7 @@ module MobyUtil
 			open_file.close
 			return language, data
 		end
-		
+    
     #
     # Note: for .loc files the colum mapping is done with the Language code number on the filenames
     #
