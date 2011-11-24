@@ -378,6 +378,7 @@ module TDriver
       def self.parent_test_object_element( test_object )
 
         # retrieve parent of current xml element; obj/..
+        test_object.refresh #Refresh the test object for identification
         test_object.xml_data.parent #.parent
       
       end

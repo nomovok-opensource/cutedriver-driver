@@ -187,13 +187,25 @@ module MobyUtil
       return result
     end
     
+    # == description
+    # Function closes MySQL connection
+    #
+    def close_db()
+            
+      if @@_mysql        
+        @@_mysql.close
+        @@_mysql=nil      
+      end      
+      
+    end
+    
   private
     
     # == description
     # Function establishes a new connection to as sql server and returns it's handle
     #
-      def self.connect_db(  db_type, host, username, password, database_name )
-
+    def self.connect_db(  db_type, host, username, password, database_name )
+      
       # if mysql API and connection are not initialized, then initialize the mysql API
       if (  db_type == DB_TYPE_MYSQL ) && ( @@_mysql.nil? )
         require 'mysql'
@@ -201,7 +213,7 @@ module MobyUtil
       elsif  db_type == DB_TYPE_SQLITE
         require 'sqlite3'
       end
-
+      
       begin
         dbh = @@_mysql.connect( host, username, password, database_name) if  db_type == DB_TYPE_MYSQL
         dbh.query 'SET NAMES utf8' if db_type == DB_TYPE_MYSQL # set the utf8 encoding
@@ -211,8 +223,8 @@ module MobyUtil
       end
       
       return dbh
-
-    end
+      
+    end    
 
     # enable hoo./base/test_object/factory.rb:king for performance measurement & debug logging
     TDriver::Hooking.hook_methods( self ) if defined?( TDriver::Hooking )
@@ -220,3 +232,5 @@ module MobyUtil
   end # DBAccess
 
 end # MobyUtil
+
+at_exit{MobyUtil::DBAccess.instance.close_db}
