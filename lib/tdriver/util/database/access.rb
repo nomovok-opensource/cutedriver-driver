@@ -111,7 +111,11 @@ module MobyUtil
 
         begin
           query_result = @@_connections[ host + db_type + database_name ].dbh.query( query_string ) # identical?
-        rescue
+        rescue 
+          if @@_mysql        
+              @@_mysql.close
+              @@_mysql=nil      
+          end
           #Possible timeout in query attempt to recreate the connection and redo the query
           dbc.dbh = connect_db( db_type, host, username, password, database_name )
           @@_connections[ host + db_type + database_name ] = dbc
