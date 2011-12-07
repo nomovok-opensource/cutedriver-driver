@@ -185,7 +185,7 @@ module TDriverReportCreator
       $new_test_case.test_case_user_data_columns
     )
 
-
+    $tdriver_reporter.test_case_user_xml_data=Hash.new
     $tdriver_reporter.set_end_time(Time.now)
     $tdriver_reporter.set_total_run(1)
     $tdriver_reporter.update_summary_page('inprogress')
