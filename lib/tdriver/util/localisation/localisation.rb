@@ -613,7 +613,7 @@ module MobyUtil
 				language += "_"
 			end
 			
-			sql_file = File.open(table_name + ".#{db_connection.db_type}.sql", 'a') if record_sql
+			sql_file = File.open(table_name + ".#{db_connection.db_type}.sql", 'a') 
 
 			# CREATE TABLE if doesn't exist (language columns to be created as needed)
       # When no lengthvar is provided we now assign priority '1' by default
