@@ -186,7 +186,6 @@ module TDriverReportCreator
     )
 
 
-    $tdriver_reporter.test_case_user_xml_data=Hash.new 
     $tdriver_reporter.set_end_time(Time.now)
     $tdriver_reporter.set_total_run(1)
     $tdriver_reporter.update_summary_page('inprogress')
@@ -232,7 +231,7 @@ module TDriverReportCreator
       chronological_data_rows=$tdriver_reporter.test_case_user_chronological_table_data
       $new_test_case.set_test_case_chronological_view_data(chronological_data_rows)
       $tdriver_reporter.set_user_data(nil)
-      $tdriver_reporter.set_user_chronological_table_data(nil)      
+      $tdriver_reporter.set_user_chronological_table_data(nil)
     end
   end
 
@@ -317,7 +316,7 @@ module TDriverReportCreator
 
         each_video_device do | video_device, device_index |
           begin
-            FileUtils.mv( "cam_" + device_index + "_" + @_video_file_name, "cam_" + device_index + "_" + @_previous_video_file_name )
+            FileUtils.mv(tdriver_report_folder() + "/cam_" + device_index + "_" + @_video_file_name, tdriver_report_folder() + "/cam_" + device_index + "_" + @_previous_video_file_name )
           rescue
             # do nothing..
           end
@@ -551,6 +550,7 @@ module TDriverReportCreator
         no_activity_videos = ""
         if $parameters[:report_check_device_active, 'false']=='true'
           if temp_rec
+
             no_activity_videos = $new_test_case.target_video_alive
           end
         end
@@ -596,8 +596,6 @@ module TDriverReportCreator
 
       update_run($new_test_case.test_case_name.to_s,status,$new_test_case.test_case_reboots,$new_test_case.test_case_crash_files,execution_log)
 
-      
-      
       $new_junit_xml_results.add_test_result(status, $new_test_case.test_case_start_time, $new_test_case.test_case_end_time)
       tdriver_update_sequential_fails( status ) if $parameters[ :runner_sequence_skip, "false" ] == "true"
 
@@ -620,7 +618,7 @@ module TDriverReportCreator
 
       each_video_device do | video_device, device_index |
         begin
-          delete_file = "cam_" + device_index + "_" + file_name
+          delete_file = tdriver_report_folder() + "/cam_" + device_index + "_" + file_name
           if File.exists?( delete_file )
             File.delete( delete_file )
           end

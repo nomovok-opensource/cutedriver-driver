@@ -393,13 +393,14 @@ module TDriverReportCreator
 
           rec_options = { :width => tc_video_width, :height => tc_video_height, :fps => tc_video_fps }
           rec_options[ :device ] = video_device unless video_device == "true" # use default device if "true"
-          video_recorder = MobyUtil::TDriverCam.new_cam( "cam_" + device_index + "_" + @tc_video_filename, rec_options )
+          video_recorder = MobyUtil::TDriverCam.new_cam( tdriver_report_folder() + "/cam_" + device_index + "_" + @tc_video_filename, rec_options )
           video_recorder.start_recording
           @tc_video_recorders << video_recorder
           @tc_video_recording = true
 
         end
       rescue Exception => e
+
         # make sure to stop any started cams if startup fails
         stop_video_recording
         raise e
@@ -419,11 +420,11 @@ module TDriverReportCreator
         check_frame_min =  $parameters[:report_activity_frame_treshold, '8']
         check_video_min =  $parameters[:report_activity_video_treshold, '29']
 
-        ret_n = MobyUtil.video_alive? "cam_" + device_index + "_" + @tc_video_filename, check_fps.to_f, check_frame_min.to_f, check_video_min.to_f, false
+        ret_n = MobyUtil.video_alive? tdriver_report_folder() + "/cam_" + device_index + "_" + @tc_video_filename, check_fps.to_f, check_frame_min.to_f, check_video_min.to_f, false
 
         if !ret_n
           ret += ", " if !ret.empty?
-          ret += "cam_" + device_index + "_" + @tc_video_filename
+          ret += tdriver_report_folder() + "/cam_" + device_index + "_" + @tc_video_filename
         end
 
       end
@@ -523,6 +524,7 @@ module TDriverReportCreator
       MobyUtil::Logger.instance.enabled=false
       begin
 
+
         video_folder=@test_case_folder+'/video'
         if File::directory?(video_folder)==false
           FileUtils.mkdir_p video_folder
@@ -532,14 +534,15 @@ module TDriverReportCreator
         each_video_device do | video_device, device_index |
 
           begin
-            FileUtils.copy("cam_" + device_index + "_" + @tc_video_filename, video_folder)
+            FileUtils.copy(tdriver_report_folder() + "/cam_" + device_index + "_" + @tc_video_filename, video_folder)
           rescue
-            # Copy failed, do nothing
+			 # Copy failed, do nothing
           end
 
           begin
-            FileUtils.copy("cam_" + device_index + "_" + @tc_previous_video_filename, video_folder)
+            FileUtils.copy(tdriver_report_folder() + "/cam_" + device_index + "_" + @tc_previous_video_filename, video_folder)
           rescue
+
             # Copy failed, do nothing
           end
 
