@@ -42,6 +42,7 @@ module MobyUtil
       "Norwegian" => ["no", "08"], 
       "Finnish" => ["fi", "09"],
       "English US" => ["en_US", "10"],
+      "en_US" => ["en_US", "14346"],
       # "Swiss French" => ["SF", "11"],
       # "Swiss German" => ["SG", "12"],
       "Portuguese" => ["pt", "13"],
@@ -83,6 +84,7 @@ module MobyUtil
       "Estonian" => ["et", "49"],  
       "Persian" => ["fa", "50"],  
       "French CA" => ["fr_CA", "51"],
+      "fr_CA" => ["fr_CA", "14387"],
       # "Scots Gaelic" => ["GD", "52"],  
       "Georgian" => ["ka", "53"],  
       "Greek" => ["el", "54"],  
@@ -107,14 +109,18 @@ module MobyUtil
       # "Moldavian" => ["MO", "73"],  
       "Mongolian" => ["mn", "74"],  
       # "Norwegian Nynorsk" => ["nn", "75"],  
-      "Portuguese BR" => ["pt_BR", "76"],  
+      "Portuguese BR" => ["pt_BR", "76"],
+      "pt_AM" => ["pt_AM", "14412"],
       "Punjabi" => ["pa", "77"],  
       "Romanian" => ["ro", "78"],  
       "Servian" => ["sr", "79"], 
       "Sinhala" => ["si", "80"],  
       # "Somali" => ["SO", "81"],  
       # "International Spanish" => ["OS", "82"],  
-      "Spanish AM" => ["es_419", "83"],  
+      "Spanish AM" => ["es_419", "83"], 
+      "sp_AM" => ["sp_AM", "14419"],
+      "sp_PA" => ["sp_PA", "6154"],
+      "sp_UR" => ["sp_UR", "14346"],      
       "Swahili" => ["sw", "84"],  
       # "Finland Swedish" => ["FS", "85"],  
       "Tamil" => ["ta", "87"],   
@@ -564,7 +570,7 @@ module MobyUtil
     begin
     
       data = []
-      file.split('/').last.match(/(.*)_(\w{2,3}).loc/)
+      file.split('/').last.match(/(.*)_(\w{2,5}).loc/)
       fname = $1
       language_number = $2
       # select returns an array of [language, codes] that suite the conditional
@@ -574,7 +580,7 @@ module MobyUtil
       
       io = open(file)
       while line = io.gets
-        if line.match(/#define ([a-zA-Z1-9\_]*) \"(.*)\"/)
+        if line.match(/#define ([a-zA-Z1-9\d\_]*) \"(.*)\"/)
           lname = $1
           translation = $2
           # When no lengthvar is provided we now assign priority '1' by default          
@@ -586,8 +592,8 @@ module MobyUtil
       #p data
       return language, data
     rescue Exception => e
-      puts e.message
-      puts e.backtrace
+      #puts e.message
+      #puts e.backtrace
     end
     end
 		
@@ -671,7 +677,7 @@ module MobyUtil
           data.each do |fname, source, translation, plurality, lengthvar|
             # Escape ` and ' and "  and other restricted characters in SQL (prevent SQL injections
             source = source.gsub(/([\'\"\`\;\&])/){|s|  "\\" + s}
-            translation = (translation != nil) ? translation.gsub(/([\'\"\`\;\&])/){|s|  "\\" + s} : ""
+            translation = (translation != nil) ? translation.gsub(/([\'\"\`\;\&\\'\\"])/){|s|  "\\" + s} : ""
             if plurality=='NULL'
               insert_values += "('" + fname + "', '" + source + "', '" + translation + "', NULL, '" + lengthvar + "'), "						
             else
