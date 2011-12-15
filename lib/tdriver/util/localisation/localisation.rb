@@ -672,32 +672,31 @@ module MobyUtil
       when "mysql"
         insert_values = ""
         
-        
+        begin
           # Formatting (seems like there is no length limit for the insert string)
-          data.each do |fname, source, translation, plurality, lengthvar|
-          begin
+          data.each do |fname, source, translation, plurality, lengthvar|            
             # Escape ` and ' and "  and other restricted characters in SQL (prevent SQL injections
             source = source.gsub(/([\'\"\`\;\&])/){|s|  "\\" + s}
             translation = (translation != nil) ? translation.gsub(/([\'\"\`\;\&\\'\\"])/){|s|  "\\" + s} : ""
             if plurality=='NULL'
-              insert_values = "('" + fname + "', '" + source + "', '" + translation + "', NULL, '" + lengthvar + "')"						
+              insert_values += "('" + fname + "', '" + source + "', '" + translation + "', NULL, '" + lengthvar + "') ,"						
             else
-              insert_values = "('" + fname + "', '" + source + "', '" + translation + "', '" + plurality + "', '" + lengthvar + "')"						
-            end
-            #insert_values[-2] = ' ' unless insert_values == "" # replace last ',' with ';'
-            # INSERT Query
-            query_string = "INSERT INTO `" + table_name + "` (FNAME, LNAME, `" + language + "`, `PLURALITY`, `LENGTHVAR`) VALUES " + insert_values +
-              "ON DUPLICATE KEY UPDATE fname = VALUES(fname), lname = VALUES(lname), `" + language + "` = VALUES(`" + language + "`) ;"
-            MobyUtil::DBAccess.query( db_connection, query_string )
-            sql_file.write( query_string + "\n" ) if record_sql
-          rescue Exception => e
-            puts e.message
-            puts e.backtrace
-            puts ''
-            sql_file.write( "Error: #{e.message}: #{query_string}" + "\n" )
+              insert_values += "('" + fname + "', '" + source + "', '" + translation + "', '" + plurality + "', '" + lengthvar + "') ,"						
+            end            
           end
-        end
           
+          insert_values[-2] = ' ' unless insert_values == "" # replace last ',' with ';'
+          # INSERT Query
+          query_string = "INSERT INTO `" + table_name + "` (FNAME, LNAME, `" + language + "`, `PLURALITY`, `LENGTHVAR`) VALUES " + insert_values +
+            "ON DUPLICATE KEY UPDATE fname = VALUES(fname), lname = VALUES(lname), `" + language + "` = VALUES(`" + language + "`) ;"
+          MobyUtil::DBAccess.query( db_connection, query_string )
+          sql_file.write( query_string + "\n" ) if record_sql
+        rescue Exception => e
+          puts e.message
+          puts e.backtrace
+          puts ''
+          sql_file.write( "Error: #{e.message}: #{query_string}" + "\n" )
+        end
                   
 				when "sqlite"
 					begin
