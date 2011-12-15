@@ -679,9 +679,9 @@ module MobyUtil
             source = source.gsub(/([\'\"\`\;\&])/){|s|  "\\" + s}
             translation = (translation != nil) ? translation.gsub(/([\'\"\`\;\&\\'\\"])/){|s|  "\\" + s} : ""
             if plurality=='NULL'
-              insert_values += "('" + fname + "', '" + source + "', '" + translation + "', NULL, '" + lengthvar + "') ,"						
+              insert_values += "('" + fname + "', '" + source + "', '" + translation + "', NULL, '" + lengthvar + "'), "						
             else
-              insert_values += "('" + fname + "', '" + source + "', '" + translation + "', '" + plurality + "', '" + lengthvar + "') ,"						
+              insert_values += "('" + fname + "', '" + source + "', '" + translation + "', '" + plurality + "', '" + lengthvar + "'), "						
             end            
           end
           
