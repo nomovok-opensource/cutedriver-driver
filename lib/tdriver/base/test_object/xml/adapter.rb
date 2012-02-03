@@ -708,6 +708,9 @@ module TDriver
           # flag defining that is application element already created
           application_element_set = false
 
+          # keep error element
+          new_xml << document_root.xpath('/tasMessage/tasInfo/obj[@type="Error"]').to_s
+
           # collect environment values
           environments = document_root.xpath('/tasMessage/tasInfo/obj[@type="application"]/@env').collect{ | attribute | attribute.to_s }
 
