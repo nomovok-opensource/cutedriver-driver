@@ -17,7 +17,7 @@
       {
          padding: 10px;
          border: #e7e7e7 1px solid;
-         background: #ffffff;
+         background: #74C2E1;
          color: black;
          font-size: 13px;
          cursor: default;
