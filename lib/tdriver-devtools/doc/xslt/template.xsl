@@ -301,9 +301,10 @@
       span.toc_title
       {
       
-        font-size: 14px;
+        font-size: 24px;
         font-weight: bold;
         #text-shadow: #909090 1px 1px 1px;
+		text-align: center;
       
       }
       
@@ -311,7 +312,7 @@
       {
       
         padding: 5px;
-        width: 100%;
+        width: 50%;
         word-spacing: normal;
       }
 
@@ -319,15 +320,17 @@
       {
       
         padding: 7px;
+		
       }
       
       a.toc_item
       {
       
-        font-size: 11px;
+        font-size: 20px;
         text-decoration: none;
         color: #313131;
-
+        text-align: center;
+		
       }
 
       a.toc_item:hover
@@ -407,7 +410,7 @@
   <body>
 
     <a name="top">
-      <h2>Testability Driver API Documentation</h2>
+      <center><h1>Testability Driver API Documentation</h1></center>
     </a>
     
     <xsl:apply-templates/>
@@ -419,13 +422,14 @@
 <xsl:template match="documentation">
 
   <!-- table of contents -->
-  <span class="toc_title">Table of contents:</span>
+  <center><span class="toc_title">Table of contents:</span>
   <br />
   
   <div class="toc">
+	<table class="default">
 
     <xsl:for-each select="feature/@name">
-
+    
       <xsl:sort select="." />
 
       <!---
@@ -438,16 +442,21 @@
       <xsl:variable name="module"><xsl:value-of select="../behaviour/@module"/></xsl:variable>
       <xsl:variable name="module_name"><xsl:value-of select="../behaviour/@name"/></xsl:variable>
 
-      <xsl:for-each select="str:split(.,';')">
-        <span class="toc_block"><a href="#{ $module_name }:{ $name }" class="toc_item" title="{ $module_name } ({ $module })"><xsl:value-of select="." /></a><xsl:text> </xsl:text></span>
-      </xsl:for-each>
 
+	<tr>
+	<td class="tablebg_even" valign="top">
+      <xsl:for-each select="str:split(.,';')">
+        <center><span class="toc_block"><a href="#{ $module_name }:{ $name }" class="toc_item" title="{ $module_name } ({ $module })"><xsl:value-of select="." /></a><xsl:text> </xsl:text></span></center>
+      </xsl:for-each>
+	</td>
+    </tr>
       <xsl:text> </xsl:text>
     
     </xsl:for-each>
-    
+    </table>
   </div>
-  <br />
+  </center>
+  <hr />
 
   <!-- content -->
 
@@ -1566,8 +1575,14 @@
     <xsl:call-template name="div_warning"><xsl:with-param name="text">No examples/test scenarios available</xsl:with-param></xsl:call-template>
   </xsl:if>
 
+  <hr />
   <br />
-
+  <br />
+  <br />
+  <br />
+  <br />
+  <br />
+  <hr />
 </xsl:template>
 
 <xsl:template name="info">
