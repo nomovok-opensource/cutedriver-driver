@@ -312,7 +312,7 @@
       {
       
         padding: 5px;
-        width: 50%;
+        width: 65%;
         word-spacing: normal;
       }
 
@@ -430,7 +430,10 @@
   
             <div class="toc">
                 <table class="default">
-
+                <tr class="header">
+                    <td class="header">Method</td>
+                    <td class="header">Description</td>
+                </tr>
                     <xsl:for-each select="feature/@name">
     
                         <xsl:sort select="." />
@@ -450,20 +453,27 @@
                         <xsl:variable name="module_name">
                             <xsl:value-of select="../behaviour/@name"/>
                         </xsl:variable>
-
+                        <xsl:variable name="feature_description">
+						<xsl:call-template name="formatted_content">
+                            <xsl:with-param name="text" select="../description/text()" />
+						</xsl:call-template> 
+                        </xsl:variable>
 
                         <tr>
                             <td class="tablebg_even" valign="top">
-                                <xsl:for-each select="str:split(.,';')">
-                                    <center>
+                                <xsl:for-each select="str:split(.,';')">                                    
                                         <span class="toc_block">
                                             <a href="#{ $module_name }:{ $name }" class="toc_item" title="{ $module_name } ({ $module })">
                                                 <xsl:value-of select="." />
                                             </a>
                                             <xsl:text> </xsl:text>
-                                        </span>
-                                    </center>
+                                        </span>                                    
                                 </xsl:for-each>
+                            </td>
+                            <td class="tablebg_even" valign="top">
+							
+                              <xsl:value-of select="$feature_description" />
+							 
                             </td>
                         </tr>
                         <xsl:text> </xsl:text>
