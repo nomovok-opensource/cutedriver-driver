@@ -100,7 +100,7 @@ module TDriver
                   
                 end
 
-                TDriverReportAPI::tdriver_report_log("Verification failed as an exception was thrown when the verification block was executed. #{ verify.source }\nDetails: #{ ( verify.message || "none" ) }\nNested exception:\n#{ e.inspect }")
+                TDriverReportAPI::tdriver_report_log("Verification failed as an exception was thrown when the verification block was executed. #{ verify.source }\nDetails: #{( verify.message || "none" ) }\nNested exception:\n#{ e.inspect }")
 
                 TDriverReportAPI::tdriver_report_log("<hr />")
                 
