@@ -67,6 +67,7 @@ def run(iteration)
 
 	# process Events
 	if !@settings[:events].empty?
+    app.enable_events
 		events = app.get_events
 		app.disable_events
 		#puts events
