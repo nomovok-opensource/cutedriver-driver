@@ -201,11 +201,11 @@ module MobyBehaviour
         # behaviour logging
         $logger.behaviour "#{ ( result == true ? 'PASS' : 'FAIL' ) };#{ description };#{ ( sut? ? id.to_s : '' ) };test_object_exists?;" 
         
-        # raise exception if neccessery
-        raise result if result.kind_of?( Exception )
-
         # restore original logger state
         $logger.pop_enabled
+        
+        # raise exception if neccessery
+        raise result if result.kind_of?( Exception )        
 
       end
 
