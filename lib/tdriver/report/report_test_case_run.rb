@@ -645,15 +645,20 @@ module TDriverReportCreator
     # === raises
     def capture_trace_files()
       if  $parameters[ :report_trace_capture, false]=="true"
-        trace_folder= $parameters[ :report_trace_folder, nil]
-        if trace_folder!=nil
-          if File::directory?(trace_folder)==true
-            dump_folder=@test_case_folder+'/trace_files'
-            if File::directory?(dump_folder)==false
-              FileUtils.mkdir_p dump_folder
+        begin        
+          trace_folder= $parameters[ :report_trace_folder, nil]
+          if trace_folder!=nil
+            if File::directory?(trace_folder)==true
+              dump_folder=@test_case_folder+'/trace_files'
+              if File::directory?(dump_folder)==false
+                FileUtils.mkdir_p dump_folder
+              end
+              FileUtils.cp_r trace_folder, @test_case_folder+'/trace_files'
             end
-            FileUtils.cp_r trace_folder, @test_case_folder+'/trace_files'
           end
+        rescue Exception => ex
+          self.set_test_case_execution_log(ex.message)
+          self.set_test_case_execution_log(ex.backtrace)
         end
       end
     end
