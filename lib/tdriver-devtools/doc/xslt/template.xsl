@@ -332,8 +332,24 @@
         text-align: center;
 		
       }
+      
+      a.toc_item2
+      {
+      
+        font-size: 11px;
+        text-decoration: none;
+        color: #313131;
+		
+      }
 
       a.toc_item:hover
+      {
+      
+        border-bottom: 1px dotted #515151;
+
+      }
+      
+      a.toc_item2:hover
       {
       
         border-bottom: 1px dotted #515151;
@@ -422,7 +438,38 @@
     </xsl:template>
 
     <xsl:template match="documentation">
+<!-- table of contents -->
+  <br />
+  
+  
 
+    <xsl:for-each select="feature/@name">
+
+      <xsl:sort select="." />
+
+      <!---
+
+        file:///home/jussi/git/2010-10-07/driver/lib/output/example.xml#QT;TestObject;activate
+
+      -->
+
+      <xsl:variable name="name"><xsl:value-of select="../@name"/></xsl:variable>
+      <xsl:variable name="module"><xsl:value-of select="../behaviour/@module"/></xsl:variable>
+      <xsl:variable name="module_name"><xsl:value-of select="../behaviour/@name"/></xsl:variable>
+
+      <xsl:for-each select="str:split(.,';')">
+        <span class="toc_block"><a href="#{ $module_name }:{ $name }" class="toc_item2" title="{ $module_name } ({ $module })"><xsl:value-of select="." /></a><xsl:text> </xsl:text></span>
+      </xsl:for-each>
+
+      <xsl:text> </xsl:text>
+    
+    </xsl:for-each>
+    
+
+  <br />
+
+  <!-- content -->
+  
   <!-- table of contents -->
         <center>
             <span class="toc_title">Table of contents:</span>
