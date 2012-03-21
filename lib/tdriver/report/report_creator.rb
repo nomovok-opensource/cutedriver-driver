@@ -118,7 +118,7 @@ module TDriverReportCreator
     error_in_connection if $parameters[ :custom_error_recovery_module, nil ]!=nil
     $tdriver_reporter.connection_errors+=1 if $tdriver_reporter
     $new_test_case.connection_errors+=1 if $new_test_case
-    update_test_case('<b style="color: #FF0000">WARNING: Connection error detected!</b>')   
+    $new_test_case.set_test_case_execution_log('<b style="color: #FF0000">WARNING: Connection error detected!</b>') if $new_test_case
   end
   #This method returns the group where the test case belongs
   #
