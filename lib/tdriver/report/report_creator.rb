@@ -352,7 +352,7 @@ module TDriverReportCreator
     if $new_test_case==nil
       @_stored_details << details
     else
-      if @_stored_details!=[]
+      if @_stored_details!=[] && @_stored_details!=nil
         @_stored_details.each do |detail|
           $new_test_case.set_test_case_execution_log(detail)
         end
@@ -411,15 +411,7 @@ module TDriverReportCreator
         $new_test_case.copy_video_capture()
       end
       error_in_test_case(TDriver::SUTFactory.connected_suts) if $parameters[ :custom_error_recovery_module, nil ]!=nil
-      begin
 
-          error_in_connection_detected
-
-      rescue Exception => e
-        update_test_case("Error recovery failed Exception: #{e.message} Backtrace: #{e.backtrace}")
-        end_test_case($new_test_case.test_case_name,'failed')
-        exit(1)
-      end
     rescue => ex
       puts ex.message
       puts ex.backtrace

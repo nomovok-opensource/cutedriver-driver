@@ -1393,7 +1393,8 @@ module TDriverReportCreator
         @all_cases_arr=nil
         update_test_case_summary_pages_for_crashes_and_reboots(rewrite)
       rescue Exception => e
-        raise e, "Unable to update test case summary pages", caller
+        puts e.backtrace 
+        raise e, "Unable to update test case summary pages", caller        
       end
       return nil
     end

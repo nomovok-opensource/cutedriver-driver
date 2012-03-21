@@ -672,7 +672,7 @@ display: block;
     case title
     when "TDriver test results"
       stylesheet='<link rel="stylesheet" title="TDriverReportStyle" href="tdriver_report_style.css"/>'
-    when "TDriver test environment","Total run","Statistics","Passed","Failed","Not run","Crash","Reboot","TDriver log"
+    when "TDriver test environment","Total run","Statistics","Passed","Failed","Not run","Crash","Reboot","Connection Errors", "TDriver log"
       stylesheet='<link rel="stylesheet" title="TDriverReportStyle" href="../tdriver_report_style.css"/>'
     else
       if title.include?("Test:")
@@ -1028,6 +1028,20 @@ display: block;
         html_body << '<form action="save_results_to" ><input type="submit" name="save_results_to" value="Download report" /></form>' if @report_editable=='true'
         tdriver_group=nil
         html_result=nil
+      when 'connection_errors'
+        title='<div class="page_title"><center><h1>Connection Errors</h1></center></div>'<<
+          '<div class="summary_reboot">' <<
+          '<form action="save_total_run_results" >'
+        tdriver_group=ReportingGroups.new(@reporting_groups,tc_arr,false)
+        tdriver_group.parse_groups()
+        html_result=tdriver_group.generate_report('all')
+        html_body << title
+        html_body << html_result
+        html_body << "<input type=\"submit\" name=\"save_changes\" value=\"Save changes\" />" if @report_editable=='true'
+        html_body << "</form>"
+        html_body << '<form action="save_results_to" ><input type="submit" name="save_results_to" value="Download report" /></form>' if @report_editable=='true'
+        tdriver_group=nil
+        html_result=nil
       when 'statistics'
         title='<div class="page_title"><center><h1>Statistics</h1></center></div>'<<
           '<div class="statistics">'
@@ -1351,7 +1365,7 @@ display: block;
       passed_link="#{report_page}_passed_index.html\" class=\"current\""
       failed_link="1_failed_index.html\""
       not_run_link="1_not_run_index.html\""
-    when "Failed","Crash","Reboot"
+    when "Failed","Crash","Reboot", "Connection Errors"
       tdriver_test_results_link='../index.html"'
       tdriver_test_environment_link='../environment/index.html"'
       tdriver_log_link='tdriver_log_index.html"'
