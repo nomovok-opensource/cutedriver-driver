@@ -116,6 +116,11 @@ module TDriverReportCreator
   # === raises
   def error_in_connection_detected
     error_in_connection if $parameters[ :custom_error_recovery_module, nil ]!=nil
+    $tdriver_reporter.connection_errors+=1 if $tdriver_reporter
+    $new_test_case.connection_errors+=1 if $new_test_case
+    update_test_case("WARNING: Connection error detected!")
+    update_test_case(caller)
+    update_test_case('')
   end
   #This method returns the group where the test case belongs
   #
@@ -181,8 +186,9 @@ module TDriverReportCreator
       $new_test_case.test_case_total_dump_count,
       $new_test_case.test_case_total_data_sent,
       $new_test_case.test_case_total_data_received,
-      $new_test_case.test_case_user_data,
-      $new_test_case.test_case_user_data_columns
+      $new_test_case.test_case_user_data,      
+      $new_test_case.test_case_user_data_columns,
+      $new_test_case.connection_errors
     )
 
     $tdriver_reporter.test_case_user_xml_data=Hash.new

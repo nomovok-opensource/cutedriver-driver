@@ -59,8 +59,9 @@ module TDriverReportCreator
       :not_run_statuses,
       :report_editable,
       :test_fails,
-      :report_exclude_passed_cases
-
+      :report_exclude_passed_cases,
+      :connection_errors
+      
     )
     #class variables for summary report
     def initialize()
@@ -76,6 +77,7 @@ module TDriverReportCreator
       @total_not_run=0
       @total_crash_files=0
       @total_device_resets=0
+      @connection_errors=0
       @test_case_user_defined_status=nil
       @test_run_behaviour_log = Array.new
       @test_run_user_log = Array.new
@@ -569,12 +571,12 @@ module TDriverReportCreator
         @run_time=Time.now-@start_time
         if status=='inprogress'
           write_page_start(@report_folder+'/index.html','TDriver test results')
-          write_summary_body(@report_folder+'/index.html',@start_time,'Tests Ongoing...',@run_time,@total_run,@total_passed,@total_failed,@total_not_run,@total_crash_files,@total_device_resets)
+          write_summary_body(@report_folder+'/index.html',@start_time,'Tests Ongoing...',@run_time,@total_run,@total_passed,@total_failed,@total_not_run,@total_crash_files,@total_device_resets,@connection_errors)
           write_page_end(@report_folder+'/index.html')
         else
           all_cases_arr=read_result_storage('all')
           write_page_start(@report_folder+'/index.html','TDriver test results')
-          write_summary_body(@report_folder+'/index.html',@start_time,@end_time,@run_time,@total_run,@total_passed,@total_failed,@total_not_run,@total_crash_files,@total_device_resets,all_cases_arr)
+          write_summary_body(@report_folder+'/index.html',@start_time,@end_time,@run_time,@total_run,@total_passed,@total_failed,@total_not_run,@total_crash_files,@total_device_resets,@connection_errors,all_cases_arr)
           write_page_end(@report_folder+'/index.html')
         end
       rescue Exception => e
@@ -866,7 +868,8 @@ module TDriverReportCreator
         total_sent=0,
         total_received=0,
         user_data_rows=nil,
-        user_data_columns=nil)
+        user_data_columns=nil,
+        connection_errors=0)
       
       while $result_storage_in_use==true
         sleep 1
@@ -915,6 +918,8 @@ module TDriverReportCreator
           test_comment.content = comment
           test_link = Nokogiri::XML::Node.new("link",test)
           test_link.content = html_link
+          test_connection_errors = Nokogiri::XML::Node.new("connection_errors",test)
+          test_connection_errors.content = connection_errors
           test_dump_count = Nokogiri::XML::Node.new("dump_count",test)
           test_dump_count.content = calculate_total_values_from_hash(total_dump)
           test_sent_bytes = Nokogiri::XML::Node.new("sent_bytes",test)
@@ -934,6 +939,7 @@ module TDriverReportCreator
           test << test_log
           test << test_comment
           test << test_link
+          test << test_connection_errors
           test << test_dump_count
           test << test_sent_bytes
           test << test_received_bytes
@@ -1005,6 +1011,7 @@ module TDriverReportCreator
                 xml.log log
                 xml.comment comment
                 xml.link html_link
+                xml.connection_errors connection_errors
                 xml.dump_count calculate_total_values_from_hash(total_dump)
                 xml.sent_bytes calculate_total_values_from_hash(total_sent)
                 xml.received_bytes calculate_total_values_from_hash(total_received)
@@ -1144,7 +1151,9 @@ module TDriverReportCreator
             nodes=xml_data.root.xpath("//tests/test[crashes>0]")
           elsif results=='reboot'
             nodes=xml_data.root.xpath("//tests/test[reboots>0]")
-          elsif results!='all' && results!='crash' && results!='reboot'
+          elsif results=='connection_errors'
+            nodes=xml_data.root.xpath("//tests/test[connection_errors>0]")
+          elsif results!='all' && results!='crash' && results!='reboot' && results!='connection_errors'
             case results
             when 'passed'
 
@@ -1184,6 +1193,7 @@ module TDriverReportCreator
             dump_count=node.search("dump_count").text #12
             sent_bytes=node.search("sent_bytes").text #13
             received_bytes=node.search("received_bytes").text #14
+            connection_errors=node.search("connection_errors").text #15
             user_data = Hash.new
             node.xpath("user_display_data/data").each do |data_node|
               value_name =  data_node.get_attribute("id")
@@ -1206,7 +1216,8 @@ module TDriverReportCreator
               user_data,
               dump_count,
               sent_bytes,
-              received_bytes
+              received_bytes,
+              connection_errors
             ]
 
             result_storage << current_record
@@ -1392,6 +1403,7 @@ module TDriverReportCreator
       begin
         update_test_case_summary_page('crash',rewrite,'Crash')
         update_test_case_summary_page('reboot',rewrite,'Reboot')
+        update_test_case_summary_page('connection_errors',rewrite,'Connection Errors')
       rescue Exception => e
         raise e, "Unable to update test case summary pages for crashes and reboots", caller
       end

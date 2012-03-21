@@ -67,7 +67,8 @@ module TDriverReportCreator
       :fail_statuses,
       :not_run_statuses,
       :test_case_logging_level,
-      :trace_directory
+      :trace_directory,
+      :connection_errors
     )
     def initialize()
       @test_case_folder=nil
@@ -88,6 +89,7 @@ module TDriverReportCreator
       @failed_dump_error=nil
       @test_case_reboots=0
       @test_case_crash_files=0
+      @connection_errors=0
       @test_case_behaviour_log = Array.new
       @failed_screenshot=nil
       @test_case_group=nil

@@ -48,13 +48,14 @@ class ReportingStatistics
     end
     @total_statistics_arr << ["reboots",0]
     @total_statistics_arr << ["crashes",0]
+    @total_statistics_arr << ["connection_errors",0]
     @total_statistics_arr << ["duration",0]
     @total_statistics_arr << ["dump count",0]
     @total_statistics_arr << ["sent bytes",0]
     @total_statistics_arr << ["received bytes",0]
     @total_statistics_arr << ["used mem",0]
     @total_statistics_arr << ["pass rate",0]
-    @all_statuses << "reboots" << "crashes" << "duration" << "dump count" << "sent bytes" << "received bytes" << "used mem" << "pass rate"
+    @all_statuses << "reboots" << "crashes" << "connection_errors" << "duration" << "dump count" << "sent bytes" << "received bytes" << "used mem" << "pass rate"
   end
 
   def generate_statistics_headers()
@@ -70,6 +71,7 @@ class ReportingStatistics
     end
     status_heads << "<th abbr=\"link_column\"><b>Reboots</b></th>"
     status_heads << "<th abbr=\"link_column\"><b>Crashes</b></th>"
+    status_heads << "<th abbr=\"link_column\"><b>Connection Errors</b></th>"
     status_heads << "<th abbr=\"link_column\"><b>Duration</b></th>"
     status_heads << "<th abbr=\"link_column\"><b>Dump count</b></th>"
     status_heads << "<th abbr=\"link_column\"><b>Sent bytes</b></th>"
@@ -79,7 +81,7 @@ class ReportingStatistics
     status_heads
   end
 
-  def update_total_execution_statistics(tc_status,reboots,crashes,dump_count,sent_bytes,received_bytes,memory_usage)
+  def update_total_execution_statistics(tc_status,reboots,crashes,connection_errors,dump_count,sent_bytes,received_bytes,memory_usage)
     current_index=0
     @total_statistics_arr.each do |total_status|
       if tc_status==total_status[0]
@@ -90,6 +92,9 @@ class ReportingStatistics
       end
       if total_status[0]=="crashes"
         @total_statistics_arr[current_index]=["crashes",total_status[1].to_i+crashes.to_i]
+      end
+      if total_status[0]=="connection_errors"
+        @total_statistics_arr[current_index]=["connection_errors",total_status[1].to_i+connection_errors.to_i]
       end
       if total_status[0]=="total"
         @total_statistics_arr[current_index]=["total",total_status[1].to_i+1]
@@ -116,7 +121,7 @@ class ReportingStatistics
     end
   end
 
-  def update_test_case_execution_statistics(tc_name,tc_status,tc_execution,duration,tc_link,reboots,crashes,dump_count,sent_bytes,received_bytes,memory_usage)
+  def update_test_case_execution_statistics(tc_name,tc_status,tc_execution,duration,tc_link,reboots,crashes,connection_errors,dump_count,sent_bytes,received_bytes,memory_usage)
     b_test_in_statistics=false
     current_index=0
     total_run=0
@@ -137,6 +142,10 @@ class ReportingStatistics
       if total_status[1]=="crashes" && total_status[0]==tc_name
         b_test_in_statistics=true
         @statistics_arr[current_index]=[tc_name,"crashes",total_status[2].to_i+crashes.to_i,tc_execution,tc_link]
+      end
+      if total_status[1]=="connection_errors" && total_status[0]==tc_name
+        b_test_in_statistics=true
+        @statistics_arr[current_index]=[tc_name,"connection_errors",total_status[2].to_i+connection_errors.to_i,tc_execution,tc_link]
       end
       if total_status[1]=="total" && total_status[0]==tc_name
         b_test_in_statistics=true
@@ -202,16 +211,17 @@ class ReportingStatistics
       sent_bytes=test_case[14].to_i
       received_bytes=test_case[15].to_i
       memory_usage=test_case[6].to_i
+      connection_errors=test_case[16].to_i
 
       duration=test_case[5].to_f
       total_duration = total_duration + duration
       b_test_in_statistics=false
 
       #Update total statistics
-      update_total_execution_statistics(tc_status,reboots,crashes,dump_count,sent_bytes,received_bytes,memory_usage)
+      update_total_execution_statistics(tc_status,reboots,crashes,connection_errors,dump_count,sent_bytes,received_bytes,memory_usage)
 
       #Update current test case total statistics
-      b_test_in_statistics=update_test_case_execution_statistics(tc_name,tc_status,tc_execution,duration,tc_link,reboots,crashes,dump_count,sent_bytes,received_bytes,memory_usage)
+      b_test_in_statistics=update_test_case_execution_statistics(tc_name,tc_status,tc_execution,duration,tc_link,reboots,crashes,connection_errors,dump_count,sent_bytes,received_bytes,memory_usage)
 
       if b_test_in_statistics==false
         total_run=0
@@ -226,6 +236,8 @@ class ReportingStatistics
             @statistics_arr << [tc_name,"reboots",reboots.to_i,tc_execution,tc_link]
           elsif status=="crashes"
             @statistics_arr << [tc_name,"crashes",crashes.to_i,tc_execution,tc_link]
+          elsif status=="connection_errors"
+            @statistics_arr << [tc_name,"connection_errors",connection_errors.to_i,tc_execution,tc_link]
           elsif status=="total"
             total_run=1
             @statistics_arr << [tc_name,"total",1,tc_execution,tc_link]
@@ -274,6 +286,7 @@ class ReportingStatistics
       tc_link='<a href="cases/'+result_page.to_i.to_s+'_chronological_total_run_index.html">'
       tc_link='<a href="cases/1_reboot_index.html">' if status=="reboots" && total>0
       tc_link='<a href="cases/1_crash_index.html">' if status=="crashes" && total>0
+      tc_link='<a href="cases/1_connection_errors_index.html">' if status=="connection_errors" && total>0
       tc_link='<a href="cases/1_'+@pass_statuses.first.gsub(' ','_')+'_'+test_case.gsub(' ','_')+'_index.html">' if @pass_statuses.include?(status) && total>0
       tc_link='<a href="cases/1_'+@fail_statuses.first.gsub(' ','_')+'_'+test_case.gsub(' ','_')+'_index.html">' if @fail_statuses.include?(status) && total>0
       tc_link='<a href="cases/1_'+@not_run_statuses.first.gsub(' ','_')+'_'+test_case.gsub(' ','_')+'_index.html">' if @not_run_statuses.include?(status) && total>0
@@ -281,6 +294,7 @@ class ReportingStatistics
       tc_link='<a href="'+result_page.to_i.to_s+'_chronological_total_run_index.html">'
       tc_link='<a href="1_reboot_index.html">' if status=="reboots" && total>0
       tc_link='<a href="1_crash_index.html">' if status=="crashes" && total>0
+      tc_link='<a href="1_connection_errors_index.html">' if status=="connection_errors" && total>0
       tc_link='<a href="1_'+@pass_statuses.first.gsub(' ','_')+'_'+test_case.gsub(' ','_')+'_index.html">' if @pass_statuses.include?(status) && total>0
       tc_link='<a href="1_'+@fail_statuses.first.gsub(' ','_')+'_'+test_case.gsub(' ','_')+'_index.html">' if @fail_statuses.include?(status) && total>0
       tc_link='<a href="1_'+@not_run_statuses.first.gsub(' ','_')+'_'+test_case.gsub(' ','_')+'_index.html">' if @not_run_statuses.include?(status) && total>0

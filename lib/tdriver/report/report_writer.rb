@@ -1085,7 +1085,7 @@ display: block;
 
   end
 
-  def write_summary_body(page,start_time,end_time,run_time,total_run,total_passed,total_failed,total_not_run,total_crash_files,total_device_resets,summary_arr=nil)
+  def write_summary_body(page,start_time,end_time,run_time,total_run,total_passed,total_failed,total_not_run,total_crash_files,total_device_resets,connection_errors,summary_arr=nil)
     fail_rate="0"
     pass_rate="0"
     if total_run.to_i > total_not_run.to_i
@@ -1141,6 +1141,10 @@ display: block;
       '<tr>'<<
       '<td><b>Total device resets</b></td>'<<
       '<td>'+total_device_resets.to_s+'</td>'<<
+      '</tr>'<<
+      '<tr>'<<
+      '<td><b>Total connection errors</b></td>'<<
+      '<td>'+connection_errors.to_s+'</td>'<<
       '</tr>'
     if  $parameters[ :report_generate_rdoc, 'false' ]=='true'
       html_body << '<tr>'<<

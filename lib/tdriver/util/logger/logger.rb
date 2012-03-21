@@ -561,7 +561,9 @@ module MobyUtil
 
           log( *exit_status )
 
-        rescue
+        rescue Exception => ex
+          puts ex.message
+          puts ex.backtrace
 
         end
 
