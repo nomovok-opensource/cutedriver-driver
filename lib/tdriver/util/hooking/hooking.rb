@@ -332,11 +332,13 @@ module TDriver
     # base:: Target Class or Module
     # == returns
     def self.hook_methods( _base )
+      
+      if $parameters[ :tdriver_method_hooking_enabled,nil]=='true'
+        hook_static_methods( _base )
 
-      hook_static_methods( _base )
-
-      hook_instance_methods( _base )
-
+        hook_instance_methods( _base )
+      end
+      
       nil
 
     end

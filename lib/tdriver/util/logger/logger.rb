@@ -574,7 +574,7 @@ module MobyUtil
 
       #STDOUT.puts "Use TDriver::Hooking instead of MobyUtil::Logging.hook_methods (#{ caller(1).first })"
 
-      TDriver::Hooking.hook_methods( _base ) #if @enabled
+      TDriver::Hooking.hook_methods( _base ) if $parameters[ :tdriver_method_hooking_enabled,nil]=='true' #@enabled
 
     end
 

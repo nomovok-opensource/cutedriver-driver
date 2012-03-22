@@ -22,6 +22,12 @@ require 'singleton'
 require 'rubygems'
 
 [ 
+  # parameter modules
+  'xml/loader.rb',
+  
+  # parameter modules
+  'parameter/loader.rb', 
+  
   # hooking module - should be loaded first due to above modules uses its functions
   'hooking/hooking.rb', 
 
@@ -31,9 +37,6 @@ require 'rubygems'
   # logger module
   'logger/logger.rb',
 
-  # parameter modules
-  'xml/loader.rb',
-
   # statistics module
   'statistics/statistics.rb',
 
@@ -42,9 +45,6 @@ require 'rubygems'
 
   # plugin service modules
   'plugin/loader.rb', 
-
-  # parameter modules
-  'parameter/loader.rb', 
 
   # database access module
   'database/loader.rb', 
