@@ -28,9 +28,6 @@
     <!-- xml cache settings -->
     <parameter name="xml_cache_buffer_size" value="10" />
     
-    <!-- tdriver method hooking -->
-    <parameter name="tdriver_method_hooking_enabled" value="false" />
-    
   </template>
 
   <!-- default values for each SUT. Usage example: value = @sut.parameter(:type)-->
