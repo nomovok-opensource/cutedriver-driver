@@ -88,11 +88,13 @@ module MobyBehaviour
         raise BehaviourError.new("reboot", "switchbox_sleep_after_powerup_in_reboot could not be converted to integer")
       end
       
-      power_down
       begin
         disconnect
       rescue
       end
+      
+      power_down
+
       sleep sleep_time_before_powerup
       power_up
       sleep sleep_time_after_powerup
