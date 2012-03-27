@@ -457,7 +457,7 @@ module TDriverReportCreator
         if $new_test_case.test_case_logging_level.to_i > 0
           $tdriver_report_log_output.string.each do |line|
             $new_test_case.set_test_case_behaviour_log(line,nil)
-            $tdriver_reporter.set_test_run_behaviour_log(line,$new_test_case.test_case_name_full)
+            $tdriver_reporter.set_test_run_behaviour_log(line,$new_test_case.test_case_folder)
           end
         end
       end
