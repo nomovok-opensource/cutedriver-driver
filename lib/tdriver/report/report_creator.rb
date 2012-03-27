@@ -58,7 +58,7 @@ module TDriverReportCreator
         end
         if $new_test_case!=nil
           if $new_test_case.test_case_ended==false
-            end_test_case($new_test_case.test_case_name,@tc_status)
+            end_test_case($new_test_case.test_case_name,'not_run')
           end
         end
         puts 'Generating report summary...'

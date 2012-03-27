@@ -1399,11 +1399,11 @@ display: block;
       tdriver_test_results_link='../index.html"'
       tdriver_test_environment_link='../environment/index.html"'
       tdriver_log_link='tdriver_log_index.html" class="current"'
-      total_run_link="#{report_page}_total_run_index.html\""
+      total_run_link="1_total_run_index.html\""
       statistics_link='statistics_index.html"'
-      passed_link="#{report_page}_passed_index.html\""
-      failed_link="#{report_page}_failed_index.html\""
-      not_run_link="#{report_page}_not_run_index.html\""
+      passed_link="1_passed_index.html\""
+      failed_link="1_failed_index.html\""
+      not_run_link="1_not_run_index.html\""
     else
       if title.include?("Test:")
         tdriver_test_results_link='../index.html"'
