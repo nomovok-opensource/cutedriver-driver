@@ -514,8 +514,8 @@ module TDriverReportCreator
         write_page_end(@report_folder+'/cases/1_not_run_index.html')
         write_page_start(@report_folder+'/cases/1_total_run_index.html','Total run')
         write_page_end(@report_folder+'/cases/1_total_run_index.html')
-        #write_page_start(@report_folder+'/cases/tdriver_log_index.html','TDriver log')
-        #write_page_end(@report_folder+'/cases/tdriver_log_index.html')
+        write_page_start(@report_folder+'/cases/tdriver_log_index.html','TDriver log')
+        write_page_end(@report_folder+'/cases/tdriver_log_index.html')
         write_page_start(@report_folder+'/cases/statistics_index.html','Statistics')
         write_page_end(@report_folder+'/cases/statistics_index.html')
         if $parameters[ :report_generate_rdoc, 'false' ]=='true'

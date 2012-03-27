@@ -214,7 +214,7 @@ module TDriverReportCreator
             $tdriver_reporter.update_test_case_summary_pages('statistics')
             $tdriver_reporter.group_results_by_test_case()
             $new_junit_xml_results.create_junit_xml()
-            #tdriver_log_page $tdriver_reporter.update_tdriver_log_page()
+            $tdriver_reporter.update_tdriver_log_page()
             #ML: Update summary every 10 seconds improves performance during execution
             sleep 10
             $run_status_thread_active=false
@@ -452,7 +452,7 @@ module TDriverReportCreator
         if $new_test_case.test_case_logging_level.to_i > 0
           $tdriver_report_log_output.string.each do |line|
             $new_test_case.set_test_case_behaviour_log(line,nil)
-            #tdriver_log_page $tdriver_reporter.set_test_run_behaviour_log(line,full_tc_name)
+            $tdriver_reporter.set_test_run_behaviour_log(line,full_tc_name)
           end
         end
       end
