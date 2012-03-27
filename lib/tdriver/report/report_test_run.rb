@@ -565,7 +565,7 @@ module TDriverReportCreator
     # === returns
     # nil
     # === raises
-    def update_summary_page(status)
+    def update_summary_page(status,exit_trace=nil)
       begin
         #Calculate run time
         @run_time=Time.now-@start_time
@@ -578,6 +578,11 @@ module TDriverReportCreator
           write_page_start(@report_folder+'/index.html','TDriver test results')
           write_summary_body(@report_folder+'/index.html',@start_time,@end_time,@run_time,@total_run,@total_passed,@total_failed,@total_not_run,@total_crash_files,@total_device_resets,@connection_errors,all_cases_arr)
           write_page_end(@report_folder+'/index.html')
+        end
+        if exit_trace
+          write_page_start(@report_folder+'/exit.html','TDriver test results')
+          write_exit_body(@report_folder+'/exit.html',exit_trace,@report_folder)
+          write_page_end(@report_folder+'/exit.html')
         end
       rescue Exception => e
         raise e, "Unable to update summary page", e.backtrace

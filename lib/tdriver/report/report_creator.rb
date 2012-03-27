@@ -57,7 +57,14 @@ module TDriverReportCreator
           sleep 1
         end
         puts 'Generating report summary...'
-        $tdriver_reporter.update_summary_page('finished')
+        exit_status=''
+  
+        exit_status << "Stderr:#{$stderr}<hr/>"
+        exit_status << "Stdout:#{$stdout}<hr/>"
+        exit_status << "Exit command:#{$!}<br/>"
+        exit_status << "Backtrace:#{$@}"
+        
+        $tdriver_reporter.update_summary_page('finished',exit_status)
         puts 'Summary generated...'
         puts 'Generating total run table...'
         $tdriver_reporter.update_test_case_summary_pages('all')

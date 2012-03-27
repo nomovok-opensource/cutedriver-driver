@@ -1121,7 +1121,7 @@ display: block;
       '<td>'+start_time.strftime("%d.%m.%Y %H:%M:%S")+'</td>'<<
       '</tr>'<<
       '<tr>'<<
-      '<td><b>Ended</b></td>'
+      '<td><a href="exit.html"><b>Ended</b></a></td>'
     begin
       html_body+='<td>'+end_time.strftime("%d.%m.%Y %H:%M:%S")+'</td>'
     rescue
@@ -1291,6 +1291,18 @@ display: block;
     end
     html_body=nil
   end
+  
+  def write_exit_body(page,exit_log,folder)
+
+    html_body='<div class="page_title"><center><h1>TDriver execution exit trace</h1></center></div>'<<
+      "<div class=\"environment\">#{format_execution_log(exit_log,folder.to_s)}</div>"
+    create_behaviour_links()
+    File.open(page, 'a') do |f2|
+      f2.puts html_body
+    end
+    html_body=nil
+  end
+  
   def write_tdriver_log_body(page,log)
     if log.length > 0
       log_summary=behaviour_log_summary(log,'array')
