@@ -68,7 +68,8 @@ module TDriverReportCreator
       :not_run_statuses,
       :test_case_logging_level,
       :trace_directory,
-      :connection_errors
+      :connection_errors,
+      :report_short_folders
     )
     def initialize()
       @test_case_folder=nil
