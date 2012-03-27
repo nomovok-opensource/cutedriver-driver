@@ -1437,6 +1437,9 @@ display: block;
       statistics_link<<
       '>Statistics</a></li>'<<
       '<li><a href="'<<
+      tdriver_log_link<<
+      '>Log</a></li>'<<
+      '<li><a href="'<<
       total_run_link<<
       '>Total run</a></li>'<<
       '<li><a href="'<<

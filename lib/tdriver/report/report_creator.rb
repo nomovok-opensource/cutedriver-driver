@@ -96,7 +96,7 @@ module TDriverReportCreator
         puts 'Junit generated...'
         #$tdriver_reporter.delete_result_storage()
         $tdriver_reporter.disconnect_connected_devices()
-        #tdriver_log_page $tdriver_reporter.update_tdriver_log_page()
+        tdriver_log_page $tdriver_reporter.update_tdriver_log_page()
         puts 'Report generated to:'
         puts $tdriver_reporter.report_folder()
         clean_video_files
