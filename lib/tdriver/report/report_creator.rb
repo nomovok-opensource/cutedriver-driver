@@ -52,9 +52,14 @@ module TDriverReportCreator
       $tdriver_reporter.set_total_run(0)
       $tdriver_reporter.update_summary_page('inprogress')
       $tdriver_reporter.update_environment_page()
-      at_exit {
+      at_exit {        
         while $run_status_thread_active == true
           sleep 1
+        end
+        if $new_test_case!=nil
+          if $new_test_case.test_case_ended==false
+            end_test_case($new_test_case.test_case_name,@tc_status)
+          end
         end
         puts 'Generating report summary...'
         exit_status=''
