@@ -626,6 +626,7 @@ display: block;
         formatted_log=log_row[0].gsub('PASS;','')
         formatted_log=formatted_log.gsub('FAIL;','')
         formatted_log=formatted_log.gsub('BEHAVIOUR TDriver:','')
+        formatted_log=formatted_log.gsub('[TDriver] [BEHAVIOUR]','')
         formatted_log=formatted_log.gsub('WARNING;','')
         formatted_log=formatted_log.gsub('DEBUG TDriver:','')
         formatted_log=formatted_log.gsub('INFO TDriver:','')

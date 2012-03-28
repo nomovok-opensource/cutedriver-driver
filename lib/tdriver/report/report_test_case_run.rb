@@ -126,7 +126,8 @@ module TDriverReportCreator
             rescue
             end
             o = Log4r::IOOutputter.new("io",$tdriver_report_log_output)
-            MobyUtil::Logger.instance.add_outputter(logger_instance, o)
+            MobyUtil::Logger.instance.set_outputter_pattern(o, $parameters[ :logging_outputter_pattern, '%d [%c] [%l] %M' ])
+            MobyUtil::Logger.instance.add_outputter(logger_instance, o)            
           end
         end
       rescue
