@@ -1,4 +1,10 @@
-libtestability-driver-ruby (1.5.2-1) unstable; urgency=low
+libtestability-driver-ruby (1.5.3-1) unstable; urgency=low
+
+  * new release version  
+
+ -- Testability Driver Team <testabilitydriver@nokia.com>  Mon, 02 Apr 2012 15:19:59 +0200
+      
+ libtestability-driver-ruby (1.5.2-1) unstable; urgency=low
 
   * new release version  
 
