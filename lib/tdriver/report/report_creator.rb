@@ -417,6 +417,11 @@ module TDriverReportCreator
     begin
       create_test_case_folder($tdriver_reporter.fail_statuses.first)
       $new_test_case.capture_dump()
+      
+      if $new_test_case.video_recording?
+        $new_test_case.copy_video_capture()
+      end
+      
       error_in_test_case(TDriver::SUTFactory.connected_suts) if $parameters[ :custom_error_recovery_module, nil ]!=nil
     rescue => ex
       puts ex.message
