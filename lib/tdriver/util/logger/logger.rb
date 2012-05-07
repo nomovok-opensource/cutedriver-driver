@@ -263,10 +263,15 @@ module MobyUtil
         text_array.each{ | text |
 
           @logger_instance.send level, ( include_behaviour_info && !text.empty? ) ? "#{ text.to_s } in #{ log_caller.to_s }" : text.to_s
+          if $tdriver_reporter && !text.empty? && text.include?("A temporary information popup")
+            $new_test_case.capture_dump(true,:text=> text) if $new_test_case
+          end
 
         }
 
         log_to_report_details(caller) if $parameters[:report_script_steps_to_details, nil ]=='true'
+        
+        
       end
 
     end
