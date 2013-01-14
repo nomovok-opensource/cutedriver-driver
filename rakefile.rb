@@ -58,7 +58,7 @@ end
 @__gem_version = @__revision
 
 require 'rubygems'
-require 'rake/gempackagetask'
+require 'rubygems/package_task'
 
 def make_spec
 	#Specification for creating a Testability Driver gem
@@ -109,6 +109,7 @@ def make_spec
 end
 
 spec = make_spec
+
 
 task :default do | task |
 
@@ -407,7 +408,7 @@ end
 
 =end
 
-Rake::GemPackageTask.new( spec ) do | pkg |
+Gem::PackageTask.new( spec ) do | pkg |
   pkg.gem_spec = spec
   pkg.package_dir = "pkg"
 end
