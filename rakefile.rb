@@ -20,7 +20,7 @@
 # rakefile for building and releasing Testability Driver
 @__release_mode = ENV['rel_mode']
 @__release_mode = 'minor' if @__release_mode == nil
-GEM_NAME="testability-driver"
+GEM_NAME="cutedriver-driver"
 # version information
 def read_version
 	version = "0"
@@ -69,17 +69,17 @@ def make_spec
     s.platform      =   Gem::Platform::RUBY
     s.name          =   GEM_NAME
     s.version       =   "#{gem_version}"
-    s.author        =   "Testability Driver team"
-    s.email         =   "testabilitydriver@nokia.com"
+    s.author        =   "Testability Driver team & cuTeDriver team"
+    s.email         =   "antti.korventausta@nomovok.com"
     s.homepage      =   "http://code.nokia.com"
-    s.summary       =   "Testability Driver"
+    s.summary       =   "cuTeDriver version of TDriver Testability Driver"
 
     s.bindir        =   "bin/"    
     s.executables   =   FileList['tdriver-devtools', 'start_app_perf']
 
 		s.files         =   
 		  FileList[ 
-			  'README',
+			  'README.md',
 			  'lib/*.rb',
 			  'lib/tdriver/*.rb',
 			  'lib/tdriver/base/**/*',
