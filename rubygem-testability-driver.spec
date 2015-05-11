@@ -1,7 +1,7 @@
 # Generated from testability-driver-0.8.4.gem by gem2rpm -*- rpm-spec -*-
 %define ruby_sitelib %(ruby -rrbconfig -e "puts Config::CONFIG['sitelibdir']")
 %define gemdir %(ruby -rubygems -e 'puts Gem::dir' 2>/dev/null)
-%define gemname testability-driver
+%define gemname cutedriver-driver
 %define geminstdir %{gemdir}/gems/%{gemname}-%{version}
 
 Summary: Testability Driver

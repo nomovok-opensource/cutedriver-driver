@@ -304,7 +304,7 @@ task :gem_uninstall do
   puts "#########################################################"
   puts "### Uninstalling GEM #{GEM_NAME}     ###"
   puts "#########################################################"
-  tdriver_gem = "testability-driver-#{@__gem_version}.gem"
+  tdriver_gem = "cutedriver-driver-#{@__gem_version}.gem"
      
   FileUtils.rm(Dir.glob('pkg/*gem'))
   if /win/ =~ RUBY_PLATFORM || /mingw32/ =~ RUBY_PLATFORM
@@ -323,11 +323,11 @@ task :gem_install do
   puts "#########################################################"
   puts "### Installing GEM  #{GEM_NAME}       ###"
   puts "#########################################################"
-  tdriver_gem = "testability-driver-#{@__gem_version}.gem"
+  tdriver_gem = "cutedriver-driver-#{@__gem_version}.gem"
   if /win/ =~ RUBY_PLATFORM || /mingw32/ =~ RUBY_PLATFORM
-     cmd = "gem install pkg\\testability-driver*.gem --LOCAL"
+     cmd = "gem install pkg\\cutedriver-driver*.gem --LOCAL"
   else
-     cmd = "sudo gem install pkg/testability-driver*.gem --LOCAL"
+     cmd = "sudo gem install pkg/cutedriver-driver*.gem --LOCAL"
   end
   failure = system(cmd)
   raise "installing  #{GEM_NAME} failed" if (failure != true) or ($? != 0)
