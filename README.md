@@ -1,5 +1,16 @@
-cuTeDriver is a TDriver fork.
+cuTeDriver is a Testability Driver (TDriver) fork.
 
-This repository is UNDER CONSTRUCTION.
+cuTeDriver is a framework for remote execution, automatic testing, regression testing and even automated performance measurement for any Qt-based application.
 
-For details contact: antti.korventausta@nomovok.com
+For more information about cuTeDriver visit https://github.com/nomovok-opensource/cutedriver-agent_qt/wiki
+
+Minor changes:
+* renaming to cuTeDriver
+
+
+Build instructions:
+https://github.com/nomovok-opensource/cutedriver-agent_qt/wiki/Setup%3A-driver-and-sut_qt
+
+For details contact:
+antti.korventausta@nomovok.com
+jukka.raninen@nomovok.com
