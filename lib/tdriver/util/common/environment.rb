@@ -83,7 +83,7 @@ module MobyUtil
     # Integer:: LINUX 
     def self.platform
 
-      case Config::CONFIG[ 'host_os' ]
+      case RbConfig::CONFIG[ 'host_os' ]
 
         when /mswin|mingw|windows/i
 
@@ -118,7 +118,7 @@ module MobyUtil
     # String:: 
     def self.ruby_platform
 
-      Config::CONFIG[ 'target_os' ]
+      RbConfig::CONFIG[ 'target_os' ]
 
     end
 
