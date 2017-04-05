@@ -101,7 +101,7 @@ def make_spec
     s.add_dependency("log4r", ">=1.1.7")
     s.add_dependency("nokogiri", ">=1.4.1")
     s.add_dependency("builder", ">=2.1.2")
-
+    s.add_dependency('minitest', '~>5.8')
     s.extensions << 'ext/extconf.rb'
   
 	end
